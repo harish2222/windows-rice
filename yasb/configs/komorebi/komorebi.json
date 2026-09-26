@@ -1,0 +1,78 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LGUG2Z/komorebi/master/schema.json",
+  "monitors": [
+    {
+      "workspaces": [
+        { "name": "1", "layout": "BSP" },
+        { "name": "2", "layout": "BSP" },
+        { "name": "3", "layout": "BSP" },
+        { "name": "4", "layout": "BSP" },
+        { "name": "5", "layout": "BSP" },
+        { "name": "6", "layout": "BSP" },
+        { "name": "7", "layout": "BSP" },
+        { "name": "8", "layout": "BSP" },
+        { "name": "9", "layout": "BSP" }
+      ]
+    },
+    {
+      "workspaces": [
+        { "name": "1", "layout": "BSP" },
+        { "name": "2", "layout": "BSP" },
+        { "name": "3", "layout": "BSP" },
+        { "name": "4", "layout": "BSP" },
+        { "name": "5", "layout": "BSP" },
+        { "name": "6", "layout": "BSP" },
+        { "name": "7", "layout": "BSP" },
+        { "name": "8", "layout": "BSP" },
+        { "name": "9", "layout": "BSP" }
+      ]
+    },
+    {
+      "workspaces": [
+        { "name": "1", "layout": "BSP" },
+        { "name": "2", "layout": "BSP" },
+        { "name": "3", "layout": "BSP" },
+        { "name": "4", "layout": "BSP" },
+        { "name": "5", "layout": "BSP" },
+        { "name": "6", "layout": "BSP" },
+        { "name": "7", "layout": "BSP" },
+        { "name": "8", "layout": "BSP" },
+        { "name": "9", "layout": "BSP" }
+      ]
+    }
+  ],
+  "ignore_rules": [
+    { "kind": "Exe", "id": "yasb.exe" },
+    { "kind": "Exe", "id": "yasb_bar.exe" },
+    { "kind": "Exe", "id": "glazewm.exe" },
+    { "kind": "Exe", "id": "PowerToys.PowerLauncher" },
+    { "kind": "Exe", "id": "PowerToys.CommandPalette" },
+    { "kind": "Exe", "id": "msrdc.exe" },
+    { "kind": "Exe", "id": "mstsc.exe" },
+    { "kind": "Class", "id": "TscShellContainerClass" },
+    { "kind": "Class", "id": "SnippingToolWindowClass" },
+    { "kind": "Class", "id": "ScreenSketch" },
+    { "kind": "Class", "id": "MS_SnipSketch" },
+    { "kind": "Class", "id": "Windows.UI.Core.CoreWindow" }
+  ],
+  "global_work_area_offset": { "top": 0, "left": 0, "bottom": 0, "right": 0 },
+  "default_container_padding": 0,
+  "default_workspace_padding": 0,
+  "resize_delta": 40,
+  "mouse_follows_focus": true,
+  "border": true,
+  "border_width": 4,
+  "border_colours": {
+    "single": "#cba6f7",
+    "unfocused": "#313244",
+    "stack": "#89b4fa",
+    "float": "#f5c2e7"
+  },
+  "transparency": true,
+  "transparency_alpha": 240,
+  "animations": {
+    "enabled": true,
+    "style": "EaseOutSine",
+    "duration": 250
+  }
+}

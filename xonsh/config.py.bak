@@ -1,0 +1,52 @@
+# ==============================================================================
+# Xonsh Configuration — Mirroring PowerShell Profile
+# Carapace completions + Oh-My-Posh (half-life theme)
+# ==============================================================================
+
+import os
+import sys
+from pathlib import Path
+
+# ── FASTFETCH — Mangekyo Sharingan ──
+$(fastfetch --config ~/.config/fastfetch/config.jsonc)
+
+# ── Carapace completions (official setup) ──
+$CARAPACE_BRIDGES = 'zsh,fish,bash,inshellisense'
+$COMPLETIONS_CONFIRM = True
+exec($(carapace _carapace))
+
+# ── Oh-My-Posh prompt (half-life theme) ──
+$POSH_THEMES_DIR = "C:/Users/haris/scoop/apps/oh-my-posh/current/themes"
+$POSH_THEME = f"{ $POSH_THEMES_DIR }/half-life.omp.json"
+execx($(oh-my-posh init xonsh --config $POSH_THEME), 'exec', {}, {'__xonsh__': globals()})
+
+# ── Environment Variables ──
+$XONSH_HISTORY_SIZE = 100000
+$XONSH_STORE_STATE = True
+$PYTHONDONTWRITEBYTECODE = "1"
+$EDITOR = "nvim"
+$VISUAL = "nvim"
+$MANPAGER = "nvim +Man!"
+
+# ── FZF ──
+$FZF_DEFAULT_OPTS = (
+    "--color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8"
+    " --color=fg:#cdd6f4,fg+:#cdd6f4,pointer:#f5e0dc,marker:#f5e0dc"
+    " --color=header:#f38ba8,info:#cba6f7,border:#313244"
+    " --layout=reverse --border=rounded --margin=0,1"
+    " --prompt='❯ ' --pointer='▶' --marker='✓'"
+)
+$FZF_DEFAULT_COMMAND = "fd --type f --hidden --follow --exclude .git"
+
+# ── Bat ──
+$BAT_THEME = "Catppuccin Mocha"
+$BAT_STYLE = "full"
+
+# ── Git ──
+$GIT_PAGER = "delta --paging=never"
+$DELTA_FEATURES = "side-by-side line-numbers decorations"
+$DELTA_NAVIGATE = "true"
+
+# ── Pager ──
+$PAGER = "bat --paging=always"
+$LESS = "-RF -X -i"

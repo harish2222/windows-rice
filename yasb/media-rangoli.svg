@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="320" viewBox="0 0 440 320">
+  <g fill="none" stroke="#EDE4D0" stroke-opacity="0.2" stroke-width="1.4">
+    <path d="M440 8 C380 10 348 34 344 78 C341 112 360 138 388 142 C410 145 428 132 426 112 C424 96 408 90 396 98 C388 104 388 116 396 120"/>
+    <path d="M344 78 C300 84 262 72 228 88 C200 100 196 128 214 142"/>
+    <path d="M228 88 C240 60 270 46 300 50"/>
+    <path d="M214 142 C190 150 168 146 154 130"/>
+    <circle cx="396" cy="98" r="2.4" fill="#EDE4D0" fill-opacity="0.25" stroke="none"/>
+    <circle cx="300" cy="50" r="2" fill="#EDE4D0" fill-opacity="0.25" stroke="none"/>
+    <circle cx="154" cy="130" r="2" fill="#EDE4D0" fill-opacity="0.25" stroke="none"/>
+    <path d="M262 76 C258 66 258 56 264 48 C270 56 270 66 266 76 Z"/>
+    <path d="M196 132 C188 126 184 116 188 106 C196 112 200 122 197 132 Z"/>
+  </g>
+  <g fill="none" stroke="#D99A2B" stroke-opacity="0.32" stroke-width="1.6">
+    <path d="M440 40 C410 44 392 62 392 88 C392 108 406 122 424 122"/>
+    <path d="M60 320 C58 290 70 268 94 262 C114 257 132 268 134 288 C135 302 124 312 110 310 C100 308 96 298 102 290"/>
+    <path d="M94 262 C92 244 98 228 112 220 C120 232 120 250 110 262 Z"/>
+  </g>
+  <g fill="none" stroke="#EDE4D0" stroke-opacity="0.18" stroke-width="1.2">
+    <path d="M40 320 C42 300 52 286 68 282 M80 320 C80 302 88 288 102 284 M60 320 L60 296"/>
+    <path d="M52 278 C48 270 48 262 52 254 C56 262 56 270 54 278 Z"/>
+  </g>
+  <g fill="#D99A2B" fill-opacity="0.28">
+    <circle cx="426" cy="112" r="2.2"/>
+    <circle cx="110" cy="310" r="2.2"/>
+    <circle cx="68" cy="282" r="1.8"/>
+    <circle cx="102" cy="284" r="1.8"/>
+  </g>
+</svg>

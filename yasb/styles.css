@@ -1,0 +1,3505 @@
+@import "yasb_colors.css";
+
+/* Root Variables */
+:root {
+
+  /* ==== MANUAL FONT SWITCH (pick one, keep all four lines on the same family) ====
+     1. JetBrainsMono Nerd Font (default Nerd icons + text):
+        --icons-font: "JetBrainsMono Nerd Font"; --icons-font-fallback: "JetBrainsMono Nerd Font"; --system-font: "JetBrainsMono Nerd Font"; --specialFont: "JetBrainsMono Nerd Font";
+     2. FiraCode Nerd Font (Retina weight auto-used by Qt for bold-ish text):
+        --icons-font: "FiraCode Nerd Font"; --icons-font-fallback: "FiraCode Nerd Font"; --system-font: "FiraCode Nerd Font"; --specialFont: "FiraCode Nerd Font";
+     3. Mononoki Nerd Font:
+        --icons-font: "Mononoki Nerd Font"; --icons-font-fallback: "Mononoki Nerd Font"; --system-font: "Mononoki Nerd Font"; --specialFont: "Mononoki Nerd Font";
+     4. Segoe UI (system text) + Segoe Fluent Icons (icons):
+        --icons-font: "Segoe Fluent Icons"; --icons-font-fallback: "Segoe MDL2 Assets"; --system-font: "Segoe UI"; --specialFont: "Segoe UI";
+     Bar auto-reloads on save (watch_stylesheet: true). No restart needed. */
+
+      --icons-font: "FiraCode Nerd Font Mono";
+      --icons-font-fallback: "FiraCode Nerd Font Mono";
+      --system-font: "FiraCode Nerd Font Mono";
+      --specialFont: "FiraCode Nerd Font Mono";
+    --border-radius: var(--border-radius);
+    --border-radius2: 4;
+    --border-radius3: 10;
+    --border-radiusWallpapers: 10;
+    --fontSize: 13px;
+    --iconSize: 20px;
+    --fontSizeLarge: 16px;
+    --fontWeight: 600;
+
+    /*colors*/
+
+    /* Rangalipi */
+    /* --background: #14141B;
+    --background2: #1D1D28;
+    --accent: #D99A2B;
+    --text: #E7E0D2;
+    --accentText: #14141B;
+    --hover: #262633;
+    --mutedBG: #0F0F16;
+    --border: #D99A2B;
+    --redFlash: #D95D5D;
+    --subtext: #B8B2A7;
+    --base: #14141B;
+    --mantle: #0F0F16;
+    --crust: #0A0A10;
+    --surface0: #1D1D28;
+    --surface1: #262633;
+    --surface2: #34344A;
+    --overlay0: #6B675F;
+    --overlay1: #8A857B;
+    --overlay2: #A39D90;
+    --subtext0: #8A857B;
+    --subtext1: #B8B2A7;
+    --lavender: #9A8FD0;
+    --blue: #6A8FD4;
+    --sapphire: #5E8FD0;
+    --sky: #6FC3C9;
+    --teal: #4FA3A0;
+    --green: #7FB069;
+    --yellow: #D99A2B;
+    --peach: #E07A4F;
+    --maroon: #C24A5E;
+    --red: #D95D5D;
+    --mauve: #A37AC0;
+    --pink: #C97E9E;
+    --flamingo: #D8A7A0;
+    --rosewater: #E9D5C8;
+    --text-muted: #B8B2A7;
+    --yasb-icon-fg: #E7E0D2;
+    --glass: rgba(20, 20, 27, 0.7);
+    --glassmenu: rgba(20, 20, 27, 0.5);
+    --glassfrost: rgba(20, 20, 27, 0.4);
+    --glassmist: rgba(20, 20, 27, 0.35);
+    --hairline: rgba(231, 224, 210, 0.16);
+    --text-faint: rgba(231, 224, 210, 0.45);
+    --chip: rgba(217, 154, 43, 0.18);
+    --glow: #23232F;
+    --shade: #0D0D13;
+    --accent-soft: rgba(217, 154, 43, 0.55);
+    --frame: #D99A2B;
+    --motif: url("C:/Users/haris/.config/yasb/motif-base.svg");
+    --runner: url("C:/Users/haris/.config/yasb/runner-base.svg"); */
+
+    /* Rangalipi Ember */
+    /* --background: #1A1310;
+    --background2: #241A14;
+    --accent: #C96F2F;
+    --text: #F0E4D4;
+    --accentText: #1A1310;
+    --hover: #2E2119;
+    --mutedBG: #100C0A;
+    --border: #C96F2F;
+    --redFlash: #D0483B;
+    --subtext: #C9A37E;
+    --base: #1A1310;
+    --mantle: #100C0A;
+    --crust: #0B0806;
+    --surface0: #241A14;
+    --surface1: #2E2119;
+    --surface2: #40301F;
+    --overlay0: #6B5A44;
+    --overlay1: #87705A;
+    --overlay2: #A68D70;
+    --subtext0: #87705A;
+    --subtext1: #C9A37E;
+    --lavender: #D89A5E;
+    --blue: #5E9BB5;
+    --sapphire: #4E8F96;
+    --sky: #7FD4BC;
+    --teal: #57A88E;
+    --green: #8FB45C;
+    --yellow: #D9A441;
+    --peach: #E08A4E;
+    --maroon: #B44A52;
+    --red: #D0483B;
+    --mauve: #B083B8;
+    --pink: #DA8FA0;
+    --flamingo: #DFAF8E;
+    --rosewater: #F2DCC2;
+    --text-muted: #C9A37E;
+    --yasb-icon-fg: #F0E4D4;
+    --glass: rgba(26, 19, 16, 0.7);
+    --glassmenu: rgba(26, 19, 16, 0.5);
+    --glassfrost: rgba(26, 19, 16, 0.4);
+    --glassmist: rgba(26, 19, 16, 0.35);
+    --hairline: rgba(240, 228, 212, 0.16);
+    --text-faint: rgba(240, 228, 212, 0.45);
+    --chip: rgba(201, 111, 47, 0.18);
+    --glow: #2B211A;
+    --shade: #110B07;
+    --accent-soft: rgba(201, 111, 47, 0.55);
+    --frame: #C96F2F;
+    --motif: url("C:/Users/haris/.config/yasb/motif-ember.svg");
+    --runner: url("C:/Users/haris/.config/yasb/runner-ember.svg"); */
+
+    /* Rangalipi Ember Light */
+    /* --background: #E7E0D2;
+    --background2: #F5F0E8;
+    --accent: #B45F27;
+    --text: #1A1816;
+    --accentText: #FFFFFF;
+    --hover: #D9D2C2;
+    --mutedBG: #EBE5D8;
+    --border: #B45F27;
+    --redFlash: #BE4234;
+    --subtext: #45423C;
+    --base: #E7E0D2;
+    --mantle: #EBE5D8;
+    --crust: #F5F0E8;
+    --surface0: #F5F0E8;
+    --surface1: #D9D2C2;
+    --surface2: #C4BCA8;
+    --overlay0: #67625A;
+    --overlay1: #524E47;
+    --overlay2: #4A463E;
+    --subtext0: #67625A;
+    --subtext1: #45423C;
+    --lavender: #B57A3A;
+    --blue: #3F7A96;
+    --sapphire: #3A7579;
+    --sky: #4EA88A;
+    --teal: #3F8A70;
+    --green: #6B9439;
+    --yellow: #B45F27;
+    --peach: #C47434;
+    --maroon: #93404A;
+    --red: #BE4234;
+    --mauve: #8A5FA0;
+    --pink: #B56A80;
+    --flamingo: #BE8A64;
+    --rosewater: #C4A483;
+    --text-muted: #45423C;
+    --yasb-icon-fg: #1A1816;
+    --glass: rgba(180, 95, 39, 0.45);
+    --glassmenu: rgba(180, 95, 39, 0.5);
+    --glassfrost: rgba(180, 95, 39, 0.4);
+    --glassmist: rgba(180, 95, 39, 0.35);
+    --hairline: rgba(26, 24, 22, 0.14);
+    --text-faint: rgba(26, 24, 22, 0.42);
+    --chip: rgba(180, 95, 39, 0.22);
+    --glow: #F5F0E8;
+    --shade: #EBE5D8;
+    --accent-soft: rgba(180, 95, 39, 0.55);
+    --frame: #8A6240;
+    --motif: url("C:/Users/haris/.config/yasb/motif-ember.svg");
+    --runner: url("C:/Users/haris/.config/yasb/runner-ember.svg"); */
+
+    /* Rangalipi Mossfern */
+    /* --background: #111A11;
+    --background2: #182418;
+    --accent: #82AC54;
+    --text: #E3E9D3;
+    --accentText: #111A11;
+    --hover: #22301F;
+    --mutedBG: #0B100B;
+    --border: #82AC54;
+    --redFlash: #C95F45;
+    --subtext: #AEBB90;
+    --base: #111A11;
+    --mantle: #0B100B;
+    --crust: #070B07;
+    --surface0: #182418;
+    --surface1: #22301F;
+    --surface2: #31432A;
+    --overlay0: #5A6B4C;
+    --overlay1: #75875F;
+    --overlay2: #93A67C;
+    --subtext0: #75875F;
+    --subtext1: #AEBB90;
+    --lavender: #A4CE7E;
+    --blue: #6FA3C9;
+    --sapphire: #5AA3A8;
+    --sky: #8FD8B4;
+    --teal: #55A67E;
+    --green: #82AC54;
+    --yellow: #D2B84E;
+    --peach: #D8A05E;
+    --maroon: #BC5A4C;
+    --red: #C95F45;
+    --mauve: #A89BC0;
+    --pink: #CE94A8;
+    --flamingo: #D2B08E;
+    --rosewater: #ECE2BC;
+    --text-muted: #AEBB90;
+    --yasb-icon-fg: #E3E9D3;
+    --glass: rgba(17, 26, 17, 0.7);
+    --glassmenu: rgba(17, 26, 17, 0.5);
+    --glassfrost: rgba(17, 26, 17, 0.4);
+    --glassmist: rgba(17, 26, 17, 0.35);
+    --hairline: rgba(227, 233, 211, 0.16);
+    --text-faint: rgba(227, 233, 211, 0.45);
+    --chip: rgba(130, 172, 84, 0.18);
+    --glow: #1E2C1D;
+    --shade: #0A0E09;
+    --accent-soft: rgba(130, 172, 84, 0.55);
+    --frame: #82AC54;
+    --motif: url("C:/Users/haris/.config/yasb/motif-moss.svg");
+    --runner: url("C:/Users/haris/.config/yasb/runner-moss.svg"); */
+
+    /* Rangalipi Mossfern Light */
+    /* --background: #E7E0D2;
+    --background2: #F5F0E8;
+    --accent: #5F8A3C;
+    --text: #1A1816;
+    --accentText: #FFFFFF;
+    --hover: #D9D2C2;
+    --mutedBG: #EBE5D8;
+    --border: #5F8A3C;
+    --redFlash: #B04040;
+    --subtext: #45423C;
+    --base: #E7E0D2;
+    --mantle: #EBE5D8;
+    --crust: #F5F0E8;
+    --surface0: #F5F0E8;
+    --surface1: #D9D2C2;
+    --surface2: #C4BCA8;
+    --overlay0: #67625A;
+    --overlay1: #524E47;
+    --overlay2: #4A463E;
+    --subtext0: #67625A;
+    --subtext1: #45423C;
+    --lavender: #A87F3E;
+    --blue: #3E8A70;
+    --sapphire: #357A6A;
+    --sky: #4E9A78;
+    --teal: #3E8A6A;
+    --green: #5A8A3A;
+    --yellow: #5F8A3C;
+    --peach: #B57F3E;
+    --maroon: #7A5A44;
+    --red: #B04040;
+    --mauve: #7A7A5A;
+    --pink: #9A8A5A;
+    --flamingo: #A8945E;
+    --rosewater: #B8A078;
+    --text-muted: #45423C;
+    --yasb-icon-fg: #1A1816;
+    --glass: rgba(95, 138, 60, 0.45);
+    --glassmenu: rgba(95, 138, 60, 0.5);
+    --glassfrost: rgba(95, 138, 60, 0.4);
+    --glassmist: rgba(95, 138, 60, 0.35);
+    --hairline: rgba(26, 24, 22, 0.14);
+    --text-faint: rgba(26, 24, 22, 0.42);
+    --chip: rgba(95, 138, 60, 0.22);
+    --glow: #F5F0E8;
+    --shade: #EBE5D8;
+    --accent-soft: rgba(95, 138, 60, 0.55);
+    --frame: #6B7444;
+    --motif: url("C:/Users/haris/.config/yasb/motif-moss.svg");
+    --runner: url("C:/Users/haris/.config/yasb/runner-moss.svg"); */
+
+    /* Rangalipi Wine - active */
+    --background: #1D1015;
+    --background2: #29151D;
+    --accent: #C04E68;
+    --text: #F1DFE3;
+    --accentText: #FFFFFF;
+    --hover: #352028;
+    --mutedBG: #120A0E;
+    --border: #C04E68;
+    --redFlash: #D84E4E;
+    --subtext: #CCA0AA;
+    --base: #1D1015;
+    --mantle: #120A0E;
+    --crust: #0C0609;
+    --surface0: #29151D;
+    --surface1: #352028;
+    --surface2: #4A2E38;
+    --overlay0: #6B4E56;
+    --overlay1: #86636D;
+    --overlay2: #A6828B;
+    --subtext0: #86636D;
+    --subtext1: #CCA0AA;
+    --lavender: #BE8FD8;
+    --blue: #7E9CC9;
+    --sapphire: #62A3B5;
+    --sky: #8AC9D2;
+    --teal: #5CA89B;
+    --green: #92B060;
+    --yellow: #D8A854;
+    --peach: #E4935E;
+    --maroon: #C04E68;
+    --red: #D84E4E;
+    --mauve: #B082C4;
+    --pink: #E893AE;
+    --flamingo: #DFA08E;
+    --rosewater: #F2D4D6;
+    --text-muted: #CCA0AA;
+    --yasb-icon-fg: #F1DFE3;
+    --glass: rgba(29, 16, 21, 0.7);
+    --glassmenu: rgba(29, 16, 21, 0.5);
+    --glassfrost: rgba(29, 16, 21, 0.4);
+    --glassmist: rgba(29, 16, 21, 0.35);
+    --hairline: rgba(241, 223, 227, 0.16);
+    --text-faint: rgba(241, 223, 227, 0.45);
+    --chip: rgba(192, 78, 104, 0.18);
+    --glow: #34212B;
+    --shade: #12090D;
+    --accent-soft: rgba(192, 78, 104, 0.55);
+    --frame: #C04E68;
+    --motif: url("C:/Users/haris/.config/yasb/motif-wine.svg");
+    --runner: url("C:/Users/haris/.config/yasb/runner-wine.svg");
+
+    /* Rangalipi Wine Light */
+    /* --background: #E7E0D2;
+    --background2: #F5F0E8;
+    --accent: #A83E58;
+    --text: #1A1816;
+    --accentText: #FFFFFF;
+    --hover: #D9D2C2;
+    --mutedBG: #EBE5D8;
+    --border: #A83E58;
+    --redFlash: #B03050;
+    --subtext: #45423C;
+    --base: #E7E0D2;
+    --mantle: #EBE5D8;
+    --crust: #F5F0E8;
+    --surface0: #F5F0E8;
+    --surface1: #D9D2C2;
+    --surface2: #C4BCA8;
+    --overlay0: #67625A;
+    --overlay1: #524E47;
+    --overlay2: #4A463E;
+    --subtext0: #67625A;
+    --subtext1: #45423C;
+    --lavender: #9A5A7A;
+    --blue: #4A7A9A;
+    --sapphire: #3A6E80;
+    --sky: #5A9AA8;
+    --teal: #3E8A80;
+    --green: #6B8A4A;
+    --yellow: #A83E58;
+    --peach: #C47A4E;
+    --maroon: #8A3448;
+    --red: #B03050;
+    --mauve: #8A4E80;
+    --pink: #A85A70;
+    --flamingo: #B87A70;
+    --rosewater: #C49A90;
+    --text-muted: #45423C;
+    --yasb-icon-fg: #1A1816;
+    --glass: rgba(168, 62, 88, 0.45);
+    --glassmenu: rgba(168, 62, 88, 0.5);
+    --glassfrost: rgba(168, 62, 88, 0.4);
+    --glassmist: rgba(168, 62, 88, 0.35);
+    --hairline: rgba(26, 24, 22, 0.14);
+    --text-faint: rgba(26, 24, 22, 0.42);
+    --chip: rgba(168, 62, 88, 0.22);
+    --glow: #F5F0E8;
+    --shade: #EBE5D8;
+    --accent-soft: rgba(168, 62, 88, 0.55);
+    --frame: #8A5460;
+    --motif: url("C:/Users/haris/.config/yasb/motif-wine.svg");
+    --runner: url("C:/Users/haris/.config/yasb/runner-wine.svg"); */
+
+    /* Rangalipi Dune */
+    /* --background: #1B1610;
+    --background2: #262013;
+    --accent: #C08A24;
+    --text: #EFE4CC;
+    --accentText: #1B1610;
+    --hover: #312A19;
+    --mutedBG: #100D08;
+    --border: #C08A24;
+    --redFlash: #C95F38;
+    --subtext: #C4AC7C;
+    --base: #1B1610;
+    --mantle: #100D08;
+    --crust: #0B0905;
+    --surface0: #262013;
+    --surface1: #312A19;
+    --surface2: #453B22;
+    --overlay0: #6B6046;
+    --overlay1: #877A5C;
+    --overlay2: #A69774;
+    --subtext0: #877A5C;
+    --subtext1: #C4AC7C;
+    --lavender: #D2BC74;
+    --blue: #6E9CB8;
+    --sapphire: #5AA093;
+    --sky: #8AD2BC;
+    --teal: #63A67E;
+    --green: #9AB058;
+    --yellow: #C08A24;
+    --peach: #E2A04E;
+    --maroon: #BA5C46;
+    --red: #C95F38;
+    --mauve: #B098B8;
+    --pink: #D8A094;
+    --flamingo: #DFBC8E;
+    --rosewater: #F0E0BC;
+    --text-muted: #C4AC7C;
+    --yasb-icon-fg: #EFE4CC;
+    --glass: rgba(27, 22, 16, 0.7);
+    --glassmenu: rgba(27, 22, 16, 0.5);
+    --glassfrost: rgba(27, 22, 16, 0.4);
+    --glassmist: rgba(27, 22, 16, 0.35);
+    --hairline: rgba(239, 228, 204, 0.16);
+    --text-faint: rgba(239, 228, 204, 0.45);
+    --chip: rgba(192, 138, 36, 0.18);
+    --glow: #2D2618;
+    --shade: #100C06;
+    --accent-soft: rgba(192, 138, 36, 0.55);
+    --frame: #C08A24;
+    --motif: url("C:/Users/haris/.config/yasb/motif-dune.svg");
+    --runner: url("C:/Users/haris/.config/yasb/runner-dune.svg"); */
+
+    /* Rangalipi Dune Light */
+    /* --background: #E7E0D2;
+    --background2: #F5F0E8;
+    --accent: #A8741C;
+    --text: #1A1816;
+    --accentText: #FFFFFF;
+    --hover: #D9D2C2;
+    --mutedBG: #EBE5D8;
+    --border: #A8741C;
+    --redFlash: #B04434;
+    --subtext: #45423C;
+    --base: #E7E0D2;
+    --mantle: #EBE5D8;
+    --crust: #F5F0E8;
+    --surface0: #F5F0E8;
+    --surface1: #D9D2C2;
+    --surface2: #C4BCA8;
+    --overlay0: #67625A;
+    --overlay1: #524E47;
+    --overlay2: #4A463E;
+    --subtext0: #67625A;
+    --subtext1: #45423C;
+    --lavender: #A87A30;
+    --blue: #4A8A80;
+    --sapphire: #3A7A70;
+    --sky: #57A890;
+    --teal: #3E8A68;
+    --green: #7A8A3A;
+    --yellow: #A8741C;
+    --peach: #C4883E;
+    --maroon: #8A5A38;
+    --red: #B04434;
+    --mauve: #8A7A4A;
+    --pink: #A88A54;
+    --flamingo: #B8985E;
+    --rosewater: #C4A878;
+    --text-muted: #45423C;
+    --yasb-icon-fg: #1A1816;
+    --glass: rgba(168, 116, 28, 0.45);
+    --glassmenu: rgba(168, 116, 28, 0.5);
+    --glassfrost: rgba(168, 116, 28, 0.4);
+    --glassmist: rgba(168, 116, 28, 0.35);
+    --hairline: rgba(26, 24, 22, 0.14);
+    --text-faint: rgba(26, 24, 22, 0.42);
+    --chip: rgba(168, 116, 28, 0.22);
+    --glow: #F5F0E8;
+    --shade: #EBE5D8;
+    --accent-soft: rgba(168, 116, 28, 0.55);
+    --frame: #8A6E3E;
+    --motif: url("C:/Users/haris/.config/yasb/motif-dune.svg");
+    --runner: url("C:/Users/haris/.config/yasb/runner-dune.svg"); */
+
+    /* Rangalipi Matcha */
+    /* --background: #151A0F;
+    --background2: #1E2615;
+    --accent: #93B04C;
+    --text: #E7EAD0;
+    --accentText: #151A0F;
+    --hover: #2A3419;
+    --mutedBG: #0D1008;
+    --border: #93B04C;
+    --redFlash: #C95F38;
+    --subtext: #B2B882;
+    --base: #151A0F;
+    --mantle: #0D1008;
+    --crust: #090B05;
+    --surface0: #1E2615;
+    --surface1: #2A3419;
+    --surface2: #3A4A20;
+    --overlay0: #5E6646;
+    --overlay1: #78835C;
+    --overlay2: #96A273;
+    --subtext0: #78835C;
+    --subtext1: #B2B882;
+    --lavender: #B2C46E;
+    --blue: #74A3BE;
+    --sapphire: #60A8A4;
+    --sky: #92D2B0;
+    --teal: #68A87C;
+    --green: #93B04C;
+    --yellow: #D2B84E;
+    --peach: #D8A25E;
+    --maroon: #BC5A4A;
+    --red: #C95F38;
+    --mauve: #A894B8;
+    --pink: #CE90A4;
+    --flamingo: #D2BC8E;
+    --rosewater: #EEE4B8;
+    --text-muted: #B2B882;
+    --yasb-icon-fg: #E7EAD0;
+    --glass: rgba(21, 26, 15, 0.7);
+    --glassmenu: rgba(21, 26, 15, 0.5);
+    --glassfrost: rgba(21, 26, 15, 0.4);
+    --glassmist: rgba(21, 26, 15, 0.35);
+    --hairline: rgba(231, 234, 208, 0.16);
+    --text-faint: rgba(231, 234, 208, 0.45);
+    --chip: rgba(147, 176, 76, 0.18);
+    --glow: #29341C;
+    --shade: #0B0E06;
+    --accent-soft: rgba(147, 176, 76, 0.55);
+    --frame: #93B04C;
+    --motif: url("C:/Users/haris/.config/yasb/motif-matcha.svg");
+    --runner: url("C:/Users/haris/.config/yasb/runner-matcha.svg"); */
+
+    /* Rangalipi Matcha Light */
+    /* --background: #E7E0D2;
+    --background2: #F5F0E8;
+    --accent: #7A943C;
+    --text: #1A1816;
+    --accentText: #FFFFFF;
+    --hover: #D9D2C2;
+    --mutedBG: #EBE5D8;
+    --border: #7A943C;
+    --redFlash: #B04434;
+    --subtext: #45423C;
+    --base: #E7E0D2;
+    --mantle: #EBE5D8;
+    --crust: #F5F0E8;
+    --surface0: #F5F0E8;
+    --surface1: #D9D2C2;
+    --surface2: #C4BCA8;
+    --overlay0: #67625A;
+    --overlay1: #524E47;
+    --overlay2: #4A463E;
+    --subtext0: #67625A;
+    --subtext1: #45423C;
+    --lavender: #9A8A3E;
+    --blue: #4A8A6A;
+    --sapphire: #3A7A62;
+    --sky: #57AA80;
+    --teal: #3E8A60;
+    --green: #6B8A34;
+    --yellow: #7A943C;
+    --peach: #B8884E;
+    --maroon: #7A6240;
+    --red: #B04434;
+    --mauve: #7A8A5A;
+    --pink: #9A8A5E;
+    --flamingo: #A89862;
+    --rosewater: #BCA87E;
+    --text-muted: #45423C;
+    --yasb-icon-fg: #1A1816;
+    --glass: rgba(122, 148, 60, 0.45);
+    --glassmenu: rgba(122, 148, 60, 0.5);
+    --glassfrost: rgba(122, 148, 60, 0.4);
+    --glassmist: rgba(122, 148, 60, 0.35);
+    --hairline: rgba(26, 24, 22, 0.14);
+    --text-faint: rgba(26, 24, 22, 0.42);
+    --chip: rgba(122, 148, 60, 0.22);
+    --glow: #F5F0E8;
+    --shade: #EBE5D8;
+    --accent-soft: rgba(122, 148, 60, 0.55);
+    --frame: #76794C;
+    --motif: url("C:/Users/haris/.config/yasb/motif-matcha.svg");
+    --runner: url("C:/Users/haris/.config/yasb/runner-matcha.svg"); */
+
+    /* Rangalipi Espresso */
+    /* --background: #171210;
+    --background2: #211915;
+    --accent: #C68A4B;
+    --text: #ECDDC8;
+    --accentText: #171210;
+    --hover: #2D231B;
+    --mutedBG: #0F0B08;
+    --border: #C68A4B;
+    --redFlash: #C65746;
+    --subtext: #BE9E7A;
+    --base: #171210;
+    --mantle: #0F0B08;
+    --crust: #0A0705;
+    --surface0: #211915;
+    --surface1: #2D231B;
+    --surface2: #413026;
+    --overlay0: #6B5B48;
+    --overlay1: #87725E;
+    --overlay2: #A69376;
+    --subtext0: #87725E;
+    --subtext1: #BE9E7A;
+    --lavender: #D2AE74;
+    --blue: #7AA0BC;
+    --sapphire: #64A09A;
+    --sky: #8CC9BC;
+    --teal: #67A694;
+    --green: #98AC5C;
+    --yellow: #CCA04E;
+    --peach: #E2A05E;
+    --maroon: #BA5C50;
+    --red: #C65746;
+    --mauve: #B294B8;
+    --pink: #D8A09C;
+    --flamingo: #DFB48E;
+    --rosewater: #F2DCB8;
+    --text-muted: #BE9E7A;
+    --yasb-icon-fg: #ECDDC8;
+    --glass: rgba(23, 18, 16, 0.7);
+    --glassmenu: rgba(23, 18, 16, 0.5);
+    --glassfrost: rgba(23, 18, 16, 0.4);
+    --glassmist: rgba(23, 18, 16, 0.35);
+    --hairline: rgba(236, 221, 200, 0.16);
+    --text-faint: rgba(236, 221, 200, 0.45);
+    --chip: rgba(198, 138, 75, 0.18);
+    --glow: #2D241D;
+    --shade: #0F0A07;
+    --accent-soft: rgba(198, 138, 75, 0.55);
+    --frame: #C68A4B;
+    --motif: url("C:/Users/haris/.config/yasb/motif-espresso.svg");
+    --runner: url("C:/Users/haris/.config/yasb/runner-espresso.svg"); */
+
+    /* Rangalipi Espresso Light */
+    /* --background: #E7E0D2;
+    --background2: #F5F0E8;
+    --accent: #A8743C;
+    --text: #1A1816;
+    --accentText: #FFFFFF;
+    --hover: #D9D2C2;
+    --mutedBG: #EBE5D8;
+    --border: #A8743C;
+    --redFlash: #B04434;
+    --subtext: #45423C;
+    --base: #E7E0D2;
+    --mantle: #EBE5D8;
+    --crust: #F5F0E8;
+    --surface0: #F5F0E8;
+    --surface1: #D9D2C2;
+    --surface2: #C4BCA8;
+    --overlay0: #67625A;
+    --overlay1: #524E47;
+    --overlay2: #4A463E;
+    --subtext0: #67625A;
+    --subtext1: #45423C;
+    --lavender: #9A7A48;
+    --blue: #4A8A80;
+    --sapphire: #3A7A70;
+    --sky: #57A890;
+    --teal: #3E8A68;
+    --green: #7A8A44;
+    --yellow: #A8743C;
+    --peach: #C08050;
+    --maroon: #8A5C40;
+    --red: #B04434;
+    --mauve: #8A7A58;
+    --pink: #A88A60;
+    --flamingo: #B89468;
+    --rosewater: #C4A884;
+    --text-muted: #45423C;
+    --yasb-icon-fg: #1A1816;
+    --glass: rgba(168, 116, 60, 0.45);
+    --glassmenu: rgba(168, 116, 60, 0.5);
+    --glassfrost: rgba(168, 116, 60, 0.4);
+    --glassmist: rgba(168, 116, 60, 0.35);
+    --hairline: rgba(26, 24, 22, 0.14);
+    --text-faint: rgba(26, 24, 22, 0.42);
+    --chip: rgba(168, 116, 60, 0.22);
+    --glow: #F5F0E8;
+    --shade: #EBE5D8;
+    --accent-soft: rgba(168, 116, 60, 0.55);
+    --frame: #8A6E4E;
+    --motif: url("C:/Users/haris/.config/yasb/motif-espresso.svg");
+    --runner: url("C:/Users/haris/.config/yasb/runner-espresso.svg"); */
+
+    /* Rangalipi Noir */
+    /* --background: #161114;
+    --background2: #211619;
+    --accent: #CE4152;
+    --text: #EDE1E1;
+    --accentText: #161114;
+    --hover: #2D1E22;
+    --mutedBG: #0E0A0C;
+    --border: #CE4152;
+    --redFlash: #CE4152;
+    --subtext: #BC9898;
+    --base: #161114;
+    --mantle: #0E0A0C;
+    --crust: #090607;
+    --surface0: #211619;
+    --surface1: #2D1E22;
+    --surface2: #43262C;
+    --overlay0: #6B4E54;
+    --overlay1: #866368;
+    --overlay2: #A68489;
+    --subtext0: #866368;
+    --subtext1: #BC9898;
+    --lavender: #BC90CE;
+    --blue: #7E98BE;
+    --sapphire: #64A0B2;
+    --sky: #8CC4CE;
+    --teal: #5EA698;
+    --green: #90AC60;
+    --yellow: #CEA854;
+    --peach: #E2905E;
+    --maroon: #CE4152;
+    --red: #E25050;
+    --mauve: #B084BE;
+    --pink: #E490A4;
+    --flamingo: #DFA48E;
+    --rosewater: #F2D6CC;
+    --text-muted: #BC9898;
+    --yasb-icon-fg: #EDE1E1;
+    --glass: rgba(22, 17, 20, 0.7);
+    --glassmenu: rgba(22, 17, 20, 0.5);
+    --glassfrost: rgba(22, 17, 20, 0.4);
+    --glassmist: rgba(22, 17, 20, 0.35);
+    --hairline: rgba(237, 225, 225, 0.16);
+    --text-faint: rgba(237, 225, 225, 0.45);
+    --chip: rgba(206, 65, 82, 0.18);
+    --glow: #2D2025;
+    --shade: #0D080A;
+    --accent-soft: rgba(206, 65, 82, 0.55);
+    --frame: #CE4152;
+    --motif: url("C:/Users/haris/.config/yasb/motif-noir.svg");
+    --runner: url("C:/Users/haris/.config/yasb/runner-noir.svg"); */
+
+    /* Rangalipi Noir Light */
+    /* --background: #E7E0D2;
+    --background2: #F5F0E8;
+    --accent: #AE3546;
+    --text: #1A1816;
+    --accentText: #FFFFFF;
+    --hover: #D9D2C2;
+    --mutedBG: #EBE5D8;
+    --border: #AE3546;
+    --redFlash: #BE3838;
+    --subtext: #45423C;
+    --base: #E7E0D2;
+    --mantle: #EBE5D8;
+    --crust: #F5F0E8;
+    --surface0: #F5F0E8;
+    --surface1: #D9D2C2;
+    --surface2: #C4BCA8;
+    --overlay0: #67625A;
+    --overlay1: #524E47;
+    --overlay2: #4A463E;
+    --subtext0: #67625A;
+    --subtext1: #45423C;
+    --lavender: #9A5A60;
+    --blue: #4A7A9A;
+    --sapphire: #3A6E80;
+    --sky: #5A9AA8;
+    --teal: #3E8A80;
+    --green: #6B8A4A;
+    --yellow: #AE3546;
+    --peach: #C4744E;
+    --maroon: #8A3448;
+    --red: #AE3546;
+    --mauve: #8A4E80;
+    --pink: #A85A70;
+    --flamingo: #B87A70;
+    --rosewater: #C49A90;
+    --text-muted: #45423C;
+    --yasb-icon-fg: #1A1816;
+    --glass: rgba(174, 53, 70, 0.45);
+    --glassmenu: rgba(174, 53, 70, 0.5);
+    --glassfrost: rgba(174, 53, 70, 0.4);
+    --glassmist: rgba(174, 53, 70, 0.35);
+    --hairline: rgba(26, 24, 22, 0.14);
+    --text-faint: rgba(26, 24, 22, 0.42);
+    --chip: rgba(174, 53, 70, 0.22);
+    --glow: #F5F0E8;
+    --shade: #EBE5D8;
+    --accent-soft: rgba(174, 53, 70, 0.55);
+    --frame: #8A525C;
+    --motif: url("C:/Users/haris/.config/yasb/motif-noir.svg");
+    --runner: url("C:/Users/haris/.config/yasb/runner-noir.svg"); */
+
+    /* Rangalipi Aubergine */
+    /* --background: #17111B;
+    --background2: #201627;
+    --accent: #A67FD4;
+    --text: #E7DFF1;
+    --accentText: #17111B;
+    --hover: #2C1F36;
+    --mutedBG: #0F0A13;
+    --border: #A67FD4;
+    --redFlash: #C6576E;
+    --subtext: #B09ED2;
+    --base: #17111B;
+    --mantle: #0F0A13;
+    --crust: #0A060E;
+    --surface0: #201627;
+    --surface1: #2C1F36;
+    --surface2: #3E2C4E;
+    --overlay0: #5E526C;
+    --overlay1: #786A88;
+    --overlay2: #9488A4;
+    --subtext0: #786A88;
+    --subtext1: #B09ED2;
+    --lavender: #A67FD4;
+    --blue: #8296D8;
+    --sapphire: #6CA6D8;
+    --sky: #92C4D8;
+    --teal: #62A69A;
+    --green: #90AC62;
+    --yellow: #CEA854;
+    --peach: #E2A070;
+    --maroon: #BA5E76;
+    --red: #C6576E;
+    --mauve: #B48AD8;
+    --pink: #D890BC;
+    --flamingo: #DCA4AC;
+    --rosewater: #E7D8EA;
+    --text-muted: #B09ED2;
+    --yasb-icon-fg: #E7DFF1;
+    --glass: rgba(23, 17, 27, 0.7);
+    --glassmenu: rgba(23, 17, 27, 0.5);
+    --glassfrost: rgba(23, 17, 27, 0.4);
+    --glassmist: rgba(23, 17, 27, 0.35);
+    --hairline: rgba(231, 223, 241, 0.16);
+    --text-faint: rgba(231, 223, 241, 0.45);
+    --chip: rgba(166, 127, 212, 0.18);
+    --glow: #2D2239;
+    --shade: #0D0811;
+    --accent-soft: rgba(166, 127, 212, 0.55);
+    --frame: #A67FD4;
+    --motif: url("C:/Users/haris/.config/yasb/motif-aubergine.svg");
+    --runner: url("C:/Users/haris/.config/yasb/runner-aubergine.svg"); */
+
+    /* Rangalipi Aubergine Light */
+    /* --background: #E7E0D2;
+    --background2: #F5F0E8;
+    --accent: #8A63B8;
+    --text: #1A1816;
+    --accentText: #FFFFFF;
+    --hover: #D9D2C2;
+    --mutedBG: #EBE5D8;
+    --border: #8A63B8;
+    --redFlash: #B04060;
+    --subtext: #45423C;
+    --base: #E7E0D2;
+    --mantle: #EBE5D8;
+    --crust: #F5F0E8;
+    --surface0: #F5F0E8;
+    --surface1: #D9D2C2;
+    --surface2: #C4BCA8;
+    --overlay0: #67625A;
+    --overlay1: #524E47;
+    --overlay2: #4A463E;
+    --subtext0: #67625A;
+    --subtext1: #45423C;
+    --lavender: #7A5AA8;
+    --blue: #5A6EAE;
+    --sapphire: #4A62A0;
+    --sky: #5E9AC0;
+    --teal: #4A8A9A;
+    --green: #6B8A5A;
+    --yellow: #8A63B8;
+    --peach: #C08A70;
+    --maroon: #8A4A70;
+    --red: #B04060;
+    --mauve: #7A4E9A;
+    --pink: #A85E88;
+    --flamingo: #B87E80;
+    --rosewater: #C49AA0;
+    --text-muted: #45423C;
+    --yasb-icon-fg: #1A1816;
+    --glass: rgba(138, 99, 184, 0.45);
+    --glassmenu: rgba(138, 99, 184, 0.5);
+    --glassfrost: rgba(138, 99, 184, 0.4);
+    --glassmist: rgba(138, 99, 184, 0.35);
+    --hairline: rgba(26, 24, 22, 0.14);
+    --text-faint: rgba(26, 24, 22, 0.42);
+    --chip: rgba(138, 99, 184, 0.22);
+    --glow: #F5F0E8;
+    --shade: #EBE5D8;
+    --accent-soft: rgba(138, 99, 184, 0.55);
+    --frame: #6E5E8A;
+    --motif: url("C:/Users/haris/.config/yasb/motif-aubergine.svg");
+    --runner: url("C:/Users/haris/.config/yasb/runner-aubergine.svg"); */
+
+    /* Rangalipi Clay */
+    /* --background: #1A130E;
+    --background2: #251A12;
+    --accent: #C9683C;
+    --text: #F1E0CC;
+    --accentText: #1A130E;
+    --hover: #302217;
+    --mutedBG: #100C07;
+    --border: #C9683C;
+    --redFlash: #C64E38;
+    --subtext: #C6A37E;
+    --base: #1A130E;
+    --mantle: #100C07;
+    --crust: #0B0805;
+    --surface0: #251A12;
+    --surface1: #302217;
+    --surface2: #44301E;
+    --overlay0: #6B5846;
+    --overlay1: #87705C;
+    --overlay2: #A69174;
+    --subtext0: #87705C;
+    --subtext1: #C6A37E;
+    --lavender: #D8A466;
+    --blue: #76A0BC;
+    --sapphire: #60A096;
+    --sky: #88C9B8;
+    --teal: #63A692;
+    --green: #98AC5C;
+    --yellow: #CEA03E;
+    --peach: #C9683C;
+    --maroon: #BA5444;
+    --red: #C64E38;
+    --mauve: #B294B8;
+    --pink: #D8908C;
+    --flamingo: #DFAE7E;
+    --rosewater: #F2D8B4;
+    --text-muted: #C6A37E;
+    --yasb-icon-fg: #F1E0CC;
+    --glass: rgba(26, 19, 14, 0.7);
+    --glassmenu: rgba(26, 19, 14, 0.5);
+    --glassfrost: rgba(26, 19, 14, 0.4);
+    --glassmist: rgba(26, 19, 14, 0.35);
+    --hairline: rgba(241, 224, 204, 0.16);
+    --text-faint: rgba(241, 224, 204, 0.45);
+    --chip: rgba(201, 104, 60, 0.18);
+    --glow: #32251B;
+    --shade: #0F0A05;
+    --accent-soft: rgba(201, 104, 60, 0.55);
+    --frame: #C9683C;
+    --motif: url("C:/Users/haris/.config/yasb/motif-clay.svg");
+    --runner: url("C:/Users/haris/.config/yasb/runner-clay.svg"); */
+
+    /* Rangalipi Clay Light */
+    /* --background: #E7E0D2;
+    --background2: #F5F0E8;
+    --accent: #A85630;
+    --text: #1A1816;
+    --accentText: #FFFFFF;
+    --hover: #D9D2C2;
+    --mutedBG: #EBE5D8;
+    --border: #A85630;
+    --redFlash: #B04434;
+    --subtext: #45423C;
+    --base: #E7E0D2;
+    --mantle: #EBE5D8;
+    --crust: #F5F0E8;
+    --surface0: #F5F0E8;
+    --surface1: #D9D2C2;
+    --surface2: #C4BCA8;
+    --overlay0: #67625A;
+    --overlay1: #524E47;
+    --overlay2: #4A463E;
+    --subtext0: #67625A;
+    --subtext1: #45423C;
+    --lavender: #9A6A3C;
+    --blue: #4A7E88;
+    --sapphire: #3A6E78;
+    --sky: #57907E;
+    --teal: #3E8468;
+    --green: #7A8444;
+    --yellow: #A85630;
+    --peach: #B86A3C;
+    --maroon: #8A4C38;
+    --red: #B04434;
+    --mauve: #8A6E52;
+    --pink: #A87858;
+    --flamingo: #B88A60;
+    --rosewater: #C49C7C;
+    --text-muted: #45423C;
+    --yasb-icon-fg: #1A1816;
+    --glass: rgba(168, 86, 48, 0.45);
+    --glassmenu: rgba(168, 86, 48, 0.5);
+    --glassfrost: rgba(168, 86, 48, 0.4);
+    --glassmist: rgba(168, 86, 48, 0.35);
+    --hairline: rgba(26, 24, 22, 0.14);
+    --text-faint: rgba(26, 24, 22, 0.42);
+    --chip: rgba(168, 86, 48, 0.22);
+    --glow: #F5F0E8;
+    --shade: #EBE5D8;
+    --accent-soft: rgba(168, 86, 48, 0.55);
+    --frame: #8A5E44;
+    --motif: url("C:/Users/haris/.config/yasb/motif-clay.svg");
+    --runner: url("C:/Users/haris/.config/yasb/runner-clay.svg"); */
+
+    /* Rangalipi Olive */
+    /* --background: #14150D;
+    --background2: #1D1E13;
+    --accent: #A8A03A;
+    --text: #E5E3C9;
+    --accentText: #14150D;
+    --hover: #282A19;
+    --mutedBG: #0C0D07;
+    --border: #A8A03A;
+    --redFlash: #C65F38;
+    --subtext: #ACAA7C;
+    --base: #14150D;
+    --mantle: #0C0D07;
+    --crust: #080905;
+    --surface0: #1D1E13;
+    --surface1: #282A19;
+    --surface2: #37391F;
+    --overlay0: #5C5E46;
+    --overlay1: #74765C;
+    --overlay2: #929674;
+    --subtext0: #74765C;
+    --subtext1: #ACAA7C;
+    --lavender: #BCC06E;
+    --blue: #7AA0BA;
+    --sapphire: #66A0A2;
+    --sky: #8CCCB0;
+    --teal: #6AA67A;
+    --green: #8EAC42;
+    --yellow: #A8A03A;
+    --peach: #D4A05E;
+    --maroon: #BA5A4A;
+    --red: #C65F38;
+    --mauve: #A894B8;
+    --pink: #C8909C;
+    --flamingo: #CEBC8E;
+    --rosewater: #ECE4B4;
+    --text-muted: #ACAA7C;
+    --yasb-icon-fg: #E5E3C9;
+    --glass: rgba(20, 21, 13, 0.7);
+    --glassmenu: rgba(20, 21, 13, 0.5);
+    --glassfrost: rgba(20, 21, 13, 0.4);
+    --glassmist: rgba(20, 21, 13, 0.35);
+    --hairline: rgba(229, 227, 201, 0.16);
+    --text-faint: rgba(229, 227, 201, 0.45);
+    --chip: rgba(168, 160, 58, 0.18);
+    --glow: #282B1B;
+    --shade: #0A0B05;
+    --accent-soft: rgba(168, 160, 58, 0.55);
+    --frame: #A8A03A;
+    --motif: url("C:/Users/haris/.config/yasb/motif-olive.svg");
+    --runner: url("C:/Users/haris/.config/yasb/runner-olive.svg"); */
+
+    /* Rangalipi Olive Light */
+    /* --background: #E7E0D2;
+    --background2: #F5F0E8;
+    --accent: #8A8430;
+    --text: #1A1816;
+    --accentText: #FFFFFF;
+    --hover: #D9D2C2;
+    --mutedBG: #EBE5D8;
+    --border: #8A8430;
+    --redFlash: #B04434;
+    --subtext: #45423C;
+    --base: #E7E0D2;
+    --mantle: #EBE5D8;
+    --crust: #F5F0E8;
+    --surface0: #F5F0E8;
+    --surface1: #D9D2C2;
+    --surface2: #C4BCA8;
+    --overlay0: #67625A;
+    --overlay1: #524E47;
+    --overlay2: #4A463E;
+    --subtext0: #67625A;
+    --subtext1: #45423C;
+    --lavender: #948A3C;
+    --blue: #4A8A72;
+    --sapphire: #3A7A64;
+    --sky: #57A884;
+    --teal: #3E8A62;
+    --green: #6E8A30;
+    --yellow: #8A8430;
+    --peach: #B88A4E;
+    --maroon: #7A6440;
+    --red: #B04434;
+    --mauve: #7E8A52;
+    --pink: #9C885A;
+    --flamingo: #AC9460;
+    --rosewater: #BCA87C;
+    --text-muted: #45423C;
+    --yasb-icon-fg: #1A1816;
+    --glass: rgba(138, 132, 48, 0.45);
+    --glassmenu: rgba(138, 132, 48, 0.5);
+    --glassfrost: rgba(138, 132, 48, 0.4);
+    --glassmist: rgba(138, 132, 48, 0.35);
+    --hairline: rgba(26, 24, 22, 0.14);
+    --text-faint: rgba(26, 24, 22, 0.42);
+    --chip: rgba(138, 132, 48, 0.22);
+    --glow: #F5F0E8;
+    --shade: #EBE5D8;
+    --accent-soft: rgba(138, 132, 48, 0.55);
+    --frame: #74714A;
+    --motif: url("C:/Users/haris/.config/yasb/motif-olive.svg");
+    --runner: url("C:/Users/haris/.config/yasb/runner-olive.svg"); */
+
+    /* Bright-wallpaper theme.
+       Switch with yasb-theme set "Rangalipi Light". */
+    /* Rangalipi Light */
+    /* --background: #E7E0D2;
+    --background2: #F5F0E8;
+    --accent: #B37A1A;
+    --text: #1A1816;
+    --accentText: #FFFFFF;
+    --hover: #D9D2C2;
+    --mutedBG: #EBE5D8;
+    --border: #B37A1A;
+    --redFlash: #C24444;
+    --subtext: #45423C;
+    --base: #E7E0D2;
+    --mantle: #EBE5D8;
+    --crust: #F5F0E8;
+    --surface0: #F5F0E8;
+    --surface1: #D9D2C2;
+    --surface2: #C4BCA8;
+    --overlay0: #67625A;
+    --overlay1: #524E47;
+    --overlay2: #4A463E;
+    --subtext0: #67625A;
+    --subtext1: #45423C;
+    --lavender: #6B5E8A;
+    --blue: #4A6A8F;
+    --sapphire: #3E6085;
+    --sky: #4A8A8F;
+    --teal: #3A7A75;
+    --green: #5A8A45;
+    --yellow: #B37A1A;
+    --peach: #B85A35;
+    --maroon: #8A3A4A;
+    --red: #C24444;
+    --mauve: #7A5A9A;
+    --pink: #9A5A75;
+    --flamingo: #A87A6A;
+    --rosewater: #8A6A55;
+    --text-muted: #45423C;
+    --yasb-icon-fg: #1A1816;
+    --glass: rgba(231, 224, 210, 0.45);
+    --glassmenu: rgba(231, 224, 210, 0.5);
+    --glassfrost: rgba(231, 224, 210, 0.4);
+    --glassmist: rgba(231, 224, 210, 0.35);
+    --hairline: rgba(26, 24, 22, 0.14);
+    --text-faint: rgba(26, 24, 22, 0.42);
+    --chip: rgba(179, 122, 26, 0.22);
+    --glow: #F5F0E8;
+    --shade: #EBE5D8;
+    --accent-soft: rgba(179, 122, 26, 0.55);
+    --frame: #8A6D3B;
+    --motif: url("C:/Users/haris/.config/yasb/motif-base.svg");
+    --runner: url("C:/Users/haris/.config/yasb/runner-base.svg"); */
+}
+
+/* Global Defaults */
+* {
+    font-size: var(--fontSize);
+    font-weight: var(--fontWeight);
+    font-family: var(--system-font);
+    color: var(--text);
+}
+
+
+/* Bar - islands, Rangalipi glass */
+.yasb-bar {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+}
+.yasb-bar.adaptive {
+    background-color: transparent;
+    border: none;
+    -qproperty-railheight: 0;
+    -qproperty-islandradius: 12;
+    -qproperty-grouppadding: 6px;
+    -qproperty-islands: true;
+    -qproperty-edgeradius: 0;
+    -qproperty-borderwidth: 1;
+    -qproperty-bordercolor: var(--frame);
+}
+.container-left,
+.container-center,
+.container-right {
+    background-color: transparent;
+    padding: 0 4px;
+    margin: 0;
+}
+
+/* Tooltip */
+.tooltip {
+    background-color: var(--background);
+    border-radius: var(--border-radius);
+    color: var(--text);
+    padding: 5px 10px;
+    font-size: var(--fontSize);
+    font-family: var(--system-font);
+    font-weight: var(--fontWeight);
+    margin-top: 4px;
+    border: 3px double var(--border);
+}
+
+/* Context Menu */
+.context-menu,
+.context-menu .menu-checkbox {
+    background-color: var(--background);
+    border-bottom: 1px solid var(--hairline);
+    padding: 4px 0px;
+    font-family: var(--system-font);
+    font-weight: var(--fontWeight);
+    font-size: var(--fontSize);
+    color: var(--text);
+}
+.context-menu {
+    border-radius: var(--border-radius);
+    border: 3px double var(--border);
+}
+.context-menu::right-arrow {
+    width: 8px;
+    height: 8px;
+    padding-right: 24px;
+}
+.context-menu::item,
+.context-menu .menu-checkbox {
+    background-color: transparent;
+    padding: 6px 12px;
+    margin: 2px 6px;
+    border-radius: var(--border-radius);
+    min-width: 100px;
+}
+.context-menu::item:selected,
+.context-menu .menu-checkbox:hover {
+    background-color: var(--hover);
+    color: var(--text);
+    border-radius: var(--border-radius3);
+}
+.context-menu::separator {
+    height: 1px;
+    background-color: var(--background2);
+    margin: 4px 8px;
+}
+.context-menu::item:disabled {
+    color: var(--overlay1);
+    background-color: transparent;
+}
+.context-menu .menu-checkbox .checkbox {
+    border: none;
+    padding: 8px 16px;
+    font-size: var(--fontSize);
+    margin: 0;
+    color: var(--text);
+    font-family: var(--system-font);
+    font-weight: var(--fontWeight);
+}
+.context-menu .submenu::item:disabled {
+    margin: 0;
+    padding-left: 16px;
+}
+.context-menu .menu-checkbox .checkbox:unchecked {
+    color: var(--text);
+}
+.context-menu .menu-checkbox .checkbox::indicator {
+    width: 12px;
+    height: 12px;
+    margin-left: 0px;
+    margin-right: 8px;
+}
+.context-menu .menu-checkbox .checkbox::indicator:unchecked {
+    background: var(--mutedBG);
+    border-radius: var(--border-radius2);
+}
+.context-menu .menu-checkbox .checkbox::indicator:checked {
+    background: var(--accent);
+    border-radius: var(--border-radius2);
+}
+.context-menu .menu-checkbox .checkbox:focus {
+}
+
+/* Base Widget Styles - plain strip */
+.widget {
+    padding-left: 6px;
+    padding-right: 6px;
+    margin: 0 2px;
+    background-color: transparent;
+    border-radius: 0;
+    border: none;
+}
+
+.widget .icon {
+    font-size: var(--iconSize);
+    font-weight: var(--fontWeight);
+    color: var(--yasb-icon-fg);
+    font-family: var(--icons-font-fallback);
+}
+
+.widget .label {
+    color: var(--text);
+    font-weight: var(--fontWeight);
+    padding-bottom: 2px;
+}
+
+/* UNIFORM TYPE POLICY: ONE family (--system-font) + ONE weight (--fontWeight)
+   across bar, menus and popups. Hierarchy comes from colour and size only. */
+.home-menu, .home-menu *,
+.context-menu, .context-menu *,
+[class*="-popup"], [class*="-popup"] *,
+[class*="-menu"] .menu-item, [class*="-menu"] .menu-label,
+.calendar-table, .calendar-table::item,
+.day-label, .month-label, .year-label, .date-label {
+    font-weight: var(--fontWeight);
+}
+
+/* Home Menu */
+.home-widget .icon {
+    font-family: var(--system-font);
+    font-size: 20px;
+    font-weight: var(--fontWeight);
+    color: var(--accent);
+    padding-bottom: 0.5px;
+}
+
+.home-menu {
+    /* ACRYLIC 10% POLICY: translucent tint only - no blur anywhere (native
+       blur disabled in config.yaml; acrylic look comes from CSS alpha alone).
+       0.10 = base color at 10% opacity. Literal rgba because QSS var() has no
+       hex->rgba conversion; update alongside the active theme block above. */
+    background-color: rgba(26, 19, 16, 0.10);
+    border: 3px double var(--border);
+    border-radius: var(--border-radius);
+    margin-top: 3px;
+}
+.home-menu .menu-item {
+    color: var(--text);
+    padding: 10px 48px 10px 16px;
+    font-family: var(--system-font);
+    font-weight: var(--fontWeight);
+    margin-top: 3px;
+}
+.home-menu .menu-item:hover {
+    background-color: var(--hover);
+    color: var(--text);
+    border-radius: var(--border-radius3);
+}
+.home-menu .separator {
+    max-height: 0px;
+    background-color: var(--background2);
+}
+
+/* Clock */
+
+.clock-widget .widget-container {
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+    margin: 1px 1px;
+    padding: 2px 4px;
+}
+
+.clock-widget .label {
+    color: var(--text);
+    margin: 0 2px;
+}
+
+.clock-widget {
+    padding: 2px 2px;
+}
+
+.clock-widget .icon.alarm {
+    color: var(--text);
+    padding-left: 4px;
+    padding-right: 4px;
+}
+.clock-popup.alarm,
+.clock-popup.timer,
+.clock-popup.calendar {
+    min-width: 460px;
+    background-color: var(--background);
+    border-radius: var(--border-radius);
+    border: 3px double var(--border);
+    /* UNIFORM: one type system for the whole popup (incl. week label etc.) -
+       font props propagate to every child in QSS, same as the bar. */
+    font-family: var(--system-font);
+    font-weight: var(--fontWeight);
+}
+.clock-popup.calendar .calendar-table,
+.clock-popup.calendar .calendar-table::item {
+    background-color: var(--background);
+    color: var(--text);
+    font-family: var(--system-font);
+    font-size: var(--fontSize);
+    font-weight: var(--fontWeight);
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+.clock-popup.calendar .calendar-table::item:selected {
+    color: var(--accentText);
+    font-weight: var(--fontWeight);
+    background-color: var(--accent);
+    border-radius: var(--border-radius3);
+}
+.clock-popup.calendar .calendar-table::item:hover {
+    color: var(--text);
+    background-color: var(--hover);
+    border-radius: var(--border-radius3);
+}
+.clock-popup.calendar .day-label {
+    margin-top: 20px;
+}
+.clock-popup.calendar .day-label,
+.clock-popup.calendar .month-label,
+.clock-popup.calendar .year-label,
+.clock-popup.calendar .date-label {
+    /* UNIFORM NUMBER SYSTEM: same family + weight as the bar (FiraCode 600).
+       Hierarchy comes from size and colour only - never mixed weights. */
+    font-family: var(--system-font);
+    font-size: var(--iconSize);
+    font-weight: var(--fontWeight);
+    min-width: 180px;
+    max-width: 180px;
+}
+.clock-popup.calendar .day-label {
+    color: var(--subtext);
+}
+.clock-popup.calendar .month-label {
+    color: var(--text);
+}
+.clock-popup.calendar .year-label {
+    color: var(--subtext);
+}
+.clock-popup.calendar .date-label {
+    font-size: 88px;
+    font-weight: var(--fontWeight);
+    margin-top: -20px;
+    color: var(--accent);
+}
+.clock-popup.timer .clock-popup-container,
+.clock-popup.alarm .clock-popup-container {
+    padding: 16px;
+    background-color: var(--background);
+    border-radius: var(--border-radius);
+}
+.clock-popup.timer .clock-popup-footer,
+.clock-popup.alarm .clock-popup-footer {
+    padding: 16px;
+    background-color: var(--background2);
+    border-radius: var(--border-radius);
+}
+.clock-popup .clock-label-timer {
+    font-size: 13px;
+    font-family: var(--system-font);
+    font-weight: var(--fontWeight);
+}
+.clock-popup .clock-input-time {
+    font-size: 48px;
+    background-color: var(--background);
+    border: none;
+    font-family: var(--system-font);
+    font-weight: var(--fontWeight);
+}
+.clock-popup .clock-input-time.colon {
+    padding-bottom: 8px;
+}
+.clock-popup .button {
+    border-radius: var(--border-radius2);
+    font-family: var(--system-font);
+    font-weight: var(--fontWeight);
+    font-size: 13px;
+    min-height: 28px;
+    min-width: 64px;
+    margin: 4px 0;
+    background-color: var(--background2);
+}
+.clock-popup .button.save,
+.clock-popup .button.start,
+.clock-popup .button.delete,
+.clock-popup .button.cancel {
+    min-width: 120px;
+}
+.clock-popup .button.save,
+.clock-popup .button.start {
+    background-color: var(--background2);
+    color: var(--text);
+    margin-right: 8px;
+}
+.clock-popup .button.save:hover,
+.clock-popup .button.start:hover {
+    background-color: var(--background2)
+}
+.clock-popup .button.is-alarm-enabled {
+    background-color: var(--background);
+}
+.clock-popup .button.is-alarm-enabled:hover {
+    background-color: var(--background);
+}
+.clock-popup .button.is-alarm-disabled {
+    background-color: var(--background);
+}
+.clock-popup .button.day {
+    background-color: var(--background2);
+    max-height: 20px;
+    min-height: 20px;
+}
+.clock-popup .button.day:checked {
+    background-color: var(--accent);
+    color: var(--accentText);
+}
+.clock-popup .button.quick-option {
+    background-color: var(--background2);
+}
+.clock-popup .button.quick-option:checked {
+    background-color: var(--accent);
+    color: var(--accentText);
+}
+.clock-popup .button:hover {
+    background-color: var(--hover);
+}
+.clock-popup .button:disabled {
+    background-color: var(--background2);
+    color: var(--text);
+}
+.clock-popup .alarm-input-title {
+    font-size: 14px;
+    font-family: var(--system-font);
+    font-weight: var(--fontWeight);
+    color: var(--text-muted);
+    background-color: var(--background2);
+    border: 1px solid transparent;
+    border-radius: var(--border-radius2);
+    padding: 4px 8px;
+    margin-top: 8px;
+    min-width: 300px;
+}
+.clock-popup .alarm-input-title:focus {
+    border: 1px solid var(--accent);
+}
+.active-alarm-window {
+    background-color: var(--background);
+    max-width: 500px;
+    min-width: 500px;
+    padding: 32px;
+    border-radius: var(--border-radius);
+}
+.active-alarm-window .alarm-title-icon {
+    font-size: 88px;
+    color: var(--text);
+    margin-bottom: 16px;
+}
+.active-alarm-window .alarm-title {
+    font-size: 24px;
+    font-family: var(--system-font);
+    font-weight: var(--fontWeight);
+    color: var(--text);
+    max-width: 500px;
+    min-width: 500px;
+}
+.active-alarm-window .alarm-info {
+    font-size: var(--iconSize);
+    font-family: var(--system-font);
+    font-weight: var(--fontWeight);
+    color: var(--text);
+    margin-bottom: 32px;
+}
+.active-alarm-window .button {
+    border-radius: var(--border-radius2);
+    font-family: var(--system-font);
+    font-weight: var(--fontWeight);
+    font-size: 13px;
+    min-height: 36px;
+    min-width: 100px;
+    margin: 0 4px;
+    background-color: var(--background2);
+}
+.active-alarm-window .button:hover {
+    background-color: var(--hover);
+}
+
+/* Power Menu */
+
+.power-menu-compact {
+    min-width: 260px;
+    background-color: var(--background);
+    border-radius: var(--border-radius);
+    margin-right: 14px;
+    border: 3px double var(--border);
+}
+.power-menu-compact .profile-info {
+    padding: 24px 14px 24px 0px;
+}
+.power-menu-compact .profile-info .profile-username {
+    font-size: var(--iconSize);
+    font-weight: var(--fontWeight);
+    color: var(--text);
+    font-family: var(--system-font);
+    margin-top: 4px;
+}
+
+.power-menu-widget .icon {
+    color: var(--text);
+}
+
+
+.power-menu-compact .profile-info .profile-account-type {
+    font-size: var(--fontSize);
+    color: var(--accentText);
+    font-weight: var(--fontWeight);
+    margin-top: 8px;
+    font-family: var(--system-font);
+    background-color: var(--accent);
+    padding: 2px 6px 3px 6px;
+    border-radius: var(--border-radius2);
+}
+
+.power-menu-compact .profile-info .profile-email {
+    font-size: var(--fontSize);
+    color: transparent;
+    margin-top: -10px;
+    font-family: var(--system-font);
+}
+
+.power-menu-compact .manage-accounts {
+    font-size: var(--fontSize);
+    background-color: var(--background2);
+    font-family: var(--system-font);
+    font-weight: var(--fontWeight);
+    padding: 3px 12px 4px 12px;
+    color: var(--text);
+    margin-top: 0px;
+    border-radius: var(--border-radius2);
+    border: none;
+}
+
+.power-menu-compact .manage-accounts:hover {
+    background-color: var(--accent);
+    color: var(--accentText);
+}
+
+.power-menu-compact .buttons {
+    margin: 0 26px 12px 12px;
+    border-radius: var(--border-radius);
+    background-color: transparent;
+    border: none;
+}
+.power-menu-compact .button {
+    padding: 8px 16px;
+    margin: 2px;
+    background-color: var(--background2);
+    /* border: 3px double var(--border); */
+    color: var(--background2);
+    border-radius: var(--border-radius2);
+}
+.power-menu-compact .button:hover {
+    background-color: var(--hover);
+    color: var(--text);
+}
+.power-menu-compact .button.hover {
+    background-color: var(--accent);
+}
+
+.power-menu-compact .button .icon {
+    font-size: var(--iconSize);
+    font-weight: var(--fontWeight);
+    color: var(--text);
+    padding-right: 10px;
+    min-width: 20px;
+}
+.power-menu-compact .button .label {
+    font-size: 13px;
+    font-weight: var(--fontWeight);
+    font-family: var(--system-font);
+    color: var(--text);
+}
+.power-menu-compact .icon.hover,
+.power-menu-compact .label.hover {
+    color: var(--accentText);
+}
+
+/* Volume */
+
+.volume-widget .icon {
+    color: var(--teal);
+    font-family: var(--icons-font);
+    padding-right: 5px;
+}
+.audio-menu {
+    background-color: var(--glass); 
+    border: 3px double var(--border);
+    min-width: 300px;
+    border-radius: var(--border-radius);
+}
+/* System volume */
+.audio-menu .system-volume-container .volume-slider {
+    border: none;
+}
+/* Device list styles */
+.audio-menu .audio-container .device {
+    background-color:transparent;
+    border: none;
+    padding: 6px 12px;
+    margin: 2px 6px;
+    font-size: var(--fontSize);
+    border-radius: var(--border-radius2);
+}
+.audio-menu .audio-container .device.selected {
+    background-color: var(--background2);
+    color: var(--text);
+   
+}
+.audio-menu .audio-container .device:hover {
+    background-color: var(--hover);
+    color: var(--text);
+}
+
+.audio-menu .audio-container .device.selected:hover {
+    background-color: var(--hover);
+    color: var(--text);
+}
+
+/* Toggle button for application volumes (if is enabled) */
+.audio-menu .toggle-apps {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    min-height: 24px;
+    min-width: 24px;
+    border-radius: var(--border-radius2);
+}
+.audio-menu .toggle-apps.expanded {
+    background-color: transparent;
+}
+.audio-menu .toggle-apps:hover {
+    background-color: var(--hover);
+    
+}
+/* Container for application volumes (if is enabled) */
+.audio-menu .apps-container {
+    padding: 8px;
+    margin-top:10px;
+    border-radius: var(--border-radius2);
+    background-color: var(--background2);
+}
+.audio-menu .apps-container .app-volume .app-icon-container {
+    min-width: 40px;
+    min-height: 40px;
+    max-width: 40px;
+    max-height: 40px;
+    border-radius: var(--border-radius);
+    margin-right: 8px;
+}
+.audio-menu .apps-container .app-volume .app-icon-container:hover {
+    background-color: var(--hover);
+}
+
+/* Active Windows Title */
+.active-window-widget .icon {
+    padding-right: 4px;
+    padding-bottom: 0;
+    color: var(--overlay1);
+}
+
+
+/* Separator_widget */
+.separator-widget .widget-container .label{
+    color: var(--accent);
+    margin-left: -1px;
+    margin-right: -1px;
+}
+
+/* Komorebi Workspaces */
+/*Style for widget.*/
+.komorebi-workspaces {
+    padding: 0px 4px;
+    border: none;
+}
+
+/*Style for widget container.*/
+.komorebi-workspaces .widget-container {
+
+}
+
+/*Style for buttons.*/
+.komorebi-workspaces .ws-btn {
+    border: none;
+    color: var(--overlay1);
+}
+
+/*Style for buttons which contain window and are not empty.*/
+.komorebi-workspaces .ws-btn.populated {
+    padding-left: 8px;
+    padding-right: 8px;
+    background-color: transparent;
+    border-radius: var(--border-radius2);
+    color: var(--subtext1);
+} 
+
+/*Style for the active workspace button.*/
+.komorebi-workspaces .ws-btn.active {
+    padding-left: 8px;
+    padding-right: 8px;
+    background-color: transparent;
+    border: none;
+    border-bottom: 3px solid var(--accent);
+    border-radius: 0;
+    color: var(--accent);
+    font-weight: var(--fontWeight);
+    padding-top: 3px;
+    padding-bottom: 2px;
+} 
+
+
+/* Komorebi-active-layout */
+.komorebi-active-layout {}
+.komorebi-active-layout .widget-container {}
+.komorebi-active-layout .label {
+    font-family: var(--specialFont);
+    padding-top: 1px;
+    color: var(--sapphire);
+}
+
+/* Komorebi-layout-menu */
+.komorebi-layout-menu {
+    /* ACRYLIC 10% (widget-scoped only) - CSS alpha, no blur anywhere. */
+    background-color: rgba(26, 19, 16, 0.10);
+    border-radius: var(--border-radius);
+    border: 3px double var(--border);
+}
+.komorebi-layout-menu .menu-item {
+    padding: 8px 16px;
+    font-size: var(--fontSize);
+    color: var(--text); 
+    font-weight: var(--fontWeight);
+    margin: 2px 2px;
+}
+.komorebi-layout-menu .menu-item-icon {
+    color: var(--text);
+    font-size: var(--iconSize);
+}
+.komorebi-layout-menu .menu-item-text {
+    font-family: var(--system-font);
+    padding-left:4px;
+    font-size: var(--fontSize);
+} 
+
+.komorebi-layout-menu .menu-item:hover {
+    background-color: var(--hover);
+    border-radius: var(--border-radius3);
+} 
+
+.komorebi-layout-menu .separator {
+    max-height: 1px;
+    background-color: var(--background2);
+}
+
+/* Wallpapers-Widget */
+.wallpapers-widget {
+}
+
+.wallpapers-widget .icon {
+    color: var(--mauve);
+}
+
+.wallpapers-widget .widget-container {
+}
+/* NOTE: the gallery itself is not CSS-styled (native strip row);
+   selection border comes from gallery.accent_color in config.yaml. */
+
+/* Systray - Rangalipi semantic */
+.systray {
+    background: transparent;
+    border: none;
+}
+
+/* Icon being dragged, we already apply some transparency to it so you don't need to use it */
+
+.systray .pinned-container.drop-target {
+    background: var(--background);
+}
+.systray .unpinned-visibility-btn {
+    border-radius: var(--border-radius2);
+    height: 20px;
+    width: 16px;
+    border: none;
+}
+.systray .label,
+.systray .icon {
+    color: var(--mauve);
+    font-family: var(--icons-font-fallback);
+}
+
+.systray-popup {
+    background-color: var(--glass);
+    padding: 4px;
+    border-radius: var(--border-radius);
+    border: 3px double var(--border);
+}
+.systray-popup .button {
+    padding: 10px;
+    margin: 0;
+    border: none;
+    border-radius: var(--border-radius2);
+}
+.systray-popup .button:hover {
+    background-color: var(--hover);
+    border-radius: var(--border-radius3);
+}
+
+
+/* notification-widget - Rangalipi semantic */
+.notification-widget .icon {
+    color: var(--overlay2);
+}
+.notification-widget .icon.new-notification {
+    color: var(--blue);
+}
+.notification-widget .label.new-notification {
+    color: var(--blue);
+    font-weight: var(--fontWeight);
+}
+
+/* Media-Widget-Popup */
+
+/* Media full features: bar controls, progress line, app volume */
+.media-widget .btn {
+    font-family: "Segoe Fluent Icons";
+    font-size: 13px;
+    font-weight: var(--fontWeight);
+    color: var(--subtext);
+    padding: 0 3px;
+    margin: 0;
+    background-color: transparent;
+    border: none;
+}
+.media-widget .btn:hover {
+    color: var(--text);
+}
+.media-widget .btn.play {
+    font-size: 14px;
+    color: var(--accent);
+}
+.media-widget .btn.disabled,
+.media-widget .btn.disabled:hover {
+    color: var(--overlay1);
+    background-color: transparent;
+}
+.media-widget .progress-bar {
+    max-height: 2px;
+    background-color: transparent;
+    border: none;
+}
+.media-widget .progress-bar::chunk {
+    background-color: var(--accent);
+    border-radius: var(--border-radius2);
+}
+.media-menu .thumbnail {
+    border-radius: var(--border-radius);
+    border: 2px solid var(--hairline);
+}
+.media-menu .app-volume-container {
+    background-color: var(--background2);
+    padding: 8px 6px;
+    border-radius: var(--border-radius2);
+    margin-left: 10px;
+}
+.media-menu .app-volume-container .volume-slider::groove {
+    background: var(--surface1);
+    width: 2px;
+    border-radius: var(--border-radius2);
+}
+.media-menu .app-volume-container .volume-slider::sub-page {
+    background: var(--accent);
+    border-radius: var(--border-radius2);
+}
+.media-menu .app-volume-container .volume-slider::handle {
+    background: var(--accent);
+    border-radius: var(--border-radius2);
+    height: 12px;
+    width: 12px;
+}
+.media-menu .app-volume-container .mute-button,
+.media-menu .app-volume-container .unmute-button {
+    font-family: "Segoe Fluent Icons";
+    font-size: 16px;
+    color: var(--subtext);
+    margin-top: 4px;
+}
+.media-menu .app-volume-container .unmute-button {
+    color: var(--overlay1);
+}
+.media-menu {
+    min-width: 440px;
+    max-width: 440px;
+    background-color: var(--glassmist);
+    background-image: var(--motif);
+    background-repeat: no-repeat;
+    background-position: top right;
+    border: 3px double var(--border);
+    border-radius: var(--border-radius);
+}
+.media-menu .title,
+.media-menu .artist,
+.media-menu .source {
+    font-size: 14px;
+    font-weight: var(--fontWeight);
+    margin-left: 10px;
+    font-family: var(--system-font);
+    color: var(--text);
+}
+.media-menu .artist {
+    font-size: 13px;
+    color: var(--subtext);
+    margin-top: 0px;
+}
+.media-menu .source {
+    font-size: 11px;
+    color: var(--accentText);
+    border-radius: var(--border-radius2);
+    background-color: var(--accent);
+    padding: 2px 4px;
+    font-weight: var(--fontWeight);
+    font-family: var(--system-font);
+    margin-top: 10px;
+}
+/* The source class name is the same as what you see in the media widget; just replace spaces with dashes and convert it to lowercase. 
+Example: "Windows Media" becomes "windows-media" */
+.media-menu .source.aimp {
+    background-color: #6f42c1;
+    color: #ffffff;
+}
+.media-menu .source.apple-music {
+    background-color: #fa2b56;
+    color: #ffffff;
+}
+.media-menu .source.brave {
+    background-color: #fb542b;
+    color: #ffffff;
+}
+.media-menu .source.chrome {
+    background-color: #4285f4;
+    color: #ffffff;
+}
+.media-menu .source.edge {
+    background-color: #0078d4;
+    color: #ffffff;
+}
+.media-menu .source.firefox {
+    background-color: #ff7139;
+    color: #ffffff;
+}
+.media-menu .source.foobar2000 {
+    background-color: #444444;
+    color: #ffffff;
+}
+.media-menu .source.media-player {
+    background-color: #0078d4;
+    color: #ffffff;
+}
+.media-menu .source.murglar {
+    background-color: #8a8a8a;
+    color: #ffffff;
+}
+.media-menu .source.musicbee {
+    background-color: #ffcc00;
+    color: #000000;
+}
+.media-menu .source.nsmusics {
+    background-color: #e64a19;
+    color: #ffffff;
+}
+.media-menu .source.opera {
+    background-color: #ff1b2d;
+    color: #ffffff;
+}
+.media-menu .source.qobuz {
+    background-color: #003a6f;
+    color: #ffffff;
+}
+.media-menu .source.spotify {
+    background-color: #1db954;
+    color: #ffffff;
+}
+.media-menu .source.tidal {
+    background-color: #000000;
+    color: #ffffff;
+}
+.media-menu .source.winamp {
+    background-color: #f1a11b;
+    color: #000000;
+}
+.media-menu .source.youtube {
+    background-color: #ff0000;
+    color: #ffffff;
+}
+.media-menu .source.youtube-music {
+    background-color: #c51f1f;
+    color: #ffffff;
+}
+.media-menu .source.zen {
+    background-color: #2ecc71;
+    color: #000000;
+}
+.media-menu .btn {
+    font-family: var(--icons-font);
+    font-size: 14px;
+    font-weight: var(--fontWeight);
+    margin: 10px 2px 0px 2px;
+    min-width: 40px;
+    max-width: 40px;
+    min-height: 40px;
+    max-height: 40px;
+    border-radius: var(--border-radius);
+    color: var(--accent);
+    background-color: var(--background2);
+}
+.media-menu .btn.prev {
+    margin-left: 10px;
+    color: var(--accent);
+}
+.media-menu .btn:hover {
+    color: var(--mutedBG);
+    background-color: var(--accent);
+}
+.media-menu .btn.play {
+    background-color: var(--accent);
+    font-size: 20px;
+    color: var(--accentText);
+}
+.media-menu .btn.disabled:hover {
+    color: var(--accent);
+    background-color: var(--background);
+}
+
+.media-menu .btn.disabled {
+    background-color: transparent;
+}
+
+.media-menu .btn.play:hover {
+    background-color: var(--text);
+    color: var(--mutedBG);
+}
+
+.media-menu .playback-time {
+    font-size: 13px;
+    font-family: var(--system-font);
+    color: var(--subtext);
+    margin-top: 20px;
+    min-width: 100px;
+}
+.media-menu .progress-slider {
+    height: 10px;
+    margin: 5px 4px;
+    border-radius: var(--border-radius2);
+}
+.media-menu .progress-slider::groove {
+    background: transparent;
+    height: 2px;
+    border-radius: var(--border-radius2);
+    background: var(--background2);
+
+}
+.media-menu .progress-slider::groove:hover {
+    background: transparent;
+    height: 6px;
+    border-radius: var(--border-radius2);
+    background: var(--background2);
+}
+.media-menu .progress-slider::sub-page {
+    background: var(--accent);
+    border-radius: var(--border-radius2);
+    height: 4px;
+}
+
+/* Language-Widget */
+.language-menu {
+    background-color: var(--glass);
+    min-width: 300px;
+    border: 3px double var(--border);
+    border-radius: var(--border-radius);
+}
+.language-menu .header {
+    color: transparent;
+    padding-bottom: -12px;
+}
+.language-menu .footer {
+    border-top: 1px solid var(--hairline);
+    color: transparent;
+    padding-top: -12px;
+}
+
+.language-menu .language-item {
+    padding: 6px 12px;
+    margin: 2px 4px;
+    border-radius: var(--border-radius2);
+}
+.language-menu .language-item.active {
+    background-color: var(--background2);
+    border-radius: var(--border-radius2);
+    color: var(--text);
+    border-radius: var(--border-radius2);
+}
+.language-menu .language-item:hover {
+    background-color: var(--hover);
+    color: var(--text);
+    border-radius: var(--border-radius2);
+}
+.language-menu .language-item.active:hover {
+    background-color: var(--hover);
+    border-radius: var(--border-radius2);
+    border-radius: var(--border-radius2);
+}
+.language-menu .language-item .code {
+    font-weight: var(--fontWeight);
+    font-size: 14px;
+    min-width: 40px;
+    text-transform: uppercase;
+}
+.language-menu .language-item .icon {
+    font-size: var(--iconSize);
+    margin-right: 8px;
+    color: var(--text);
+}
+.language-menu .language-item .name {
+    font-weight: var(--fontWeight);
+    font-family: var(--system-font);
+    font-size: 14px;
+}
+.language-menu .language-item .layout {
+    font-weight: var(--fontWeight);
+    font-family: var(--system-font);
+    font-size: var(--fontSize);
+}
+
+/* Launcher */
+/* Quick Launch Widget */
+.quick-launch-widget .icon {
+	font-size: var(--fontSize);
+	padding: 0 4px;
+    color: var(--text);
+}
+
+/* Quick Launch Popup - main window */
+
+.quick-launch-popup .container {
+	background-color: var(--background);
+    border: 3px double var(--border);
+    border-radius: var(--border-radius);
+}
+/* Search bar container */
+.quick-launch-popup .search {
+	padding: 12px 16px;
+	background-color: transparent;
+	border-bottom: 1px solid var(--background2);
+}
+/* Search loader line color */
+.quick-launch-popup .search .loader-line {
+	color: var(--blue);
+}
+.quick-launch-popup .search .search-icon {
+	font-family: var(--icons-font);
+	font-size: 18px;
+	color: var(--text);
+	padding-right: 8px;
+	min-width: 18px;
+}
+.quick-launch-popup .search .search-submit-icon {
+	font-family: var(--icons-font);
+	font-size: 18px;
+	color: var(--text);
+	min-width: 18px;
+}
+.quick-launch-popup .search .search-input {
+	background: transparent;
+	border: none;
+	color: var(--text);
+	font-size: var(--iconSize);
+	font-family: var(--system-font);
+	font-weight: var(--fontWeight);
+	padding: 4px 0;
+}
+/* Search prefix styling (e.g., ">" for commands) */
+.quick-launch-popup .search .prefix {
+	background: var(--accent);
+	border-radius: var(--border-radius2);
+	color: var(--text);
+	padding: -2px 8px 0px 8px;
+	margin-top: 2px;
+	margin-right: 4px;
+	font-size: 13px;
+	font-weight: var(--fontWeight);
+	font-family: var(--system-font);
+	max-height: 28px;
+}
+
+/* Results list */
+.quick-launch-popup .results {
+	background: transparent;
+	padding: 8px;
+}
+/* Individual result item here you can set font szie for title */
+.quick-launch-popup .results-list-view {
+	font-size: var(--fontSizeLarge);
+	font-family: var(--system-font);
+	font-weight: var(--fontWeight);
+	color: var(--text);
+}
+.quick-launch-popup {
+    background-color: var(--glass);
+    border: 3px double var(--border);
+    border-radius: var(--border-radius);
+    min-width: 480px;
+}
+.quick-launch-popup .results-list-view .description {
+	color: var(--subtext);
+	font-size: 11px;
+	font-family: var(--system-font);
+	font-weight: var(--fontWeight);
+}
+.quick-launch-popup .results-list-view .separator {
+    color: var(--subtext);
+    font-size: 13px;
+    font-family: var(--system-font);
+    font-weight: var(--fontWeight);
+    padding: 4px 0 4px 12px;
+}
+/* Result item hover and selected states */
+.quick-launch-popup .results-list-view::item {
+	padding: 10px;
+    margin-top: 4px;
+	border-radius: var(--border-radius);
+    margin-left: 4px;
+    margin-right: 4px;
+}
+.quick-launch-popup .results-list-view::item:hover {
+    background-color: var(--hover);
+}
+.quick-launch-popup .results-list-view::item:selected {
+	background-color: var(--background2);
+    border-radius: var(--border-radius);
+}
+
+.quick-launch-popup .results-list-view::item:selected:hover {
+    background-color: var(--hover);
+}
+
+/* Empty state when no results found */
+.quick-launch-popup .results-empty-text {
+	font-size: 24px;
+	font-family: var(--system-font);
+	color: var(--text);
+	padding-top: 8px;
+}
+
+/* CPU widget */
+.cpu-widget .widget-container .icon {
+    color: var(--mauve);
+    padding-bottom: 1px;
+}
+
+.cpu-widget .widget-container .label {
+    padding-left: 3px;
+}
+.cpu-widget .widget-container .label.alt {
+    padding-left: 1.5px;
+}
+
+.cpu-widget {
+    border: none;
+}
+/* Rangalipi CPU status colors */
+.cpu-widget .label.status-low { color: var(--green); }
+.cpu-widget .label.status-medium { color: var(--yellow); }
+.cpu-widget .label.status-high { color: var(--peach); }
+.cpu-widget .label.status-critical { color: var(--red); }
+
+.cpu-popup {
+    background-color: var(--glass);
+    min-width: 400px;
+    border: 3px double var(--border);
+    border-radius: var(--border-radius);
+}
+
+.cpu-popup .header {
+    background: transparent;
+    padding: 12px 16px;
+    color: var(--text);
+}
+.cpu-popup .header .text {
+    font-size: 16px;
+    font-family: var(--system-font);
+    color: var(--text);
+}
+.cpu-popup .header .pin-btn {
+    font-size: var(--fontSize);
+    background: transparent;
+    font-family: "Segoe Fluent Icons";
+    padding: 6px;
+    color: var(--text);
+}
+.cpu-popup .header .pin-btn:hover {
+    color: var(--hover);
+}
+.cpu-popup .header .pin-btn.pinned {
+    color: var(--accent);
+}
+/* Graph area */
+.cpu-popup .graph-container {
+    background:  transparent;
+    min-height: 64px;
+}
+.cpu-popup .cpu-graph {
+    color: var(--mauve);   /* <-- set the graph line/fill color */
+}
+.cpu-popup .cpu-graph-grid {
+    color: var(--background2);  /* set the grid line color */
+}
+.cpu-popup .graph-title {
+    font-size: 12px;
+    color: var(--text);
+    font-family: var(--system-font);
+    padding: 0px 0px 4px 14px;
+}
+/* Stats grid */
+.cpu-popup .stats {
+    background: transparent;
+    padding: 16px;
+}
+.cpu-popup .stats .stat-item {
+    background-color: var(--background2);
+    border: 3px double var(--border);
+    border-radius: var(--border-radius);
+    padding: 8px 12px;
+    margin: 8px;
+}
+.cpu-popup .stats .stat-label {
+    font-size: 13px;
+    color: var(--text);
+    font-family: var(--system-font);
+    font-weight: var(--fontWeight);
+    padding: 6px 4px 2px 4px;
+}
+.cpu-popup .stats .stat-value {
+    font-size: 20px;
+    font-weight: var(--fontWeight);
+    color: var(--subtext);
+    font-family: var(--system-font);
+    padding: 0 4px 12px 4px;
+}
+
+/* Memory widget */
+.memory-widget .widget-container .label {
+    padding-left: 3px;
+    color: var(--text);
+}
+.memory-widget .widget-container .label.alt {
+    padding-left: 1.5px;
+}
+.memory-widget .widget-container .icon {
+    color: var(--blue);
+    padding-bottom: 1px;
+}
+
+.memory-widget {
+    border: none;
+}
+/* Rangalipi memory status colors */
+.memory-widget .label.status-low { color: var(--green); }
+.memory-widget .label.status-medium { color: var(--yellow); }
+.memory-widget .label.status-high { color: var(--peach); }
+.memory-widget .label.status-critical { color: var(--red); }
+
+.memory-popup {
+    background-color: var(--glass);
+    min-width: 400px;
+    border: 3px double var(--border);
+    border-radius: var(--border-radius);
+}
+
+.memory-popup .header {
+    background: transparent;
+    padding: 12px 16px;
+}
+.memory-popup .header .text {
+    font-size: 16px;
+    font-family: var(--system-font);
+    color: var(--text);
+}
+.memory-popup .header .pin-btn {
+    font-size: 14px;
+    background: transparent;
+    font-family: "Segoe Fluent Icons";
+    border: none;
+    padding: 6px;
+    color: var(--text);
+}
+.memory-popup .header .pin-btn:hover {
+    color: var(--hover);
+}
+.memory-popup .header .pin-btn.pinned {
+    color: var(--accent)
+}
+/* Graph area */
+.memory-popup .graph-container {
+    background:  transparent;
+    min-height: 64px;
+}
+.memory-popup .memory-graph {
+    color: var(--blue);   /* <-- set the graph line/fill color */
+}
+.memory-popup .memory-graph-grid {
+    color: var(--background2);  /* set the grid line color */
+}
+.memory-popup .graph-title {
+    font-size: 12px;
+    color: var(--text);
+    font-family: var(--system-font);
+    padding: 0px 0px 4px 14px;
+}
+/* Stats grid */
+.memory-popup .stats {
+    background: transparent;
+    padding: 16px;
+}
+.memory-popup .stats .stat-item {
+    background-color: var(--background2);
+    border: 3px double var(--border);
+    border-radius: var(--border-radius);
+    padding: 8px 12px;
+    margin: 8px;
+}
+.memory-popup .stats .stat-label {
+    font-size: 13px;
+    color: var(--text);
+    font-family: var(--system-font);
+    font-weight: var(--fontWeight);
+    padding: 6px 4px 2px 4px;
+}
+.memory-popup .stats .stat-value {
+    font-size: 20px;
+    font-weight: var(--fontWeight);
+    color: var(--subtext);
+    font-family: var(--system-font);
+    padding: 0 4px 12px 4px;
+}
+
+/* Alpha stats group - collapsible, Rangalipi */
+.alpha-group .container { /* The name of the css class is the name given in the config */
+    background-color: transparent;
+    border-bottom: 3px dotted var(--hairline);
+}
+
+.alpha-group .grouper-button {
+    font-size: 20px;
+    font-weight: var(--fontWeight);
+    font-family: var(--system-font);
+    color: var(--green);
+    border: none;
+    padding: 0 6px;
+}
+
+.alpha-group .grouper-button:hover {
+    color: var(--text);
+}
+
+/* Control_Center */
+/* POPUP WINDOW */
+
+.control-center-widget .icon {
+    color: var(--mauve);
+    font-family: var(--system-font);
+    font-weight: var(--fontWeight);
+    font-size: 20px;
+}
+
+.control-center-menu {
+    background-color: var(--background);
+    background: var(--glass);
+    min-width: 360px;
+    border: 3px double var(--border);
+    border-radius: var(--border-radius);
+}
+
+/* SECTIONS */
+/* Left and right padding of 12 px + 4 px margin for quick action and power plan, 
+which is 16 pixels same as the other sections. */
+.control-center-menu .section {
+    background: transparent;
+    margin: 0;
+    padding: 16px 12px;
+    border: none;
+}
+/* We dont want a padding at the bottom of the first section. */
+.control-center-menu .section.system-controls {
+    padding: 12px 16px 0 16px;
+}
+.control-center-menu .section.sliders {
+    padding: 16px;
+}
+
+/* SHARED SEGOE FLUENT ICONS */
+.control-center-menu .section.system-controls .button,
+.control-center-menu .section.quick-actions .button .icon,
+.control-center-menu .section.sliders .slider .icon,
+.control-center-menu .section.sliders .slider .source-selector,
+.control-center-menu .section.power .plan-name .icon,
+.control-center-menu .section.power .mode-name .icon,
+.control-center-menu .section.media .button {
+    font-family: "Segoe Fluent Icons";
+    font-weight: var(--fontWeight);
+}
+
+/* SHARED HOVER & TRANSITION TRANSITIONS */
+.control-center-menu .section.quick-actions .button .icon,
+.control-center-menu .section.system-controls .button,
+.control-center-menu .section.sliders .slider .source-selector,
+.control-center-menu .section.power .plan-name,
+.control-center-menu .section.power .mode-name,
+.control-center-menu .section.media .button {
+    transition: background-color 0.08s, opacity 0.08s;
+    opacity: 1;
+}
+
+/* SHARED CLICKED / PRESSED STATES */.control-center-menu .section.system-controls .button:pressed,.control-center-menu .section.quick-actions .button .icon:pressed,.control-center-menu .section.sliders .slider .source-selector:pressed,.control-center-menu .section.power .plan-name:pressed,.control-center-menu .section.power .mode-name:pressed,.control-center-menu .section.media .button:pressed {
+    opacity: 0.5;
+}
+
+/* SHARED DISABLED STATES */
+.control-center-menu .section.quick-actions .button.disabled .title,
+.control-center-menu .section.quick-actions .button.disabled .icon,
+.control-center-menu .section.sliders .slider.disabled,
+.control-center-menu .section.media .button.disabled,
+.control-center-menu .section.media .button.disabled:hover {
+    opacity: 0.5;
+}
+
+/* SYSTEM CONTROLS */
+.control-center-menu .section.system-controls .button {
+    background-color: var(--accent);
+    border-radius: var(--border-radius);
+    min-height: 32px;
+    max-height: 32px;
+    min-width: 32px;
+    max-width: 32px;
+    font-size: 14px;
+    color: var(--accentText);
+    transition: background-color 0.08s, opacity 0.08s;
+}
+.control-center-menu .section.system-controls .button:hover {
+    background-color: var(--redFlash);
+}
+
+/* QUICK ACTIONS */
+.control-center-menu .section.quick-actions .button {
+    margin: 0 4px;
+    cursor: pointer;
+}
+.control-center-menu .section.quick-actions .button .icon {
+    font-size: 16px;
+    background-color: var(--background2);
+    min-height: 48px;
+    border-radius: var(--border-radius);
+    color: var(--text); 
+}
+.control-center-menu .section.quick-actions .button .icon:hover {
+    background-color: var(--hover);
+}
+.control-center-menu .section.quick-actions .button.active .icon {
+    background-color: var(--accent);
+    color: var(--accentText);
+}
+.control-center-menu .section.quick-actions .button.active .icon:hover {
+    background-color: var(--redFlash);
+    color: var(--accentText);
+}
+.control-center-menu .section.quick-actions .button.disabled .icon:hover {
+    background-color: var(--hover);
+}
+.control-center-menu .section.quick-actions .button.active .icon:pressed {
+    background-color: var(--hover);
+}
+.control-center-menu .section.quick-actions .button .title {
+    font-size: var(--fontSize);
+    margin: 4px 0 8px 0;
+    padding: 0;
+    font-weight: var(--fontWeight);
+    color: var(--text);
+}
+
+/* SLIDERS */
+.control-center-menu .section.sliders .slider {
+    background: transparent;
+    border: none;
+    min-height: 34px;
+    margin: 0 4px 0 4px;
+}
+.control-center-menu .section.sliders .slider .icon {
+    font-size: 16px;
+    color: var(--text);
+    min-width: 36px;
+}
+.control-center-menu .section.sliders .slider .value {
+    min-width: 36px;
+    font-size: 12px;
+    font-weight: var(--fontWeight);
+    color: var(--text);
+}
+.control-center-menu .section.sliders .slider .source-selector {
+    font-size: 12px;
+    color: var(--text);
+    width: 24px;
+    height: 24px;
+    border-radius: var(--border-radius2);
+    background-color: var(--background);
+    margin-left: 4px;
+}
+.control-center-menu .section.sliders .slider .source-selector:hover {
+    background-color: var(--hover);
+}
+
+/* POWER PLAN & POWER MODE */
+.control-center-menu .section.power .plan-name,
+.control-center-menu .section.power .mode-name {
+    background: var(--accent);
+    border: 3px double var(--border);
+    border-radius: var(--border-radius);
+    min-height: 36px;
+    margin: 0 4px;
+    padding: 6px 10px;
+    cursor: pointer;
+}
+.control-center-menu .section.power .plan-name:hover,
+.control-center-menu .section.power .mode-name:hover {
+    background: var(--redFlash);
+}
+.control-center-menu .section.power .mode-name.disabled,
+.control-center-menu .section.power .mode-name.disabled:hover {
+    opacity: 0.5;
+    background: var(--hover);
+}
+.control-center-menu .section.power .plan-name .title,
+.control-center-menu .section.power .mode-name .title {
+    font-size: var(--fontSize);
+    font-weight: var(--fontWeight);
+    color: var(--accentText);
+}
+.control-center-menu .section.power .plan-name .subtext,
+.control-center-menu .section.power .mode-name .subtext {
+    font-size: var(--fontSize);
+    font-weight: var(--fontWeight);
+    color: var(--accentText);
+}
+
+.control-center-menu .section.power .plan-name.disabled .title,
+.control-center-menu .section.power .mode-name.disabled .title {
+    font-size: var(--fontSize);
+    font-weight: var(--fontWeight);
+    color: var(--text);
+}
+.control-center-menu .section.power .plan-name.disabled .subtext,
+.control-center-menu .section.power .mode-name.disabled .subtext {
+    font-size: var(--fontSize);
+    font-weight: var(--fontWeight);
+    color: var(--text);
+}
+.control-center-menu .section.power .plan-name .icon,
+.control-center-menu .section.power .mode-name .icon {
+    color: var(--accentText);
+    font-size: var(--iconSize);
+}
+
+.control-center-menu .section.power .plan-name.disabled .icon,
+.control-center-menu .section.power .mode-name.disabled .icon {
+    color: var(--text);
+    font-size: var(--iconSize);
+}
+
+/* MEDIA CONTROLS */
+.control-center-menu .section.media {
+    background-color: transparent;
+    padding: 12px;
+}
+.control-center-menu .section.media .track-info {
+     padding-left: 8px;
+}
+.control-center-menu .section.media .title {
+    font-size: var(--fontSize);
+    font-weight: var(--fontWeight);
+    color: var(--text);
+}
+.control-center-menu .section.media .subtext {
+    font-size: var(--fontSize);
+    font-weight: var(--fontWeight);
+    color: var(--subtext);
+}
+.control-center-menu .section.media .button {
+    font-size: var(--iconSize);
+    background-color: var(--accent);
+    color: var(--accentText);
+    min-width: 32px;
+    min-height: 32px;
+    max-width: 32px;
+    max-height: 32px;
+    border-radius: var(--border-radius2);
+    margin: 0 0 0 4px;
+}
+
+.control-center-menu .section.media .button.prev {
+    color: var(--accentText);
+    background-color: var(--accent);
+}
+.control-center-menu .section.media .button.next {
+    color: var(--accentText);
+    background-color: var(--accent);
+}
+
+.control-center-menu .section.media .button.prev.disabled {
+    color: var(--text);
+}
+.control-center-menu .section.media .button.next.disabled {
+    color: var(--text);
+}
+
+.control-center-menu .section.media .button:hover {
+    background-color: var(--redFlash);
+}
+.control-center-menu .section.media .button.disabled,
+.control-center-menu .section.media .button.disabled:hover {
+    background-color: var(--background2);
+}
+
+/* Context menu styles for dropdowns and menus inside the Control Center panel */
+.control-center-menu .context-menu {
+    background-color: var(--glass);
+    padding: 4px 0px;
+    font-family: var(--system-font);
+    font-weight: var(--fontWeight);
+    font-size: var(--fontSize);
+    color: var(--text);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--accent);
+}
+.control-center-menu .context-menu::item {
+    background-color: transparent;
+    padding: 6px 12px;
+    margin: 2px 6px;
+    border-radius: var(--border-radius3);
+    min-width: 100px;
+}
+.control-center-menu .context-menu::item:selected  {
+    background-color: var(--hover);
+    color: var(--text);
+}
+.control-center-menu .context-menu::separator {
+    height: 1px;
+    background-color: var(--hairline);
+    margin: 4px 0;
+}
+.control-center-menu .context-menu::indicator:unchecked {
+    width: 4px;
+    height: 12px;
+    margin-left: 0;
+    color: transparent;
+    background-color: transparent;
+}
+.control-center-menu .context-menu::indicator:checked {
+    width: 4px;
+    height: 12px;
+    background-color: var(--accent);
+    border-radius: var(--border-radius3);
+    margin-left: 0;
+}
+
+.cava-widget {
+    padding: 0;
+    margin: 0;
+    padding-bottom: 1px;
+}
+.cava-widget .widget-container {}
+
+/* Komorebi control + stack - glass menu, quiet buttons, active pill */
+.komorebi-control-widget .widget-container .icon {
+    color: var(--subtext1);
+}
+.komorebi-control-menu {
+    /* ACRYLIC 10% (widget-scoped only) - CSS alpha, no blur anywhere. */
+    background-color: rgba(26, 19, 16, 0.10);
+    border: 3px double var(--border);
+    border-radius: var(--border-radius);
+    min-width: 220px;
+}
+.komorebi-control-menu .button {
+    color: var(--subtext);
+    padding: 8px 12px;
+    margin: 2px 6px;
+    font-size: 15px;
+    border-radius: var(--border-radius2);
+    background-color: transparent;
+}
+.komorebi-control-menu .button:hover {
+    background-color: var(--hover);
+    color: var(--text);
+}
+.komorebi-control-menu .button.active {
+    color: var(--accent);
+    background-color: var(--background2);
+}
+.komorebi-control-menu .button:disabled {
+    color: var(--overlay1);
+}
+.komorebi-control-menu .footer {
+    padding: 8px 12px;
+    border-top: 1px solid var(--hairline);
+}
+.komorebi-control-menu .footer .text {
+    font-size: 12px;
+    font-family: var(--system-font);
+    color: var(--subtext);
+}
+.komorebi-stack .window {
+    background-color: transparent;
+    border: none;
+    margin: 0 2px;
+    padding: 0 4px 2px 4px;
+}
+.komorebi-stack .window .label {
+    font-size: 12px;
+    color: var(--subtext);
+}
+.komorebi-stack .window .icon {
+    padding: 0;
+    margin: 0;
+}
+.komorebi-stack .window.active {
+    background-color: transparent;
+    border: none;
+    border-bottom: 3px solid var(--accent);
+    border-radius: 0;
+    padding-bottom: 2px;
+}
+.komorebi-stack .window.active .label {
+    color: var(--text);
+    font-weight: var(--fontWeight);
+}
+/* Alpha metrics - one tabular Nerd voice: icons + digits share JetBrainsMono
+   so live numbers never jitter the bar width. Higher specificity wins. */
+.yasb-bar .cpu-widget .widget-container .label,
+.yasb-bar .gpu-widget .widget-container .label,
+.yasb-bar .memory-widget .widget-container .label,
+.yasb-bar .disk-widget .widget-container .label,
+.yasb-bar .traffic-widget .widget-container .label {
+    font-family: var(--icons-font);
+    font-size: 12px;
+    font-weight: var(--fontWeight);
+    padding: 0 3px;
+}
+/* Traffic widget - compact */
+.traffic-widget {
+    padding-left: 4px;
+    padding-right: 4px;
+}
+.traffic-widget .widget-container .label {
+    padding-left: 2px;
+    font-size: 11px;
+    font-weight: var(--fontWeight);
+    color: var(--subtext0);
+}
+.traffic-widget .widget-container .label span {
+    font-family: var(--icons-font);
+    font-size: 11px;
+    color: var(--sky);
+    padding: 0 2px;
+}
+.traffic-widget .widget-container .label.offline {
+    color: var(--subtext);
+    font-size: 11px;
+}
+.traffic-widget .widget-container .label.offline span {
+    color: var(--redFlash);
+}
+.traffic-widget .widget-container .icon {
+    font-size: 12px;
+    color: var(--text);
+    padding-bottom: 1px;
+}
+.traffic-widget .widget-container .icon.offline {
+    color: var(--redFlash);
+}
+
+/* Traffic popup menu - matches cpu/memory popup + Rangalipi theme */
+.traffic-menu {
+    background-color: var(--glass);
+    border: 3px double var(--border);
+    border-radius: var(--border-radius);
+    min-width: 320px;
+}
+.traffic-menu .header {
+    background: transparent;
+    padding: 12px 16px 8px 16px;
+    border-bottom: 1px solid var(--hairline);
+}
+.traffic-menu .header .title {
+    font-size: 16px;
+    font-family: var(--system-font);
+    font-weight: var(--fontWeight);
+    color: var(--text);
+}
+.traffic-menu .header .reset-button {
+    font-size: var(--fontSize);
+    font-family: var(--system-font);
+    font-weight: var(--fontWeight);
+    padding: 4px 10px;
+    border-radius: var(--border-radius2);
+    background-color: var(--background2);
+    color: var(--text);
+    border: 3px double var(--border);
+}
+.traffic-menu .header .reset-button:hover {
+    background-color: var(--hover);
+    color: var(--text);
+}
+.traffic-menu .header .reset-button:pressed {
+    background-color: var(--accent);
+    color: var(--accentText);
+}
+/* Big live speeds at top */
+.traffic-menu .download-speed,
+.traffic-menu .upload-speed {
+    background-color: transparent;
+    padding: 12px 10px 4px 10px;
+    margin: 0 12px;
+    border-bottom: 1px solid var(--hairline);
+}
+.traffic-menu .speed-separator {
+    max-width: 1px;
+    background-color: var(--hairline);
+    margin: 24px 0 12px 0;
+}
+.traffic-menu .upload-speed-value,
+.traffic-menu .download-speed-value {
+    font-size: 18px;
+    font-weight: var(--fontWeight);
+    font-family: var(--system-font);
+    color: var(--text);
+}
+.traffic-menu .upload-speed-unit,
+.traffic-menu .download-speed-unit {
+    font-size: 13px;
+    font-family: var(--system-font);
+    font-weight: var(--fontWeight);
+    color: var(--subtext);
+    padding-top: 4px;
+    padding-left: 4px;
+}
+.traffic-menu .upload-speed-placeholder,
+.traffic-menu .download-speed-placeholder {
+    color: var(--subtext);
+    font-size: 11px;
+    font-family: var(--system-font);
+    padding: 0 0 8px 0;
+}
+/* Session / Today / All-time sections */
+.traffic-menu .section-title {
+    font-size: 12px;
+    font-weight: var(--fontWeight);
+    color: var(--subtext);
+    margin-bottom: 4px;
+    font-family: var(--system-font);
+}
+.traffic-menu .session-section,
+.traffic-menu .today-section,
+.traffic-menu .alltime-section {
+    margin: 8px 8px 0 8px;
+    padding: 0 10px 10px 10px;
+    background-color: transparent;
+    border-bottom: 1px solid var(--hairline);
+}
+.traffic-menu .alltime-section {
+    border-bottom: none;
+    margin-bottom: 8px;
+}
+.traffic-menu .data-text {
+    font-size: 13px;
+    color: var(--subtext);
+    padding: 2px 0;
+    font-family: var(--system-font);
+}
+.traffic-menu .data-value {
+    font-weight: var(--fontWeight);
+    font-size: 13px;
+    color: var(--text);
+    font-family: var(--system-font);
+    padding: 2px 0;
+}
+/* Footer interface + internet status */
+.traffic-menu .interface-info,
+.traffic-menu .internet-info {
+    font-size: 12px;
+    font-family: var(--system-font);
+    color: var(--subtext);
+    padding: 8px 0;
+}
+.traffic-menu .internet-info.connected {
+    background-color: var(--background2);
+    color: var(--green);
+}
+.traffic-menu .internet-info.disconnected {
+    background-color: var(--background2);
+    color: var(--redFlash);
+}
+.traffic-menu .internet-info.checking {
+    background-color: var(--background2);
+    color: var(--subtext);
+}
+
+/* Omega quick-settings group - collapsible, Rangalipi */
+.omega-group .container {
+    background-color: transparent;
+    border-bottom: 3px dotted var(--hairline);
+}
+.omega-group .grouper-button {
+    font-size: 20px;
+    font-weight: var(--fontWeight);
+    font-family: var(--system-font);
+    color: var(--sky);
+    border: none;
+    padding: 0 6px;
+}
+.omega-group .grouper-button:hover {
+    color: var(--text);
+}
+
+/* WiFi - sky icon, ethernet handled by same widget */
+.wifi-widget .widget-container .icon {
+    color: var(--sky);
+}
+.wifi-widget .widget-container .label {
+    color: var(--text);
+}
+.wifi-menu {
+    background-color: var(--glass);
+    border: 3px double var(--border);
+    border-radius: var(--border-radius);
+    min-width: 420px;
+    min-height: 340px;
+}
+.wifi-menu .header {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--hairline);
+}
+.wifi-menu .header .title {
+    font-size: 14px;
+    font-weight: var(--fontWeight);
+    color: var(--text);
+}
+.wifi-menu .wifi-item {
+    padding: 10px 12px;
+    margin: 2px 6px;
+    border-radius: var(--border-radius2);
+}
+.wifi-menu .wifi-item:hover {
+    background-color: var(--hover);
+}
+.wifi-menu .wifi-item[active=true] {
+    background-color: var(--background2);
+}
+.wifi-menu .wifi-item .icon {
+    font-family: "Segoe Fluent Icons";
+    font-size: 18px;
+    color: var(--sky);
+}
+.wifi-menu .wifi-item .name {
+    font-size: 13px;
+    font-weight: var(--fontWeight);
+    color: var(--text);
+}
+.wifi-menu .footer {
+    font-size: 13px;
+    font-family: var(--system-font);
+    padding: 8px 12px;
+    color: var(--subtext);
+    border-top: 1px solid var(--hairline);
+}
+
+/* Battery - status colors */
+.battery-widget .widget-container .icon {
+    color: var(--green);
+    padding-right: 3px;
+}
+.battery-widget .widget-container .label {
+    color: var(--text);
+}
+.battery-widget .icon.status-critical,
+.battery-widget .label.status-critical { color: var(--red); }
+.battery-widget .icon.status-low,
+.battery-widget .label.status-low { color: var(--peach); }
+.battery-widget .icon.status-medium,
+.battery-widget .label.status-medium { color: var(--yellow); }
+.battery-widget .icon.status-high,
+.battery-widget .label.status-high,
+.battery-widget .icon.status-full,
+.battery-widget .label.status-full { color: var(--green); }
+.battery-widget .icon.status-charging,
+.battery-widget .label.status-charging { color: var(--sky); }
+
+/* Bluetooth - state colors */
+.bluetooth-widget .widget-container .icon {
+    font-family: "Segoe Fluent Icons";
+    font-size: 16px;
+}
+.bluetooth-widget .icon.bt-off,
+.bluetooth-widget .label.bt-off { color: var(--overlay1); }
+.bluetooth-widget .icon.bt-on,
+.bluetooth-widget .label.bt-on { color: var(--sky); }
+.bluetooth-widget .icon.bt-connected,
+.bluetooth-widget .label.bt-connected { color: var(--green); }
+.bluetooth-menu {
+    background-color: var(--glass);
+    border: 3px double var(--border);
+    border-radius: var(--border-radius);
+    min-width: 420px;
+    min-height: 340px;
+}
+.bluetooth-menu .header {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--hairline);
+}
+.bluetooth-menu .header .title {
+    font-size: 14px;
+    font-weight: var(--fontWeight);
+    color: var(--text);
+}
+.bluetooth-menu .section-title {
+    font-size: 12px;
+    font-weight: var(--fontWeight);
+    color: var(--subtext);
+    padding: 10px 12px 4px 12px;
+}
+.bluetooth-menu .bluetooth-item {
+    padding: 10px 12px;
+    margin: 2px 6px;
+    border-radius: var(--border-radius2);
+}
+.bluetooth-menu .bluetooth-item:hover {
+    background-color: var(--hover);
+}
+.bluetooth-menu .bluetooth-item.active {
+    background-color: var(--background2);
+}
+.bluetooth-menu .bluetooth-item .icon {
+    font-family: "Segoe Fluent Icons";
+    font-size: 18px;
+    color: var(--sky);
+}
+.bluetooth-menu .bluetooth-item .name {
+    font-size: 13px;
+    font-weight: var(--fontWeight);
+    color: var(--text);
+}
+.bluetooth-menu .bluetooth-item .status {
+    font-size: 12px;
+    color: var(--subtext);
+}
+.bluetooth-menu .footer {
+    font-size: 13px;
+    font-family: var(--system-font);
+    padding: 8px 12px;
+    color: var(--subtext);
+    border-top: 1px solid var(--hairline);
+}
+
+/* GPU - pink icon, Mocha status colors */
+.gpu-widget .widget-container .icon {
+    color: var(--pink);
+    padding-bottom: 1px;
+}
+.gpu-widget .widget-container .label {
+    color: var(--text);
+}
+.gpu-widget .label.status-low { color: var(--green); }
+.gpu-widget .label.status-medium { color: var(--yellow); }
+.gpu-widget .label.status-high { color: var(--peach); }
+.gpu-widget .label.status-critical { color: var(--red); }
+.gpu-popup {
+    background-color: var(--glass);
+    border: 3px double var(--border);
+    border-radius: var(--border-radius);
+    min-width: 400px;
+}
+.gpu-popup .header {
+    background: transparent;
+    padding: 12px 16px 8px 16px;
+    border-bottom: 1px solid var(--hairline);
+}
+.gpu-popup .header .text {
+    font-size: 16px;
+    font-weight: var(--fontWeight);
+    font-family: var(--system-font);
+    color: var(--text);
+}
+.gpu-popup .header .pin-btn {
+    font-size: 14px;
+    background: transparent;
+    font-family: "Segoe Fluent Icons";
+    border: none;
+    padding: 6px;
+    color: var(--subtext);
+}
+.gpu-popup .header .pin-btn:hover {
+    color: var(--text);
+}
+.gpu-popup .header .pin-btn.pinned {
+    color: var(--accent);
+}
+.gpu-popup .graph-container {
+    background: transparent;
+    min-height: 64px;
+}
+.gpu-popup .gpu-graph {
+    color: var(--pink);
+}
+.gpu-popup .gpu-graph-grid {
+    color: var(--background2);
+}
+.gpu-popup .gpu-temp-graph {
+    color: var(--peach);
+}
+.gpu-popup .graph-title {
+    font-size: 12px;
+    color: var(--subtext);
+    font-family: var(--system-font);
+    padding: 0 0 4px 14px;
+    margin-top: 12px;
+}
+.gpu-popup .graph-title.first {
+    margin-top: 0;
+}
+.gpu-popup .stats {
+    background: transparent;
+    padding: 8px 12px 12px 12px;
+}
+.gpu-popup .stats .stat-item {
+    background-color: var(--background2);
+    border: 3px double var(--border);
+    border-radius: var(--border-radius2);
+    padding: 8px 12px;
+    margin: 4px;
+}
+.gpu-popup .stats .stat-label {
+    font-size: 12px;
+    color: var(--subtext);
+    font-family: var(--system-font);
+    padding: 4px 4px 2px 4px;
+}
+.gpu-popup .stats .stat-value {
+    font-size: 20px;
+    font-weight: var(--fontWeight);
+    color: var(--text);
+    font-family: var(--system-font);
+    padding: 0 4px 8px 4px;
+}
+
+/* Disk - sapphire icon, Mocha status colors + group popup */
+.disk-widget .widget-container .icon {
+    color: var(--sapphire);
+    padding-bottom: 1px;
+}
+.disk-widget .widget-container .label {
+    color: var(--text);
+}
+.disk-widget .widget-container .label.status-low { color: var(--green); }
+.disk-widget .widget-container .label.status-medium { color: var(--yellow); }
+.disk-widget .widget-container .label.status-high { color: var(--peach); }
+.disk-widget .widget-container .label.status-critical { color: var(--red); }
+.disk-group {
+    background-color: var(--glass);
+    border: 3px double var(--border);
+    border-radius: var(--border-radius);
+    padding: 10px 12px;
+}
+
+.disk-group-row {
+    min-width: 220px;
+    max-width: 260px;
+    margin: 0;
+    padding: 6px 8px;
+    border-radius: var(--border-radius2);
+    border: 1px solid transparent;
+}
+.disk-group-row:hover {
+    background-color: var(--hover);
+    border: 3px double var(--border);
+}
+.disk-group-label {
+    font-size: 12px;
+    color: var(--text);
+    font-family: var(--system-font);
+}
+.disk-group-label-size {
+    font-size: 11px;
+    color: var(--subtext);
+    font-family: var(--system-font);
+}
+.disk-group-label-bar {
+    max-height: 8px;
+    border: none;
+    background-color: var(--background2);
+    border-radius: var(--border-radius2);
+}
+.disk-group-label-bar::chunk {
+    background-color: var(--sapphire);
+    border-radius: var(--border-radius2);
+}
+
+/* ==== Per-component padding (bar level, wins by order) ====
+   Tight scale: separators 0, icon-only 3, text/stats 5, groupers 6.
+   (Measured: base .widget stacked 6px padding + 2px margin per side
+   under container 8 + island grouppadding 8 = ~30px dead air per gap.) */
+.yasb-bar .separator-widget { margin: 0; padding: 0; }
+.yasb-bar .separator-widget .widget-container { padding: 0; margin: 0; }
+.yasb-bar .separator-widget .widget-container .label {
+    margin: 0;
+    padding: 0 2px;
+    font-size: 16px;
+    color: var(--accent-soft);
+}
+.yasb-bar .systray-widget .widget-container,
+.yasb-bar .control-center-widget .widget-container,
+.yasb-bar .wallpapers-widget .widget-container,
+.yasb-bar .home-widget .widget-container,
+.yasb-bar .notifications-widget .widget-container { padding: 0 3px; }
+.yasb-bar .komorebi-workspaces .widget-container,
+.yasb-bar .komorebi-active-layout .widget-container,
+.yasb-bar .komorebi-control-widget .widget-container,
+.yasb-bar .clock-widget .widget-container,
+.yasb-bar .cava-widget .widget-container,
+.yasb-bar .cpu-widget .widget-container,
+.yasb-bar .gpu-widget .widget-container,
+.yasb-bar .memory-widget .widget-container,
+.yasb-bar .disk-widget .widget-container,
+.yasb-bar .traffic-widget .widget-container,
+.yasb-bar .wifi-widget .widget-container,
+.yasb-bar .bluetooth-widget .widget-container,
+.yasb-bar .volume-widget .widget-container,
+.yasb-bar .battery-widget .widget-container,
+.yasb-bar .media-widget .widget-container { padding: 0 5px; }
+.yasb-bar .alpha-group .grouper-button,
+.yasb-bar .omega-group .grouper-button { padding: 0 6px; }
+
+/* Expanded grouper rows: single divider line, minimal air */
+.omega-group .container .widget-container,
+.alpha-group .container .widget-container {
+    padding: 0 2px 0 6px;
+    margin-left: 1px;
+}
+
+/* Sys-stat icons: fixed 25px across cpu/gpu/memory/disk/traffic */
+.cpu-widget .widget-container .icon,
+.gpu-widget .widget-container .icon,
+.memory-widget .widget-container .icon,
+.disk-widget .widget-container .icon,
+.traffic-widget .widget-container .icon { font-size: 25px; }
+
+/* Grouper active state: colored while expanded, plain when collapsed */
+.alpha-group .grouper-button:checked,
+.omega-group .grouper-button:checked {
+    color: var(--accent);
+}
+
+/* Alpha + systray: extra-tight (below the standard tiers) */
+.yasb-bar .alpha-group .grouper-button { padding: 0 4px; }
+.yasb-bar .alpha-group .container .widget-container {
+    padding: 0 1px 0 4px;
+    margin-left: 0;
+}
+.yasb-bar .systray-widget { margin: 0; }
+.yasb-bar .systray-widget .widget-container { padding: 0 1px; }
+
+/* Stat cluster baseline: icons and labels share one baseline */
+.alpha-group .container .widget-container .icon,
+.alpha-group .container .widget-container .label { padding-bottom: 1px; }
+
+/* Frames stay Madhubani double */
+

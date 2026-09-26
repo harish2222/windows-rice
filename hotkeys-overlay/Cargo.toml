@@ -1,0 +1,12 @@
+[package]
+name = "hotkeys-overlay"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+strip = true
+panic = "abort"

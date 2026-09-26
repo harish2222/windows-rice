@@ -1,0 +1,7 @@
+{
+  "installer_source": "DirectBinary",
+  "channel": "dev",
+  "version": "0.4.0",
+  "bin_path": "Z:\\Projects\\Forgum\\target\\release\\forgum.exe",
+  "timestamp": 1790006046
+}
