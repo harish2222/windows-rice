@@ -1,0 +1,6 @@
+# ~/.config/ripgrep/config
+# Referenced by RIPGREP_CONFIG_PATH (see ~/.config/nushell/env.nu §16).
+# Options here apply to every `rg` invocation.
+#
+# smart-case: case-insensitive search unless the pattern contains uppercase.
+smart-case

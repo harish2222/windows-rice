@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "firecrawl": {
+      "type": "remote",
+      "url": "https://mcp.firecrawl.dev/fc-9380bcb926764541a9eafa97a3bf98be/v2/mcp",
+      "enabled": true
+    },
+    "agentdb": {
+      "type": "local",
+      "command": ["npx", "-y", "agentdb", "mcp", "start"],
+      "enabled": true
+    },
+    "claude-flow": {
+      "type": "local",
+      "command": ["npx", "-y", "claude-flow@v3alpha", "mcp", "start"],
+      "enabled": true
+    },
+    "caveman": {
+      "type": "local",
+      "command": ["npx", "-y", "caveman-shrink"],
+      "enabled": true
+    }
+  }
+}

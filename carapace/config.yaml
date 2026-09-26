@@ -1,0 +1,5 @@
+# Carapace completion configuration
+# Author: @HKDEVS | Org: @HKDevloops
+# Style: fish — bracketed completions with descriptions
+
+style: fish

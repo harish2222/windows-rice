@@ -1,0 +1,60 @@
+{
+  "analyticsId": "anon_b47d5fec-6588-4c3f-bb5d-e957339f8d03",
+  "authSessions": {
+    "https://www.codebuff.com": {
+      "token": "d7ade698-560a-4af2-acf3-9c4dc58e5c8b",
+      "user": {
+        "id": "22410c64-a85f-49bb-acba-214b5a00204b",
+        "email": "harishkalva14@gmail.com",
+        "name": "Kalva Harish"
+      }
+    }
+  },
+  "machineId": "2a94bb41-91f3-437d-9a65-ca7137804ea5",
+  "recentProjects": [
+    "C:\\Users\\haris\\Downloads\\wallpapers"
+  ],
+  "workspace": {
+    "tabs": [
+      {
+        "id": "3337901d-4d3d-4fb4-b470-45515c87f1f8",
+        "projectPath": "C:\\Users\\haris\\Downloads\\wallpapers",
+        "spaceId": "spc-y8gz6ydf",
+        "draft": {
+          "title": "New thread",
+          "harnessId": null,
+          "model": null,
+          "byok": null,
+          "reasoningEffort": null,
+          "agentMode": "build",
+          "executionMode": "local",
+          "branch": null,
+          "worktreePath": null,
+          "sourceBranch": null,
+          "baseRef": null,
+          "lastSeenHead": null,
+          "queuePaused": false,
+          "missionOn": false,
+          "missionEffort": 3,
+          "missionPrompt": "Complete the user's request fully. When the work is correct, lean, and verified, commit it, open a pull request, drive its checks to green, and merge it.",
+          "createdAt": 1789227759260,
+          "updatedAt": 1789227759260,
+          "workspaceEpoch": 0
+        }
+      }
+    ],
+    "activeId": "3337901d-4d3d-4fb4-b470-45515c87f1f8",
+    "windows": [],
+    "spaces": [
+      {
+        "id": "spc-y8gz6ydf",
+        "projectPath": "C:\\Users\\haris\\Downloads\\wallpapers",
+        "activeId": "3337901d-4d3d-4fb4-b470-45515c87f1f8"
+      }
+    ],
+    "activeSpaceId": "spc-y8gz6ydf"
+  },
+  "uiPrefs": {
+    "freebucksIntroSeen": true
+  }
+}

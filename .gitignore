@@ -1,0 +1,37 @@
+# ===== Never commit: secrets & personal data =====
+manicode/
+higgsfield/
+containers/podman/
+opencode/opencode.json
+.android/
+
+# ===== Nested independent git repos (they keep their own history) =====
+emacs/
+nushell/
+powershell/
+
+# ===== Binaries, build output, compiled tool assets =====
+*.exe
+*.dll
+*.pyd
+*.pdb
+*.so
+target/
+build/
+dist/
+__pycache__/
+rzodo/bin/
+yasb/tools/picker/
+
+# ===== Dependencies =====
+node_modules/
+
+# ===== Logs & runtime state =====
+*.log
+*.log.[0-9]
+*.db
+*.lock
+*.tmp
+Thumbs.db
+desktop.ini
+cagent/user-uuid

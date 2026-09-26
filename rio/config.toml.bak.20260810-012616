@@ -1,0 +1,143 @@
+# ==============================================================================
+#  Rio Terminal Configuration
+#  Author: @HKDEVS | Org: @HKDevloops
+#  Fonts: Mononoki Nerd Font + CaskaydiaCove Nerd Font
+#  GPU: Hardware-accelerated
+#  Shell: Xonsh
+#  Opacity: 60% with Acrylic
+# ==============================================================================
+
+[window]
+title = "Rio — Xonsh"
+padding_x = 8.0
+padding_y = 8.0
+decorations = "Buttonless"
+background_opacity = 0.60
+blur = true
+
+[window.padding]
+top = 4
+bottom = 0
+left = 8
+right = 8
+
+[fonts]
+size = 11.0
+
+[fonts.regular]
+family = "Mononoki Nerd Font"
+style = "Regular"
+
+[fonts.bold]
+family = "Mononoki Nerd Font"
+style = "Bold"
+
+[fonts.italic]
+family = "Mononoki Nerd Font"
+style = "Italic"
+
+[fonts.bold_italic]
+family = "Mononoki Nerd Font"
+style = "Bold Italic"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Catppuccin Mocha Theme
+# ═══════════════════════════════════════════════════════════════════════════
+[colors]
+background = '#1e1e2e'
+foreground = '#cdd6f4'
+cursor = '#f5e0dc'
+selection = '#313244'
+selection_text = '#cdd6f4'
+
+[colors.dim]
+black = '#313244'
+red = '#f38ba8'
+green = '#a6e3a1'
+yellow = '#f9e2af'
+blue = '#89b4fa'
+magenta = '#cba6f7'
+cyan = '#94e2d5'
+white = '#bac2de'
+
+[colors.normal]
+black = '#1e1e2e'
+red = '#f38ba8'
+green = '#a6e3a1'
+yellow = '#f9e2af'
+blue = '#89b4fa'
+magenta = '#cba6f7'
+cyan = '#94e2d5'
+white = '#bac2de'
+
+[colors.light]
+black = '#45475a'
+red = '#f38ba8'
+green = '#a6e3a1'
+yellow = '#f9e2af'
+blue = '#89b4fa'
+magenta = '#cba6f7'
+cyan = '#94e2d5'
+white = '#a6adc8'
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Performance
+# ═══════════════════════════════════════════════════════════════════════════
+[shell]
+program = "xonsh.exe"
+args = []
+
+[navigation]
+mode = "BottomTab"
+use-current-path = true
+
+[performance]
+renderer = "opengl"
+fps = 120
+disable-unfocused-render = false
+
+[scrollback]
+history-limit = 50000
+
+[editor]
+program = "nvim"
+args = []
+
+[cursor]
+shape = "beam"
+blinking = true
+blinking-interval = 800
+
+[platform]
+windows.env-vars = ["PATH=C:\\Users\\haris\\scoop\\shims;C:\\Users\\haris\\xonsh-env\\Scripts;C:\\Users\\haris\\scoop\\apps\\nu\\current;C:\\Program Files\\Git\\bin;C:\\Users\\haris\\AppData\\Local\\Microsoft\\WinGet\\Links;%PATH%"]
+
+[keybindings]
+key = [
+  # Split
+  { key = "Enter", mods = "Alt", action = "SplitHorizontal" },
+  { key = "Enter", mods = "Alt|Shift", action = "SplitVertical" },
+  # Navigation
+  { key = "h", mods = "Alt", action = "SelectLeft" },
+  { key = "l", mods = "Alt", action = "SelectRight" },
+  { key = "k", mods = "Alt", action = "SelectUp" },
+  { key = "j", mods = "Alt", action = "SelectDown" },
+  # Font
+  { key = "Equal", mods = "Control", action = "IncreaseFontSize" },
+  { key = "Minus", mods = "Control", action = "DecreaseFontSize" },
+  { key = "Key0", mods = "Control", action = "ResetFontSize" },
+  # Close pane
+  { key = "x", mods = "Control|Shift", action = "CloseTab" },
+  # New tab
+  { key = "t", mods = "Control|Shift", action = "NewTab" },
+  # Tabs
+  { key = "1", mods = "Alt", action = "SelectTab(0)" },
+  { key = "2", mods = "Alt", action = "SelectTab(1)" },
+  { key = "3", mods = "Alt", action = "SelectTab(2)" },
+  { key = "4", mods = "Alt", action = "SelectTab(3)" },
+  { key = "5", mods = "Alt", action = "SelectTab(4)" },
+  # Copy/Paste
+  { key = "c", mods = "Control|Shift", action = "Copy" },
+  { key = "v", mods = "Control|Shift", action = "Paste" },
+  # Search
+  { key = "f", mods = "Control|Shift", action = "Search" },
+]

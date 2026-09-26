@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "settings": {
+    "view_modes": {
+      "kanban": true,
+      "eisenhower": true,
+      "list": true,
+      "calendar": true
+    },
+    "kanban_preset": "backlog_todo_in_progress_review_done",
+    "user_columns": null,
+    "work_duration_min": 25,
+    "break_duration_min": 5,
+    "long_break_min": 15,
+    "long_break_every": 4,
+    "daily_quota": 8,
+    "chirp_repetitions": 1,
+    "loop_chirp": true,
+    "sound_path": "",
+    "toast_dismiss_secs": 0,
+    "theme": {
+      "styles_css_path": "",
+      "last_loaded": null
+    },
+    "active_window_view": "kanban"
+  },
+  "tasks": [
+    {
+      "id": 0,
+      "title": "hkdevs",
+      "description": null,
+      "created_at": "2026-08-12T14:22:33.234175200Z",
+      "due_at": null,
+      "completed_at": null,
+      "category": "default",
+      "urgency": 0,
+      "importance": 0,
+      "stage": "todo",
+      "position": 0,
+      "tags": [],
+      "pomodoro": {
+        "target_sessions": 0,
+        "sessions": [],
+        "active_session": null,
+        "parallel_timers_enabled": false,
+        "is_focus_task": true
+      }
+    }
+  ],
+  "pending_reminders": [],
+  "pending_chirps": [],
+  "next_id": 6,
+  "last_modified": "2026-08-12T14:22:43.317722Z",
+  "last_service_tick": "2026-08-12T08:43:59.271577900Z",
+  "pending_seq": 25
+}
