@@ -18,18 +18,27 @@
       --icons-font-fallback: "FiraCode Nerd Font Mono";
       --system-font: "FiraCode Nerd Font Mono";
       --specialFont: "FiraCode Nerd Font Mono";
-    --border-radius: var(--border-radius);
-    --border-radius2: 4;
-    --border-radius3: 10;
-    --border-radiusWallpapers: 10;
+    --border-radius: 12px;
+    --border-radius2: 8px;
+    --border-radius3: 14px;
+    --border-radiusWallpapers: 10px;
     --fontSize: 13px;
     --iconSize: 20px;
     --fontSizeLarge: 16px;
     --fontWeight: 600;
 
+    /* ACRYLIC POLICY: menus and popups paint --acrylic (theme base @ 50%);
+       hover states paint --acrylic-hover (same base @ 65%). Literal rgba
+       because QSS var() cannot convert hex; every Rangalipi block below
+       overrides both per palette so theme switching stays automatic. */
+    --acrylic: rgba(26, 19, 16, 0.50);
+    --acrylic-hover: rgba(26, 19, 16, 0.65);
+
     /*colors*/
 
     /* Rangalipi */
+    /* --acrylic: rgba(20, 20, 27, 0.50); base @ 50% + hover @ 65% */
+    /* --acrylic-hover: rgba(20, 20, 27, 0.65); */
     /* --background: #14141B;
     --background2: #1D1D28;
     --accent: #D99A2B;
@@ -82,6 +91,8 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-base.svg"); */
 
     /* Rangalipi Ember */
+    /* --acrylic: rgba(26, 19, 16, 0.50); base @ 50% + hover @ 65% */
+    /* --acrylic-hover: rgba(26, 19, 16, 0.65); */
     /* --background: #1A1310;
     --background2: #241A14;
     --accent: #C96F2F;
@@ -134,6 +145,8 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-ember.svg"); */
 
     /* Rangalipi Ember Light */
+    /* --acrylic: rgba(231, 224, 210, 0.50); base @ 50% + hover @ 65% */
+    /* --acrylic-hover: rgba(231, 224, 210, 0.65); */
     /* --background: #E7E0D2;
     --background2: #F5F0E8;
     --accent: #B45F27;
@@ -186,6 +199,8 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-ember.svg"); */
 
     /* Rangalipi Mossfern */
+    /* --acrylic: rgba(17, 26, 17, 0.50); base @ 50% + hover @ 65% */
+    /* --acrylic-hover: rgba(17, 26, 17, 0.65); */
     /* --background: #111A11;
     --background2: #182418;
     --accent: #82AC54;
@@ -238,6 +253,8 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-moss.svg"); */
 
     /* Rangalipi Mossfern Light */
+    /* --acrylic: rgba(231, 224, 210, 0.50); base @ 50% + hover @ 65% */
+    /* --acrylic-hover: rgba(231, 224, 210, 0.65); */
     /* --background: #E7E0D2;
     --background2: #F5F0E8;
     --accent: #5F8A3C;
@@ -290,6 +307,8 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-moss.svg"); */
 
     /* Rangalipi Wine - active */
+    --acrylic: rgba(29, 16, 21, 0.01); /* 1% acrylic */
+    --acrylic-hover: rgba(29, 16, 21, 0.01);
     --background: #1D1015;
     --background2: #29151D;
     --accent: #C04E68;
@@ -327,10 +346,10 @@
     --rosewater: #F2D4D6;
     --text-muted: #CCA0AA;
     --yasb-icon-fg: #F1DFE3;
-    --glass: rgba(29, 16, 21, 0.7);
-    --glassmenu: rgba(29, 16, 21, 0.5);
-    --glassfrost: rgba(29, 16, 21, 0.4);
-    --glassmist: rgba(29, 16, 21, 0.35);
+    --glass: rgba(29, 16, 21, 0.01);
+    --glassmenu: rgba(29, 16, 21, 0.01);
+    --glassfrost: rgba(29, 16, 21, 0.01);
+    --glassmist: rgba(29, 16, 21, 0.01);
     --hairline: rgba(241, 223, 227, 0.16);
     --text-faint: rgba(241, 223, 227, 0.45);
     --chip: rgba(192, 78, 104, 0.18);
@@ -338,10 +357,14 @@
     --shade: #12090D;
     --accent-soft: rgba(192, 78, 104, 0.55);
     --frame: #C04E68;
-    --motif: url("C:/Users/haris/.config/yasb/motif-wine.svg");
+    --motif: url("C:/Users/haris/.config/yasb/motif-paisley.svg");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-wine-mandala.png");
+    --motif-corner: url("C:/Users/haris/.config/yasb/motif-wine-mandala-corner.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-wine.svg");
 
     /* Rangalipi Wine Light */
+    /* --acrylic: rgba(231, 224, 210, 0.50); base @ 50% + hover @ 65% */
+    /* --acrylic-hover: rgba(231, 224, 210, 0.65); */
     /* --background: #E7E0D2;
     --background2: #F5F0E8;
     --accent: #A83E58;
@@ -390,10 +413,12 @@
     --shade: #EBE5D8;
     --accent-soft: rgba(168, 62, 88, 0.55);
     --frame: #8A5460;
-    --motif: url("C:/Users/haris/.config/yasb/motif-wine.svg");
+    --motif: url("C:/Users/haris/.config/yasb/motif-paisley.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-wine.svg"); */
 
     /* Rangalipi Dune */
+    /* --acrylic: rgba(27, 22, 16, 0.50); base @ 50% + hover @ 65% */
+    /* --acrylic-hover: rgba(27, 22, 16, 0.65); */
     /* --background: #1B1610;
     --background2: #262013;
     --accent: #C08A24;
@@ -446,6 +471,8 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-dune.svg"); */
 
     /* Rangalipi Dune Light */
+    /* --acrylic: rgba(231, 224, 210, 0.50); base @ 50% + hover @ 65% */
+    /* --acrylic-hover: rgba(231, 224, 210, 0.65); */
     /* --background: #E7E0D2;
     --background2: #F5F0E8;
     --accent: #A8741C;
@@ -498,6 +525,8 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-dune.svg"); */
 
     /* Rangalipi Matcha */
+    /* --acrylic: rgba(21, 26, 15, 0.50); base @ 50% + hover @ 65% */
+    /* --acrylic-hover: rgba(21, 26, 15, 0.65); */
     /* --background: #151A0F;
     --background2: #1E2615;
     --accent: #93B04C;
@@ -550,6 +579,8 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-matcha.svg"); */
 
     /* Rangalipi Matcha Light */
+    /* --acrylic: rgba(231, 224, 210, 0.50); base @ 50% + hover @ 65% */
+    /* --acrylic-hover: rgba(231, 224, 210, 0.65); */
     /* --background: #E7E0D2;
     --background2: #F5F0E8;
     --accent: #7A943C;
@@ -602,6 +633,8 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-matcha.svg"); */
 
     /* Rangalipi Espresso */
+    /* --acrylic: rgba(23, 18, 16, 0.50); base @ 50% + hover @ 65% */
+    /* --acrylic-hover: rgba(23, 18, 16, 0.65); */
     /* --background: #171210;
     --background2: #211915;
     --accent: #C68A4B;
@@ -654,6 +687,8 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-espresso.svg"); */
 
     /* Rangalipi Espresso Light */
+    /* --acrylic: rgba(231, 224, 210, 0.50); base @ 50% + hover @ 65% */
+    /* --acrylic-hover: rgba(231, 224, 210, 0.65); */
     /* --background: #E7E0D2;
     --background2: #F5F0E8;
     --accent: #A8743C;
@@ -706,6 +741,8 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-espresso.svg"); */
 
     /* Rangalipi Noir */
+    /* --acrylic: rgba(22, 17, 20, 0.50); base @ 50% + hover @ 65% */
+    /* --acrylic-hover: rgba(22, 17, 20, 0.65); */
     /* --background: #161114;
     --background2: #211619;
     --accent: #CE4152;
@@ -758,6 +795,8 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-noir.svg"); */
 
     /* Rangalipi Noir Light */
+    /* --acrylic: rgba(231, 224, 210, 0.50); base @ 50% + hover @ 65% */
+    /* --acrylic-hover: rgba(231, 224, 210, 0.65); */
     /* --background: #E7E0D2;
     --background2: #F5F0E8;
     --accent: #AE3546;
@@ -810,6 +849,8 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-noir.svg"); */
 
     /* Rangalipi Aubergine */
+    /* --acrylic: rgba(23, 17, 27, 0.50); base @ 50% + hover @ 65% */
+    /* --acrylic-hover: rgba(23, 17, 27, 0.65); */
     /* --background: #17111B;
     --background2: #201627;
     --accent: #A67FD4;
@@ -862,6 +903,8 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-aubergine.svg"); */
 
     /* Rangalipi Aubergine Light */
+    /* --acrylic: rgba(231, 224, 210, 0.50); base @ 50% + hover @ 65% */
+    /* --acrylic-hover: rgba(231, 224, 210, 0.65); */
     /* --background: #E7E0D2;
     --background2: #F5F0E8;
     --accent: #8A63B8;
@@ -914,6 +957,8 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-aubergine.svg"); */
 
     /* Rangalipi Clay */
+    /* --acrylic: rgba(26, 19, 14, 0.50); base @ 50% + hover @ 65% */
+    /* --acrylic-hover: rgba(26, 19, 14, 0.65); */
     /* --background: #1A130E;
     --background2: #251A12;
     --accent: #C9683C;
@@ -966,6 +1011,8 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-clay.svg"); */
 
     /* Rangalipi Clay Light */
+    /* --acrylic: rgba(231, 224, 210, 0.50); base @ 50% + hover @ 65% */
+    /* --acrylic-hover: rgba(231, 224, 210, 0.65); */
     /* --background: #E7E0D2;
     --background2: #F5F0E8;
     --accent: #A85630;
@@ -1018,6 +1065,8 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-clay.svg"); */
 
     /* Rangalipi Olive */
+    /* --acrylic: rgba(20, 21, 13, 0.50); base @ 50% + hover @ 65% */
+    /* --acrylic-hover: rgba(20, 21, 13, 0.65); */
     /* --background: #14150D;
     --background2: #1D1E13;
     --accent: #A8A03A;
@@ -1070,6 +1119,8 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-olive.svg"); */
 
     /* Rangalipi Olive Light */
+    /* --acrylic: rgba(231, 224, 210, 0.50); base @ 50% + hover @ 65% */
+    /* --acrylic-hover: rgba(231, 224, 210, 0.65); */
     /* --background: #E7E0D2;
     --background2: #F5F0E8;
     --accent: #8A8430;
@@ -1124,6 +1175,8 @@
     /* Bright-wallpaper theme.
        Switch with yasb-theme set "Rangalipi Light". */
     /* Rangalipi Light */
+    /* --acrylic: rgba(231, 224, 210, 0.50); base @ 50% + hover @ 65% */
+    /* --acrylic-hover: rgba(231, 224, 210, 0.65); */
     /* --background: #E7E0D2;
     --background2: #F5F0E8;
     --accent: #B37A1A;
@@ -1212,7 +1265,8 @@
 
 /* Tooltip */
 .tooltip {
-    background-color: var(--background);
+    /* ACRYLIC 50% - per-theme --acrylic. */
+    background-color: var(--acrylic);
     border-radius: var(--border-radius);
     color: var(--text);
     padding: 5px 10px;
@@ -1226,7 +1280,8 @@
 /* Context Menu */
 .context-menu,
 .context-menu .menu-checkbox {
-    background-color: var(--background);
+    /* ACRYLIC 50% - per-theme --acrylic. */
+    background-color: var(--acrylic);
     border-bottom: 1px solid var(--hairline);
     padding: 4px 0px;
     font-family: var(--system-font);
@@ -1253,7 +1308,7 @@
 }
 .context-menu::item:selected,
 .context-menu .menu-checkbox:hover {
-    background-color: var(--hover);
+    background-color: var(--acrylic-hover);
     color: var(--text);
     border-radius: var(--border-radius3);
 }
@@ -1343,11 +1398,9 @@
 }
 
 .home-menu {
-    /* ACRYLIC 10% POLICY: translucent tint only - no blur anywhere (native
-       blur disabled in config.yaml; acrylic look comes from CSS alpha alone).
-       0.10 = base color at 10% opacity. Literal rgba because QSS var() has no
-       hex->rgba conversion; update alongside the active theme block above. */
-    background-color: rgba(26, 19, 16, 0.10);
+    /* ACRYLIC 50% POLICY: frosted panel - native blur enabled for this menu
+       (home widget blur: true) plus the 50% themed tint for text contrast. */
+    background-color: var(--acrylic);
     border: 3px double var(--border);
     border-radius: var(--border-radius);
     margin-top: 3px;
@@ -1360,7 +1413,7 @@
     margin-top: 3px;
 }
 .home-menu .menu-item:hover {
-    background-color: var(--hover);
+    background-color: var(--acrylic-hover);
     color: var(--text);
     border-radius: var(--border-radius3);
 }
@@ -1397,7 +1450,8 @@
 .clock-popup.timer,
 .clock-popup.calendar {
     min-width: 460px;
-    background-color: var(--background);
+    /* ACRYLIC 50% - per-theme --acrylic. */
+    background-color: var(--acrylic);
     border-radius: var(--border-radius);
     border: 3px double var(--border);
     /* UNIFORM: one type system for the whole popup (incl. week label etc.) -
@@ -1407,7 +1461,7 @@
 }
 .clock-popup.calendar .calendar-table,
 .clock-popup.calendar .calendar-table::item {
-    background-color: var(--background);
+    background-color: transparent;
     color: var(--text);
     font-family: var(--system-font);
     font-size: var(--fontSize);
@@ -1424,11 +1478,12 @@
 }
 .clock-popup.calendar .calendar-table::item:hover {
     color: var(--text);
-    background-color: var(--hover);
+    background-color: var(--acrylic-hover);
     border-radius: var(--border-radius3);
 }
 .clock-popup.calendar .day-label {
     margin-top: 20px;
+    color: var(--subtext);
 }
 .clock-popup.calendar .day-label,
 .clock-popup.calendar .month-label,
@@ -1442,9 +1497,7 @@
     min-width: 180px;
     max-width: 180px;
 }
-.clock-popup.calendar .day-label {
-    color: var(--subtext);
-}
+
 .clock-popup.calendar .month-label {
     color: var(--text);
 }
@@ -1460,7 +1513,7 @@
 .clock-popup.timer .clock-popup-container,
 .clock-popup.alarm .clock-popup-container {
     padding: 16px;
-    background-color: var(--background);
+    background-color: transparent;
     border-radius: var(--border-radius);
 }
 .clock-popup.timer .clock-popup-footer,
@@ -1492,7 +1545,7 @@
     min-height: 28px;
     min-width: 64px;
     margin: 4px 0;
-    background-color: var(--background2);
+    background-color: rgba(29, 16, 21, 0.01);
 }
 .clock-popup .button.save,
 .clock-popup .button.start,
@@ -1502,25 +1555,25 @@
 }
 .clock-popup .button.save,
 .clock-popup .button.start {
-    background-color: var(--background2);
+    background-color: rgba(29, 16, 21, 0.01);
     color: var(--text);
     margin-right: 8px;
 }
 .clock-popup .button.save:hover,
 .clock-popup .button.start:hover {
-    background-color: var(--background2)
+    background-color: var(--acrylic-hover)
 }
 .clock-popup .button.is-alarm-enabled {
-    background-color: var(--background);
+    background-color: rgba(29, 16, 21, 0.01);
 }
 .clock-popup .button.is-alarm-enabled:hover {
-    background-color: var(--background);
+    background-color: var(--acrylic-hover);
 }
 .clock-popup .button.is-alarm-disabled {
-    background-color: var(--background);
+    background-color: rgba(29, 16, 21, 0.01);
 }
 .clock-popup .button.day {
-    background-color: var(--background2);
+    background-color: rgba(29, 16, 21, 0.01);
     max-height: 20px;
     min-height: 20px;
 }
@@ -1529,17 +1582,17 @@
     color: var(--accentText);
 }
 .clock-popup .button.quick-option {
-    background-color: var(--background2);
+    background-color: rgba(29, 16, 21, 0.01);
 }
 .clock-popup .button.quick-option:checked {
     background-color: var(--accent);
     color: var(--accentText);
 }
 .clock-popup .button:hover {
-    background-color: var(--hover);
+    background-color: var(--acrylic-hover);
 }
 .clock-popup .button:disabled {
-    background-color: var(--background2);
+    background-color: rgba(29, 16, 21, 0.01);
     color: var(--text);
 }
 .clock-popup .alarm-input-title {
@@ -1558,7 +1611,8 @@
     border: 1px solid var(--accent);
 }
 .active-alarm-window {
-    background-color: var(--background);
+    /* ACRYLIC 50% - per-theme --acrylic. */
+    background-color: var(--acrylic);
     max-width: 500px;
     min-width: 500px;
     padding: 32px;
@@ -1592,17 +1646,18 @@
     min-height: 36px;
     min-width: 100px;
     margin: 0 4px;
-    background-color: var(--background2);
+    background-color: rgba(29, 16, 21, 0.01);
 }
 .active-alarm-window .button:hover {
-    background-color: var(--hover);
+    background-color: var(--acrylic-hover);
 }
 
 /* Power Menu */
 
 .power-menu-compact {
     min-width: 260px;
-    background-color: var(--background);
+    /* ACRYLIC 50% - per-theme --acrylic. */
+    background-color: var(--acrylic);
     border-radius: var(--border-radius);
     margin-right: 14px;
     border: 3px double var(--border);
@@ -1667,13 +1722,13 @@
 .power-menu-compact .button {
     padding: 8px 16px;
     margin: 2px;
-    background-color: var(--background2);
+    background-color: rgba(29, 16, 21, 0.01);
     /* border: 3px double var(--border); */
     color: var(--background2);
     border-radius: var(--border-radius2);
 }
 .power-menu-compact .button:hover {
-    background-color: var(--hover);
+    background-color: var(--acrylic-hover);
     color: var(--text);
 }
 .power-menu-compact .button.hover {
@@ -1706,7 +1761,8 @@
     padding-right: 5px;
 }
 .audio-menu {
-    background-color: var(--glass); 
+    /* ACRYLIC 50% - per-theme --acrylic. */
+    background-color: var(--acrylic);
     border: 3px double var(--border);
     min-width: 300px;
     border-radius: var(--border-radius);
@@ -1725,17 +1781,17 @@
     border-radius: var(--border-radius2);
 }
 .audio-menu .audio-container .device.selected {
-    background-color: var(--background2);
+    background-color: rgba(29, 16, 21, 0.01);
     color: var(--text);
    
 }
 .audio-menu .audio-container .device:hover {
-    background-color: var(--hover);
+    background-color: var(--acrylic-hover);
     color: var(--text);
 }
 
 .audio-menu .audio-container .device.selected:hover {
-    background-color: var(--hover);
+    background-color: var(--acrylic-hover);
     color: var(--text);
 }
 
@@ -1753,7 +1809,7 @@
     background-color: transparent;
 }
 .audio-menu .toggle-apps:hover {
-    background-color: var(--hover);
+    background-color: var(--acrylic-hover);
     
 }
 /* Container for application volumes (if is enabled) */
@@ -1761,7 +1817,7 @@
     padding: 8px;
     margin-top:10px;
     border-radius: var(--border-radius2);
-    background-color: var(--background2);
+    background-color: rgba(29, 16, 21, 0.01);
 }
 .audio-menu .apps-container .app-volume .app-icon-container {
     min-width: 40px;
@@ -1772,7 +1828,7 @@
     margin-right: 8px;
 }
 .audio-menu .apps-container .app-volume .app-icon-container:hover {
-    background-color: var(--hover);
+    background-color: var(--acrylic-hover);
 }
 
 /* Active Windows Title */
@@ -1844,7 +1900,8 @@
 /* Komorebi-layout-menu */
 .komorebi-layout-menu {
     /* ACRYLIC 10% (widget-scoped only) - CSS alpha, no blur anywhere. */
-    background-color: rgba(26, 19, 16, 0.10);
+    /* ACRYLIC 50% - per-theme --acrylic. */
+    background-color: var(--acrylic);
     border-radius: var(--border-radius);
     border: 3px double var(--border);
 }
@@ -1866,7 +1923,7 @@
 } 
 
 .komorebi-layout-menu .menu-item:hover {
-    background-color: var(--hover);
+    background-color: var(--acrylic-hover);
     border-radius: var(--border-radius3);
 } 
 
@@ -1912,7 +1969,8 @@
 }
 
 .systray-popup {
-    background-color: var(--glass);
+    /* ACRYLIC 50% - per-theme --acrylic. */
+    background-color: var(--acrylic);
     padding: 4px;
     border-radius: var(--border-radius);
     border: 3px double var(--border);
@@ -1924,8 +1982,8 @@
     border-radius: var(--border-radius2);
 }
 .systray-popup .button:hover {
-    background-color: var(--hover);
-    border-radius: var(--border-radius3);
+    background-color: var(--acrylic-hover);
+    border-radius: var(--border-radius2);
 }
 
 
@@ -1946,6 +2004,7 @@
 /* Media full features: bar controls, progress line, app volume */
 .media-widget .btn {
     font-family: "Segoe Fluent Icons";
+    border-radius: var(--border-radius3);
     font-size: 13px;
     font-weight: var(--fontWeight);
     color: var(--subtext);
@@ -1980,7 +2039,7 @@
     border: 2px solid var(--hairline);
 }
 .media-menu .app-volume-container {
-    background-color: var(--background2);
+    background-color: rgba(29, 16, 21, 0.01);
     padding: 8px 6px;
     border-radius: var(--border-radius2);
     margin-left: 10px;
@@ -2013,10 +2072,11 @@
 .media-menu {
     min-width: 440px;
     max-width: 440px;
-    background-color: var(--glassmist);
-    background-image: var(--motif);
+    /* media popup: 30% glass + mandala watermark (0.45 baked alpha) */
+    background-color: rgba(29, 16, 21, 0.3);
+    background-image: var(--motif-mandala);
     background-repeat: no-repeat;
-    background-position: top right;
+    background-position: center;
     border: 3px double var(--border);
     border-radius: var(--border-radius);
 }
@@ -2131,9 +2191,10 @@ Example: "Windows Media" becomes "windows-media" */
     max-width: 40px;
     min-height: 40px;
     max-height: 40px;
-    border-radius: var(--border-radius);
+    border-radius: 50%;
     color: var(--accent);
-    background-color: var(--background2);
+    background-color: rgba(29, 16, 21, 0.01);
+    border: 1px solid var(--hairline);
 }
 .media-menu .btn.prev {
     margin-left: 10px;
@@ -2150,7 +2211,7 @@ Example: "Windows Media" becomes "windows-media" */
 }
 .media-menu .btn.disabled:hover {
     color: var(--accent);
-    background-color: var(--background);
+    background-color: rgba(29, 16, 21, 0.01);
 }
 
 .media-menu .btn.disabled {
@@ -2195,7 +2256,8 @@ Example: "Windows Media" becomes "windows-media" */
 
 /* Language-Widget */
 .language-menu {
-    background-color: var(--glass);
+    /* ACRYLIC 50% - per-theme --acrylic. */
+    background-color: var(--acrylic);
     min-width: 300px;
     border: 3px double var(--border);
     border-radius: var(--border-radius);
@@ -2216,18 +2278,18 @@ Example: "Windows Media" becomes "windows-media" */
     border-radius: var(--border-radius2);
 }
 .language-menu .language-item.active {
-    background-color: var(--background2);
+    background-color: rgba(29, 16, 21, 0.01);
     border-radius: var(--border-radius2);
     color: var(--text);
     border-radius: var(--border-radius2);
 }
 .language-menu .language-item:hover {
-    background-color: var(--hover);
+    background-color: var(--acrylic-hover);
     color: var(--text);
     border-radius: var(--border-radius2);
 }
 .language-menu .language-item.active:hover {
-    background-color: var(--hover);
+    background-color: var(--acrylic-hover);
     border-radius: var(--border-radius2);
     border-radius: var(--border-radius2);
 }
@@ -2264,7 +2326,7 @@ Example: "Windows Media" becomes "windows-media" */
 /* Quick Launch Popup - main window */
 
 .quick-launch-popup .container {
-	background-color: var(--background);
+	background-color: transparent;
     border: 3px double var(--border);
     border-radius: var(--border-radius);
 }
@@ -2327,7 +2389,8 @@ Example: "Windows Media" becomes "windows-media" */
 	color: var(--text);
 }
 .quick-launch-popup {
-    background-color: var(--glass);
+    /* ACRYLIC 50% - per-theme --acrylic. */
+    background-color: var(--acrylic);
     border: 3px double var(--border);
     border-radius: var(--border-radius);
     min-width: 480px;
@@ -2354,7 +2417,7 @@ Example: "Windows Media" becomes "windows-media" */
     margin-right: 4px;
 }
 .quick-launch-popup .results-list-view::item:hover {
-    background-color: var(--hover);
+    background-color: var(--acrylic-hover);
 }
 .quick-launch-popup .results-list-view::item:selected {
 	background-color: var(--background2);
@@ -2362,7 +2425,7 @@ Example: "Windows Media" becomes "windows-media" */
 }
 
 .quick-launch-popup .results-list-view::item:selected:hover {
-    background-color: var(--hover);
+    background-color: var(--acrylic-hover);
 }
 
 /* Empty state when no results found */
@@ -2396,7 +2459,8 @@ Example: "Windows Media" becomes "windows-media" */
 .cpu-widget .label.status-critical { color: var(--red); }
 
 .cpu-popup {
-    background-color: var(--glass);
+    /* ACRYLIC 50% - per-theme --acrylic. */
+    background-color: var(--acrylic);
     min-width: 400px;
     border: 3px double var(--border);
     border-radius: var(--border-radius);
@@ -2448,7 +2512,7 @@ Example: "Windows Media" becomes "windows-media" */
     padding: 16px;
 }
 .cpu-popup .stats .stat-item {
-    background-color: var(--background2);
+    background-color: rgba(29, 16, 21, 0.01);
     border: 3px double var(--border);
     border-radius: var(--border-radius);
     padding: 8px 12px;
@@ -2492,7 +2556,8 @@ Example: "Windows Media" becomes "windows-media" */
 .memory-widget .label.status-critical { color: var(--red); }
 
 .memory-popup {
-    background-color: var(--glass);
+    /* ACRYLIC 50% - per-theme --acrylic. */
+    background-color: var(--acrylic);
     min-width: 400px;
     border: 3px double var(--border);
     border-radius: var(--border-radius);
@@ -2544,7 +2609,7 @@ Example: "Windows Media" becomes "windows-media" */
     padding: 16px;
 }
 .memory-popup .stats .stat-item {
-    background-color: var(--background2);
+    background-color: rgba(29, 16, 21, 0.01);
     border: 3px double var(--border);
     border-radius: var(--border-radius);
     padding: 8px 12px;
@@ -2595,11 +2660,15 @@ Example: "Windows Media" becomes "windows-media" */
 }
 
 .control-center-menu {
-    background-color: var(--background);
-    background: var(--glass);
+    /* ACRYLIC 50% - per-theme --acrylic. */
+    background-color: var(--acrylic);
     min-width: 360px;
     border: 3px double var(--border);
     border-radius: var(--border-radius);
+    /* mandala corner watermark (0.35 baked alpha) under the glass */
+    background-image: var(--motif-corner);
+    background-repeat: no-repeat;
+    background-position: bottom right;
 }
 
 /* SECTIONS */
@@ -2627,8 +2696,10 @@ which is 16 pixels same as the other sections. */
 .control-center-menu .section.power .plan-name .icon,
 .control-center-menu .section.power .mode-name .icon,
 .control-center-menu .section.media .button {
+    border-radius: var(--border-radius3);
     font-family: "Segoe Fluent Icons";
     font-weight: var(--fontWeight);
+    border-radius: var(--border-radius3);
 }
 
 /* SHARED HOVER & TRANSITION TRANSITIONS */
@@ -2657,34 +2728,35 @@ which is 16 pixels same as the other sections. */
 
 /* SYSTEM CONTROLS */
 .control-center-menu .section.system-controls .button {
-    background-color: var(--accent);
-    border-radius: var(--border-radius);
+    background-color: rgba(29, 16, 21, 0.01);
+    border-radius: 50%;
     min-height: 32px;
     max-height: 32px;
     min-width: 32px;
     max-width: 32px;
     font-size: 14px;
-    color: var(--accentText);
+    color: var(--text);
     transition: background-color 0.08s, opacity 0.08s;
 }
 .control-center-menu .section.system-controls .button:hover {
-    background-color: var(--redFlash);
+    background-color: var(--acrylic-hover);
 }
 
 /* QUICK ACTIONS */
 .control-center-menu .section.quick-actions .button {
     margin: 0 4px;
     cursor: pointer;
+    border-radius: var(--border-radius3);
 }
 .control-center-menu .section.quick-actions .button .icon {
     font-size: 16px;
-    background-color: var(--background2);
+    background-color: rgba(29, 16, 21, 0.01);
     min-height: 48px;
     border-radius: var(--border-radius);
     color: var(--text); 
 }
 .control-center-menu .section.quick-actions .button .icon:hover {
-    background-color: var(--hover);
+    background-color: var(--acrylic-hover);
 }
 .control-center-menu .section.quick-actions .button.active .icon {
     background-color: var(--accent);
@@ -2695,10 +2767,10 @@ which is 16 pixels same as the other sections. */
     color: var(--accentText);
 }
 .control-center-menu .section.quick-actions .button.disabled .icon:hover {
-    background-color: var(--hover);
+    background-color: var(--acrylic-hover);
 }
 .control-center-menu .section.quick-actions .button.active .icon:pressed {
-    background-color: var(--hover);
+    background-color: var(--acrylic-hover);
 }
 .control-center-menu .section.quick-actions .button .title {
     font-size: var(--fontSize);
@@ -2732,11 +2804,11 @@ which is 16 pixels same as the other sections. */
     width: 24px;
     height: 24px;
     border-radius: var(--border-radius2);
-    background-color: var(--background);
+    background-color: rgba(29, 16, 21, 0.01);
     margin-left: 4px;
 }
 .control-center-menu .section.sliders .slider .source-selector:hover {
-    background-color: var(--hover);
+    background-color: var(--acrylic-hover);
 }
 
 /* POWER PLAN & POWER MODE */
@@ -2852,7 +2924,8 @@ which is 16 pixels same as the other sections. */
 
 /* Context menu styles for dropdowns and menus inside the Control Center panel */
 .control-center-menu .context-menu {
-    background-color: var(--glass);
+    /* ACRYLIC 50% - per-theme --acrylic. */
+    background-color: var(--acrylic);
     padding: 4px 0px;
     font-family: var(--system-font);
     font-weight: var(--fontWeight);
@@ -2869,7 +2942,7 @@ which is 16 pixels same as the other sections. */
     min-width: 100px;
 }
 .control-center-menu .context-menu::item:selected  {
-    background-color: var(--hover);
+    background-color: var(--acrylic-hover);
     color: var(--text);
 }
 .control-center-menu .context-menu::separator {
@@ -2905,7 +2978,8 @@ which is 16 pixels same as the other sections. */
 }
 .komorebi-control-menu {
     /* ACRYLIC 10% (widget-scoped only) - CSS alpha, no blur anywhere. */
-    background-color: rgba(26, 19, 16, 0.10);
+    /* ACRYLIC 50% - per-theme --acrylic. */
+    background-color: var(--acrylic);
     border: 3px double var(--border);
     border-radius: var(--border-radius);
     min-width: 220px;
@@ -2919,7 +2993,7 @@ which is 16 pixels same as the other sections. */
     background-color: transparent;
 }
 .komorebi-control-menu .button:hover {
-    background-color: var(--hover);
+    background-color: var(--acrylic-hover);
     color: var(--text);
 }
 .komorebi-control-menu .button.active {
@@ -3010,7 +3084,8 @@ which is 16 pixels same as the other sections. */
 
 /* Traffic popup menu - matches cpu/memory popup + Rangalipi theme */
 .traffic-menu {
-    background-color: var(--glass);
+    /* ACRYLIC 50% - per-theme --acrylic. */
+    background-color: var(--acrylic);
     border: 3px double var(--border);
     border-radius: var(--border-radius);
     min-width: 320px;
@@ -3032,12 +3107,12 @@ which is 16 pixels same as the other sections. */
     font-weight: var(--fontWeight);
     padding: 4px 10px;
     border-radius: var(--border-radius2);
-    background-color: var(--background2);
+    background-color: rgba(29, 16, 21, 0.01);
     color: var(--text);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
 }
 .traffic-menu .header .reset-button:hover {
-    background-color: var(--hover);
+    background-color: var(--acrylic-hover);
     color: var(--text);
 }
 .traffic-menu .header .reset-button:pressed {
@@ -3122,15 +3197,15 @@ which is 16 pixels same as the other sections. */
     padding: 8px 0;
 }
 .traffic-menu .internet-info.connected {
-    background-color: var(--background2);
+    background-color: rgba(29, 16, 21, 0.01);
     color: var(--green);
 }
 .traffic-menu .internet-info.disconnected {
-    background-color: var(--background2);
+    background-color: rgba(29, 16, 21, 0.01);
     color: var(--redFlash);
 }
 .traffic-menu .internet-info.checking {
-    background-color: var(--background2);
+    background-color: rgba(29, 16, 21, 0.01);
     color: var(--subtext);
 }
 
@@ -3159,7 +3234,8 @@ which is 16 pixels same as the other sections. */
     color: var(--text);
 }
 .wifi-menu {
-    background-color: var(--glass);
+    /* ACRYLIC 50% - per-theme --acrylic. */
+    background-color: var(--acrylic);
     border: 3px double var(--border);
     border-radius: var(--border-radius);
     min-width: 420px;
@@ -3180,10 +3256,10 @@ which is 16 pixels same as the other sections. */
     border-radius: var(--border-radius2);
 }
 .wifi-menu .wifi-item:hover {
-    background-color: var(--hover);
+    background-color: var(--acrylic-hover);
 }
 .wifi-menu .wifi-item[active=true] {
-    background-color: var(--background2);
+    background-color: rgba(29, 16, 21, 0.01);
 }
 .wifi-menu .wifi-item .icon {
     font-family: "Segoe Fluent Icons";
@@ -3236,7 +3312,8 @@ which is 16 pixels same as the other sections. */
 .bluetooth-widget .icon.bt-connected,
 .bluetooth-widget .label.bt-connected { color: var(--green); }
 .bluetooth-menu {
-    background-color: var(--glass);
+    /* ACRYLIC 50% - per-theme --acrylic. */
+    background-color: var(--acrylic);
     border: 3px double var(--border);
     border-radius: var(--border-radius);
     min-width: 420px;
@@ -3263,10 +3340,10 @@ which is 16 pixels same as the other sections. */
     border-radius: var(--border-radius2);
 }
 .bluetooth-menu .bluetooth-item:hover {
-    background-color: var(--hover);
+    background-color: var(--acrylic-hover);
 }
 .bluetooth-menu .bluetooth-item.active {
-    background-color: var(--background2);
+    background-color: rgba(29, 16, 21, 0.01);
 }
 .bluetooth-menu .bluetooth-item .icon {
     font-family: "Segoe Fluent Icons";
@@ -3303,7 +3380,8 @@ which is 16 pixels same as the other sections. */
 .gpu-widget .label.status-high { color: var(--peach); }
 .gpu-widget .label.status-critical { color: var(--red); }
 .gpu-popup {
-    background-color: var(--glass);
+    /* ACRYLIC 50% - per-theme --acrylic. */
+    background-color: var(--acrylic);
     border: 3px double var(--border);
     border-radius: var(--border-radius);
     min-width: 400px;
@@ -3361,7 +3439,7 @@ which is 16 pixels same as the other sections. */
     padding: 8px 12px 12px 12px;
 }
 .gpu-popup .stats .stat-item {
-    background-color: var(--background2);
+    background-color: rgba(29, 16, 21, 0.01);
     border: 3px double var(--border);
     border-radius: var(--border-radius2);
     padding: 8px 12px;
@@ -3409,7 +3487,7 @@ which is 16 pixels same as the other sections. */
     border: 1px solid transparent;
 }
 .disk-group-row:hover {
-    background-color: var(--hover);
+    background-color: var(--acrylic-hover);
     border: 3px double var(--border);
 }
 .disk-group-label {
@@ -3425,7 +3503,7 @@ which is 16 pixels same as the other sections. */
 .disk-group-label-bar {
     max-height: 8px;
     border: none;
-    background-color: var(--background2);
+    background-color: rgba(29, 16, 21, 0.01);
     border-radius: var(--border-radius2);
 }
 .disk-group-label-bar::chunk {
@@ -3437,8 +3515,14 @@ which is 16 pixels same as the other sections. */
    Tight scale: separators 0, icon-only 3, text/stats 5, groupers 6.
    (Measured: base .widget stacked 6px padding + 2px margin per side
    under container 8 + island grouppadding 8 = ~30px dead air per gap.) */
-.yasb-bar .separator-widget { margin: 0; padding: 0; }
-.yasb-bar .separator-widget .widget-container { padding: 0; margin: 0; }
+.yasb-bar .separator-widget {
+    margin: 0;
+    padding: 0;
+}
+.yasb-bar .separator-widget .widget-container {
+    padding: 0;
+    margin: 0;
+}
 .yasb-bar .separator-widget .widget-container .label {
     margin: 0;
     padding: 0 2px;
@@ -3502,4 +3586,5 @@ which is 16 pixels same as the other sections. */
 .alpha-group .container .widget-container .label { padding-bottom: 1px; }
 
 /* Frames stay Madhubani double */
+
 

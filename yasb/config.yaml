@@ -86,7 +86,7 @@ widgets:
       - { title: "Emacs", command: "C:\\PROGRA~1\\Emacs\\emacs-31.1\\bin\\runemacs.exe", show_window: true }
       - { title: "Z Drive", path: "Z:\\" }
       system_menu: true
-      blur: false # POLICY: no native blur anywhere - acrylic comes from CSS only
+      blur: true # ACRYLIC: native OS blur behind the lambda menu popup (bar blur_effect stays off)
       power_menu: false
       round_corners: true
       round_corners_type: normal
@@ -123,9 +123,14 @@ widgets:
         round_corners: true
         alignment: center
         direction: down
-        extended: false
+        extended: true
         show_years: true
-        show_holidays: false
+        # Indian festivals via native holidays engine: national + pan-Indian
+        # set (Diwali, Holi, Dussehra, Eid, Christmas, Baisakhi...). Add a
+        # 2-letter subdivision (KA/MH/TN/KL/PB/AS...) for state holidays.
+        country_code: "IN"
+        show_holidays: true
+        holiday_color: "#D95D5D"
         show_week_numbers: true
       callbacks:
         on_left: toggle_calendar
