@@ -81,14 +81,38 @@ Step 'build palette picker (qt6)' {
     if ($LASTEXITCODE -ne 0) { throw 'palette-picker-build.ps1 failed' }
 }
 
-Step 'build font tool' {
-    powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $yasbDir 'tools\picker\yasb-font-build.ps1')
-    if ($LASTEXITCODE -ne 0) { throw 'yasb-font-build.ps1 failed' }
+Step 'build saka tool (rust)' {
+    Push-Location (Join-Path $yasbDir 'tools\saka')
+    try {
+        cargo test --quiet
+        if ($LASTEXITCODE -ne 0) { throw 'saka tests failed' }
+        cargo build --release
+        if ($LASTEXITCODE -ne 0) { throw 'cargo build saka failed' }
+    } finally { Pop-Location }
+}
+
+Step 'build pomodoro (rust)' {
+    Push-Location (Join-Path $yasbDir 'tools\pomodoro')
+    try {
+        # tests use an isolated POMODORO_STATE; the live timer is untouched
+        cargo test --quiet
+        if ($LASTEXITCODE -ne 0) { throw 'pomodoro tests failed' }
+        cargo build --release
+        if ($LASTEXITCODE -ne 0) { throw 'cargo build pomodoro failed' }
+    } finally { Pop-Location }
+}
+
+Step 'font tool (presence check)' {
+    $exe = Join-Path $yasbDir 'tools\picker\yasb-font.exe'
+    if (-not (Test-Path $exe)) { throw 'yasb-font.exe missing' }
+    Write-Output '  yasb-font.exe present (source lost; see tools/picker/picker.md)'
 }
 
 Step 'snapshot shared configs' {
     Copy-Item "$HOME\.glzr\glazewm\config.yaml" (Join-Path $yasbDir 'configs\glazewm\config.yaml') -Force
-    Copy-Item "$HOME\komorebi.json" (Join-Path $yasbDir 'configs\komorebi\komorebi.json') -Force
+    Copy-Item "$HOME\.config\komorebi\komorebi.json" (Join-Path $yasbDir 'configs\komorebi\komorebi.json') -Force
+    Copy-Item "$HOME\.config\komorebi\komorebi.bar.json" (Join-Path $yasbDir 'configs\komorebi\komorebi.bar.json') -Force
+    Copy-Item "$HOME\.config\komorebi\applications.json" (Join-Path $yasbDir 'configs\komorebi\applications.json') -Force
     Copy-Item "$HOME\.config\komorebi\komorebi-startup.ps1" (Join-Path $yasbDir 'configs\komorebi\komorebi-startup.ps1') -Force
     Write-Output '  live glazewm + komorebi configs snapshotted into configs\'
 }
@@ -99,6 +123,14 @@ Step 'verify chain' {
     if ($LASTEXITCODE -ne 0) { throw 'yasb-theme current failed' }
     $n = ((& $exe list) | Measure-Object -Line).Lines
     Write-Output ("  theme tool ok: {0} themes, active: {1}" -f $n, $cur)
+    $saka = Join-Path $yasbDir 'tools\saka\target\release\saka.exe'
+    $null = & $saka (Get-Date -Format 'yyyy-MM-dd') --long
+    if ($LASTEXITCODE -ne 0) { throw 'saka.exe smoke failed' }
+    Write-Output ("  saka ok: {0}" -f (& $saka (Get-Date -Format 'yyyy-MM-dd') --long))
+    $pomo = Join-Path $yasbDir 'tools\pomodoro\target\release\pomodoro.exe'
+    $null = & $pomo tick
+    if ($LASTEXITCODE -ne 0) { throw 'pomodoro.exe smoke failed' }
+    Write-Output '  pomodoro ok'
     if (-not (Has-Cmd 'silent-run')) { throw 'silent-run not on PATH' }
     Write-Output '  silent-run on PATH'
     $pj = Join-Path $yasbDir 'tools\picker\palette-themes.json'

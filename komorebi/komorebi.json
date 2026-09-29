@@ -9,10 +9,11 @@
   },
   "border": true,
   "border_colours": {
-    "monocle": "#ff5500",
-    "stack": "#89b4fa",
-    "unfocused": "#ffaa00",
-    "single": "#cba6f7"
+    "monocle": "#D8A854",
+    "stack": "#BE8FD8",
+    "unfocused": "#4A2E38",
+    "single": "#C04E68",
+    "float": "#D8A854"
   },
   "border_implementation": "Windows",
   "border_offset": 0,

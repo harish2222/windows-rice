@@ -67,7 +67,12 @@ fn now_secs() -> u64 {
 
 /// The state file sits at the crate root: target/release/pomodoro.exe walks
 /// two ancestors up. Falls back to beside the exe if the binary ever moves.
+/// POMODORO_STATE overrides the location (used by the test suite so tests
+/// never touch the live timer's file).
 fn state_path() -> PathBuf {
+    if let Ok(p) = std::env::var("POMODORO_STATE") {
+        return PathBuf::from(p);
+    }
     if let Ok(exe) = std::env::current_exe() {
         if let Some(dir) = exe.parent() {
             if let Some(root) = dir.ancestors().nth(2) {

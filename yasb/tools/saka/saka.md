@@ -111,8 +111,10 @@ form; the CSS chip lives under `.saka-widget` in `styles.css`.
 
 ## Verification
 
-The built exe was checked against the **official month-start table** for
-all twelve months (Saka 1948), both Jan/Feb next-year dates (still 1948),
-the leap-year Chaitra cases (Saka 1950: 21 Mar anchor, 31-day Chaitra,
-Vaisakha on 21 Apr), and the January rollback to Saka 1947 — all pass.
-Re-run those boundary dates after touching the month table.
+`cargo test` (in this crate) pins the converter to the **official
+month-start table**: all twelve months of Saka 1948, the Jan/Feb
+next-year dates, the leap-year Chaitra cases (Saka 1950: 21 March
+anchor, 31-day Chaitra), the January rollback to Saka 1947, the
+Devanagari mode, and the headline case that caught the original bug
+(2026-09-29 = Asvina 7, not "Ashwin 4"). Six tests, all green — run
+them after touching the month table.
