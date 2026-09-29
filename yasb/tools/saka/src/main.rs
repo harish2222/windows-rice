@@ -1,22 +1,27 @@
 // Rangalipi saka — Indian national (Saka) calendar converter.
 // Official month names per the Calendar Reform Committee 1957 / Gazette of India.
 // Usage:
-//   saka.exe YYYY-MM-DD           -> "4 Ashwin 1948"
-//   saka.exe YYYY-MM-DD --long    -> "Ashwin 4, Saka 1948"  (era-correct form)
-//   saka.exe YYYY-MM-DD --deva    -> "4 अश्विन 1948"         (Devanagari)
+//   saka.exe YYYY-MM-DD           -> "7 Asvina 1948"
+//   saka.exe YYYY-MM-DD --long    -> "Asvina 7, Saka 1948"  (era-correct form)
+//   saka.exe YYYY-MM-DD --deva    -> "7 आश्विन 1948"         (Devanagari)
 //   saka.exe --today <epoch_days> -> long form for the bar wrapper
 use std::io::Write;
 
-/// Official transliterations (Gregorian-of-Saka alignment per Gazette).
+/// Official month names per the Gazette of India / Rashtriya Panchang
+/// (Calendar Reform Committee, 1957) — the *national solar* calendar's
+/// spellings, not the lunisolar panchang variants (Ashwin, Shravana, ...).
 const MONTHS: [&str; 12] = [
-    "Chaitra", "Vaishakha", "Jyeshtha", "Ashadha", "Shravana", "Bhadrapada",
-    "Ashwin", "Kartika", "Margashirsha", "Pausha", "Magha", "Phalguna",
+    "Chaitra", "Vaisakha", "Jyaishtha", "Ashadha", "Sravana", "Bhadra",
+    "Asvina", "Kartika", "Agrahayana", "Pausha", "Magha", "Phalguna",
 ];
 /// Devanagari forms for the --deva mode.
 const MONTHS_DEVA: [&str; 12] = [
-    "चैत्र", "वैशाख", "ज्येष्ठ", "आषाढ", "श्रावण", "भाद्रपद",
-    "आश्विन", "कार्तिक", "मार्गशीर्ष", "पौष", "माघ", "फाल्गुन",
+    "चैत्र", "वैशाख", "ज्येष्ठ", "आषाढ", "श्रावण", "भाद्र",
+    "आश्विन", "कार्तिक", "अग्रहायण", "पौष", "माघ", "फाल्गुन",
 ];
+/// Gazette month lengths: Chaitra 30 (31 in Saka leap years),
+/// Vaisakha..Bhadra 31, Asvina..Phalguna 30. Sum = 365 (366 in leap).
+const MONTH_LENS: [u32; 12] = [30, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 30];
 
 fn is_greg_leap(y: i32) -> bool {
     (y % 4 == 0 && y % 100 != 0) || y % 400 == 0
@@ -46,26 +51,36 @@ fn civil_from_days(z: i64) -> (i32, u32, u32) {
 }
 
 fn saka_from_greg(y: i32, m: u32, d: u32) -> (i32, usize, u32) {
-    let anchor = if is_greg_leap(y) { (y, 3u32, 22u32) } else { (y, 3u32, 23u32) };
-    let days = days_from_civil(y, m, d) - days_from_civil(anchor.0, anchor.1, anchor.2);
+    // Chaitra 1 of the Saka year running in Gregorian year g falls on
+    // 22 March (21 March when g is a leap year) — day-of-year 81 either
+    // way, so every later month starts on a fixed Gregorian date:
+    // Apr 21, May 22, Jun 22, Jul 23, Aug 23, Sep 23, Oct 23, Nov 22,
+    // Dec 22, Jan 21, Feb 20.
+    let chaitra1 = |g: i32| days_from_civil(g, 3, if is_greg_leap(g) { 21 } else { 22 });
+    let today = days_from_civil(y, m, d);
 
-    let (saka_year, doy) = if days >= 0 {
-        (y - 78, days as u32)
-    } else {
-        let py = y - 1;
-        let plen = if is_greg_leap(py) { 366u32 } else { 365u32 };
-        (py - 78, plen - 82 + days as u32) // Mar 23/22 = doy 82
-    };
+    let mut g = y;
+    let mut days = today - chaitra1(g);
+    if days < 0 {
+        // Jan 1 - Mar 20/21: still the Saka year that began last March.
+        g -= 1;
+        days = today - chaitra1(g);
+    }
 
-    let mut lens = [31u32, 31, 33, 31, 31, 31, 31, 30, 30, 30, 30, 30];
-    lens[0] = if is_greg_leap(y) { 31 } else { 30 }; // Chaitra
-    let mut rem = doy;
+    // Saka leap rule: Saka year + 78 (== g here) being a Gregorian leap
+    // year makes the Saka year leap; the extra day lengthens Chaitra to 31.
+    let mut lens = MONTH_LENS;
+    if is_greg_leap(g) {
+        lens[0] = 31;
+    }
+
+    let mut rem = days as u32;
     let mut mi = 0usize;
     while mi < 11 && rem >= lens[mi] {
         rem -= lens[mi];
         mi += 1;
     }
-    (saka_year, mi, rem + 1)
+    (g - 78, mi, rem + 1)
 }
 
 fn main() {
