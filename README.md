@@ -60,7 +60,9 @@ yasbc reload
 Rust tools rebuild with `cargo build --release` inside their crate
 (`yasb/tools/saka`, `yasb/tools/pomodoro`, `yasb/tools/theme/yasb-theme`,
 `hotkeys-overlay`); the theme exe redeploys via
-`yasb/tools/theme/yasb-theme-build.ps1`.
+`yasb/tools/theme/yasb-theme-build.ps1`. Saka and pomodoro carry `cargo
+test` suites (saka's pins the official Gazette month table); the whole
+chain rebuilds + verifies via `yasb/tools/setup/yasb-setup.ps1`.
 
 The bar also ships a **55/5 pomodoro chip** (`pomodoro` widget, right
 section): left-click start/pause, middle-click skip, right-click reset.

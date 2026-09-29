@@ -8,7 +8,6 @@
 general:
   startup_commands:
     - "shell-exec yasb"
-    - "shell-exec pwsh -NoProfile -Command \"Stop-Process -Name whkd -ErrorAction SilentlyContinue\""
   # KEY-ONLY MODE: Komorebi owns focus + cursor (mouse_follows_focus) and all
   # tiling, so GlazeWM must not touch cursor or focus. Both managers moving
   # the cursor caused focus flicker / cursor war.
@@ -84,9 +83,11 @@ binding_modes:
         bindings: ["h", "left"]
       - commands: ["shell-exec silent-run komorebic resize-edge right increase"]
         bindings: ["l", "right"]
-      - commands: ["shell-exec silent-run komorebic resize-edge top increase"]
+      # i3 parity: k/j grow/shrink height, h/l shrink/grow width.
+      # komorebic resize-edge only accepts left|right|up|down (NOT top/bottom).
+      - commands: ["shell-exec silent-run komorebic resize-edge up increase"]
         bindings: ["k", "up"]
-      - commands: ["shell-exec silent-run komorebic resize-edge bottom increase"]
+      - commands: ["shell-exec silent-run komorebic resize-edge down decrease"]
         bindings: ["j", "down"]
       - commands: ["wm-disable-binding-mode --name resize"]
         bindings: ["escape", "enter", "alt+r"]
@@ -123,8 +124,6 @@ keybindings:
   # ── Window state (komorebi) ────────────────────────────────────────────────
   - commands: ["shell-exec silent-run komorebic toggle-maximize"]
     bindings: ["win+f"]
-  - commands: ["shell-exec silent-run komorebic toggle-float"]
-    bindings: ["win+shift+f"]
   - commands: ["shell-exec silent-run komorebic toggle-tiling"]
     bindings: ["alt+t"]
   - commands: ["shell-exec silent-run komorebic minimize"]
@@ -148,14 +147,14 @@ keybindings:
   - commands: ["shell-exec silent-run komorebic promote"]
     bindings: ["alt+p"]
   - commands: ["shell-exec silent-run komorebic toggle-workspace-layer"]
-    bindings: ["alt+o"]
-  - commands: ["shell-exec silent-run komorebic toggle-monocle"]
-    bindings: ["alt+shift+m"]
+    bindings: ["alt+shift+o"]
 
   # ── WM control (komorebi; glazewm itself stays up as the key layer) ─────────
-  - commands: ["shell-exec silent-run komorebic stop"]
+  # File explorer (AGENTS.md alt+shift+e). NOTE: this used to run `komorebic
+  # stop` — pressing your muscle-memory explorer key was killing komorebi.
+  - commands: ["shell-exec explorer.exe"]
     bindings: ["alt+shift+e"]
-  - commands: ["shell-exec silent-run komorebic replace-configuration C:\\Users\\haris\\komorebi.json"]
+  - commands: ["shell-exec silent-run komorebic replace-configuration C:\\Users\\haris\\.config\\komorebi\\komorebi.json"]
     bindings: ["alt+shift+r"]
   - commands: ["shell-exec silent-run komorebic retile"]
     bindings: ["alt+shift+w"]
@@ -215,12 +214,44 @@ keybindings:
     bindings: ["alt+shift+ctrl+left"]
   - commands: ["shell-exec silent-run komorebic cycle-move-workspace-to-monitor next"]
     bindings: ["alt+shift+ctrl+right"]
-  - commands: ["shell-exec silent-run komorebic cycle-move-workspace-to-monitor previous"]
-    bindings: ["alt+shift+ctrl+up"]
-  - commands: ["shell-exec silent-run komorebic cycle-move-workspace-to-monitor next"]
-    bindings: ["alt+shift+ctrl+down"]
+  # Move focused WINDOW (not workspace) to the adjacent monitor; focus follows
+  # the window. comma = previous screen, period = next screen.
+  - commands: ["shell-exec silent-run komorebic cycle-move-to-monitor previous"]
+    bindings: ["alt+shift+comma"]
+  - commands: ["shell-exec silent-run komorebic cycle-move-to-monitor next"]
+    bindings: ["alt+shift+period"]
 
   # ── Launchers ──────────────────────────────────────────────────────────────
+  # ── Float focused window at FIXED size (Windows Terminal etc.) ──────────────
+  # komorebic toggle-float first, then SetWindowPos: 1200x700 centered on the
+  # window's own monitor working area (YASB bar excluded). -NoProfile = no lag.
+  - commands: ["shell-exec silent-run komorebic toggle-float", "shell-exec silent-run powershell -NoProfile -encodedcommand UwB0AGEAcgB0AC0AUwBsAGUAZQBwACAALQBNAGkAbABsAGkAcwBlAGMAbwBuAGQAcwAgADMAMAAwAAoAQQBkAGQALQBUAHkAcABlACAALQBOAGEAbQBlAHMAcABhAGMAZQAgAFcAaQBuADMAMgAgAC0ATgBhAG0AZQAgAFUAIAAtAE0AZQBtAGIAZQByAEQAZQBmAGkAbgBpAHQAaQBvAG4AIAAnAFsARABsAGwASQBtAHAAbwByAHQAKAAiAHUAcwBlAHIAMwAyAC4AZABsAGwAIgApAF0AIABwAHUAYgBsAGkAYwAgAHMAdABhAHQAaQBjACAAZQB4AHQAZQByAG4AIABJAG4AdABQAHQAcgAgAEcAZQB0AEYAbwByAGUAZwByAG8AdQBuAGQAVwBpAG4AZABvAHcAKAApADsAIABbAEQAbABsAEkAbQBwAG8AcgB0ACgAIgB1AHMAZQByADMAMgAuAGQAbABsACIAKQBdACAAcAB1AGIAbABpAGMAIABzAHQAYQB0AGkAYwAgAGUAeAB0AGUAcgBuACAAYgBvAG8AbAAgAFMAZQB0AFcAaQBuAGQAbwB3AFAAbwBzACgASQBuAHQAUAB0AHIAIABoAFcAbgBkACwAIABJAG4AdABQAHQAcgAgAGgAVwBuAGQASQBuAHMAZQByAHQAQQBmAHQAZQByACwAIABpAG4AdAAgAFgALAAgAGkAbgB0ACAAWQAsACAAaQBuAHQAIABjAHgALAAgAGkAbgB0ACAAYwB5ACwAIAB1AGkAbgB0ACAAdQBGAGwAYQBnAHMAKQA7ACcACgBBAGQAZAAtAFQAeQBwAGUAIAAtAEEAcwBzAGUAbQBiAGwAeQBOAGEAbQBlACAAUwB5AHMAdABlAG0ALgBXAGkAbgBkAG8AdwBzAC4ARgBvAHIAbQBzAAoAJABoACAAPQAgAFsAVwBpAG4AMwAyAC4AVQBdADoAOgBHAGUAdABGAG8AcgBlAGcAcgBvAHUAbgBkAFcAaQBuAGQAbwB3ACgAKQAKACQAYgAgAD0AIABbAFMAeQBzAHQAZQBtAC4AVwBpAG4AZABvAHcAcwAuAEYAbwByAG0AcwAuAFMAYwByAGUAZQBuAF0AOgA6AEYAcgBvAG0ASABhAG4AZABsAGUAKAAkAGgAKQAuAFcAbwByAGsAaQBuAGcAQQByAGUAYQAKACQAdwAgAD0AIAAxADIAMAAwADsAIAAkAGgAdAAgAD0AIAA3ADAAMAAKACQAeAAgAD0AIAAkAGIALgBYACAAKwAgAFsAaQBuAHQAXQAoACgAJABiAC4AVwBpAGQAdABoACAALQAgACQAdwApACAALwAgADIAKQAKACQAeQAgAD0AIAAkAGIALgBZACAAKwAgAFsAaQBuAHQAXQAoACgAJABiAC4ASABlAGkAZwBoAHQAIAAtACAAJABoAHQAKQAgAC8AIAAyACkACgBbAHYAbwBpAGQAXQBbAFcAaQBuADMAMgAuAFUAXQA6ADoAUwBlAHQAVwBpAG4AZABvAHcAUABvAHMAKAAkAGgALAAgAFsASQBuAHQAUAB0AHIAXQA6ADoAWgBlAHIAbwAsACAAJAB4ACwAIAAkAHkALAAgACQAdwAsACAAJABoAHQALAAgADAAeAAwADAAMQA0ACkA"]
+    bindings: ["alt+shift+t"]
+
+  # ── Rice-parity binds (i3/hyprland muscle memory; no Windows-default clashes) ─
+  # i3: $mod+Shift+Space = floating toggle
+  - commands: ["shell-exec silent-run komorebic toggle-float"]
+    bindings: ["alt+shift+space"]
+  # i3: $mod+f = fullscreen -> komorebi monocle (window fills the workspace)
+  - commands: ["shell-exec silent-run komorebic toggle-monocle"]
+    bindings: ["alt+f"]
+  # i3: $mod+backslash = workspace back_and_forth (last workspace)
+  - commands: ["shell-exec silent-run komorebic focus-last-workspace"]
+    bindings: ["alt+backslash"]
+  # i3-gaps: +/- container padding (alt) and workspace padding (alt+shift)
+  - commands: ["shell-exec silent-run komorebic adjust-container-padding decrease 4"]
+    bindings: ["alt+minus"]
+  - commands: ["shell-exec silent-run komorebic adjust-container-padding increase 4"]
+    bindings: ["alt+equal"]
+  - commands: ["shell-exec silent-run komorebic adjust-workspace-padding decrease 4"]
+    bindings: ["alt+shift+minus"]
+  - commands: ["shell-exec silent-run komorebic adjust-workspace-padding increase 4"]
+    bindings: ["alt+shift+equal"]
+
+  # ── Hotkey overlay (Rust, Omarchy-style; toggles open/close) ────────────────
+  - commands: ["shell-exec C:\\Users\\haris\\.config\\hotkeys-overlay\\target\\release\\hotkeys-overlay.exe"]
+    bindings: ["alt+slash"]
+
   # Shell: Nushell directly
   - commands: ["shell-exec nu"]
     bindings: ["alt+return"]
@@ -240,6 +271,9 @@ keybindings:
   # Editor: VS Code
   - commands: ["shell-exec code"]
     bindings: ["alt+v"]
+  # AGENTS.md: Editor = alt+o (VS Code, same proven PATH launch)
+  - commands: ["shell-exec code"]
+    bindings: ["alt+o"]
   # Browser: Arc (Store alias needs cmd /c start)
   - commands: ["shell-exec cmd /c start arc"]
     bindings: ["alt+a"]
@@ -253,6 +287,9 @@ keybindings:
   # Desktop Zen.lnk points here; direct short path avoids shell entirely
   - commands: ["shell-exec C:\\Users\\haris\\AppData\\Local\\ZENBRO~1\\zen.exe"]
     bindings: ["alt+z"]
+  # AGENTS.md: Browser = alt+shift+b -> default browser (Zen, FirefoxURL handler)
+  - commands: ["shell-exec C:\\Users\\haris\\AppData\\Local\\ZENBRO~1\\zen.exe"]
+    bindings: ["alt+shift+b"]
   # Editor: Emacs (full path, not on PATH)
   - commands: ["shell-exec C:\\PROGRA~1\\Emacs\\emacs-31.1\\bin\\runemacs.exe"]
     bindings: ["alt+e"]
@@ -265,21 +302,21 @@ keybindings:
     bindings: ["win+shift+s"]
 
   # Quoteless via -encodedcommand (base64 UTF-16LE): same SendKeys action
-  - commands: ["shell-exec silent-run powershell -encodedcommand JgAgAHsAQQBkAGQALQBUAHkAcABlACAALQBBAHMAcwBlAG0AYgBsAHkATgBhAG0AZQAgAFMAeQBzAHQAZQBtAC4AVwBpAG4AZABvAHcAcwAuAEYAbwByAG0AcwA7ACAAWwBTAHkAcwB0AGUAbQAuAFcAaQBuAGQAbwB3AHMALgBGAG8AcgBtAHMALgBTAGUAbgBkAEsAZQB5AHMAXQA6ADoAUwBlAG4AZABXAGEAaQB0ACgAJwAlAHsAUABSAFQAUwBDAH0AJwApAH0A"]
+  - commands: ["shell-exec silent-run powershell -NoProfile -encodedcommand JgAgAHsAQQBkAGQALQBUAHkAcABlACAALQBBAHMAcwBlAG0AYgBsAHkATgBhAG0AZQAgAFMAeQBzAHQAZQBtAC4AVwBpAG4AZABvAHcAcwAuAEYAbwByAG0AcwA7ACAAWwBTAHkAcwB0AGUAbQAuAFcAaQBuAGQAbwB3AHMALgBGAG8AcgBtAHMALgBTAGUAbgBkAEsAZQB5AHMAXQA6ADoAUwBlAG4AZABXAGEAaQB0ACgAJwAlAHsAUABSAFQAUwBDAH0AJwApAH0A"]
     bindings: ["alt+shift+print_screen"]
 
   # ── Media keys (volume) ────────────────────────────────────────────────────
-  - commands: ["shell-exec silent-run powershell -encodedcommand KABOAGUAdwAtAE8AYgBqAGUAYwB0ACAALQBDAG8AbQBPAGIAagBlAGMAdAAgAFcAUwBjAHIAaQBwAHQALgBTAGgAZQBsAGwAKQAuAFMAZQBuAGQASwBlAHkAcwAoAFsAYwBoAGEAcgBdADEANwA1ACkA"]
+  - commands: ["shell-exec silent-run powershell -NoProfile -encodedcommand KABOAGUAdwAtAE8AYgBqAGUAYwB0ACAALQBDAG8AbQBPAGIAagBlAGMAdAAgAFcAUwBjAHIAaQBwAHQALgBTAGgAZQBsAGwAKQAuAFMAZQBuAGQASwBlAHkAcwAoAFsAYwBoAGEAcgBdADEANwA1ACkA"]
     bindings: ["alt+ctrl+F3"]
-  - commands: ["shell-exec silent-run powershell -encodedcommand KABOAGUAdwAtAE8AYgBqAGUAYwB0ACAALQBDAG8AbQBPAGIAagBlAGMAdAAgAFcAUwBjAHIAaQBwAHQALgBTAGgAZQBsAGwAKQAuAFMAZQBuAGQASwBlAHkAcwAoAFsAYwBoAGEAcgBdADEANwA0ACkA"]
+  - commands: ["shell-exec silent-run powershell -NoProfile -encodedcommand KABOAGUAdwAtAE8AYgBqAGUAYwB0ACAALQBDAG8AbQBPAGIAagBlAGMAdAAgAFcAUwBjAHIAaQBwAHQALgBTAGgAZQBsAGwAKQAuAFMAZQBuAGQASwBlAHkAcwAoAFsAYwBoAGEAcgBdADEANwA0ACkA"]
     bindings: ["alt+ctrl+F2"]
-  - commands: ["shell-exec silent-run powershell -encodedcommand KABOAGUAdwAtAE8AYgBqAGUAYwB0ACAALQBDAG8AbQBPAGIAagBlAGMAdAAgAFcAUwBjAHIAaQBwAHQALgBTAGgAZQBsAGwAKQAuAFMAZQBuAGQASwBlAHkAcwAoAFsAYwBoAGEAcgBdADEANwAzACkA"]
+  - commands: ["shell-exec silent-run powershell -NoProfile -encodedcommand KABOAGUAdwAtAE8AYgBqAGUAYwB0ACAALQBDAG8AbQBPAGIAagBlAGMAdAAgAFcAUwBjAHIAaQBwAHQALgBTAGgAZQBsAGwAKQAuAFMAZQBuAGQASwBlAHkAcwAoAFsAYwBoAGEAcgBdADEANwAzACkA"]
     bindings: ["alt+ctrl+F1"]
 
   # ── Brightness ─────────────────────────────────────────────────────────────
-  - commands: ["shell-exec silent-run powershell -encodedcommand KABHAGUAdAAtAFcAbQBpAE8AYgBqAGUAYwB0ACAALQBOAGEAbQBlAHMAcABhAGMAZQAgAHIAbwBvAHQALwBXAE0ASQAgAC0AQwBsAGEAcwBzACAAVwBtAGkATQBvAG4AaQB0AG8AcgBCAHIAaQBnAGgAdABuAGUAcwBzAE0AZQB0AGgAbwBkAHMAKQAuAFcAbQBpAFMAZQB0AEIAcgBpAGcAaAB0AG4AZQBzAHMAKAAxACwAIAAoAEcAZQB0AC0AVwBtAGkATwBiAGoAZQBjAHQAIAAtAE4AYQBtAGUAcwBwAGEAYwBlACAAcgBvAG8AdAAvAFcATQBJACAALQBDAGwAYQBzAHMAIABXAG0AaQBNAG8AbgBpAHQAbwByAEIAcgBpAGcAaAB0AG4AZQBzAHMAKQAuAEMAdQByAHIAZQBuAHQAQgByAGkAZwBoAHQAbgBlAHMAcwAgACsAIAAxADAAKQA="]
+  - commands: ["shell-exec silent-run powershell -NoProfile -encodedcommand KABHAGUAdAAtAFcAbQBpAE8AYgBqAGUAYwB0ACAALQBOAGEAbQBlAHMAcABhAGMAZQAgAHIAbwBvAHQALwBXAE0ASQAgAC0AQwBsAGEAcwBzACAAVwBtAGkATQBvAG4AaQB0AG8AcgBCAHIAaQBnAGgAdABuAGUAcwBzAE0AZQB0AGgAbwBkAHMAKQAuAFcAbQBpAFMAZQB0AEIAcgBpAGcAaAB0AG4AZQBzAHMAKAAxACwAIAAoAEcAZQB0AC0AVwBtAGkATwBiAGoAZQBjAHQAIAAtAE4AYQBtAGUAcwBwAGEAYwBlACAAcgBvAG8AdAAvAFcATQBJACAALQBDAGwAYQBzAHMAIABXAG0AaQBNAG8AbgBpAHQAbwByAEIAcgBpAGcAaAB0AG4AZQBzAHMAKQAuAEMAdQByAHIAZQBuAHQAQgByAGkAZwBoAHQAbgBlAHMAcwAgACsAIAAxADAAKQA="]
     bindings: ["alt+shift+F3"]
-  - commands: ["shell-exec silent-run powershell -encodedcommand KABHAGUAdAAtAFcAbQBpAE8AYgBqAGUAYwB0ACAALQBOAGEAbQBlAHMAcABhAGMAZQAgAHIAbwBvAHQALwBXAE0ASQAgAC0AQwBsAGEAcwBzACAAVwBtAGkATQBvAG4AaQB0AG8AcgBCAHIAaQBnAGgAdABuAGUAcwBzAE0AZQB0AGgAbwBkAHMAKQAuAFcAbQBpAFMAZQB0AEIAcgBpAGcAaAB0AG4AZQBzAHMAKAAxACwAIAAoAEcAZQB0AC0AVwBtAGkATwBiAGoAZQBjAHQAIAAtAE4AYQBtAGUAcwBwAGEAYwBlACAAcgBvAG8AdAAvAFcATQBJACAALQBDAGwAYQBzAHMAIABXAG0AaQBNAG8AbgBpAHQAbwByAEIAcgBpAGcAaAB0AG4AZQBzAHMAKQAuAEMAdQByAHIAZQBuAHQAQgByAGkAZwBoAHQAbgBlAHMAcwAgAC0AIAAxADAAKQA="]
+  - commands: ["shell-exec silent-run powershell -NoProfile -encodedcommand KABHAGUAdAAtAFcAbQBpAE8AYgBqAGUAYwB0ACAALQBOAGEAbQBlAHMAcABhAGMAZQAgAHIAbwBvAHQALwBXAE0ASQAgAC0AQwBsAGEAcwBzACAAVwBtAGkATQBvAG4AaQB0AG8AcgBCAHIAaQBnAGgAdABuAGUAcwBzAE0AZQB0AGgAbwBkAHMAKQAuAFcAbQBpAFMAZQB0AEIAcgBpAGcAaAB0AG4AZQBzAHMAKAAxACwAIAAoAEcAZQB0AC0AVwBtAGkATwBiAGoAZQBjAHQAIAAtAE4AYQBtAGUAcwBwAGEAYwBlACAAcgBvAG8AdAAvAFcATQBJACAALQBDAGwAYQBzAHMAIABXAG0AaQBNAG8AbgBpAHQAbwByAEIAcgBpAGcAaAB0AG4AZQBzAHMAKQAuAEMAdQByAHIAZQBuAHQAQgByAGkAZwBoAHQAbgBlAHMAcwAgAC0AIAAxADAAKQA="]
     bindings: ["alt+shift+F2"]
 
 

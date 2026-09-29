@@ -2,7 +2,7 @@
 
 A deep-work timer wired into the **right side of the YASB bar**: 55 minutes
 work / 5 minutes break, driven entirely by one-shot CLI invocations — there
-is no resident background process, tray icon, or window.
+is no resident background process, tray icon, window, or PowerShell shim.
 
 ## Bar usage
 
@@ -54,15 +54,27 @@ C:\Users\haris\.config\yasb\tools\pomodoro\pomodoro.exe status
 | File | Role |
 |---|---|
 | `Cargo.toml` | manifest; `[[bin]] path = "src/main.rs"` pins the real source |
-| `src/main.rs` | the whole state machine (~230 lines, zero dependencies) |
-| `pomodoro.ps1` | 1s wrapper the widget polls; prints the label, safe idle fallback |
+| `src/main.rs` | the whole state machine (~240 lines, zero dependencies) |
+| `tests/cli.rs` | 6 integration tests driving the CLI like the bar does (isolated `POMODORO_STATE` file, so your live timer is never touched) |
 | `pomodoro-state.txt` | runtime state (gitignored; delete to force-reset) |
 | `target/release/pomodoro.exe` | build output — rebuild with `cargo build --release` |
 
 ## Bar wiring
 
 `config.yaml` right section: `pomodoro, lines, systray, ...`; widget
-definition under `widgets:` (`run_interval: 1000`, clicks run the exe
-one-shot via `silent-run`). Styling: `.pomodoro-widget` block in
-`styles.css` — 11px subtext, tabular numerals so the countdown doesn't
-wobble, accent-coloured clock icon.
+definition under `widgets:` polls the **exe directly**
+(`run_cmd: ...pomodoro.exe tick`, `run_interval: 1000` — no PowerShell
+spawn per tick), and clicks run the exe one-shot via `silent-run`.
+Styling: `.pomodoro-widget` block in `styles.css` — 11px subtext, tabular
+numerals so the countdown doesn't wobble, accent-coloured clock icon.
+
+## Tests
+
+```sh
+cd ~/.config/yasb/tools/pomodoro && cargo test
+```
+
+Six CLI-driven tests cover idle → start → pause → resume → skip →
+break → round counting → reset. They run against a temp state file via
+the `POMODORO_STATE` env override and are safe to run while the bar is
+timing a live block.

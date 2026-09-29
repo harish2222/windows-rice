@@ -6,12 +6,16 @@ the bar for the amnweb/yasb-themes gallery.
 ## yasb-setup.ps1 — replicate this rice
 
 Idempotent one-shot setup: installs missing toolchains (Rust via winget,
-PyQt6 + PyInstaller via pip), rebuilds every companion binary (theme exe,
-palette picker, font tool), snapshots the live GlazeWM/Komorebi configs
-into `configs\`, verifies the whole chain end-to-end (theme tool round-trip,
-`silent-run` on PATH, picker exe boots bundled Qt), and installs the `yt`
-shell helper into the PowerShell profile. Never touches `config.yaml` /
-`styles.css`.
+PyQt6 + PyInstaller via pip), runs the **cargo test suites** for saka and
+pomodoro, rebuilds every companion binary (theme exe, saka, pomodoro,
+palette picker), presence-checks the font tool (its Python source is
+lost — see `../picker/picker.md`), snapshots the live GlazeWM/Komorebi
+configs from their **authoritative locations**
+(`~/.glzr/glazewm/`, `~/.config/komorebi/`) into `configs\`, verifies
+the whole chain end-to-end (theme round-trip, saka long-form smoke,
+pomodoro tick smoke, `silent-run` on PATH, picker exe boots bundled Qt),
+and installs the `yt` shell helper into the PowerShell profile. Never
+touches `config.yaml` / `styles.css`.
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File C:\Users\haris\.config\yasb\tools\setup\yasb-setup.ps1
