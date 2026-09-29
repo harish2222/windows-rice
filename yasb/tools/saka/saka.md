@@ -1,58 +1,74 @@
 # saka — Indian national (Saka) calendar for the bar
 
 Converts a Gregorian date into the **Indian national calendar (Saka era)**
-and prints it for the YASB bar chip: the `ॐ Ashwin 4, Saka 1948` widget in
+and prints it for the YASB bar chip: the `ॐ Asvina 7, Saka 1948` widget in
 the bar's centre.
 
 ## Why "1948" when it's 2026?
 
 That is **correct, not a bug**. The Saka era is the official calendar of
 India (adopted in 1957 on the Calendar Reform Committee's recommendation)
-and its epoch is **78 years behind the Gregorian era**:
+and its epoch is **78 years behind the Gregorian era** (79 from January
+until the March new year):
 
 ```
-Saka year = Gregorian year − 78        (while both eras are running)
+Saka year = Gregorian year − 78        (March–December)
 2026 − 78 = 1948
 ```
 
-The Saka new year is **Chaitra 1**, fixed to **22 March in Gregorian leap
-years and 23 March otherwise** — it is a solar calendar, not lunar. From
-mid-March/late-March until 31 December the two years differ by 78; from
-1 January until the new year the running Saka year is still the previous
-one (79 years behind). So:
+The Saka new year is **Chaitra 1**: 22 March in ordinary years, 21 March
+in leap years. It is a *tropical solar* calendar — every other month then
+starts on a fixed Gregorian date. Compare: the Vikram Samvat era used in
+many panchangs is 57 years *ahead* — a different calendar entirely; and
+the lunisolar panchang months (Ashwin, Shravana, …) drift against this
+fixed solar scheme.
 
-| Gregorian date | Saka date | Why |
-|---|---|---|
-| 2026-09-29 | Ashwin 4, Saka 1948 | Sep: 2026 − 78 |
-| 2026-03-23 | 1 Chaitra 1948 | Saka new year (non-leap anchor) |
-| 2026-03-01 | Phalguna 10, Saka 1947 | before new year: still 1947 |
-| 2028-03-22 | 1 Chaitra 1950 | leap-year anchor |
-| 2026-12-31 | Pausha 6, Saka 1948 | year-end sanity |
+## Official month table (Gazette of India / Rashtriya Panchang)
 
-The Saka era itself started in **78 CE** (attributed to emperor
-Kanishka's era), which is where the 78-year offset comes from. Compare:
-the Vikram Samvat era used in many panchangs is 57 years *ahead* of the
-Gregorian era — a different calendar entirely.
+| # | Month | Days | Starts (Gregorian) |
+|---|---|---|---|
+| 1 | Chaitra | 30 (31 leap) | 22 Mar (21 Mar leap) |
+| 2 | Vaisakha | 31 | 21 Apr |
+| 3 | Jyaishtha | 31 | 22 May |
+| 4 | Ashadha | 31 | 22 Jun |
+| 5 | Sravana | 31 | 23 Jul |
+| 6 | Bhadra | 31 | 23 Aug |
+| 7 | Asvina | 30 | 23 Sep |
+| 8 | Kartika | 30 | 23 Oct |
+| 9 | Agrahayana | 30 | 22 Nov |
+| 10 | Pausha | 30 | 22 Dec |
+| 11 | Magha | 30 | 21 Jan |
+| 12 | Phalguna | 30 | 20 Feb |
+
+Names are the national calendar's spellings (Asvina, Sravana, Bhadra,
+Jyaishtha, Agrahayana) — not the lunisolar variants (Ashwin, Shravana,
+Bhadrapada, Jyeshtha, Margashirsha). Leap rule: a Saka year is leap when
+`Saka year + 78` is a Gregorian leap year; the extra day lengthens
+Chaitra to 31.
 
 ## Files
 
 | File | Role |
 |---|---|
 | `Cargo.toml` | crate manifest; `[[bin]] path = "src/main.rs"` so cargo always compiles the real source |
-| `src/main.rs` | the converter (~140 lines, zero dependencies) |
+| `src/main.rs` | the converter (~150 lines, zero dependencies) |
 | `saka-today.ps1` | wrapper the widget calls; passes today's date, prints long form |
 | `target/release/saka.exe` | build output (gitignored, rebuild with `cargo build --release`) |
 
 > History: a stale `saka.rs` at the crate root used to shadow
 > `src/main.rs` because `Cargo.toml` pointed at it — source edits never
-> reached the bar. The `[[bin]] path` line pins the true source.
+> reached the bar. The `[[bin]] path` line pins the true source. Later,
+> the first month table used lunisolar spellings and a wrong anchor
+> (23/22 March) — caught by comparing the bar against the published
+> national calendar (2026-09-29 is Asvina **7**, not "Ashwin 4"); the
+> current table is verified against every official month start.
 
 ## CLI
 
 ```sh
-saka.exe 2026-09-29          # 29 Ashwin 1948          (short form)
-saka.exe 2026-09-29 --long   # Ashwin 29, Saka 1948    (era-correct form)
-saka.exe 2026-09-29 --deva   # 29 आश्विन 1948          (Devanagari)
+saka.exe 2026-09-29          # 7 Asvina 1948           (short form)
+saka.exe 2026-09-29 --long   # Asvina 7, Saka 1948     (era-correct form)
+saka.exe 2026-09-29 --deva   # 7 आश्विन 1948           (Devanagari)
 ```
 
 ## Algorithm (src/main.rs)
@@ -61,15 +77,15 @@ saka.exe 2026-09-29 --deva   # 29 आश्विन 1948          (Devanagari)
    Hinnant's classic proleptic-Gregorian algorithms. Everything is done in
    absolute day numbers, so month-length math never touches day-of-month
    edge cases.
-2. **Anchor** — Chaitra 1 of the current Gregorian year: 22 March in
-   Gregorian leap years, 23 March otherwise.
-3. **Day-of-year in Saka space** — `today − anchor` in days. Negative
-   (Jan–Mar before the new year) rolls back to the previous Gregorian
-   year's anchor and decrements the Saka year.
-4. **Month walk** — the Gazette month lengths
-   `[31,31,33,31,31,31,31,30,30,30,30,30]` (Chaitra gets +1 day in leap
-   years) are subtracted in order until the remainder fits one month.
-   The remainder is the day of month, the index is the month.
+2. **Anchor** — Chaitra 1 of the Saka year running in Gregorian year `g`:
+   21 March when `g` is a Gregorian leap year, else 22 March (day-of-year
+   80/81 → later months land on the fixed dates in the table above).
+3. **Year selection** — `today − anchor(g)`; if negative (Jan–mid-March),
+   retry with the previous Gregorian year. Saka year = `g − 78`.
+4. **Month walk** — subtract the Gazette lengths
+   `[30,31,31,31,31,31,30,30,30,30,30,30]` (Chaitra 31 in leap years)
+   in order until the remainder fits one month; the remainder is the day,
+   the index is the month.
 
 Because each step is pure integer math with no tz or DST inputs, the
 output is deterministic for any date string.
@@ -95,6 +111,8 @@ form; the CSS chip lives under `.saka-widget` in `styles.css`.
 
 ## Verification
 
-The anchor and month-boundary cases in the table above all pass on the
-built exe; run any of them as a regression check after touching the
-month table.
+The built exe was checked against the **official month-start table** for
+all twelve months (Saka 1948), both Jan/Feb next-year dates (still 1948),
+the leap-year Chaitra cases (Saka 1950: 21 Mar anchor, 31-day Chaitra,
+Vaisakha on 21 Apr), and the January rollback to Saka 1947 — all pass.
+Re-run those boundary dates after touching the month table.
