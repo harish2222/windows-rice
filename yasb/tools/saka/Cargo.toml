@@ -7,4 +7,4 @@ edition = "2024"
 
 [[bin]]
 name = "saka"
-path = "saka.rs"
+path = "src/main.rs"

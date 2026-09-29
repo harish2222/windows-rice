@@ -48,9 +48,14 @@ bars:
       - komorebi_offline
       center:
       - clock
+      - lines
+      - saka
+      - lines
       - cava
       - media
       right:
+      - pomodoro
+      - lines
       - systray
       - lines
       - alpha
@@ -134,6 +139,40 @@ widgets:
         show_week_numbers: true
       callbacks:
         on_left: toggle_calendar
+  saka:
+    type: "yasb.custom.CustomWidget"
+    options:
+      class_name: "saka-widget"
+      label: "<span>\u0950</span> {data}"
+      label_alt: "<span>\u0950</span> {data}"
+      tooltip: false
+      exec_options:
+        run_cmd: "powershell -NoProfile -ExecutionPolicy Bypass -File C:\\Users\\haris\\.config\\yasb\\tools\\saka\\saka-today.ps1"
+        run_interval: 600000
+        return_format: "string"
+      callbacks:
+        on_left: "do_nothing"
+        on_middle: "toggle_label"
+  pomodoro:
+    type: "yasb.custom.CustomWidget"
+    options:
+      class_name: "pomodoro-widget"
+      # 55/5 focus timer. Label states: "55:00" idle | "54:59" working |
+      # "p 54:12" paused | "b 04:32" on break. Left = start/pause/resume,
+      # middle = skip to next phase, right = reset. The 1s poll folds elapsed
+      # wall-clock time into a state file, so a running timer survives bar
+      # reloads and reboots. Docs: tools/pomodoro/pomodoro.md
+      label: "<span>\uf017</span> {data}"
+      label_alt: "{data}"
+      tooltip: false
+      exec_options:
+        run_cmd: "powershell -NoProfile -ExecutionPolicy Bypass -File C:\\Users\\haris\\.config\\yasb\\tools\\pomodoro\\pomodoro.ps1"
+        run_interval: 1000
+        return_format: "string"
+      callbacks:
+        on_left: "exec silent-run C:\\Users\\haris\\.config\\yasb\\tools\\pomodoro\\target\\release\\pomodoro.exe toggle"
+        on_middle: "exec silent-run C:\\Users\\haris\\.config\\yasb\\tools\\pomodoro\\target\\release\\pomodoro.exe skip"
+        on_right: "exec silent-run C:\\Users\\haris\\.config\\yasb\\tools\\pomodoro\\target\\release\\pomodoro.exe reset"
   volume:
     type: yasb.volume.VolumeWidget
     options:

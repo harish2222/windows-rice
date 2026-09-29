@@ -357,6 +357,7 @@
     --shade: #12090D;
     --accent-soft: rgba(192, 78, 104, 0.55);
     --frame: #C04E68;
+    --holiday: #D95D5D; /* festival red — the only red on glass */
     --motif: url("C:/Users/haris/.config/yasb/motif-paisley.svg");
     --motif-mandala: url("C:/Users/haris/.config/yasb/motif-wine-mandala.png");
     --motif-corner: url("C:/Users/haris/.config/yasb/motif-wine-mandala-corner.png");
@@ -1469,6 +1470,7 @@
     margin: 0;
     padding: 0;
     border: none;
+    outline: none;
 }
 .clock-popup.calendar .calendar-table::item:selected {
     color: var(--accentText);
@@ -1481,35 +1483,112 @@
     background-color: var(--acrylic-hover);
     border-radius: var(--border-radius3);
 }
+/* ═══ APPLE-STYLE DATE PANEL ═══
+   weekday in small caps · day numeral huge + light-feeling · month/year
+   tight on one line · hierarchy from size & colour only. */
 .clock-popup.calendar .day-label {
-    margin-top: 20px;
+    /* small caps weekday like macOS date header */
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
     color: var(--subtext);
+    margin-top: 22px;
 }
-.clock-popup.calendar .day-label,
-.clock-popup.calendar .month-label,
-.clock-popup.calendar .year-label,
 .clock-popup.calendar .date-label {
-    /* UNIFORM NUMBER SYSTEM: same family + weight as the bar (FiraCode 600).
-       Hierarchy comes from size and colour only - never mixed weights. */
-    font-family: var(--system-font);
-    font-size: var(--iconSize);
+    /* the hero numeral: oversized, accent, tight leading */
+    font-size: 96px;
     font-weight: var(--fontWeight);
+    margin-top: -26px;
+    color: var(--accent);
     min-width: 180px;
     max-width: 180px;
 }
-
 .clock-popup.calendar .month-label {
+    /* month + year read as one tight line, quiet under the numeral */
+    font-size: 15px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
     color: var(--text);
+    margin-top: -30px;
 }
 .clock-popup.calendar .year-label {
+    font-size: 15px;
+    letter-spacing: 1px;
+    color: var(--subtext);
+    margin-top: 2px;
+}
+/* festival/today emphasis inside the popup header area */
+.clock-popup.calendar .holiday-label {
+    font-size: 12px;
+    letter-spacing: 1px;
+    color: var(--holiday);
+    padding: 2px 0 6px 0;
+}/* ═══ SAKA BAR CHIP — quiet companion to the clock ═══ */
+.saka-widget {
+    padding: 0 4px;
+}
+.saka-widget .label {
+    font-family: var(--system-font);
+    font-size: 11px;
+    font-weight: var(--fontWeight);
+    letter-spacing: 0.5px;
     color: var(--subtext);
 }
-.clock-popup.calendar .date-label {
-    font-size: 88px;
-    font-weight: var(--fontWeight);
-    margin-top: -20px;
+.saka-widget .icon {
+    font-size: 12px;
     color: var(--accent);
+    padding-right: 2px;
 }
+.saka-widget:hover .label {
+    color: var(--text);
+}
+
+/* ═══ POMODORO BAR CHIP — 55/5 focus timer ═══
+   States printed by the tool: "55:00" idle, "MM:SS" working,
+   "p MM:SS" paused, "b MM:SS" on break. */
+.pomodoro-widget {
+    padding: 0 4px;
+}
+.pomodoro-widget .label {
+    font-family: var(--system-font);
+    font-size: 11px;
+    font-weight: var(--fontWeight);
+    letter-spacing: 1px;
+    font-variant-numeric: tabular-nums;
+    color: var(--subtext);
+}
+.pomodoro-widget .icon {
+    font-size: 12px;
+    color: var(--accent);
+    padding-right: 3px;
+}
+.pomodoro-widget:hover .label {
+    color: var(--text);
+}
+
+/* ═══ EXTENDED CALENDAR (upcoming holidays list) ═══ */
+.clock-popup.calendar .extended-container {
+    padding: 8px 4px 4px 4px;
+}
+.clock-popup.calendar .upcoming-events-header {
+    font-size: 11px;
+    font-weight: var(--fontWeight);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--overlay1);
+    padding: 4px 2px 6px 2px;
+}
+.clock-popup.calendar .upcoming-events-item {
+    font-size: var(--fontSize);
+    color: var(--text);
+    padding: 5px 8px;
+    margin: 1px 0;
+    border-radius: var(--border-radius2);
+}
+.clock-popup.calendar .upcoming-events-item:hover {
+    background-color: var(--acrylic-hover);
+}
+
 .clock-popup.timer .clock-popup-container,
 .clock-popup.alarm .clock-popup-container {
     padding: 16px;

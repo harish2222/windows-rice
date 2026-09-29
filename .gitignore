@@ -31,7 +31,17 @@ node_modules/
 *.log.[0-9]
 *.db
 *.lock
+# Rust lockfiles are part of the source of truth for the bar tools
+!yasb/tools/saka/Cargo.lock
+!yasb/tools/pomodoro/Cargo.lock
+!yasb/tools/theme/yasb-theme/Cargo.lock
+# keep the picker's documentation visible even though the dir is ignored
+!yasb/tools/picker/
+yasb/tools/picker/*
+!yasb/tools/picker/picker.md
 *.tmp
 Thumbs.db
 desktop.ini
 cagent/user-uuid
+# pomodoro runtime state (timer survives reloads; not config)
+yasb/tools/pomodoro/pomodoro-state.txt
