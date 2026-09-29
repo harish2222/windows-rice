@@ -1,10 +1,10 @@
 [package]
-name = "saka"
+name = "pomodoro"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 
 [dependencies]
 
 [[bin]]
-name = "saka"
+name = "pomodoro"
 path = "src/main.rs"
