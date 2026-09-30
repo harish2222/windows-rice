@@ -205,14 +205,41 @@ fn sync_cava_colors(config: &Path, sheet: &Stylesheet, theme: &str) -> Result<()
     if ends_with_newline {
         out.push_str(&newline);
     }
-    fs::write(config, out.as_bytes())
-        .map_err(|e| format!("cannot write {}: {e}", config.display()))?;
-    Ok(())
+    write_atomic(config, out.as_bytes())
 }
 
 fn read_styles(path: &Path) -> Result<String, String> {
     let bytes = fs::read(path).map_err(|e| format!("cannot read {}: {e}", path.display()))?;
     String::from_utf8(bytes).map_err(|e| format!("{} is not valid UTF-8: {e}", path.display()))
+}
+
+/// Write via temp file + rename so a concurrent reader (YASB's
+/// watch_stylesheet reload, the palette's 10s `current` poll, another switch
+/// click) never sees a truncated or half-written file: an in-place
+/// `fs::write` fires the change event on truncate, so YASB could reload an
+/// empty stylesheet mid-switch and drop every theme variable. Rename is one
+/// event with complete content; retries cover a destination briefly held open
+/// by the reader.
+fn write_atomic(path: &Path, bytes: &[u8]) -> Result<(), String> {
+    let mut tmp_name = path.as_os_str().to_owned();
+    tmp_name.push(".tmp");
+    let tmp = PathBuf::from(tmp_name);
+    let mut last_err = String::from("unknown error");
+    for attempt in 0..5u64 {
+        match fs::write(&tmp, bytes) {
+            Ok(()) => match fs::rename(&tmp, path) {
+                Ok(()) => return Ok(()),
+                Err(e) => last_err = e.to_string(),
+            },
+            Err(e) => {
+                last_err = e.to_string();
+                break;
+            }
+        }
+        std::thread::sleep(std::time::Duration::from_millis(30 * (attempt + 1)));
+    }
+    let _ = fs::remove_file(&tmp);
+    Err(format!("cannot write {}: {last_err}", path.display()))
 }
 
 fn parse(text: &str) -> Result<Stylesheet, String> {
@@ -267,6 +294,13 @@ fn parse(text: &str) -> Result<Stylesheet, String> {
 }
 
 /// `/* Name */` or `/* Name - active */` -> (name, marked_active).
+///
+/// Only name-like inners qualify (ASCII letters/digits/spaces/hyphen after an
+/// optional `- active` suffix). Declaration lines (`--acrylic: ...`) and prose
+/// annotations (`1% acrylic`, `festival red`) must never become regions: one
+/// stray single-line comment inside a block used to split it into fake themes
+/// and silently corrupt every later switch. Non-matching comments are simply
+/// not headers; multi-line comments never match either side of this pattern.
 fn parse_header(line: &str) -> Option<(String, bool)> {
     let t = line.trim();
     let inner = t.strip_prefix("/*")?.strip_suffix("*/")?.trim();
@@ -274,14 +308,21 @@ fn parse_header(line: &str) -> Option<(String, bool)> {
         return None;
     }
     let lower = inner.to_lowercase();
-    if let Some(name) = lower
-        .strip_suffix("- active")
-        .map(|s| inner[..s.len()].trim().to_string())
-    {
-        Some((name, true))
+    let active = lower.ends_with("- active");
+    let name = if active {
+        inner[..inner.len() - "- active".len()].trim()
     } else {
-        Some((inner.to_string(), false))
+        inner
+    };
+    let name_ok = !name.is_empty()
+        && name.chars().any(|c| c.is_ascii_alphabetic())
+        && name
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == ' ' || c == '-');
+    if !name_ok {
+        return None;
     }
+    Some((name.to_string(), active))
 }
 
 /// A CSS variable declaration, optionally wrapped in a `/* */` comment.
@@ -408,8 +449,7 @@ impl Stylesheet {
         if self.ends_with_newline {
             text.push_str(&self.newline);
         }
-        fs::write(path, text.as_bytes())
-            .map_err(|e| format!("cannot write {}: {e}", path.display()))
+        write_atomic(path, text.as_bytes())
     }
 }
 

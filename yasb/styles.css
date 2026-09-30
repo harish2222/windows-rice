@@ -29,16 +29,23 @@
     /* ACRYLIC POLICY: menus and popups paint --acrylic (theme base @ 50%);
        hover states paint --acrylic-hover (same base @ 65%). Literal rgba
        because QSS var() cannot convert hex; every Rangalipi block below
-       overrides both per palette so theme switching stays automatic. */
+       overrides both per palette so theme switching stays automatic.
+       Exceptions: Rangalipi Wine paints both at 1% (near-invisible glass)
+       and adds --holiday (festival red - the only red on glass).
+       THEME-BLOCK CONTRACT (tools/theme/yasb-theme): each block is one
+       comment chunk - opener on its --acrylic line, closer on its --runner
+       line - while the active block is fully bare with " - active" in its
+       header line. Never add inline comments to variable lines or standalone
+       single-line comments inside a block; record exceptions here instead. */
     --acrylic: rgba(26, 19, 16, 0.50);
     --acrylic-hover: rgba(26, 19, 16, 0.65);
 
     /*colors*/
 
     /* Rangalipi */
-    /* --acrylic: rgba(20, 20, 27, 0.50); base @ 50% + hover @ 65% */
-    /* --acrylic-hover: rgba(20, 20, 27, 0.65); */
-    /* --background: #14141B;
+    /* --acrylic: rgba(20, 20, 27, 0.50);
+    --acrylic-hover: rgba(20, 20, 27, 0.65);
+    --background: #14141B;
     --background2: #1D1D28;
     --accent: #D99A2B;
     --text: #E7E0D2;
@@ -90,9 +97,9 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-base.svg"); */
 
     /* Rangalipi Ember */
-    /* --acrylic: rgba(26, 19, 16, 0.50); base @ 50% + hover @ 65% */
-    /* --acrylic-hover: rgba(26, 19, 16, 0.65); */
-    /* --background: #1A1310;
+    /* --acrylic: rgba(26, 19, 16, 0.50);
+    --acrylic-hover: rgba(26, 19, 16, 0.65);
+    --background: #1A1310;
     --background2: #241A14;
     --accent: #C96F2F;
     --text: #F0E4D4;
@@ -144,9 +151,9 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-ember.svg"); */
 
     /* Rangalipi Ember Light */
-    /* --acrylic: rgba(231, 224, 210, 0.50); base @ 50% + hover @ 65% */
-    /* --acrylic-hover: rgba(231, 224, 210, 0.65); */
-    /* --background: #E7E0D2;
+    /* --acrylic: rgba(231, 224, 210, 0.50);
+    --acrylic-hover: rgba(231, 224, 210, 0.65);
+    --background: #E7E0D2;
     --background2: #F5F0E8;
     --accent: #B45F27;
     --text: #1A1816;
@@ -198,9 +205,9 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-ember.svg"); */
 
     /* Rangalipi Mossfern */
-    /* --acrylic: rgba(17, 26, 17, 0.50); base @ 50% + hover @ 65% */
-    /* --acrylic-hover: rgba(17, 26, 17, 0.65); */
-    /* --background: #111A11;
+    /* --acrylic: rgba(17, 26, 17, 0.50);
+    --acrylic-hover: rgba(17, 26, 17, 0.65);
+    --background: #111A11;
     --background2: #182418;
     --accent: #82AC54;
     --text: #E3E9D3;
@@ -252,9 +259,9 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-moss.svg"); */
 
     /* Rangalipi Mossfern Light */
-    /* --acrylic: rgba(231, 224, 210, 0.50); base @ 50% + hover @ 65% */
-    /* --acrylic-hover: rgba(231, 224, 210, 0.65); */
-    /* --background: #E7E0D2;
+    /* --acrylic: rgba(231, 224, 210, 0.50);
+    --acrylic-hover: rgba(231, 224, 210, 0.65);
+    --background: #E7E0D2;
     --background2: #F5F0E8;
     --accent: #5F8A3C;
     --text: #1A1816;
@@ -306,7 +313,7 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-moss.svg"); */
 
     /* Rangalipi Wine - active */
-    --acrylic: rgba(29, 16, 21, 0.01); /* 1% acrylic */
+    --acrylic: rgba(29, 16, 21, 0.01);
     --acrylic-hover: rgba(29, 16, 21, 0.01);
     --background: #1D1015;
     --background2: #29151D;
@@ -356,16 +363,16 @@
     --shade: #12090D;
     --accent-soft: rgba(192, 78, 104, 0.55);
     --frame: #C04E68;
-    --holiday: #D95D5D; /* festival red — the only red on glass */
+    --holiday: #D95D5D;
     --motif: url("C:/Users/haris/.config/yasb/motif-paisley.svg");
     --motif-mandala: url("C:/Users/haris/.config/yasb/motif-wine-mandala.png");
     --motif-corner: url("C:/Users/haris/.config/yasb/motif-wine-mandala-corner.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-wine.svg");
 
     /* Rangalipi Wine Light */
-    /* --acrylic: rgba(231, 224, 210, 0.50); base @ 50% + hover @ 65% */
-    /* --acrylic-hover: rgba(231, 224, 210, 0.65); */
-    /* --background: #E7E0D2;
+    /* --acrylic: rgba(231, 224, 210, 0.50);
+    --acrylic-hover: rgba(231, 224, 210, 0.65);
+    --background: #E7E0D2;
     --background2: #F5F0E8;
     --accent: #A83E58;
     --text: #1A1816;
@@ -417,9 +424,9 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-wine.svg"); */
 
     /* Rangalipi Dune */
-    /* --acrylic: rgba(27, 22, 16, 0.50); base @ 50% + hover @ 65% */
-    /* --acrylic-hover: rgba(27, 22, 16, 0.65); */
-    /* --background: #1B1610;
+    /* --acrylic: rgba(27, 22, 16, 0.50);
+    --acrylic-hover: rgba(27, 22, 16, 0.65);
+    --background: #1B1610;
     --background2: #262013;
     --accent: #C08A24;
     --text: #EFE4CC;
@@ -471,9 +478,9 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-dune.svg"); */
 
     /* Rangalipi Dune Light */
-    /* --acrylic: rgba(231, 224, 210, 0.50); base @ 50% + hover @ 65% */
-    /* --acrylic-hover: rgba(231, 224, 210, 0.65); */
-    /* --background: #E7E0D2;
+    /* --acrylic: rgba(231, 224, 210, 0.50);
+    --acrylic-hover: rgba(231, 224, 210, 0.65);
+    --background: #E7E0D2;
     --background2: #F5F0E8;
     --accent: #A8741C;
     --text: #1A1816;
@@ -525,9 +532,9 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-dune.svg"); */
 
     /* Rangalipi Matcha */
-    /* --acrylic: rgba(21, 26, 15, 0.50); base @ 50% + hover @ 65% */
-    /* --acrylic-hover: rgba(21, 26, 15, 0.65); */
-    /* --background: #151A0F;
+    /* --acrylic: rgba(21, 26, 15, 0.50);
+    --acrylic-hover: rgba(21, 26, 15, 0.65);
+    --background: #151A0F;
     --background2: #1E2615;
     --accent: #93B04C;
     --text: #E7EAD0;
@@ -579,9 +586,9 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-matcha.svg"); */
 
     /* Rangalipi Matcha Light */
-    /* --acrylic: rgba(231, 224, 210, 0.50); base @ 50% + hover @ 65% */
-    /* --acrylic-hover: rgba(231, 224, 210, 0.65); */
-    /* --background: #E7E0D2;
+    /* --acrylic: rgba(231, 224, 210, 0.50);
+    --acrylic-hover: rgba(231, 224, 210, 0.65);
+    --background: #E7E0D2;
     --background2: #F5F0E8;
     --accent: #7A943C;
     --text: #1A1816;
@@ -633,9 +640,9 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-matcha.svg"); */
 
     /* Rangalipi Espresso */
-    /* --acrylic: rgba(23, 18, 16, 0.50); base @ 50% + hover @ 65% */
-    /* --acrylic-hover: rgba(23, 18, 16, 0.65); */
-    /* --background: #171210;
+    /* --acrylic: rgba(23, 18, 16, 0.50);
+    --acrylic-hover: rgba(23, 18, 16, 0.65);
+    --background: #171210;
     --background2: #211915;
     --accent: #C68A4B;
     --text: #ECDDC8;
@@ -687,9 +694,9 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-espresso.svg"); */
 
     /* Rangalipi Espresso Light */
-    /* --acrylic: rgba(231, 224, 210, 0.50); base @ 50% + hover @ 65% */
-    /* --acrylic-hover: rgba(231, 224, 210, 0.65); */
-    /* --background: #E7E0D2;
+    /* --acrylic: rgba(231, 224, 210, 0.50);
+    --acrylic-hover: rgba(231, 224, 210, 0.65);
+    --background: #E7E0D2;
     --background2: #F5F0E8;
     --accent: #A8743C;
     --text: #1A1816;
@@ -741,9 +748,9 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-espresso.svg"); */
 
     /* Rangalipi Noir */
-    /* --acrylic: rgba(22, 17, 20, 0.50); base @ 50% + hover @ 65% */
-    /* --acrylic-hover: rgba(22, 17, 20, 0.65); */
-    /* --background: #161114;
+    /* --acrylic: rgba(22, 17, 20, 0.50);
+    --acrylic-hover: rgba(22, 17, 20, 0.65);
+    --background: #161114;
     --background2: #211619;
     --accent: #CE4152;
     --text: #EDE1E1;
@@ -795,9 +802,9 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-noir.svg"); */
 
     /* Rangalipi Noir Light */
-    /* --acrylic: rgba(231, 224, 210, 0.50); base @ 50% + hover @ 65% */
-    /* --acrylic-hover: rgba(231, 224, 210, 0.65); */
-    /* --background: #E7E0D2;
+    /* --acrylic: rgba(231, 224, 210, 0.50);
+    --acrylic-hover: rgba(231, 224, 210, 0.65);
+    --background: #E7E0D2;
     --background2: #F5F0E8;
     --accent: #AE3546;
     --text: #1A1816;
@@ -849,9 +856,9 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-noir.svg"); */
 
     /* Rangalipi Aubergine */
-    /* --acrylic: rgba(23, 17, 27, 0.50); base @ 50% + hover @ 65% */
-    /* --acrylic-hover: rgba(23, 17, 27, 0.65); */
-    /* --background: #17111B;
+    /* --acrylic: rgba(23, 17, 27, 0.50);
+    --acrylic-hover: rgba(23, 17, 27, 0.65);
+    --background: #17111B;
     --background2: #201627;
     --accent: #A67FD4;
     --text: #E7DFF1;
@@ -903,9 +910,9 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-aubergine.svg"); */
 
     /* Rangalipi Aubergine Light */
-    /* --acrylic: rgba(231, 224, 210, 0.50); base @ 50% + hover @ 65% */
-    /* --acrylic-hover: rgba(231, 224, 210, 0.65); */
-    /* --background: #E7E0D2;
+    /* --acrylic: rgba(231, 224, 210, 0.50);
+    --acrylic-hover: rgba(231, 224, 210, 0.65);
+    --background: #E7E0D2;
     --background2: #F5F0E8;
     --accent: #8A63B8;
     --text: #1A1816;
@@ -957,9 +964,9 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-aubergine.svg"); */
 
     /* Rangalipi Clay */
-    /* --acrylic: rgba(26, 19, 14, 0.50); base @ 50% + hover @ 65% */
-    /* --acrylic-hover: rgba(26, 19, 14, 0.65); */
-    /* --background: #1A130E;
+    /* --acrylic: rgba(26, 19, 14, 0.50);
+    --acrylic-hover: rgba(26, 19, 14, 0.65);
+    --background: #1A130E;
     --background2: #251A12;
     --accent: #C9683C;
     --text: #F1E0CC;
@@ -1011,9 +1018,9 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-clay.svg"); */
 
     /* Rangalipi Clay Light */
-    /* --acrylic: rgba(231, 224, 210, 0.50); base @ 50% + hover @ 65% */
-    /* --acrylic-hover: rgba(231, 224, 210, 0.65); */
-    /* --background: #E7E0D2;
+    /* --acrylic: rgba(231, 224, 210, 0.50);
+    --acrylic-hover: rgba(231, 224, 210, 0.65);
+    --background: #E7E0D2;
     --background2: #F5F0E8;
     --accent: #A85630;
     --text: #1A1816;
@@ -1065,9 +1072,9 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-clay.svg"); */
 
     /* Rangalipi Olive */
-    /* --acrylic: rgba(20, 21, 13, 0.50); base @ 50% + hover @ 65% */
-    /* --acrylic-hover: rgba(20, 21, 13, 0.65); */
-    /* --background: #14150D;
+    /* --acrylic: rgba(20, 21, 13, 0.50);
+    --acrylic-hover: rgba(20, 21, 13, 0.65);
+    --background: #14150D;
     --background2: #1D1E13;
     --accent: #A8A03A;
     --text: #E5E3C9;
@@ -1119,9 +1126,9 @@
     --runner: url("C:/Users/haris/.config/yasb/runner-olive.svg"); */
 
     /* Rangalipi Olive Light */
-    /* --acrylic: rgba(231, 224, 210, 0.50); base @ 50% + hover @ 65% */
-    /* --acrylic-hover: rgba(231, 224, 210, 0.65); */
-    /* --background: #E7E0D2;
+    /* --acrylic: rgba(231, 224, 210, 0.50);
+    --acrylic-hover: rgba(231, 224, 210, 0.65);
+    --background: #E7E0D2;
     --background2: #F5F0E8;
     --accent: #8A8430;
     --text: #1A1816;
@@ -1175,9 +1182,9 @@
     /* Bright-wallpaper theme.
        Switch with yasb-theme set "Rangalipi Light". */
     /* Rangalipi Light */
-    /* --acrylic: rgba(231, 224, 210, 0.50); base @ 50% + hover @ 65% */
-    /* --acrylic-hover: rgba(231, 224, 210, 0.65); */
-    /* --background: #E7E0D2;
+    /* --acrylic: rgba(231, 224, 210, 0.50);
+    --acrylic-hover: rgba(231, 224, 210, 0.65);
+    --background: #E7E0D2;
     --background2: #F5F0E8;
     --accent: #B37A1A;
     --text: #1A1816;
