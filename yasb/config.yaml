@@ -148,33 +148,62 @@ widgets:
       label_alt: "<span>\u0950</span> {data}"
       tooltip: false
       exec_options:
-        run_cmd: "powershell -NoProfile -ExecutionPolicy Bypass -File C:\\Users\\haris\\.config\\yasb\\tools\\saka\\saka-today.ps1"
+        run_cmd: "C:\\Users\\haris\\.config\\yasb\\tools\\saka\\target\\release\\saka.exe --today"
         run_interval: 600000
         return_format: "string"
       callbacks:
-        on_left: "do_nothing"
+        # Left opens the full panchangam panel: tithi, nakshatra, yoga, karana,
+        # vara, moon phase, amanta/purnimanta framing and both eras. It is a
+        # separate layered window because CustomWidget has no popup support;
+        # it themes itself off the active styles.css block and 1 Hz refreshes.
+        on_left: "exec silent-run C:\\Users\\haris\\.config\\yasb\\tools\\saka-popup\\target\\release\\saka-popup.exe"
         on_middle: "toggle_label"
   pomodoro:
-    type: "yasb.custom.CustomWidget"
+    type: "yasb.pomodoro.PomodoroWidget"
     options:
       class_name: "pomodoro-widget"
-      # 55/5 focus timer. Label states: "55:00" idle | "54:59" working |
-      # "p 54:12" paused | "b 04:32" on break. Left = start/pause/resume,
-      # middle = skip to next phase, right = reset. The 1s poll folds elapsed
-      # wall-clock time into a state file, so a running timer survives bar
-      # reloads and reboots. Docs: tools/pomodoro/pomodoro.md
-      label: "<span>\uf017</span> {data}"
-      label_alt: "{data}"
-      tooltip: false
-      exec_options:
-        # direct exe poll: no PowerShell spawn per tick (1/s, ~0 cost)
-        run_cmd: "C:\\Users\\haris\\.config\\yasb\\tools\\pomodoro\\target\\release\\pomodoro.exe tick"
-        run_interval: 1000
-        return_format: "string"
+      # Native widget, 55/5. Left click opens the circular-timer popup; the
+      # popup and the bar chip are styled from `.pomodoro-menu` in styles.css,
+      # so both follow the active theme. The two circle colours below are the
+      # one part the widget paints itself: yasb-theme rewrites them from the
+      # active theme block on every switch, like the cava widget's.
+      label: "<span>\uf252</span> {remaining}"
+      label_alt: "{session}/{total_sessions} - {remaining}"
+      work_duration: 55
+      break_duration: 5
+      long_break_duration: 15
+      long_break_interval: 4
+      auto_start_breaks: true
+      auto_start_work: true
+      sound_notification: false
+      show_notification: true
+      progress_bar:
+        enabled: true
+        progress_type: "circular"
+        size: 18
+        thickness: 3
+        position: "left"
+        animation: true
+      menu:
+        blur: true
+        round_corners: true
+        round_corners_type: "normal"
+        border_color: None
+        alignment: "right"
+        direction: "down"
+        offset_top: 6
+        offset_left: 0
+        circle_size: 170
+        circle_thickness: 8
+        circle_work_progress_color: "#B082C4"
+        circle_break_progress_color: "#5CA89B"
       callbacks:
-        on_left: "exec silent-run C:\\Users\\haris\\.config\\yasb\\tools\\pomodoro\\target\\release\\pomodoro.exe toggle"
-        on_middle: "exec silent-run C:\\Users\\haris\\.config\\yasb\\tools\\pomodoro\\target\\release\\pomodoro.exe skip"
-        on_right: "exec silent-run C:\\Users\\haris\\.config\\yasb\\tools\\pomodoro\\target\\release\\pomodoro.exe reset"
+        # `toggle_menu` is YASB's convention for widgets whose popup key is
+        # `menu` (wifi/language/disk all use it). Middle keeps the old
+        # left-click behaviour: start / pause / resume.
+        on_left: "toggle_menu"
+        on_middle: "toggle_timer"
+        on_right: "toggle_label"
   volume:
     type: yasb.volume.VolumeWidget
     options:

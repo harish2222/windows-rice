@@ -1,9 +1,16 @@
 [package]
 name = "saka"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 
 [dependencies]
+
+# Library target: the panchangam engine, shared by the CLI below and by the
+# saka-popup Win32 frontend in ../saka-popup. The [[bin]] path is pinned so
+# cargo can never fall back to a stale file at the crate root (see saka.md).
+[lib]
+name = "saka"
+path = "src/lib.rs"
 
 [[bin]]
 name = "saka"

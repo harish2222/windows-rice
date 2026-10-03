@@ -97,7 +97,7 @@ fn run() -> Result<(), String> {
             let mut sheet = parse(&read_styles(&styles)?)?;
             let new = sheet.set(name)?;
             sheet.write(&styles)?;
-            sync_cava_colors(&config, &sheet, &new)?;
+            sync_config_colors(&config, &sheet, &new)?;
             println!("{new}");
             Ok(())
         }
@@ -105,7 +105,7 @@ fn run() -> Result<(), String> {
             let mut sheet = parse(&read_styles(&styles)?)?;
             let new = sheet.step(1)?;
             sheet.write(&styles)?;
-            sync_cava_colors(&config, &sheet, &new)?;
+            sync_config_colors(&config, &sheet, &new)?;
             println!("{new}");
             Ok(())
         }
@@ -113,7 +113,7 @@ fn run() -> Result<(), String> {
             let mut sheet = parse(&read_styles(&styles)?)?;
             let new = sheet.step(-1)?;
             sheet.write(&styles)?;
-            sync_cava_colors(&config, &sheet, &new)?;
+            sync_config_colors(&config, &sheet, &new)?;
             println!("{new}");
             Ok(())
         }
@@ -151,17 +151,39 @@ fn default_config_path() -> PathBuf {
     Path::new(&home).join(".config").join("yasb").join("config.yaml")
 }
 
-/// Recolor the cava widget in config.yaml from the active theme block so the
-/// visualizer follows the palette. Only the four color lines inside the
-/// `cava:` section are touched; everything else stays byte-identical.
-fn sync_cava_colors(config: &Path, sheet: &Stylesheet, theme: &str) -> Result<(), String> {
+/// Recolor the colour values that live in config.yaml and cannot be reached by
+/// CSS, using the active theme block, so those widgets follow the palette too.
+///
+/// Only the listed keys inside the listed sections are touched; everything else
+/// stays byte-identical. Two groups today:
+///
+/// * `cava` — the visualizer's four colours, which YASB reads straight from
+///   the config rather than from the stylesheet.
+/// * `pomodoro` — the ring drawn inside the native widget's popup. The widget
+///   paints that progress circle itself, so a hex in the config is the only
+///   way to theme it.
+fn sync_config_colors(config: &Path, sheet: &Stylesheet, theme: &str) -> Result<(), String> {
     let vars = sheet.theme_vars(theme);
-    let get = |k: &str| vars.get(k).cloned().unwrap_or_else(|| "#89b4fa".to_string());
-    let targets = [
-        ("foreground:", get("teal")),
-        ("gradient_color_1:", get("blue")),
-        ("gradient_color_2:", get("mauve")),
-        ("gradient_color_3:", get("peach")),
+    let get = |k: &str, fallback: &str| {
+        vars.get(k).cloned().unwrap_or_else(|| fallback.to_string())
+    };
+    let sections: Vec<(&str, Vec<(&str, String)>)> = vec![
+        (
+            "cava",
+            vec![
+                ("foreground:", get("teal", "#89b4fa")),
+                ("gradient_color_1:", get("blue", "#89b4fa")),
+                ("gradient_color_2:", get("mauve", "#cba6f7")),
+                ("gradient_color_3:", get("peach", "#fab387")),
+            ],
+        ),
+        (
+            "pomodoro",
+            vec![
+                ("circle_work_progress_color:", get("mauve", "#a6e3a1")),
+                ("circle_break_progress_color:", get("teal", "#89b4fa")),
+            ],
+        ),
     ];
     let raw = fs::read(config).map_err(|e| format!("cannot read {}: {e}", config.display()))?;
     let text =
@@ -169,38 +191,43 @@ fn sync_cava_colors(config: &Path, sheet: &Stylesheet, theme: &str) -> Result<()
     let newline = if text.contains("\r\n") { "\r\n" } else { "\n" }.to_string();
     let ends_with_newline = text.ends_with('\n');
     let mut lines: Vec<String> = text.lines().map(str::to_string).collect();
-    let Some(start) = lines.iter().position(|l| l.trim() == "cava:") else {
-        return Ok(()); // no cava widget configured; nothing to do
-    };
-    let mut end = lines.len();
-    for (j, line) in lines.iter().enumerate().skip(start + 1) {
-        let t = line.trim_start();
-        if t.is_empty() {
-            continue;
-        }
-        if !line.starts_with(' ') && !line.starts_with('\t') {
-            end = j;
-            break;
-        }
-        if line.starts_with("  ") && !line.starts_with("   ") {
-            end = j;
-            break;
-        }
-    }
-    for line in &mut lines[start + 1..end] {
-        let t = line.trim_start().to_string();
-        for (key, val) in &targets {
-            if t.starts_with(key) {
-                if let Some(q1) = t.find('"') {
-                    if let Some(q2) = t[q1 + 1..].find('"') {
-                        let indent = &line[..line.len() - line.trim_start().len()];
-                        *line = format!("{indent}{key} \"{val}\"{}", &t[q1 + 1 + q2 + 1..]);
-                    }
-                }
+
+    for (section, targets) in &sections {
+        let Some(start) = lines.iter().position(|l| l.trim() == format!("{section}:")) else {
+            continue; // widget not configured; nothing to do
+        };
+        // The section runs until the next line at the same indent level.
+        let mut end = lines.len();
+        for (j, line) in lines.iter().enumerate().skip(start + 1) {
+            let t = line.trim_start();
+            if t.is_empty() {
+                continue;
+            }
+            if !line.starts_with(' ') && !line.starts_with('\t') {
+                end = j;
+                break;
+            }
+            if line.starts_with("  ") && !line.starts_with("   ") {
+                end = j;
                 break;
             }
         }
+        for line in &mut lines[start + 1..end] {
+            let t = line.trim_start().to_string();
+            for (key, val) in targets {
+                if t.starts_with(key) {
+                    if let Some(q1) = t.find('"') {
+                        if let Some(q2) = t[q1 + 1..].find('"') {
+                            let indent = &line[..line.len() - line.trim_start().len()];
+                            *line = format!("{indent}{key} \"{val}\"{}", &t[q1 + 1 + q2 + 1..]);
+                        }
+                    }
+                    break;
+                }
+            }
+        }
     }
+
     let mut out = lines.join(&newline);
     if ends_with_newline {
         out.push_str(&newline);
