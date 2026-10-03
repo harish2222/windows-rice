@@ -12,6 +12,10 @@ path = "src/main.rs"
 # cannot drift apart.
 saka = { path = "../saka" }
 
+# Shared stylesheet parsing and CSS colour parsing, so the popup and the
+# palette picker cannot disagree about what the active theme looks like.
+yasb-theme = { path = "../theme/yasb-theme" }
+
 # Raw Win32 rather than a GUI toolkit. The popup repaints once a second and has
 # to stay visually identical to the YASB popups; a webview or a GPU toolkit
 # would cost far more than the hand-written paint code, and needs no build-time
