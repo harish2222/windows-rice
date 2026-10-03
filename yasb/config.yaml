@@ -122,8 +122,13 @@ widgets:
   clock:
     type: yasb.clock.ClockWidget
     options:
-      label: '{%a, %d %b %H:%M}<span>{alarm}</span>'
-      label_alt: '{%a, %d %b %H:%M}'
+      # The alarm span renders inside .label and QSS cannot target a bare
+      # <span>, so the separator lives in the label itself. U+2002 is an
+      # en-space: reads as a gap at any font size, and it disappears with
+      # the alarm when none is set. Must stay double-quoted - single
+      # quotes are literal in YAML and would print "\u2002" verbatim.
+      label: "{%a, %d %b %H:%M}<span>\u2002{alarm}</span>"
+      label_alt: "{%a, %d %b %H:%M}"
       timezones: []
       calendar:
         round_corners: true

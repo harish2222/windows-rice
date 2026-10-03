@@ -94,6 +94,7 @@
     --accent-soft: rgba(217, 154, 43, 0.55);
     --frame: #D99A2B;
     --motif: url("C:/Users/haris/.config/yasb/motif-base.svg");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-base-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-base.svg"); */
 
     /* Rangalipi Ember */
@@ -148,6 +149,7 @@
     --accent-soft: rgba(201, 111, 47, 0.55);
     --frame: #C96F2F;
     --motif: url("C:/Users/haris/.config/yasb/motif-ember.svg");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-ember-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-ember.svg"); */
 
     /* Rangalipi Ember Light */
@@ -202,6 +204,7 @@
     --accent-soft: rgba(180, 95, 39, 0.55);
     --frame: #8A6240;
     --motif: url("C:/Users/haris/.config/yasb/motif-ember.svg");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-ember-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-ember.svg"); */
 
     /* Rangalipi Mossfern */
@@ -256,6 +259,7 @@
     --accent-soft: rgba(130, 172, 84, 0.55);
     --frame: #82AC54;
     --motif: url("C:/Users/haris/.config/yasb/motif-moss.svg");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-moss-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-moss.svg"); */
 
     /* Rangalipi Mossfern Light */
@@ -310,6 +314,7 @@
     --accent-soft: rgba(95, 138, 60, 0.55);
     --frame: #6B7444;
     --motif: url("C:/Users/haris/.config/yasb/motif-moss.svg");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-moss-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-moss.svg"); */
 
     /* Rangalipi Wine - active */
@@ -421,6 +426,7 @@
     --accent-soft: rgba(168, 62, 88, 0.55);
     --frame: #8A5460;
     --motif: url("C:/Users/haris/.config/yasb/motif-paisley.svg");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-paisley-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-wine.svg"); */
 
     /* Rangalipi Dune */
@@ -475,6 +481,7 @@
     --accent-soft: rgba(192, 138, 36, 0.55);
     --frame: #C08A24;
     --motif: url("C:/Users/haris/.config/yasb/motif-dune.svg");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-dune-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-dune.svg"); */
 
     /* Rangalipi Dune Light */
@@ -529,6 +536,7 @@
     --accent-soft: rgba(168, 116, 28, 0.55);
     --frame: #8A6E3E;
     --motif: url("C:/Users/haris/.config/yasb/motif-dune.svg");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-dune-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-dune.svg"); */
 
     /* Rangalipi Matcha */
@@ -583,6 +591,7 @@
     --accent-soft: rgba(147, 176, 76, 0.55);
     --frame: #93B04C;
     --motif: url("C:/Users/haris/.config/yasb/motif-matcha.svg");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-matcha-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-matcha.svg"); */
 
     /* Rangalipi Matcha Light */
@@ -637,6 +646,7 @@
     --accent-soft: rgba(122, 148, 60, 0.55);
     --frame: #76794C;
     --motif: url("C:/Users/haris/.config/yasb/motif-matcha.svg");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-matcha-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-matcha.svg"); */
 
     /* Rangalipi Espresso */
@@ -691,6 +701,7 @@
     --accent-soft: rgba(198, 138, 75, 0.55);
     --frame: #C68A4B;
     --motif: url("C:/Users/haris/.config/yasb/motif-espresso.svg");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-espresso-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-espresso.svg"); */
 
     /* Rangalipi Espresso Light */
@@ -745,6 +756,7 @@
     --accent-soft: rgba(168, 116, 60, 0.55);
     --frame: #8A6E4E;
     --motif: url("C:/Users/haris/.config/yasb/motif-espresso.svg");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-espresso-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-espresso.svg"); */
 
     /* Rangalipi Noir */
@@ -799,6 +811,7 @@
     --accent-soft: rgba(206, 65, 82, 0.55);
     --frame: #CE4152;
     --motif: url("C:/Users/haris/.config/yasb/motif-noir.svg");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-noir-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-noir.svg"); */
 
     /* Rangalipi Noir Light */
@@ -853,6 +866,7 @@
     --accent-soft: rgba(174, 53, 70, 0.55);
     --frame: #8A525C;
     --motif: url("C:/Users/haris/.config/yasb/motif-noir.svg");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-noir-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-noir.svg"); */
 
     /* Rangalipi Aubergine */
@@ -907,6 +921,7 @@
     --accent-soft: rgba(166, 127, 212, 0.55);
     --frame: #A67FD4;
     --motif: url("C:/Users/haris/.config/yasb/motif-aubergine.svg");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-aubergine-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-aubergine.svg"); */
 
     /* Rangalipi Aubergine Light */
@@ -961,6 +976,7 @@
     --accent-soft: rgba(138, 99, 184, 0.55);
     --frame: #6E5E8A;
     --motif: url("C:/Users/haris/.config/yasb/motif-aubergine.svg");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-aubergine-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-aubergine.svg"); */
 
     /* Rangalipi Clay */
@@ -1015,6 +1031,7 @@
     --accent-soft: rgba(201, 104, 60, 0.55);
     --frame: #C9683C;
     --motif: url("C:/Users/haris/.config/yasb/motif-clay.svg");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-clay-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-clay.svg"); */
 
     /* Rangalipi Clay Light */
@@ -1069,6 +1086,7 @@
     --accent-soft: rgba(168, 86, 48, 0.55);
     --frame: #8A5E44;
     --motif: url("C:/Users/haris/.config/yasb/motif-clay.svg");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-clay-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-clay.svg"); */
 
     /* Rangalipi Olive */
@@ -1123,6 +1141,7 @@
     --accent-soft: rgba(168, 160, 58, 0.55);
     --frame: #A8A03A;
     --motif: url("C:/Users/haris/.config/yasb/motif-olive.svg");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-olive-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-olive.svg"); */
 
     /* Rangalipi Olive Light */
@@ -1177,6 +1196,7 @@
     --accent-soft: rgba(138, 132, 48, 0.55);
     --frame: #74714A;
     --motif: url("C:/Users/haris/.config/yasb/motif-olive.svg");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-olive-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-olive.svg"); */
 
     /* Bright-wallpaper theme.
@@ -1233,14 +1253,22 @@
     --accent-soft: rgba(179, 122, 26, 0.55);
     --frame: #8A6D3B;
     --motif: url("C:/Users/haris/.config/yasb/motif-base.svg");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-base-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-base.svg"); */
 }
 
 /* Global Defaults */
+/* TYPOGRAPHY POLICY: ONE family (--system-font) and ONE weight
+   (--fontWeight) everywhere - bar, menus and popups alike - with
+   line-height pinned so vertical rhythm does not shift when the manual
+   font switch changes --system-font. Hierarchy comes from size and
+   colour only. The lone exception is icon-only selectors, which use
+   "Segoe Fluent Icons" deliberately to get the glyph set. */
 * {
     font-size: var(--fontSize);
     font-weight: var(--fontWeight);
     font-family: var(--system-font);
+    line-height: 1.3;
     color: var(--text);
 }
 
@@ -1362,10 +1390,14 @@
 }
 
 /* Base Widget Styles - plain strip */
+/* BAR SPACING POLICY: .widget owns the horizontal rhythm (7px pad + 3px
+   margin). Chips that need a different look override padding for vertical
+   only - restating horizontal padding here is what previously made the
+   clock sit visibly tighter than the saka and pomodoro chips beside it. */
 .widget {
-    padding-left: 6px;
-    padding-right: 6px;
-    margin: 0 2px;
+    padding-left: 7px;
+    padding-right: 7px;
+    margin: 0 3px;
     background-color: transparent;
     border-radius: 0;
     border: none;
@@ -1429,29 +1461,30 @@
     background-color: var(--background2);
 }
 
-/* Clock */
-
-.clock-widget .widget-container {
+/* Clock */.clock-widget .widget-container {
     background-color: transparent;
     border: none;
     border-radius: 0;
-    margin: 1px 1px;
-    padding: 2px 4px;
+    margin: 0;
+    padding: 0;
 }
-
+/* No margin here: the label already separates from the alarm with an
+   en-space, and adding horizontal margin on top cramped the time. */
 .clock-widget .label {
     color: var(--text);
-    margin: 0 2px;
+    margin: 0;
 }
-
+/* Inherits .widget padding so the clock sits on the same rhythm as every
+   other chip; the old 2px override made it visibly tighter. */
 .clock-widget {
-    padding: 2px 2px;
+    padding: 0 7px;
+    margin: 0 3px;
 }
-
 .clock-widget .icon.alarm {
     color: var(--text);
-    padding-left: 4px;
-    padding-right: 4px;
+    /* Small gap only: the label's en-space supplies the main separation. */
+    padding-left: 0;
+    padding-right: 3px;
 }
 .clock-popup.alarm,
 .clock-popup.timer,
@@ -1462,9 +1495,13 @@
     border-radius: var(--border-radius);
     border: 3px double var(--border);
     /* UNIFORM: one type system for the whole popup (incl. week label etc.) -
-       font props propagate to every child in QSS, same as the bar. */
+       font props propagate to every child in QSS, same as the bar.
+       line-height is set explicitly so vertical rhythm is identical
+       whatever --system-font is set to; QSS otherwise derives leading
+       from the font, which made the header spacing font-dependent. */
     font-family: var(--system-font);
     font-weight: var(--fontWeight);
+    line-height: 1.3;
 }
 .clock-popup.calendar .calendar-table,
 .clock-popup.calendar .calendar-table::item {
@@ -1473,6 +1510,7 @@
     font-family: var(--system-font);
     font-size: var(--fontSize);
     font-weight: var(--fontWeight);
+    line-height: 1.35;
     margin: 0;
     padding: 0;
     border: none;
@@ -1490,52 +1528,65 @@
     border-radius: var(--border-radius3);
 }
 /* ═══ APPLE-STYLE DATE PANEL ═══
-   weekday in small caps · day numeral huge + light-feeling · month/year
-   tight on one line · hierarchy from size & colour only. */
+   weekday in small caps · day numeral hero · month/year tight under it.
+   SPACING: every gap here is positive padding. The panel previously faked
+   tight leading with margin-top: -26px on the numeral and -30px on the
+   month, which only lined up for one font size — switching --system-font
+   pushed the month into the numeral's descender. Padding + an explicit
+   line-height keeps the stack correct at any font, and the gap scales
+   with the panel instead of being pinned to magic numbers. */
 .clock-popup.calendar .day-label {
     /* small caps weekday like macOS date header */
     font-size: 12px;
+    line-height: 16px;
     letter-spacing: 2px;
     text-transform: uppercase;
     color: var(--subtext);
-    margin-top: 22px;
+    padding: 18px 0 2px 0;
 }
 .clock-popup.calendar .date-label {
-    /* the hero numeral: oversized, accent, tight leading */
+    /* the hero numeral: oversized, accent, explicit line box so the
+       month below sits clear of the digits' descenders */
     font-size: 96px;
+    line-height: 100px;
     font-weight: var(--fontWeight);
-    margin-top: -26px;
     color: var(--accent);
+    padding: 0;
     min-width: 180px;
     max-width: 180px;
 }
 .clock-popup.calendar .month-label {
     /* month + year read as one tight line, quiet under the numeral */
     font-size: 15px;
+    line-height: 20px;
     letter-spacing: 1px;
     text-transform: uppercase;
     color: var(--text);
-    margin-top: -30px;
+    padding: 6px 0 0 0;
 }
 .clock-popup.calendar .year-label {
     font-size: 15px;
+    line-height: 20px;
     letter-spacing: 1px;
     color: var(--subtext);
-    margin-top: 2px;
+    padding: 0;
 }
 /* festival/today emphasis inside the popup header area */
 .clock-popup.calendar .holiday-label {
     font-size: 12px;
+    line-height: 18px;
     letter-spacing: 1px;
     color: var(--holiday);
-    padding: 2px 0 6px 0;
+    padding: 6px 0 4px 0;
 }/* ═══ SAKA BAR CHIP — quiet companion to the clock ═══ */
 .saka-widget {
-    padding: 0 4px;
+    padding: 0 7px;
+    margin: 0 3px;
 }
 .saka-widget .label {
     font-family: var(--system-font);
     font-size: 11px;
+    line-height: 1.3;
     font-weight: var(--fontWeight);
     letter-spacing: 0.5px;
     color: var(--subtext);
@@ -1543,7 +1594,7 @@
 .saka-widget .icon {
     font-size: 12px;
     color: var(--accent);
-    padding-right: 2px;
+    padding-right: 3px;
 }
 .saka-widget:hover .label {
     color: var(--text);
@@ -1553,11 +1604,13 @@
    States printed by the tool: "55:00" idle, "MM:SS" working,
    "p MM:SS" paused, "b MM:SS" on break. */
 .pomodoro-widget {
-    padding: 0 4px;
+    padding: 0 7px;
+    margin: 0 3px;
 }
 .pomodoro-widget .label {
     font-family: var(--system-font);
     font-size: 11px;
+    line-height: 1.3;
     font-weight: var(--fontWeight);
     letter-spacing: 1px;
     font-variant-numeric: tabular-nums;
