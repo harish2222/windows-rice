@@ -1,0 +1,27 @@
+[package]
+name = "palette-picker"
+version = "0.2.0"
+edition = "2021"
+
+[[bin]]
+name = "palette-picker"
+path = "src/main.rs"
+
+[dependencies]
+# Shared stylesheet parsing and CSS colour parsing, so the picker cannot
+# disagree with yasb-theme about which block is active or what colour a
+# custom property resolves to.
+yasb-theme = { path = "../../theme/yasb-theme" }
+
+# Raw Win32 + GDI rather than a GUI toolkit, matching saka-popup. The picker
+# is one small frameless window with a hand-drawn grid; there is no widget
+# toolkit, stylesheet engine or layout system worth pulling in for it.
+[dependencies.windows]
+version = "0.58"
+features = [
+    "Win32_Foundation",
+    "Win32_Graphics_Gdi",
+    "Win32_System_LibraryLoader",
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_UI_WindowsAndMessaging",
+]

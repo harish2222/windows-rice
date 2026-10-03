@@ -328,6 +328,11 @@ impl Stylesheet {
                 comment_last(&mut self.lines, last);
                 mark_header(&mut self.lines, header_idx, false);
             }
+            // Keep the cached flag in step with the line we just rewrote.
+            // Otherwise active_name() still reports the previously active
+            // theme after a switch, which silently breaks a second step() or
+            // set() inside the same process.
+            self.regions[i].marked_active = activate;
         }
         Ok(self.regions[target].name.clone())
     }
@@ -527,6 +532,33 @@ fn whole_root(css: &str) -> Option<&str> {
 }
 
 
+/// Force every pixel of a top-down 32-bit BGRA DIB to full alpha.
+///
+/// GDI drawing (`FillRect`, `DrawText`, `FrameRect`) writes only the
+/// three colour bytes and leaves the fourth untouched, so a freshly
+/// created DIB section has an alpha of 0 everywhere. Handing that to
+/// `UpdateLayeredWindow` with `AC_SRC_ALPHA` renders the window fully
+/// transparent — the panel is created, positioned and invisible.
+///
+/// The windows that use this draw an opaque panel, so setting alpha to
+/// 255 is correct. Call it after the GDI work and before
+/// `UpdateLayeredWindow`.
+///
+/// `bits` is the DIB pixel pointer, `w`x`h` pixels, 4 bytes each.
+pub fn force_opaque_alpha(bits: *mut u8, w: i32, h: i32) {
+    if bits.is_null() || w <= 0 || h <= 0 {
+        return;
+    }
+    for y in 0..h {
+        let row = unsafe { bits.offset((y as isize) * (w as isize) * 4) };
+        let mut i = 0isize;
+        while i < w as isize * 4 {
+            unsafe { *row.offset(i + 3) = 255 };
+            i += 4;
+        }
+    }
+}
+
 /// Pull `--name: value;` pairs out of a chunk of CSS.
 fn parse_decls(chunk: &str) -> Vec<(String, String)> {
     let mut out = Vec::new();
@@ -567,3 +599,7 @@ fn parse_decls(chunk: &str) -> Vec<(String, String)> {
     out
 }
 
+
+#[cfg(test)]
+#[path = "tests.rs"]
+mod tests;

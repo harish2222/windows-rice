@@ -36,10 +36,22 @@ node_modules/
 !yasb/tools/saka-popup/Cargo.lock
 !yasb/tools/pomodoro/Cargo.lock
 !yasb/tools/theme/yasb-theme/Cargo.lock
-# keep the picker's documentation visible even though the dir is ignored
+# The picker's Python source and PyInstaller artifacts are NOT tracked (they
+# are a superseded fallback and pull in a large binary). The Rust crate IS the
+# tool now, so its sources are tracked; target/ stays ignored via the rule
+# above.
 !yasb/tools/picker/
 yasb/tools/picker/*
 !yasb/tools/picker/picker.md
+!yasb/tools/picker/palette-themes.json
+!yasb/tools/picker/palette-picker/
+yasb/tools/picker/palette-picker/*
+!yasb/tools/picker/palette-picker/Cargo.toml
+!yasb/tools/picker/palette-picker/Cargo.lock
+!yasb/tools/picker/palette-picker/src/
+!yasb/tools/picker/palette-picker/src/*.rs
+!yasb/tools/picker/palette-picker/capture-screen.py
+!yasb/tools/picker/palette-picker/capture-window.py
 *.tmp
 Thumbs.db
 desktop.ini
