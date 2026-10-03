@@ -332,6 +332,10 @@ unsafe fn paint(hwnd: HWND) {
     let _ = DeleteObject(HGDIOBJ(font.0));
     let _ = DeleteObject(HGDIOBJ(head_font.0));
 
+    // GDI never writes the alpha byte, so the DIB is all-zero alpha and
+    // UpdateLayeredWindow would draw nothing.
+    yasb_theme::force_opaque_alpha(bits.cast::<u8>(), w, h);
+
     let src = POINT { x: 0, y: 0 };
     let blend = BLENDFUNCTION {
         BlendOp: AC_SRC_OVER as u8,
@@ -356,7 +360,6 @@ unsafe fn paint(hwnd: HWND) {
     let _ = DeleteObject(HGDIOBJ(bmp.0));
     let _ = DeleteDC(dc_mem);
     let _ = DeleteDC(dc_screen);
-    let _ = bits;
 }
 
 fn month_abbr(m: u32) -> &'static str {

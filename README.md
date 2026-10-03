@@ -29,9 +29,10 @@ Every script and tool in this rice has a one-page doc next to its source:
 | Doc | Tool |
 |---|---|
 | [`yasb/tools/saka/saka.md`](yasb/tools/saka/saka.md) | **Saka calendar converter** (Rust) — Indian national date on the bar; includes the why-1948-in-2026 era math |
-| [`yasb/tools/pomodoro/pomodoro.md`](yasb/tools/pomodoro/pomodoro.md) | **Pomodoro focus timer** (Rust) — 55 min work / 5 min break chip on the bar's right side |
-| [`yasb/tools/theme/theme.md`](yasb/tools/theme/theme.md) | **Theme switch engine** (Rust) — recolours the whole bar between Rangalipi themes |
-| [`yasb/tools/picker/picker.md`](yasb/tools/picker/picker.md) | **Palette & font pickers** (PyQt6) — dmenu-style GUIs for themes and fonts |
+| [`yasb/tools/pomodoro/pomodoro.md`](yasb/tools/pomodoro/pomodoro.md) | **Pomodoro focus timer** — the bar now uses YASB's native `PomodoroWidget` (55/5); the old Rust timer is kept as a fallback |
+| [`yasb/tools/theme/theme.md`](yasb/tools/theme/theme.md) | **Theme switch engine** (Rust) — recolours the whole bar between Rangalipi themes; also a shared library |
+| [`yasb/tools/saka-popup/saka-popup.md`](yasb/tools/saka-popup/saka-popup.md) | **Panchangam panel** (Rust/Win32) — the full Telugu panchangam in a layered top-level window |
+| [`yasb/tools/picker/picker.md`](yasb/tools/picker/picker.md) | **Palette & font pickers** — the palette picker is Rust/Win32 (layered, no Qt); a PyQt6 version is kept as a fallback |
 | [`yasb/tools/setup/setup.md`](yasb/tools/setup/setup.md) | **Bootstrap & submission pipeline** — replicate the rice; package a theme for yasb-themes |
 | [`hotkeys-overlay/hotkeys-overlay.md`](hotkeys-overlay/hotkeys-overlay.md) | **Hotkey cheatsheet overlay** (Rust/Win32) — the `Alt+/` popup |
 | [`yasb/configs/README.md`](yasb/configs/README.md) | Snapshots of the live GlazeWM/Komorebi configs |
@@ -58,14 +59,19 @@ yasbc reload
 ```
 
 Rust tools rebuild with `cargo build --release` inside their crate
-(`yasb/tools/saka`, `yasb/tools/pomodoro`, `yasb/tools/theme/yasb-theme`,
-`hotkeys-overlay`); the theme exe redeploys via
-`yasb/tools/theme/yasb-theme-build.ps1`. Saka and pomodoro carry `cargo
-test` suites (saka's pins the official Gazette month table); the whole
-chain rebuilds + verifies via `yasb/tools/setup/yasb-setup.ps1`.
+(`yasb/tools/saka`, `yasb/tools/saka-popup`,
+`yasb/tools/picker/palette-picker`, `yasb/tools/theme/yasb-theme`,
+`yasb/tools/pomodoro`, `hotkeys-overlay`); the theme exe redeploys via
+`yasb/tools/theme/yasb-theme-build.ps1`. Saka, saka-popup, the picker
+and yasb-theme carry `cargo test` suites (saka's pins the official
+Gazette month table); the whole chain rebuilds + verifies via
+`yasb/tools/setup/yasb-setup.ps1`.
 
 The bar also ships a **55/5 pomodoro chip** (`pomodoro` widget, right
-section): left-click start/pause, middle-click skip, right-click reset.
+section), driven by YASB's native `PomodoroWidget`: left-click opens the
+circular-timer popup, middle-click starts/pauses, right-click swaps the
+label. The popup and chip follow the active Rangalipi theme, and
+`yasb-theme` rewrites the two circle colours on every switch.
 
 ## Notes
 

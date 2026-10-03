@@ -318,7 +318,11 @@ widgets:
         run_interval: 10000
         return_format: "string"
       callbacks:
-        on_left: "exec silent-run C:\\Users\\haris\\.config\\yasb\\tools\\picker\\palette-picker.exe"
+        # Rust picker (tools/picker/palette-picker). It reads its own catalog
+        # (palette-themes.json), the active theme and the stylesheet, then
+        # paints a layered Win32 grid. Type to filter, arrows/Enter to apply.
+        # palette-picker.py is kept alongside as a documented fallback.
+        on_left: "exec silent-run C:\\Users\\haris\\.config\\yasb\\tools\\picker\\palette-picker\\target\\release\\palette-picker.exe"
         on_middle: "toggle_label"
         on_right: "exec silent-run C:\\Users\\haris\\.config\\yasb\\tools\\theme\\yasb-theme.exe next"
   # OFFLINE-ONLY komorebi control (native CustomWidget hide_empty):

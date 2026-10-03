@@ -51,6 +51,32 @@ Two deliberate departures from a plain QSS popup:
   Telugu script is toggled on, because GDI does no automatic font fallback for
   missing glyphs.
 
+## The alpha trap (read before touching the paint code)
+
+Windows presented with `UpdateLayeredWindow` + `AC_SRC_ALPHA` are composited
+**from the alpha byte of every pixel**. GDI — `FillRect`, `DrawText`,
+`FrameRect` — writes RGB but never writes that alpha byte, so a freshly
+created 32-bit DIB is `alpha = 0` across the whole surface and
+`UpdateLayeredWindow` renders **nothing at all**: the window exists, is
+topmost, and is invisible.
+
+The fix lives in the shared theme library so the panel and the palette picker
+cannot drift:
+
+```rust
+// tools/theme/yasb-theme/src/lib.rs
+pub fn force_opaque_alpha(bits: *mut u8, w: i32, h: i32)
+```
+
+Call it **after** all GDI drawing and **before** `UpdateLayeredWindow`. The
+debug assertion for this is one line: after painting, a DIB pixel at (0, 0)
+must read `(r, g, b, 255)` — e.g. `(21, 16, 29, 255)` for Rangalipi Wine's
+`--acrylic`. If the fourth byte is 0, this is why.
+
+The same class of bug also blocks screenshots: `PIL.ImageGrab` and
+`PrintWindow`+`PW_RENDERFULLCONTENT` both miss layered windows. Use `BitBlt`
+with `CAPTUREBLT` (`0x40000000`) from the screen DC.
+
 ## Building
 
 ```sh
@@ -90,7 +116,9 @@ smoke: ok (10 rows)
 blocks cannot leak values, every CSS colour form parses, alpha composites
 correctly, and a missing `styles.css` falls back to a default palette instead of
 panicking. The engine's own tests live in `../saka` (`tests/panchang.rs`), where
-the elements are pinned to Drik Panchang.
+the elements are pinned to Drik Panchang. `src/theme.rs` re-exports `Rgba`,
+`parse_color` and `active_theme_vars` straight from the shared `yasb-theme`
+library rather than re-implementing them.
 
 ## Known limits
 
