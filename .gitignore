@@ -33,6 +33,7 @@ node_modules/
 *.lock
 # Rust lockfiles are part of the source of truth for the bar tools
 !yasb/tools/saka/Cargo.lock
+!yasb/tools/saka-popup/Cargo.lock
 !yasb/tools/pomodoro/Cargo.lock
 !yasb/tools/theme/yasb-theme/Cargo.lock
 # keep the picker's documentation visible even though the dir is ignored

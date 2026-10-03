@@ -1,0 +1,28 @@
+[package]
+name = "saka-popup"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "saka-popup"
+path = "src/main.rs"
+
+[dependencies]
+# The panchangam engine lives in the sibling crate so the CLI and this popup
+# cannot drift apart.
+saka = { path = "../saka" }
+
+# Raw Win32 rather than a GUI toolkit. The popup repaints once a second and has
+# to stay visually identical to the YASB popups; a webview or a GPU toolkit
+# would cost far more than the hand-written paint code, and needs no build-time
+# assets.
+[dependencies.windows]
+version = "0.58"
+features = [
+    "Win32_Foundation",
+    "Win32_Graphics_Gdi",
+    "Win32_System_LibraryLoader",
+    "Win32_System_Threading",
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_UI_WindowsAndMessaging",
+]

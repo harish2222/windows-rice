@@ -2017,6 +2017,56 @@
     background-color: var(--background2);
 }
 
+/* Pomodoro-Widget popup: the native circular-timer menu. The ring itself is
+   painted by the widget from the two circle_* colours in config.yaml, which
+   yasb-theme rewrites from the active theme block on every switch; everything
+   around it is themed here. */
+.pomodoro-menu {
+    /* ACRYLIC 50% - per-theme --acrylic. */
+    background-color: var(--acrylic);
+    min-width: 220px;
+    border: 3px double var(--border);
+    border-radius: var(--border-radius);
+    /* mandala watermark under the glass, matching the media popup */
+    background-image: var(--motif-mandala);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+.pomodoro-menu .title,
+.pomodoro-menu .timer,
+.pomodoro-menu .session {
+    font-family: var(--system-font);
+    font-size: var(--fontSize);
+    font-weight: var(--fontWeight);
+    color: var(--text);
+    padding: 4px 8px;
+}
+.pomodoro-menu .session {
+    color: var(--subtext);
+}
+.pomodoro-menu .buttons,
+.pomodoro-menu .button-container {
+    background: transparent;
+    border: none;
+}
+.pomodoro-menu .pomodoro-button {
+    background-color: var(--chip);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius3);
+    font-family: var(--system-font);
+    font-size: var(--fontSize);
+    padding: 6px 14px;
+    margin: 4px;
+}
+.pomodoro-menu .pomodoro-button:hover {
+    background-color: var(--acrylic-hover);
+}
+.pomodoro-menu .pomodoro-button:pressed {
+    background-color: var(--accent-soft);
+}
+
 /* Wallpapers-Widget */
 .wallpapers-widget {
 }
@@ -2750,10 +2800,14 @@ Example: "Windows Media" becomes "windows-media" */
     min-width: 360px;
     border: 3px double var(--border);
     border-radius: var(--border-radius);
-    /* mandala corner watermark (0.35 baked alpha) under the glass */
-    background-image: var(--motif-corner);
+    /* Mandala fills the whole popup rather than sitting in one corner: the
+       full 420px motif, scaled with `cover` and centred, so it reads as a
+       backdrop behind every section instead of a corner decoration. The PNG
+       carries its own low alpha, so it stays a watermark under the text. */
+    background-image: var(--motif-mandala);
     background-repeat: no-repeat;
-    background-position: bottom right;
+    background-position: center;
+    background-size: cover;
 }
 
 /* SECTIONS */
