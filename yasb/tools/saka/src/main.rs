@@ -14,8 +14,8 @@
 use std::io::Write;
 
 use saka::{
-    MONTHS, MONTHS_DEVA, Script, civil_from_days, paksha_at, saka_from_greg,
-    tithi_name_at,
+    MONTHS, MONTHS_DEVA, Script, civil_at, civil_from_days, paksha_at,
+    saka_from_greg, tithi_name_at,
 };
 
 const DEFAULT_LAT: f64 = 17.3850; // Hyderabad
@@ -193,7 +193,10 @@ fn main() {
                     .duration_since(std::time::UNIX_EPOCH)
                     .map(|d| d.as_secs() as i64)
                     .unwrap_or(0);
-                Some(civil_from_days(now / 86400))
+                // Reckon the day in the configured zone, not UT: dividing the
+                // raw epoch by 86400 printed yesterday's date from midnight to
+                // 05:30 IST.
+                Some(civil_at(now, tz))
             } else {
                 None
             }
