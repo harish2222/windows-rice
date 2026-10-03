@@ -67,6 +67,17 @@ pub fn civil_from_days(z: i64) -> (i32, u32, u32) {
     (if m <= 2 { y + 1 } else { y }, m, d)
 }
 
+/// Civil (y, m, d) of a Unix timestamp in seconds, reckoned at `tz` hours
+/// east of UT.
+///
+/// `civil_from_days(secs / 86400)` gives the *UT* day, which in India is still
+/// yesterday from 00:00 to 05:30 IST — that is what made `saka --today` and
+/// the panchangam header print the previous day's date half the night.
+pub fn civil_at(secs: i64, tz: f64) -> (i32, u32, u32) {
+    let local = secs + (tz * 3600.0).round() as i64;
+    civil_from_days(local.div_euclid(86400))
+}
+
 // ---------------------------------------------------------------------------
 // Saka (Indian national) calendar — tropical solar, Gazette of India
 // ---------------------------------------------------------------------------
@@ -893,12 +904,18 @@ fn tithi_at(jd: f64) -> Element {
 impl Panchang {
     /// Build the panchang for a Julian Day at a place.
     pub fn at_jd(jd: f64, lat: f64, lon: f64, utc_offset: f64) -> Panchang {
+        // `jd` is an instant. The civil date it belongs to is the *local* day
+        // containing it (IST turns at 05:30 UT), while `hour_ut` stays on the
+        // UT day. Deriving both from the UT day made `Panchang::now` report
+        // yesterday's date — and weekday, Saka date and sunrise tithi to match
+        // — from midnight to 05:30 IST.
         let day_index = day_number(jd);
-        let (year, month, day) = civil_from_days(day_index);
+        let local_index = day_number(jd + utc_offset / 24.0);
+        let (year, month, day) = civil_from_days(local_index);
         let hour_ut = jd - (day_index as f64 + EPOCH_JD);
-        // day_index 0 is 1970-01-01, a Thursday. VARAS starts at Ravivara
+        // local_index 0 is 1970-01-01, a Thursday. VARAS starts at Ravivara
         // (Sunday), so shift by 4 to land on the right weekday.
-        let vara = (day_index + 4).rem_euclid(7) as usize;
+        let vara = (local_index + 4).rem_euclid(7) as usize;
 
         let sun = sun_longitude(jd);
         let moon_sid = moon_sidereal(jd);

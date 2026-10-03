@@ -10,8 +10,9 @@
 // flaky.
 use saka::{
     Element, NAKSHATRAS, Script, TITHIS, VARAS, YOGAS, Panchang, ayanamsa_lahiri,
-    civil_from_days, date_at, day_number, hhmm_at, julian_day, karana_name,
-    next_full_moon, next_new_moon, previous_new_moon, tithi_name_at,
+    civil_at, civil_from_days, date_at, day_number, days_from_civil, hhmm_at,
+    julian_day, karana_name, next_full_moon, next_new_moon, previous_new_moon,
+    tithi_name_at,
 };
 
 const LAT: f64 = 17.3850; // Hyderabad
@@ -333,4 +334,54 @@ fn hhmm_and_date_formatting() {
 fn element_helper_is_consistent() {
     let e = Element { index: 4, progress: 0.5, ends_jd: 0.0 };
     assert_eq!(e.index, 4);
+}
+
+// ---------------------------------------------------------------------------
+// An instant belongs to the *local* civil day
+// ---------------------------------------------------------------------------
+
+/// At 01:30 IST on 4 October, UT is still 3 October — the panel must say
+/// 4 October / Ravivara / Asvina 12, not yesterday's date. `Panchang::now`
+/// used to take the UT day, so from midnight to 05:30 IST the bar chip and
+/// the popup printed the previous day (wrong date, weekday and Saka date,
+/// while sunrise was already the new day's).
+#[test]
+fn instant_uses_local_civil_date_not_ut() {
+    let jd = julian_day(2026, 10, 3, 20.0); // 20:00 UT = 01:30 IST, Oct 4
+    let p = Panchang::at_jd(jd, LAT, LON, TZ);
+    assert_eq!((p.year, p.month, p.day), (2026, 10, 4));
+    assert_eq!(VARAS[p.vara], "Ravivara");
+    assert_eq!(p.saka_year, 1948);
+    assert_eq!(p.saka_month, 6); // Asvina
+    assert_eq!(p.saka_day, 12);
+    // Sunrise and sunset come from the same local day, so they must agree
+    // with the header instead of contradicting it.
+    assert_eq!(
+        date_at(p.sunrise_jd.expect("Hyderabad sunrise"), TZ),
+        "04 Oct 2026"
+    );
+}
+
+/// The same instant must still be 3 October when reckoned in UT.
+#[test]
+fn instant_keeps_ut_date_in_zero_zone() {
+    let jd = julian_day(2026, 10, 3, 20.0);
+    let p = Panchang::at_jd(jd, LAT, LON, 0.0);
+    assert_eq!((p.year, p.month, p.day), (2026, 10, 3));
+}
+
+/// `civil_at` applies the zone offset to raw epoch seconds — the helper
+/// behind `saka --today`, which used to divide the raw epoch by 86400 and
+/// print yesterday's date from midnight to 05:30 IST.
+#[test]
+fn civil_at_applies_zone_offset() {
+    let day3 = days_from_civil(2026, 10, 3) * 86400;
+    assert_eq!(civil_at(day3 + 18 * 3600, 5.5), (2026, 10, 3)); // 23:30 IST
+    assert_eq!(civil_at(day3 + 19 * 3600, 5.5), (2026, 10, 4)); // 00:30 IST
+    assert_eq!(civil_at(day3 + 19 * 3600, 0.0), (2026, 10, 3)); // 19:00 UT
+    // IST midnight is 18:30 UT: the UT day is still 3 October when the
+    // local day has already rolled to 4 October.
+    assert_eq!(civil_at(day3 + 18 * 3600 + 1799, 5.5), (2026, 10, 3));
+    assert_eq!(civil_at(day3 + 18 * 3600 + 1800, 5.5), (2026, 10, 4));
+    assert_eq!(civil_at(day3 + 18 * 3600 + 1800, 0.0), (2026, 10, 3));
 }
