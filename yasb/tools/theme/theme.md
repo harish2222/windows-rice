@@ -59,32 +59,60 @@ variable.
 The control-center, home and pomodoro panels paint the full-panel mandala
 via `background-image: var(--motif-mandala)`. Declaring that variable in
 only the *active* block meant the art vanished on every theme switch, so
-**all 22 blocks now declare it**, each pointing at its own
-`motif-<stem>-mandala.png`. The stem is derived from the block's existing
-`--motif: url(...motif-<stem>.svg)`, so a block and its art cannot drift
-apart. `add-mandala-var.py` performs the insertion (idempotent) and
-`verify-mandala.py` walks all 22 themes asserting exactly one active block,
-a bare `--motif-mandala` inside it, an existing PNG, and a byte-identical
-round-trip afterwards:
+**all 22 blocks declare it**, each pointing at its own
+`motif-<stem>-mandala.png`.
+
+### mandala-gen — one *distinct* design per theme
+
+`mandala-gen/` (Rust) draws the art. It builds each theme's mandala from a
+shared vocabulary of primitives — petals, rays, waves, scallops, lattices,
+spirograph weaves, chevrons, pinwheels — tinted from **that theme's own**
+`styles.css` tokens via `yasb_theme::Stylesheet::theme_vars`, so a palette
+change flows through to its art on the next run.
 
 ```sh
-python tools/theme/add-mandala-var.py    # add the missing declarations
-python tools/theme/verify-mandala.py     # assert all 22 themes behave
+cargo run --release --manifest-path tools/theme/mandala-gen/Cargo.toml -- generate
+cargo run --release --manifest-path tools/theme/mandala-gen/Cargo.toml -- check
 ```
 
-Note when scripting edits to `styles.css` from Python: open it with
-`newline=""`. The default text mode rewrites every LF as CRLF on Windows
-and turns a one-line edit into a whole-file diff.
+`generate` rewrites the 22 `url(...)` values (and inserts the declaration in
+a block that lacks one, so adding a theme is just: add the block, run
+`generate`) and redraws all 22 PNGs at 420x420 with 2x2 supersampled
+painter's-over compositing, on a transparent background at low alpha so the
+art reads as a watermark under the panel.
 
-The older `--motif-corner` variable (and its `*-mandala-corner.png` art) is
-unused now that the mandala fills the panel; it is dead weight but harmless,
-kept so an older cached stylesheet still paints something.
+**The distinctness contract.** An earlier hand-drawn set had only 11 distinct
+images for 22 themes — light/dark halves of a palette shared one file and
+`motif-wine-mandala.png` was byte-identical to the paisley one. So `check`
+asserts more than "the file exists":
+
+- 22 regions, each url exactly `motif-<stem>-mandala.png` for its own block,
+- every file present, every pair byte-unique,
+- every pair at least `MIN_PATTERN_DISTANCE` (10) bits apart on a 64-bit
+  **dHash** — byte-uniqueness alone would still pass for two images that
+  differ only in tint.
+
+`verify-mandala.py` is a thin shim: it runs `mandala-gen check` and then the
+switcher round-trip (activate all 22 in turn, assert the active block's
+`--motif-mandala` is bare, and the file comes back byte-identical).
+
+```sh
+python tools/theme/verify-mandala.py
+```
+
+When a new design collides, change the *design* (a different set of
+primitives, counts or phases) rather than lowering the threshold.
+
+The legacy `--motif-corner` variable and its `*-mandala-corner.png` art were
+removed: nothing consumed them once the mandala filled the panel.
 
 ## Wrappers and shell helper
 
 | File | Role |
 |---|---|
 | `yasb-theme/src/` | crate source (zero deps; rescued into the repo from a scratch clone) |
+| `mandala-gen/` | draws the 22 distinct mandala PNGs and rewrites the `--motif-mandala` urls |
+| `verify-mandala.py` | shim: `mandala-gen check` + the 22-switch round-trip |
 | `yasb-theme-build.ps1` | rebuild + deploy: `cargo build --release`, copies the exe here, smoke-tests `current` (refreshes `silent-run` in scoop shims only if this crate ever builds one again) |
 | `yasb-theme-current.bat` / `-next.bat` / `-prev.bat` | one-line wrappers used by bar callbacks and keyboard launchers |
 | `yasb-theme-shell.ps1` | dot-source from your PowerShell profile to get `yt list / set / next / prev` |

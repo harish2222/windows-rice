@@ -204,7 +204,7 @@
     --accent-soft: rgba(180, 95, 39, 0.55);
     --frame: #8A6240;
     --motif: url("C:/Users/haris/.config/yasb/motif-ember.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-ember-mandala.png");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-ember-light-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-ember.svg"); */
 
     /* Rangalipi Mossfern */
@@ -259,7 +259,7 @@
     --accent-soft: rgba(130, 172, 84, 0.55);
     --frame: #82AC54;
     --motif: url("C:/Users/haris/.config/yasb/motif-moss.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-moss-mandala.png");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-mossfern-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-moss.svg"); */
 
     /* Rangalipi Mossfern Light */
@@ -314,7 +314,7 @@
     --accent-soft: rgba(95, 138, 60, 0.55);
     --frame: #6B7444;
     --motif: url("C:/Users/haris/.config/yasb/motif-moss.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-moss-mandala.png");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-mossfern-light-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-moss.svg"); */
 
     /* Rangalipi Wine - active */
@@ -371,7 +371,6 @@
     --holiday: #D95D5D;
     --motif: url("C:/Users/haris/.config/yasb/motif-paisley.svg");
     --motif-mandala: url("C:/Users/haris/.config/yasb/motif-wine-mandala.png");
-    --motif-corner: url("C:/Users/haris/.config/yasb/motif-wine-mandala-corner.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-wine.svg");
 
     /* Rangalipi Wine Light */
@@ -426,7 +425,7 @@
     --accent-soft: rgba(168, 62, 88, 0.55);
     --frame: #8A5460;
     --motif: url("C:/Users/haris/.config/yasb/motif-paisley.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-paisley-mandala.png");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-wine-light-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-wine.svg"); */
 
     /* Rangalipi Dune */
@@ -536,7 +535,7 @@
     --accent-soft: rgba(168, 116, 28, 0.55);
     --frame: #8A6E3E;
     --motif: url("C:/Users/haris/.config/yasb/motif-dune.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-dune-mandala.png");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-dune-light-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-dune.svg"); */
 
     /* Rangalipi Matcha */
@@ -646,7 +645,7 @@
     --accent-soft: rgba(122, 148, 60, 0.55);
     --frame: #76794C;
     --motif: url("C:/Users/haris/.config/yasb/motif-matcha.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-matcha-mandala.png");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-matcha-light-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-matcha.svg"); */
 
     /* Rangalipi Espresso */
@@ -756,7 +755,7 @@
     --accent-soft: rgba(168, 116, 60, 0.55);
     --frame: #8A6E4E;
     --motif: url("C:/Users/haris/.config/yasb/motif-espresso.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-espresso-mandala.png");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-espresso-light-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-espresso.svg"); */
 
     /* Rangalipi Noir */
@@ -866,7 +865,7 @@
     --accent-soft: rgba(174, 53, 70, 0.55);
     --frame: #8A525C;
     --motif: url("C:/Users/haris/.config/yasb/motif-noir.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-noir-mandala.png");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-noir-light-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-noir.svg"); */
 
     /* Rangalipi Aubergine */
@@ -976,7 +975,7 @@
     --accent-soft: rgba(138, 99, 184, 0.55);
     --frame: #6E5E8A;
     --motif: url("C:/Users/haris/.config/yasb/motif-aubergine.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-aubergine-mandala.png");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-aubergine-light-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-aubergine.svg"); */
 
     /* Rangalipi Clay */
@@ -1086,7 +1085,7 @@
     --accent-soft: rgba(168, 86, 48, 0.55);
     --frame: #8A5E44;
     --motif: url("C:/Users/haris/.config/yasb/motif-clay.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-clay-mandala.png");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-clay-light-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-clay.svg"); */
 
     /* Rangalipi Olive */
@@ -1196,7 +1195,7 @@
     --accent-soft: rgba(138, 132, 48, 0.55);
     --frame: #74714A;
     --motif: url("C:/Users/haris/.config/yasb/motif-olive.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-olive-mandala.png");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-olive-light-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-olive.svg"); */
 
     /* Bright-wallpaper theme.
@@ -1253,7 +1252,7 @@
     --accent-soft: rgba(179, 122, 26, 0.55);
     --frame: #8A6D3B;
     --motif: url("C:/Users/haris/.config/yasb/motif-base.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-base-mandala.png");
+    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-light-mandala.png");
     --runner: url("C:/Users/haris/.config/yasb/runner-base.svg"); */
 }
 
