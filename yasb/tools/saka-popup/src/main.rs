@@ -522,7 +522,13 @@ unsafe fn run() {
         }
     });
     BACKDROP.with(|b| {
-        *b.borrow_mut() = Backdrop::capture(origin.0, origin.1, W, h);
+        // Blur here, once, rather than on every repaint: the panel repaints
+        // at least once a second and the snapshot never changes in between.
+        // This is also what makes `backdrop_opacity` of 0.85 survivable —
+        // acrylic is a low-opacity *and* heavily blurred material.
+        let t = &APP.with(|c| c.borrow().clone()).expect("app alive here").theme;
+        *b.borrow_mut() =
+            Backdrop::capture(origin.0, origin.1, W, h).map(|bd| bd.blurred(t.backdrop_blur as i32));
     });
 
     let cls: Vec<u16> = "SakaPopupClass\0".encode_utf16().collect();

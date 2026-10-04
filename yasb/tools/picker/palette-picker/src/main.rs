@@ -596,7 +596,14 @@ unsafe fn run() {
     let cx = (mi.rcMonitor.left + mi.rcMonitor.right) / 2;
     let origin = (cx - W / 2, mi.rcMonitor.top + 48);
     BACKDROP.with(|b| {
-        *b.borrow_mut() = Backdrop::capture(origin.0, origin.1, W, 520);
+        // Blur here, once, rather than on every repaint: the snapshot never
+        // changes in between. This is also what makes `backdrop_opacity` of
+        // 0.85 survivable — acrylic is a low-opacity *and* heavily blurred
+        // material, and an unblurred 0.85 would put crisp window edges
+        // directly behind the grid.
+        let blur = APP.with(|c| c.borrow().as_ref().map_or(12, |a| a.theme.backdrop_blur as i32));
+        *b.borrow_mut() =
+            Backdrop::capture(origin.0, origin.1, W, 520).map(|bd| bd.blurred(blur));
     });
     let _ = SetWindowPos(hwnd, HWND_TOPMOST, origin.0, origin.1, W, 240, SWP_SHOWWINDOW);
     apply_shape(hwnd, W, 240);
