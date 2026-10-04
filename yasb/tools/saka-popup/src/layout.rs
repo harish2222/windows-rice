@@ -33,6 +33,9 @@ pub const ROW_H: i32 = 44;
 pub const CARD_R: i32 = 16;
 /// Inner padding of the row card.
 pub const CARD_PAD: i32 = 12;
+/// Radius of the moon glyph. Lives here, not in `main.rs`, because the shape
+/// pass and the text pass both need it and they must not disagree.
+pub const MOON_R: i32 = 30;
 
 /// Where each band starts and ends, measured from the panel's top.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -103,6 +106,16 @@ impl Layout {
     /// Left edge of the value column. Wide enough for the longest label
     /// ("Purnimanta") set as tracked caps without wrapping into it.
     pub const VALUE_X: i32 = PAD + 96;
+
+    /// Centre x of the moon glyph, flush with the content's right edge.
+    ///
+    /// The glyph carries no caption: the phase name and the illumination are
+    /// already the `Moon` row's value and caption, so repeating them here
+    /// duplicated two facts on one screen — and a centred caption under a disc
+    /// this size does not fit inside the content box anyway.
+    pub fn moon_center_x(&self, w: i32) -> i32 {
+        w - PAD - MOON_R
+    }
 
     /// Where the progress bar starts and ends: the full content width, so it
     /// lines up with the label above it and with the caption's right edge.
@@ -201,6 +214,48 @@ mod tests {
         assert_eq!(x0 + tw, W - PAD, "bar must end on the content's right edge");
         assert_eq!(tw, W - PAD * 2);
         assert_eq!(th, 3);
+    }
+
+    /// The disc has to sit inside the header band and inside the content box.
+    /// A caption under it was tried and abandoned precisely because there was
+    /// no room for one, which is only obvious once this is measured.
+    #[test]
+    fn the_moon_glyph_fits_the_header_band() {
+        let l = Layout::new(10);
+        for w in [W, 420, 520] {
+            let cx = l.moon_center_x(w);
+            assert!(cx - MOON_R >= PAD, "disc overflows the left edge at w={w}");
+            assert!(cx + MOON_R <= w - PAD, "disc overflows the right edge at w={w}");
+            let cy = (l.moon_y + l.moon_bottom) / 2;
+            assert!(cy - MOON_R >= l.weekday_y, "disc above the panel content");
+            assert!(cy + MOON_R <= l.rule_y, "disc collides with the header rule");
+        }
+    }
+
+    /// A centred caption of any useful width cannot fit under the glyph, which
+    /// is why the glyph has none. This pins that reasoning so it is not
+    /// "fixed" later by silently overlapping the date.
+    #[test]
+    fn there_is_no_room_for_a_caption_under_the_glyph() {
+        let l = Layout::new(10);
+        let cx = l.moon_center_x(W);
+        let cy = (l.moon_y + l.moon_bottom) / 2;
+        // Widest string the header would want to put there.
+        let needed = 110;
+        let room_below = l.rule_y - (cy + MOON_R);
+        // Both ways it would have to go are blocked. This is a
+        // characterisation test, not a wish: if either becomes false the panel
+        // has grown room for the caption and it should be added back on
+        // purpose rather than by accident.
+        assert!(
+            cx + needed / 2 > W - PAD,
+            "a {needed}px caption now fits beside the disc ({}) — add it back deliberately",
+            cx + needed / 2
+        );
+        assert!(
+            room_below < needed,
+            "a caption now fits under the disc (room={room_below}) — add it back deliberately"
+        );
     }
 
     #[test]

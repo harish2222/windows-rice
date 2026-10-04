@@ -55,7 +55,7 @@ use windows::Win32::UI::Input::KeyboardAndMouse::{
 use windows::Win32::UI::WindowsAndMessaging::*;
 use yasb_chrome::canvas::moon_lit_mask;
 use yasb_chrome::gdi::{
-    Backdrop, Dib, apply_round_region, blit_to_window, colorref, draw_text, font, rect, text_width,
+    Backdrop, Dib, apply_round_region, blit_to_window, colorref, draw_text, font, rect,
 };
 use yasb_chrome::{DISPLAY_FAMILY, INDIC_FAMILY, TEXT_FAMILY};
 
@@ -68,8 +68,6 @@ const W: i32 = layout::W;
 const RADIUS: i32 = layout::RADIUS;
 const PAD: i32 = layout::PAD;
 const TIMER_ID: usize = 1;
-/// Radius of the moon glyph.
-const MOON_R: i32 = 30;
 
 thread_local! {
     static APP: RefCell<Option<App>> = const { RefCell::new(None) };
@@ -308,14 +306,14 @@ unsafe fn paint(hwnd: HWND) {
         c.hline(PAD, w - PAD, l.rule_y, t.hairline);
 
         // Moon disc: a dim body, the lit limb, and a soft halo. It rides at the
-        // right of the header, level with the date, rather than in a strip of
-        // its own — a 30px disc does not need 76px of panel to itself.
-        let mr = MOON_R as f32;
-        let mcx = (w - PAD - MOON_R) as f32;
+        // right of the header, level with the date. No caption: the phase name
+        // and the illumination are already the `Moon` row's value and caption.
+        let mr = layout::MOON_R as f32;
+        let mcx = l.moon_center_x(w) as f32;
         let mcy = ((l.moon_y + l.moon_bottom) / 2) as f32;
         c.radial_glow(mcx, mcy, mr * 2.4, t.accent, t.moon_glow);
-        for py in (mcy as i32 - MOON_R - 2)..=(mcy as i32 + MOON_R + 2) {
-            for px in (mcx as i32 - MOON_R - 2)..=(mcx as i32 + MOON_R + 2) {
+        for py in (mcy as i32 - layout::MOON_R - 2)..=(mcy as i32 + layout::MOON_R + 2) {
+            for px in (mcx as i32 - layout::MOON_R - 2)..=(mcx as i32 + layout::MOON_R + 2) {
                 let cov = c.disc_coverage(px, py, mcx, mcy, mr);
                 if cov <= 0.0 {
                     continue;
@@ -411,25 +409,10 @@ unsafe fn paint(hwnd: HWND) {
         );
         draw_text(dc, &sub, rect(PAD, l.era_y, w - PAD * 2, 18), DT_LEFT | DT_VCENTER);
 
-        // Moon caption, centred under the disc. Centring it on the glyph —
-        // rather than right-aligning it to the panel edge — is what makes the
-        // disc look like the subject of the caption instead of something
-        // parked beside it.
-        let moon_w = MOON_R * 2 + 40;
-        let moon_x = (w - PAD - MOON_R * 2 + 40) / 2 - 20;
-        draw_text(
-            dc,
-            p.phase_name(),
-            rect(moon_x, l.moon_y + 4, moon_w, 20),
-            DT_CENTER | DT_VCENTER,
-        );
-        let pct = format!("{}% illuminated", (p.illum * 100.0).round() as u32);
-        draw_text(
-            dc,
-            &pct,
-            rect(moon_x, l.moon_y + 24, moon_w, 18),
-            DT_CENTER | DT_VCENTER,
-        );
+        // The moon glyph carries no caption. An earlier version drew the phase
+        // name and the illumination beneath it, which was wrong twice over:
+        // both already appear on the `Moon` row, and a caption centred on a
+        // 60px disc lands in the middle of the date.
 
         // Rows: one line of text, then the bar under it.
         //
