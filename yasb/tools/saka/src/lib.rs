@@ -679,6 +679,30 @@ pub const PHASES_HINDU: [&str; 8] = [
     "Krishna Ekadashi",
 ];
 
+/// Amavasya in Telugu, the one tithi name [`TITHIS`] cannot carry.
+///
+/// [`TITHIS`] stops at Purnima because the fifteenth tithi is named by paksha
+/// rather than by its ordinal position, so the two scripts need a separate
+/// spelling for it: `tithi_name_at` resolves the Purnima/Amavasya split and
+/// has to answer in whichever script was asked for.
+pub const AMAVASYA_TE: &str = "అమావస్య";
+
+/// The eight phase names in Telugu, indexed like [`PHASES_HINDU`].
+///
+/// Every other row localises, so leaving this one Romanised put a single
+/// Latin value in the middle of a Telugu column, which read as a rendering
+/// fault rather than as an English name.
+pub const PHASES_HINDU_TE: [&str; 8] = [
+    "అమావస్య",
+    "శుక్ల చతుర్థి",
+    "శుక్ల అష్టమి",
+    "శుక్ల ఏకాదశి",
+    "పూర్ణిమ",
+    "కృష్ణ పంచమి",
+    "కృష్ణ అష్టమి",
+    "కృష్ణ ఏకాదశి",
+];
+
 /// The western astronomical names for the same eight sectors.
 pub const PHASES_WESTERN: [&str; 8] = [
     "New Moon",
@@ -777,6 +801,26 @@ impl Script {
             Script::Latin => karana_name(slot),
             Script::Telugu => karana_name_te(slot),
             Script::Devanagari => karana_name(slot),
+        }
+    }
+    /// Moon phase name, on the same 45-degree sector index `phase_index` uses.
+    pub fn phase(self, i: usize) -> &'static str {
+        match self {
+            Script::Latin | Script::Devanagari => PHASES_HINDU[i % 8],
+            Script::Telugu => PHASES_HINDU_TE[i % 8],
+        }
+    }
+    /// The fifteenth tithi, which is Purnima or Amavasya by paksha rather than
+    /// by ordinal position.
+    ///
+    /// Kept beside [`Script::tithi`] because `TITHIS[14]` is already Purnima
+    /// and only the Amavasya case needs spelling out per script.
+    pub fn tithi_final(self, amavasya: bool) -> &'static str {
+        match self {
+            Script::Telugu if amavasya => AMAVASYA_TE,
+            _ if amavasya => "Amavasya",
+            Script::Telugu => "పూర్ణిమ",
+            _ => "Purnima",
         }
     }
 }
@@ -899,7 +943,7 @@ pub fn solar_month_index(jd: f64) -> usize {
 pub fn tithi_name_at(index: usize, s: Script) -> &'static str {
     let n = index % 15;
     if n == 14 {
-        if index == 29 { "Amavasya" } else { "Purnima" }
+        s.tithi_final(index == 29)
     } else {
         s.tithi(n)
     }
@@ -1134,11 +1178,19 @@ impl Panchang {
     /// are in the same vocabulary as every other row in the panchangam —
     /// `Amavasya` and `Purnima` are literally the fifteenth tithis.
     ///
-    /// Romanised rather than in Telugu or Devanagari, because the panel is
-    /// read alongside English labels and mixing scripts in one row makes the
-    /// value column hard to scan.
+    /// Romanised. The CLI prints both this and [`Self::phase_name_western`],
+    /// so it wants the Latin spelling unconditionally.
+    ///
+    /// The panel does *not* use this: it goes through
+    /// [`Self::phase_name_in`], because a lone Latin value in an otherwise
+    /// Telugu column reads as a rendering fault.
     pub fn phase_name(&self) -> &'static str {
         PHASES_HINDU[self.phase_index % 8]
+    }
+
+    /// The same phase name written in `s`.
+    pub fn phase_name_in(&self, s: Script) -> &'static str {
+        s.phase(self.phase_index)
     }
 
     /// The same phase under its western astronomical name.
@@ -1170,6 +1222,21 @@ impl Panchang {
     /// "DD Mon YYYY" of a Julian Day in local time.
     pub fn day_label(&self, jd: f64) -> String {
         date_at(jd, self.utc_offset)
+    }
+
+    /// [`Self::day_label`] without the year.
+    ///
+    /// The year is the first thing the panel's header already states, twice —
+    /// as the headline date and again on the Saka/Vikram line — so repeating it
+    /// inside both dates on the `Next` row was pure duplication. Dropping it
+    /// is what lets the row fit on one line: the full form measured 346px
+    /// against a 308px column, and the short form needs 279px.
+    pub fn day_label_short(&self, jd: f64) -> String {
+        let s = date_at(jd, self.utc_offset);
+        match s.rfind(' ') {
+            Some(i) => s[..i].to_string(),
+            None => s,
+        }
     }
 
     /// Human-readable one-line summary, used by the CLI and by tests.

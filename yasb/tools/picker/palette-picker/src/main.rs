@@ -23,7 +23,7 @@ use std::sync::mpsc::{self, Receiver, TryRecvError};
 use std::sync::Arc;
 use std::time::Duration;
 
-use windows::Win32::Foundation::{HINSTANCE, HWND, LPARAM, LRESULT, POINT, RECT, SIZE, WPARAM};
+use windows::Win32::Foundation::{HINSTANCE, HWND, LPARAM, LRESULT, POINT, RECT, WPARAM};
 use windows::Win32::Graphics::Gdi::*;
 use windows::Win32::System::LibraryLoader::GetModuleHandleW;
 use windows::Win32::UI::Input::KeyboardAndMouse::{
@@ -32,15 +32,21 @@ use windows::Win32::UI::Input::KeyboardAndMouse::{
 };
 use windows::Win32::UI::WindowsAndMessaging::*;
 use yasb_chrome::gdi::{
-    Backdrop, Dib, apply_round_region, blit_to_window, colorref, draw_text, font, rect, text_width,
+    Backdrop, Dib, apply_round_region, blit_to_window, colorref, draw_text, font, rect,
+    text_width, tracked_text,
 };
+use yasb_chrome::Type;
 
 
 use catalog::Item;
 use layout::Row;
 use theme::{Rgba, Theme};
 
-const W: i32 = 760;
+/// Width of the panel.
+///
+/// Sized so the name column can hold the catalog's longest shipped name
+/// without an ellipsis — see `layout::CELL_W` for the measurement.
+const W: i32 = 1020;
 /// Window corner radius, matched to saka-popup so the two panels read as one
 /// system when they swap places on the same click.
 const RADIUS: i32 = 20;
@@ -48,14 +54,15 @@ const RADIUS: i32 = 20;
 const CELL_R: i32 = 12;
 
 const PAD: i32 = 16;
-/// Swatch chips per cell, and their pitch. Kept as constants because the text
-/// pass positions the name from them: if these and `draw_swatches` disagree,
-/// the name lands on top of the chips.
-const SWATCHES: i32 = 3;
-const SWATCH_STRIDE: i32 = 22;
 const SEARCH_H: i32 = 64;
 const FOOT_H: i32 = 34;
-const MAX_H: i32 = 520;
+/// Upper bound on the panel's height.
+///
+/// Not a layout constraint — it is the screen-fit guard, and the shipped
+/// catalog is well inside it: 22 themes in three columns come to 548px. It
+/// was 520, which was *below* the content, so it silently clipped the last
+/// row of cells on top of the footer.
+const MAX_H: i32 = 760;
 
 thread_local! {
     /// The desktop snapshot, taken once before the window is created. Taking
@@ -331,29 +338,13 @@ unsafe fn draw_cell(c: &mut yasb_chrome::Canvas, x: i32, y: i32, selected: bool,
 ///
 /// The edge matters more than it looks: several shipped light palettes have
 /// near-white swatches, and on a light cell those render as blank rectangles.
-/// Draw small-caps text with manual letter spacing; `DrawTextW` cannot
-/// letter-space and untracked 11px caps look cramped next to a 15px name.
-unsafe fn tracked_text(dc: HDC, text: &str, x: i32, y: i32, tracking: i32) -> i32 {
-    let mut cx = x;
-    let mut buf: Vec<u16> = Vec::with_capacity(2);
-    let mut units = [0u16; 2];
-    for ch in text.chars() {
-        buf.clear();
-        buf.extend_from_slice(ch.encode_utf16(&mut units[..]));
-        let mut sz = SIZE { cx: 0, cy: 0 };
-        let _ = GetTextExtentPoint32W(dc, &buf, &mut sz);
-        let _ = TextOutW(dc, cx, y, &buf);
-        cx += sz.cx + tracking;
-    }
-    cx - x
-}
 
 unsafe fn draw_swatches(c: &mut yasb_chrome::Canvas, x: i32, y: i32, item: &Item, t: &Theme) {
     let mut sx = x;
-    for sw in item.swatches().into_iter().take(SWATCHES as usize) {
-        c.round_rect(sx, y, sx + 18, y + 16, 5, sw);
-        c.round_rect_border(sx, y, sx + 18, y + 16, 5, 1, t.swatch_edge);
-        sx += SWATCH_STRIDE;
+    for sw in item.swatches().into_iter().take(layout::SWATCHES as usize) {
+        c.round_rect(sx, y, sx + layout::CHIP_W, y + 16, 5, sw);
+        c.round_rect_border(sx, y, sx + layout::CHIP_W, y + 16, 5, 1, t.swatch_edge);
+        sx += layout::SWATCH_STRIDE;
     }
 }
 
@@ -439,18 +430,19 @@ unsafe fn paint(hwnd: HWND) {
             let item = &app.items[*ci];
             let selected = app.filtered.get(app.sel) == Some(ci);
             draw_cell(&mut c, x, cy, selected, item.name == app.current, t);
-            draw_swatches(&mut c, x + 24, cy + 12, item, t);
+            draw_swatches(&mut c, x + layout::SWATCH_X, cy + 12, item, t);
         }
 
-        c.hline(PAD, w - PAD, h - FOOT_H - 8, t.hairline);
+        let (rule_y, _, _) = layout::footer_rows(h, FOOT_H, PAD);
+        c.hline(PAD, w - PAD, rule_y, t.hairline);
     }
 
     // ---- text pass -------------------------------------------------------
     {
         let dc = dib.dc();
-        let body = font(-15, 500, &t.typeface.family);
-        let small = font(-12, 400, &t.typeface.family);
-        let label = font(-11, 600, &t.typeface.family);
+        let body = font(Type::Body.gdi(), 500, &t.typeface.family);
+        let small = font(Type::Foot.gdi(), 400, &t.typeface.family);
+        let label = font(Type::Label.gdi(), 600, &t.typeface.family);
         SetBkMode(dc, TRANSPARENT);
 
         // The search line. When the query is empty the hint stands in for it,
@@ -476,24 +468,34 @@ unsafe fn paint(hwnd: HWND) {
                     // Tracked caps, matching the weekday label in the saka
                     // panel: two panels from the same system should not
                     // disagree about what a section heading looks like.
+                    //
+                    // Centred in the heading's own 20px line box. It used to
+                    // be drawn at `y + 14` of a full 40px band that the cells
+                    // below also started at, which is how `LIGHT` ended up
+                    // painted across the first light cell.
                     SelectObject(dc, HGDIOBJ(label.0));
                     SetTextColor(dc, colorref(t.subtext));
                     let caps = text.to_uppercase();
-                    tracked_text(dc, &caps, PAD + 6, y + 14, 2);
-                    y += layout::CELL_H;
+                    tracked_text(dc, &caps, PAD + 6, y + 4, 2);
+                    y += layout::header_advance();
                 }
                 Row::Cell(ci) => {
                     let (x, cy) = rects[cell_i];
                     let item = &app.items[*ci];
                     let is_current = item.name == app.current;
-                    let sw_x = x + 24 + SWATCHES * SWATCH_STRIDE + 8;
-                    let avail = (x + layout::CELL_W - sw_x - 14).max(24);
+                    let sw_x = x + layout::NAME_DX;
+                    let avail = layout::name_avail().max(24);
                     SetTextColor(dc, colorref(if is_current { t.accent } else { t.text }));
                     // Step the size down rather than clipping: a name cut off
                     // mid-word reads as a bug, a smaller name reads as a
                     // deliberate fit.
                     let mut drawn = false;
-                    for size in [-15i32, -14, -13, -12] {
+                    // The step-down ladder. `-13` is not decoration: the longest shipped
+                    // name measures 208px at 13px against a 214px column, so
+                    // 13px is the size that lets it render at full weight
+                    // rather than dropping to 12px. Naming only the ends of
+                    // the scale quietly deleted it.
+                    for size in [Type::Body.gdi(), -14, -13, Type::Foot.gdi()] {
                         let f = font(size, if is_current { 600 } else { 500 }, &t.typeface.family);
                         SelectObject(dc, HGDIOBJ(f.0));
                         if text_width(dc, &item.name) <= avail {
@@ -526,15 +528,19 @@ unsafe fn paint(hwnd: HWND) {
         }
 
         // Footer: the match count, and the key hints.
+        //
+        // Always drawn — the count is useful with no filter active — so its
+        // height is always reserved in `relayout`.
+        let (_, foot_y, foot_h) = layout::footer_rows(h, FOOT_H, PAD);
         SelectObject(dc, HGDIOBJ(small.0));
         SetTextColor(dc, colorref(t.subtext));
         let count = format!("{} of {} themes", app.filtered.len(), app.items.len());
-        draw_text(dc, &count, rect(PAD + 6, h - FOOT_H - 4, 240, FOOT_H), DT_LEFT | DT_VCENTER);
+        draw_text(dc, &count, rect(PAD + 6, foot_y, 240, foot_h), DT_LEFT | DT_VCENTER);
         SetTextColor(dc, colorref(t.subtext));
         draw_text(
             dc,
             "arrows select   enter apply   esc close",
-            rect(w - PAD - 360, h - FOOT_H - 4, 360, FOOT_H),
+            rect(w - PAD - 360, foot_y, 360, foot_h),
             DT_RIGHT | DT_VCENTER,
         );
 
@@ -562,11 +568,7 @@ unsafe fn relayout(hwnd: HWND, w: i32) {
         if let Some(a) = c.borrow().as_ref() {
             let rows = a.rows();
             let grid_h = layout::content_height(&rows, a.grid_origin().1, w - PAD * 2);
-            // The footer hint is only drawn while a filter is active, so reserve
-            // its height only then; otherwise the window ends up taller
-            // than its content with a gap under the last row.
-            let foot = if a.query.is_empty() { 0 } else { FOOT_H };
-            let h = (a.grid_origin().1 + grid_h + PAD + foot).min(MAX_H);
+            let h = layout::window_height(a.grid_origin().1 + grid_h, FOOT_H, PAD).min(MAX_H);
             let mut rc = RECT { left: 0, top: 0, right: 0, bottom: 0 };
             let _ = GetWindowRect(hwnd, &mut rc);
             let cur_x = rc.left;
@@ -693,6 +695,8 @@ unsafe fn run() {
         lpfnWndProc: Some(wnd_proc),
         hInstance: HINSTANCE(hinst.0),
         lpszClassName: windows::core::PCWSTR(cls.as_ptr()),
+        // See the `WM_SETCURSOR` arm in `wnd_proc`.
+        hCursor: yasb_chrome::gdi::arrow_cursor(),
         ..Default::default()
     };
     if RegisterClassW(&wc) == 0 {
@@ -761,6 +765,13 @@ unsafe fn run() {
 
 unsafe extern "system" fn wnd_proc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM) -> LRESULT {
     match msg {
+        // See the note in saka-popup's `WM_SETCURSOR`: the window class has no
+        // cursor, so the hourglass that the opening screen capture sets stays
+        // stuck over the panel. This is what clears it on hover.
+        WM_SETCURSOR => {
+            let _ = SetCursor(yasb_chrome::gdi::arrow_cursor());
+            LRESULT(1)
+        }
         WM_TIMER if wp.0 == TIMER_ID => {
             // The worker has been reading the stylesheet while this loop was
             // busy. Draw only when something actually changed — the picker

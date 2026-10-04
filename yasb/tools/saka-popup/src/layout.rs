@@ -16,8 +16,8 @@
 pub const W: i32 = 460;
 /// Window corner radius.
 pub const RADIUS: i32 = 20;
-/// Panel edge padding.
-pub const PAD: i32 = 24;
+/// Panel edge padding. Scale step 6.
+pub const PAD: i32 = yasb_chrome::space(6);
 
 /// Height of one row.
 ///
@@ -29,8 +29,8 @@ pub const PAD: i32 = 24;
 pub const ROW_H: i32 = 34;
 /// Width of the row card's radius.
 pub const CARD_R: i32 = 16;
-/// Inner padding of the row card.
-pub const CARD_PAD: i32 = 12;
+/// Inner padding of the row card. Scale step 3.
+pub const CARD_PAD: i32 = yasb_chrome::space(3);
 /// Radius of the moon glyph. Lives here, not in `main.rs`, because the shape
 /// pass and the text pass both need it and they must not disagree.
 pub const MOON_R: i32 = 30;
@@ -135,6 +135,17 @@ impl Layout {
         )
     }
 
+    /// Top of the weekday label's glyph box, centred in its scrim.
+    ///
+    /// `tracked_text` anchors on the top of the line, so the label's position
+    /// is not free: it has to be computed from the pill rather than guessed,
+    /// or the text drifts out of its scrim the moment the type size or the
+    /// pill's padding changes.
+    pub fn weekday_text_top(&self) -> i32 {
+        let pill_h = self.weekday_bottom - self.weekday_top;
+        self.weekday_top + (pill_h - yasb_chrome::Type::Meta.px()) / 2
+    }
+
     /// Top of row `i` inside the card.
     pub fn row_y(&self, i: i32) -> i32 {
         self.card_y + CARD_PAD + i * ROW_H
@@ -142,13 +153,73 @@ impl Layout {
 
     /// Left edge of the value column.
     ///
-    /// Sized off the *actual* label set in the bar's own typeface rather than
-    /// a round number. The panel used to use a monospace-ish Segoe UI and
-    /// 96px was generous; when the panel switched to the bar's Nerd Font the
-    /// wider mono advances pushed "PURnimanta" to 84px and the value column
-    /// started clipping the longest label. 104 is the measured width of the
-    /// longest label plus one character of clearance.
-    pub const VALUE_X: i32 = PAD + 104;
+    /// Sized off the *actual* label set in the bar's own typeface, at the size
+    /// the labels are drawn, rather than off a round number. The panel used a
+    /// monospace-ish Segoe UI and 96px was generous; switching to the bar's
+    /// Nerd Font widened the advances, and then enlarging the labels from 11px
+    /// to 13px widened them again. Measured through GDI, `PURNIMANTA` at 13px
+    /// with its tracking is 108px, so the column is 120px: the label plus a
+    /// full character of clearance.
+    ///
+    /// Enlarging the labels is therefore not free in general — it eats the
+    /// value column — and `the_shipped_rows_never_need_an_ellipsis` is what
+    /// proves the trade still fits the `Next` row's two dates.
+    pub const VALUE_X: i32 = PAD + yasb_chrome::space(30);
+
+    /// Gap between a row's value and its right-aligned caption. Scale step 4.
+    pub const CAPTION_GAP: i32 = yasb_chrome::space(4);
+
+    /// A caption narrower than this is not worth keeping: half a time or half
+    /// a percentage is worse than none, because the reader cannot tell whether
+    /// it ran out of room or means something.
+    pub const MIN_CAPTION_W: i32 = 48;
+
+    /// Split one row's line box between its value and its optional caption.
+    ///
+    /// Returns `(value_w, caption_w)`, with `caption_w == 0` when the row has
+    /// no caption or when the caption lost its space.
+    ///
+    /// The panel used to reserve a flat 96px on *every* row for a caption that
+    /// only five of the ten have. That cost the rows without one a quarter of
+    /// their column, which is what ellipsised `New 10 Oct 2026 · Full 26 Oct
+    /// 2026` down to `New 10 Oct 2026 · ...`, and it was simultaneously too
+    /// *narrow* for the caption it was meant to protect: the `Moon` row's
+    /// `39% % · waning` measures 102px, so it was clipped inside its own
+    /// reservation. One fixed number was wrong in both directions at once.
+    ///
+    /// Sizing both from what the text actually measures fixes both at the same
+    /// time. When the two genuinely cannot coexist the caption yields first:
+    /// the value is the datum, the caption is a percentage and an end time.
+    pub fn row_split(w: i32, value_need: i32, caption_need: Option<i32>) -> (i32, i32) {
+        let avail = w - PAD - Self::VALUE_X;
+        let Some(cap_need) = caption_need else { return (avail, 0) };
+        if value_need + Self::CAPTION_GAP + cap_need <= avail {
+            return (avail - Self::CAPTION_GAP - cap_need, cap_need);
+        }
+        // The value keeps everything it needs; the caption gets the slack, and
+        // is dropped outright rather than shown as a stub.
+        let spare = avail - value_need - Self::CAPTION_GAP;
+        if spare >= Self::MIN_CAPTION_W {
+            (avail - spare, spare)
+        } else {
+            (avail, 0)
+        }
+    }
+
+    /// Right edge of the era line's text box.
+    ///
+    /// The era line shares its band with the moon glyph, so an unbounded text
+    /// box would run the year straight under the disc. The box stops short of
+    /// the disc's left limb instead.
+    ///
+    /// This used to be a test with a 7px-per-glyph *estimate* in it, which is
+    /// how the Telugu panel came to clip its era line: the estimate happened
+    /// to hold for Latin and the Indic face is a different width again. The
+    /// bound is computed here so the paint pass and the test agree by
+    /// construction rather than by coincidence.
+    pub fn era_right(&self, w: i32) -> i32 {
+        self.moon_center_x(w) - MOON_R - 10
+    }
 
     /// Centre x of the moon glyph, flush with the content's right edge.
     ///
@@ -371,6 +442,23 @@ mod tests {
         );
     }
 
+    /// The weekday label is drawn top-anchored, so the glyph box has to land
+    /// inside the pill it sits on.
+    #[test]
+    fn the_weekday_glyph_box_sits_inside_its_scrim() {
+        let l = Layout::new(10);
+        let top = l.weekday_text_top();
+        let bottom = top + yasb_chrome::Type::Meta.px();
+        assert!(top >= l.weekday_top, "label starts above its pill: {top} < {}", l.weekday_top);
+        assert!(bottom <= l.weekday_bottom, "label ends below its pill: {bottom} > {}", l.weekday_bottom);
+        let above = top - l.weekday_top;
+        let below = l.weekday_bottom - bottom;
+        assert!(
+            (above - below).abs() <= 1,
+            "label is off-centre in its pill: {above} above, {below} below"
+        );
+    }
+
     /// The pill is sized from the measured text, so the widest weekday in
     /// either script has to fit inside the panel's content box with room for
     /// its padding — and the pill must not run into the moon glyph, which is
@@ -393,31 +481,75 @@ mod tests {
                 "pill ends at {x1}, the moon limb starts at {disc_left} (text_w={text_w})"
             );
         }
-    }
-
-    #[test]
-    fn the_value_column_starts_after_the_label_column() {
+    }#[test]
+fn the_value_column_starts_after_the_label_column() {
         assert!(Layout::VALUE_X > PAD + 80, "label column and value column collide");
     }
 
-    /// The era line and the moon glyph share a band. Measured off a real
-    /// capture of the shipped panel, the era text stops at x=205 and the lit
-    /// limb of the disc starts at x=380 -- a 171px gap. The era line is
-    /// unbounded text (a Vikram Samvat year can be long), so the gap is a
-    /// property of where the disc sits, not of what today's date happens to
-    /// be. This pins the disc's left edge so a future tweak to `moon_center_x`
-    /// cannot quietly walk it left into the text.
+    /// The label column, measured against the largest label at the size it is
+    /// actually drawn at.
+    ///
+    /// The labels were 11px against 16px values, a ratio of 1.45 that left the
+    /// left column reading as an afterthought. They are now
+    /// [`yasb_chrome::Type::Meta`] — 13px — which closes the gap to 1.23 and
+    /// still fits: the longest label, `PURNIMANTA`, is 80px of glyphs plus 10px
+    /// of tracking, and the column is 104px. That is why enlarging the labels
+    /// cost the value column nothing.
     #[test]
-    fn the_moon_glyph_cannot_reach_the_era_line() {
+    fn the_longest_label_fits_the_label_column_at_its_drawn_size() {
+        use yasb_chrome::gdi::{font, text_width};
+        use windows::Win32::Graphics::Gdi::{
+            DeleteObject, GetDC, HGDIOBJ, ReleaseDC, SelectObject,
+        };
+
+        const LABELS: [&str; 10] = [
+            "TITHI", "NAKSHATRA", "YOGA", "KARANA", "VARA",
+            "MOON", "AMANTA", "PURNIMANTA", "SUN", "NEXT",
+        ];
+        const TRACKING: i32 = 1;
+        let avail = Layout::VALUE_X - PAD;
+
+        unsafe {
+            let dc = GetDC(None);
+            let f = font(yasb_chrome::Type::Meta.gdi(), 600, "FiraCode Nerd Font Mono");
+            let old = SelectObject(dc, HGDIOBJ(f.0));
+            let mut worst = 0;
+            let mut who = "";
+            for l in LABELS {
+                let w = text_width(dc, l) + TRACKING * (l.chars().count() as i32 - 1);
+                if w > worst {
+                    worst = w;
+                    who = l;
+                }
+            }
+            let _ = SelectObject(dc, old);
+            let _ = ReleaseDC(None, dc);
+            let _ = DeleteObject(HGDIOBJ(f.0));
+            assert!(
+                worst <= avail,
+                "{who} is {worst}px but the label column is only {avail}px"
+            );
+        }
+        assert_eq!(
+            yasb_chrome::Type::Lead.px() as f32 / yasb_chrome::Type::Meta.px() as f32,
+            16.0 / 13.0
+        );
+    }
+
+    /// The era line and the moon glyph share a band, so the era line's box has
+    /// to stop short of the disc. The previous version of this test
+    /// multiplied the string's character count by a guessed 7px per glyph,
+    /// which held for Latin and silently stopped holding for the Indic face —
+    /// which is how the Telugu panel came to clip its era line.
+    #[test]
+    fn the_era_line_cannot_reach_the_moon_glyph() {
         let l = Layout::new(10);
         let disc_left = l.moon_center_x(W) - MOON_R;
-        // A deliberately long era line: 13px text averages ~7px per glyph.
-        let era = "Shaka 1946 · Vikram Samvat 2083";
-        let era_width = era.chars().count() as i32 * 7;
-        let era_right = PAD + era_width;
+        assert_eq!(l.era_right(W), disc_left - 10);
         assert!(
-            era_right < disc_left - 8,
-            "a long era line would run into the disc: text ends {era_right}, disc starts {disc_left}"
+            l.era_right(W) > PAD + 100,
+            "the era line's box has collapsed to {}px",
+            l.era_right(W) - PAD
         );
     }
 
@@ -438,46 +570,87 @@ mod tests {
         assert!(l.height - box_bottom >= PAD - 6, "no breathing room under the footer");
     }
 
-    /// The widest value in the panel must fit the column it is given.
-///
-/// The per-glyph estimate below is measured, not guessed: a real capture of
-/// the panel in the bar's own typeface put `Krishna Ashtami` (15 glyphs) at
-/// 85px, so 6px a glyph is the safe upper bound and anything wider would let a
-/// string through that the screen then ellipsises.
-///
-/// The `Next` row is the worst case because it carries two dates and has no
-/// caption to shorten it.
+    /// The row split is the fix for the truncating captions, so it gets tested
+    /// against the strings that actually broke, measured through GDI in the
+    /// bar's own typeface.
+    ///
+    /// These assertions used to multiply a character count by 6px, which is
+    /// how the fixed 96px caption zone survived so long: the estimate said
+    /// `39% · waning` was 72px and it quietly fit, while GDI says 102px and
+    /// it did not.
     #[test]
-    fn the_widest_value_still_fits_its_column() {
-        let value_x = Layout::VALUE_X;
-        let widest = "New 10 Oct 2026 · Full 26 Oct 2026";
-        let need = widest.chars().count() as i32 * 6;
-        // `paint` reserves `w - PAD - value_x` when there is no caption.
-        let avail = W - PAD - value_x;
-        assert!(
-            avail >= need,
-            "the widest value needs {need}px but only {avail}px is reserved \
-             (value column starts at {value_x})"
-        );
+    fn the_shipped_rows_never_need_an_ellipsis() {
+        use windows::Win32::Graphics::Gdi::{
+            DeleteObject, GetDC, HGDIOBJ, ReleaseDC, SelectObject,
+        };
+        use yasb_chrome::gdi::{font, text_width};
+
+        // (value, caption) exactly as `App::rows` builds them.
+        let rows: &[(&str, Option<&str>)] = &[
+            ("Krishna Navami", Some("58% · 03:56")),
+            ("Punarvasu", Some("75% · 00:15")),
+            ("Shiva", Some("29% · 09:51")),
+            ("Kaulava", Some("second half")),
+            ("Ravivara", None),
+            // The two that were visibly clipped.
+            ("Krishna Ashtami", Some("39% · waning")),
+            ("Bhadra · Day 23", None),
+            ("Asvina", None),
+            ("06:07 · 18:03", None),
+            ("New 10 Oct · Full 26 Oct", None),
+        ];
+
+        unsafe {
+            let dc = GetDC(None);
+            let body = font(-16, 500, "FiraCode Nerd Font Mono");
+            let small = font(-13, 400, "FiraCode Nerd Font Mono");
+            for (value, caption) in rows {
+                SelectObject(dc, HGDIOBJ(body.0));
+                let value_need = text_width(dc, value);
+                let cap_need = caption.map(|c| {
+                    SelectObject(dc, HGDIOBJ(small.0));
+                    text_width(dc, c)
+                });
+                let (value_w, cap_w) = Layout::row_split(W, value_need, cap_need);
+                assert!(
+                    value_w >= value_need,
+                    "{value:?} needs {value_need}px, was given {value_w}px"
+                );
+                if let Some(c) = caption {
+                    assert!(
+                        cap_w >= cap_need.unwrap_or(0),
+                        "the caption {c:?} was given {cap_w}px of the \
+                         {}px it needs",
+                        cap_need.unwrap_or(0)
+                    );
+                }
+            }
+            let _ = ReleaseDC(None, dc);
+            let _ = DeleteObject(HGDIOBJ(body.0));
+            let _ = DeleteObject(HGDIOBJ(small.0));
+        }
     }
 
-    /// The other kind of row: a short value with a right-aligned caption. The
-    /// two must not meet, or the value runs under the caption and both become
-    /// unreadable. This is the case that actually exists — no row in the
-    /// panel has both the widest value *and* a caption — so testing that
-    /// imaginary combination would only assert something untrue.
+    /// When the value and the caption genuinely cannot both fit, the caption
+    /// is the one that yields. The value is the datum; the caption is a
+    /// percentage and an end time.
     #[test]
-    fn a_value_clears_the_caption_beside_it() {
-        let value_x = Layout::VALUE_X;
-        let value = "Krishna Ashtami"; // the longest value that has a caption
-        let caption = "40% · Last Quarter"; // the longest caption
-        let value_w = value.chars().count() as i32 * 6;
-        let caption_w = caption.chars().count() as i32 * 6;
-        let value_right = value_x + value_w;
-        let caption_left = W - PAD - caption_w;
-        assert!(
-            value_right + 12 <= caption_left,
-            "value ends at {value_right}, caption starts at {caption_left}"
-        );
+    fn the_caption_yields_before_the_value_does() {
+        let avail = W - PAD - Layout::VALUE_X;
+        // A value that eats the whole column.
+        let (value_w, cap_w) = Layout::row_split(W, avail, Some(100));
+        assert_eq!(value_w, avail, "the value must keep its width");
+        assert_eq!(cap_w, 0, "a caption with no room must be dropped, not stubbed");
+    }
+
+    /// A row with no caption gets the whole column. This is the case the flat
+    /// 96px reservation broke: `New 10 Oct · Full 26 Oct` measures 279px and
+    /// was being handed 212px.
+    #[test]
+    fn a_row_without_a_caption_gets_the_whole_column() {
+        let (value_w, cap_w) = Layout::row_split(W, 279, None);
+        assert_eq!(cap_w, 0);
+        assert_eq!(value_w, W - PAD - Layout::VALUE_X);
+        assert!(value_w >= 279, "the Next row's value still does not fit");
     }
 }

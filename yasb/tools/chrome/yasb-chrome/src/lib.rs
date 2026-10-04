@@ -25,6 +25,7 @@
 
 pub mod canvas;
 pub mod gdi;
+pub mod scale;
 pub mod singleton;
 pub mod typeface;
 
@@ -33,5 +34,6 @@ pub use gdi::{
     Backdrop, Dib, apply_round_region, blit_to_window, colorref, draw_text, font, rect, styles_path,
     text_width,
 };
+pub use scale::{Type, space};
 pub use singleton::{Action, acquire, notify_window_of_class, raise_window_of_class};
 pub use typeface::{INDIC_FAMILY, Typeface};
