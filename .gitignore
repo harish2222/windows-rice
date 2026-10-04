@@ -58,3 +58,6 @@ desktop.ini
 cagent/user-uuid
 # pomodoro runtime state (timer survives reloads; not config)
 yasb/tools/pomodoro/pomodoro-state.txt
+# Alarm schedule: written by the bar at runtime, and entirely personal (it is
+# the user's own daily routine). Never belongs in a published repo.
+yasb/alarms.json

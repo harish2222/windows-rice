@@ -53,6 +53,13 @@ const MIN_PATTERN_DISTANCE: u32 = 10;
 /// motif's pixels below luminance 0.23, which is where `#F1DFE3` body text on
 /// the darkest theme still clears 3:1. Running the layers to 0.55-0.60 pushed
 /// the top 1% to 0.48 and body text to 1.6:1.
+///
+/// Test-only because it is only ever *checked*, never applied: the generator
+/// renders whatever alpha a design declares, and the test below is what proves
+/// no design declares more than this. Leaving it un-annotated made the release
+/// build report it as dead code, which is technically true and practically
+/// misleading — the limit is enforced, just not by the binary.
+#[cfg(test)]
 const MAX_WATERMARK_ALPHA: f64 = 0.50;
 
 // ---------------------------------------------------------------------------
