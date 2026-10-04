@@ -431,7 +431,7 @@ mod tests {
                 }
             }
         }
-        let mut lit = |illum: f32| {
+        let lit = |illum: f32| {
             let mut n = 0;
             for y in 0..40 {
                 for x in 0..40 {
@@ -460,5 +460,97 @@ mod tests {
     #[test]
     fn nothing_outside_the_disc_is_lit() {
         assert_eq!(moon_lit_mask(0.0, 0.0, 20.0, 20.0, 5.0, 1.0, true), 0.0);
+    }
+
+    /// The phase graphic has to agree with the number the panel reports beside
+    /// it, at every point in the cycle — not just at the three phases the
+    /// other test samples.
+    ///
+    /// "Authentic" for a phase glyph means exactly this: the lit area is the
+    /// illuminated fraction. A terminator that is merely monotonic in
+    /// illumination still looks subtly wrong at, say, 8% lit while reading
+    /// "8%" next to it, and the panel repaints every second so the shape has
+    /// to be right continuously, not at eight named stops.
+    ///
+    /// Swept at 1/64 steps against a 1% tolerance, which is finer than the
+    /// pixel quantisation of a 60px disc.
+    #[test]
+    fn the_drawn_phase_matches_the_reported_illumination_across_the_cycle() {
+        const R: f32 = 30.0;
+        let cx = 100.0;
+        let cy = 100.0;
+        // Count disc pixels once; the mask is 0 outside, so it counts itself.
+        let mut disc = 0usize;
+        for y in 0..200 {
+            for x in 0..200 {
+                let dx = x as f32 + 0.5 - cx;
+                let dy = y as f32 + 0.5 - cy;
+                if dx * dx + dy * dy <= R * R {
+                    disc += 1;
+                }
+            }
+        }
+        assert!(disc > 2000, "the disc sampler found only {disc} pixels");
+
+        let lit_fraction = |illum: f32, waxing: bool| {
+            let mut n = 0usize;
+            for y in 0..200 {
+                for x in 0..200 {
+                    if moon_lit_mask(
+                        x as f32 + 0.5,
+                        y as f32 + 0.5,
+                        cx,
+                        cy,
+                        R,
+                        illum,
+                        waxing,
+                    ) > 0.5
+                    {
+                        n += 1;
+                    }
+                }
+            }
+            n as f32 / disc as f32
+        };
+
+        let mut worst: f32 = 0.0;
+        for step in 0..=64 {
+            let illum = step as f32 / 64.0;
+            let drawn = lit_fraction(illum, true);
+            worst = worst.max((drawn - illum).abs());
+            // Waxing and waning are the same moon lit from the other side, so
+            // the lit *area* must be identical.
+            let mirrored = lit_fraction(illum, false);
+            assert!(
+                (drawn - mirrored).abs() < 0.01,
+                "at {illum:.3} waxing lights {drawn:.3} but waning lights {mirrored:.3}"
+            );
+        }
+        assert!(
+            worst < 0.01,
+            "the terminator drifts from the reported illumination by {worst:.4}"
+        );
+    }
+
+    /// New moon is dark and full moon is wholly lit, at the extremes the panel
+    /// actually reaches at the quarter-degree boundaries of a lunation.
+    #[test]
+    fn the_cycle_ends_are_exactly_dark_and_whole() {
+        let (cx, cy, r) = (50.0f32, 50.0f32, 20.0f32);
+        let sum = |illum: f32| {
+            let mut n = 0usize;
+            for y in 0..100 {
+                for x in 0..100 {
+                    if moon_lit_mask(x as f32 + 0.5, y as f32 + 0.5, cx, cy, r, illum, true)
+                        > 0.5
+                    {
+                        n += 1;
+                    }
+                }
+            }
+            n
+        };
+        assert_eq!(sum(0.0), 0, "a new moon must have no lit pixels at all");
+        assert_eq!(sum(1.0), sum(0.999), "a full moon must be wholly lit");
     }
 }

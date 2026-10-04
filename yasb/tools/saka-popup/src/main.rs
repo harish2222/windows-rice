@@ -60,8 +60,9 @@ use windows::Win32::UI::WindowsAndMessaging::*;
 use yasb_chrome::canvas::moon_lit_mask;
 use yasb_chrome::gdi::{
     Backdrop, Dib, apply_round_region, blit_to_window, colorref, draw_text, font, rect,
+    text_width, tracked_text,
 };
-use yasb_chrome::INDIC_FAMILY;
+use yasb_chrome::{INDIC_FAMILY, Type};
 
 // Hyderabad / IST: the same defaults the saka CLI uses.
 const LAT: f64 = 17.3850;
@@ -272,7 +273,7 @@ impl App {
             Row { label: "Vara", value: s.vara(p.vara).to_string(), progress: None },
             Row {
                 label: "Moon",
-                value: p.phase_name().to_string(),
+                value: p.phase_name_in(s).to_string(),
                 progress: Some((
                     p.illum,
                     format!(
@@ -284,7 +285,15 @@ impl App {
             },
             Row {
                 label: "Amanta",
-                value: format!("{} · Day {}", s.month(p.amanta_month), p.amanta_tithi_day),
+                value: format!(
+                    "{} · {} {}",
+                    s.month(p.amanta_month),
+                    // `Day` is a word, so it localises with the rest of the
+                    // column; leaving it English put "భాద్ర · Day 23" in the
+                    // middle of a Telugu row.
+                    if s == Script::Telugu { "దిన" } else { "Day" },
+                    p.amanta_tithi_day
+                ),
                 progress: None,
             },
             Row {
@@ -300,12 +309,10 @@ impl App {
                     p.sunset_jd.map(|j| p.hhmm(j)).unwrap_or_else(|| "--:--".into())
                 ),
                 progress: None,
-            },
-            Row {
-                label: "Next",value: format!(
+            },Row { label: "Next",value: format!(
                     "New {} · Full {}",
-                    p.day_label(p.next_new_moon_jd),
-                    p.day_label(p.next_full_moon_jd)
+                    p.day_label_short(p.next_new_moon_jd),
+                    p.day_label_short(p.next_full_moon_jd)
                 ),
                 progress: None,
             },
@@ -387,49 +394,34 @@ fn smoke(t: &Theme, p: &Panchang, script: Script) {
     println!("smoke: ok ({} rows, panel {}x{})", app.rows().len(), W, l.height);
 }
 
-/// Draw small-caps text with manual letter spacing.
-///
-/// `DrawTextW` cannot letter-space, and untracked 11px caps look cramped
-/// against a 28px headline. Drawing glyph by glyph costs a few dozen `TextOut`
-/// calls per panel, which is nothing at a 1 Hz repaint.
-unsafe fn tracked_text(dc: HDC, text: &str, x: i32, y: i32, tracking: i32) -> i32 {
-    let mut cx = x;
-    let mut buf: Vec<u16> = Vec::with_capacity(2);
-    let mut units = [0u16; 2];
-    for ch in text.chars() {
-        buf.clear();
-        buf.extend_from_slice(ch.encode_utf16(&mut units[..]));
-        let mut sz = SIZE { cx: 0, cy: 0 };
-        let _ = GetTextExtentPoint32W(dc, &buf, &mut sz);
-        let _ = TextOutW(dc, cx, y, &buf);
-        cx += sz.cx + tracking;
-    }
-    cx - x
-}
-
 /// Width [`tracked_text`] would draw, without drawing it.
 ///
 /// The weekday scrim has to be sized around its label, and the label is drawn
-/// with the manual tracking above — which `DrawTextW`'s `DT_CALCRECT` does not
-/// model, because the tracking is applied here rather than in GDI. Measuring
-/// glyph by glyph the same way is the only way to get a pill that is neither
-/// clipping the text nor trailing empty space behind it.
+/// with letter spacing, so the measurement has to use the same spacing or the
+/// pill clips the text or trails empty space behind it.
+///
+/// Both this and [`yasb_chrome::gdi::tracked_text`] set the extra on the DC and
+/// let GDI measure, which is what makes them agree: the extra is applied
+/// *between* characters, so the extent that comes back has no trailing gap.
+/// This used to sum per-glyph `GetTextExtentPoint32W` results, which rounds
+/// each advance to a whole pixel and so does not match what the draw call
+/// actually puts on screen.
 ///
 /// Requires `font` to already be selected into `dc`.
 unsafe fn measure_tracked(dc: HDC, text: &str, tracking: i32) -> i32 {
-    let mut total = 0i32;
-    let mut buf: Vec<u16> = Vec::with_capacity(2);
-    let mut units = [0u16; 2];
-    for ch in text.chars() {
-        buf.clear();
-        buf.extend_from_slice(ch.encode_utf16(&mut units[..]));
-        let mut sz = SIZE { cx: 0, cy: 0 };
+    let mut buf: Vec<u16> = text.encode_utf16().collect();
+    buf.push(0);
+    let mut sz = SIZE { cx: 0, cy: 0 };
+    unsafe {
+        if tracking != 0 {
+            SetTextCharacterExtra(dc, tracking);
+        }
         let _ = GetTextExtentPoint32W(dc, &buf, &mut sz);
-        total += sz.cx + tracking;
+        if tracking != 0 {
+            SetTextCharacterExtra(dc, 0);
+        }
     }
-    // `tracked_text` adds `tracking` after the final glyph too, so the
-    // trailing one is not part of the visible width.
-    (total - tracking).max(0)
+    sz.cx
 }
 
 /// Paint the whole panel: shapes into the DIB, then text through GDI on top.
@@ -590,17 +582,17 @@ unsafe fn paint(hwnd: HWND) {
         } else {
             (t.typeface.display.as_str(), t.typeface.family.as_str())
         };
-        let display = font(-28, 600, display_family);
-        let body = font(-16, 500, text_family);
-        let small = font(-13, 400, text_family);
-        let label = font(-11, 600, text_family);
+        let display = font(Type::Title.gdi(), 600, display_family);
+        let body = font(Type::Lead.gdi(), 500, text_family);
+        let small = font(Type::Meta.gdi(), 400, text_family);
+        let label = font(Type::Meta.gdi(), 600, text_family);
         SetBkMode(dc, TRANSPARENT);
 
         // Weekday, small, tracked, in the accent — the one place the accent
         // touches type. It sits on the opaque scrim drawn in the shape pass.
         SelectObject(dc, HGDIOBJ(label.0));
         SetTextColor(dc, colorref(t.accent));
-        tracked_text(dc, &weekday, PAD, l.weekday_y, 2);
+        tracked_text(dc, &weekday, PAD, l.weekday_text_top(), 2);
 
         // The date, large. This line carries the panel's whole hierarchy.
         let p = &app.panchangam;
@@ -619,7 +611,12 @@ unsafe fn paint(hwnd: HWND) {
             p.saka_year,
             p.vikram_year
         );
-        draw_text(dc, &sub, rect(PAD, l.era_y, w - PAD * 2, 18), DT_LEFT | DT_VCENTER);
+        draw_text(
+            dc,
+            &sub,
+            rect(PAD, l.era_y, l.era_right(w) - PAD, 18),
+            DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS,
+        );
 
         // The moon glyph carries no caption. An earlier version drew the phase
         // name and the illumination beneath it, which was wrong twice over:
@@ -630,8 +627,10 @@ unsafe fn paint(hwnd: HWND) {
         //
         // The label is set as tracked caps and the value in the body face, so
         // the two are told apart by weight and case rather than by size alone.
-        // The caption is right-aligned to the same edge as the bar ends.
-        let cap_w = 96;
+        // The caption is right-aligned to the same edge as the bar ends, and
+        // both columns are sized from what the text actually measures — see
+        // `Layout::row_split` for why a fixed reservation was wrong in both
+        // directions at once.
         for (i, r) in rows.iter().enumerate() {
             let y = l.row_y(i as i32);
 
@@ -640,10 +639,19 @@ unsafe fn paint(hwnd: HWND) {
             let caps = r.label.to_uppercase();
             tracked_text(dc, &caps, PAD, y + 7, 1);
 
+            let value_x = layout::Layout::VALUE_X;
+            // Measure with each string's own face selected, or the caption is
+            // measured in the body face and comes out a quarter too wide.
+            SelectObject(dc, HGDIOBJ(body.0));
+            let value_need = text_width(dc, &r.value);
+            let cap_need = r.progress.as_ref().map(|(_, c)| {
+                SelectObject(dc, HGDIOBJ(small.0));
+                text_width(dc, c)
+            });
+            let (value_w, cap_w) = layout::Layout::row_split(w, value_need, cap_need);
+
             SelectObject(dc, HGDIOBJ(body.0));
             SetTextColor(dc, colorref(t.text));
-            let value_x = layout::Layout::VALUE_X;
-            let value_w = (w - PAD - value_x - cap_w).max(40);
             draw_text(
                 dc,
                 &r.value,
@@ -651,15 +659,17 @@ unsafe fn paint(hwnd: HWND) {
                 DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS,
             );
 
-            if let Some((_, cap)) = &r.progress {
-                SelectObject(dc, HGDIOBJ(small.0));
-                SetTextColor(dc, colorref(t.subtext));
-                draw_text(
-                    dc,
-                    cap,
-                    rect(w - PAD - cap_w, y + 3, cap_w, 22),
-                    DT_RIGHT | DT_VCENTER,
-                );
+            if cap_w > 0 {
+                if let Some((_, cap)) = &r.progress {
+                    SelectObject(dc, HGDIOBJ(small.0));
+                    SetTextColor(dc, colorref(t.subtext));
+                    draw_text(
+                        dc,
+                        cap,
+                        rect(w - PAD - cap_w, y + 3, cap_w, 22),
+                        DT_LEFT | DT_VCENTER,
+                    );
+                }
             }
         }
 
@@ -735,6 +745,10 @@ unsafe fn run() {
         lpfnWndProc: Some(wnd_proc),
         hInstance: HINSTANCE(hinst.0),
         lpszClassName: windows::core::PCWSTR(cls.as_ptr()),
+        // Set as well as handled in `WM_SETCURSOR`: the class cursor is what
+        // applies before the first `WM_SETCURSOR` arrives, and a null one is
+        // how the hourglass from the opening screen capture survives.
+        hCursor: yasb_chrome::gdi::arrow_cursor(),
         ..Default::default()
     };
     if RegisterClassW(&wc) == 0 {
@@ -783,6 +797,20 @@ unsafe fn run() {
 
 unsafe extern "system" fn wnd_proc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM) -> LRESULT {
     match msg {
+        // Windows sends this every time the pointer moves onto the window and
+        // expects the window to say what the cursor should be.
+        //
+        // Without this the class cursor is null, so the system keeps whatever
+        // it was showing — and what it was showing is the hourglass, because
+        // opening this panel does a full-screen `BitBlt` to snapshot the
+        // backdrop. That is a long operation; the cursor goes busy for it; and
+        // with nothing to reset it on hover the hourglass just stays there for
+        // the life of the panel. Setting the arrow here is what makes the
+        // cursor correct again the instant the pointer enters.
+        WM_SETCURSOR => {
+            let _ = SetCursor(yasb_chrome::gdi::arrow_cursor());
+            LRESULT(1)
+        }
         // The panel has no WS_EX_LAYERED, so the system repaints exposed and
         // restyled parts through WM_PAINT rather than us blitting on a timer.
         WM_PAINT => {

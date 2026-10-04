@@ -282,7 +282,32 @@ fn box_blur_v(src: &[u8], dst: &mut [u8], w: usize, h: usize, r: usize) {
     }
 }
 
+/// The standard arrow, shared so both panels can name the same cursor.
+///
+/// Cached rather than loaded per call: `LoadCursorW` with a null module is a
+/// shared system resource, but this is asked for on every `WM_SETCURSOR`,
+/// which fires on every pointer movement over the window.
+pub fn arrow_cursor() -> windows::Win32::UI::WindowsAndMessaging::HCURSOR {
+    use windows::Win32::UI::WindowsAndMessaging::{HCURSOR, IDC_ARROW, LoadCursorW};
+    static ARROW: std::sync::OnceLock<usize> = std::sync::OnceLock::new();
+    let raw = *ARROW.get_or_init(|| unsafe { LoadCursorW(None, IDC_ARROW).unwrap_or_default().0 as usize });
+    HCURSOR(raw as *mut core::ffi::c_void)
+}
+
 /// Build a UI font at a given pixel height, weight and family.
+///
+/// ## Why not ClearType
+///
+/// `CLEARTYPE_QUALITY` is the usual answer for UI text, and it is wrong for
+/// these panels. ClearType renders subpixel RGB: it assumes an opaque
+/// background it can blend against and deliberately colours the edges of
+/// every glyph. These panels do not have one — they snapshot the desktop,
+/// alpha-blend a translucent theme over it, and `BitBlt` the result — so the
+/// subpixel fringes are composited against whatever was behind the window and
+/// show up as coloured halos on 11-13px caps, which is the worst size for it.
+///
+/// `ANTIALIASED_QUALITY` is grayscale: smooth, neutral, and correct for a
+/// surface you have already composited yourself.
 pub fn font(size: i32, weight: i32, family: &str) -> HFONT {
     let wide: Vec<u16> = family.encode_utf16().chain(std::iter::once(0)).collect();
     unsafe {
@@ -291,10 +316,51 @@ pub fn font(size: i32, weight: i32, family: &str) -> HFONT {
             DEFAULT_CHARSET.0 as u32,
             OUT_DEFAULT_PRECIS.0 as u32,
             CLIP_DEFAULT_PRECIS.0 as u32,
-            CLEARTYPE_QUALITY.0 as u32,
+            ANTIALIASED_QUALITY.0 as u32,
             DEFAULT_PITCH.0 as u32,
             windows::core::PCWSTR(wide.as_ptr()),
         )
+    }
+}
+
+/// Draw letter-spaced text and return the width it occupied.
+///
+/// `DrawTextW` cannot letter-space, and untracked 11-13px caps look cramped
+/// against a 16-28px headline.
+///
+/// The obvious implementation draws glyph by glyph with `TextOutW`, adding
+/// `GetTextExtentPoint32W`'s advance plus the tracking after each one. That
+/// looks equivalent and is not: the extent call rounds every advance to a
+/// whole pixel, so a 9.75px advance alternates between rounding up and down
+/// and the gaps come out visibly uneven. Letting GDI do it with
+/// `SetTextCharacterExtra` keeps one exact extra for every gap and keeps the
+/// glyphs on GDI's own hinted positions, which is also what makes the caps
+/// sit on the pixel grid instead of shimmering.
+///
+/// ## The anchor changed
+///
+/// `TextOutW` takes `y` as a **baseline**; `DrawTextW` takes the rect's top as
+/// the top of the line. `y` here is a **top**, matching [`draw_text`], so every
+/// call site that was tuned against the old baseline has to be re-checked —
+/// it is not a drop-in swap. The width is generous but the height is not
+/// zero: a rect with `bottom == top` is empty, and `DrawTextW` will happily
+/// draw nothing into one.
+///
+/// The extra is reset afterwards because it is DC state, not font state: a
+/// caller that forgets to clear it silently letter-spaces the rest of the
+/// panel.
+pub fn tracked_text(dc: HDC, text: &str, x: i32, y: i32, tracking: i32) -> i32 {
+    // Tall enough for any face these panels use, with no vertical centring:
+    // the top of the rect is the anchor.
+    let r = rect(x, y, 4096, 48);
+    if tracking == 0 {
+        return draw_text(dc, text, r, DT_LEFT);
+    }
+    unsafe {
+        SetTextCharacterExtra(dc, tracking);
+        let w = draw_text(dc, text, r, DT_LEFT);
+        SetTextCharacterExtra(dc, 0);
+        w
     }
 }
 
@@ -376,6 +442,91 @@ pub fn styles_path() -> PathBuf {
 mod tests {
     use super::*;
 
+    /// Both text helpers must actually put ink on the DC.
+    ///
+    /// This is the regression fence for a bug that shipped to the desktop:
+    /// [`tracked_text`] was changed from per-glyph `TextOutW` to `DrawTextW`
+    /// to even out letter spacing, and it was handed `rect(x, y, 4096, 0)` —
+    /// a rect whose `bottom` equals its `top`. `DrawTextW` silently draws
+    /// nothing into an empty rect, whereas `TextOutW` never looked at the rect
+    /// at all, so the same arguments worked before the swap and produced
+    /// completely blank output after it. Every row label and the weekday in
+    /// the panchangam panel vanished; only the values, drawn by the other
+    /// helper, survived.
+    ///
+    /// Asserting the returned width is not enough — `DrawTextW` returns 0 for
+    /// an empty rect too, which is easy to mistake for "drew fine". This
+    /// checks that the DC has lit pixels afterwards.
+    #[test]
+    fn both_text_helpers_put_ink_on_the_dc() {
+        const W: i32 = 220;
+        const H: i32 = 60;
+        unsafe {
+            for tracked in [false, true] {
+                let mut dib = Dib::new(W, H);
+                let dc = dib.dc();
+                {
+                    let mut c = dib.canvas();
+                    c.clear(yasb_theme::Rgba::rgb(0, 0, 0));
+                }
+                let f = font(-16, 500, "Segoe UI");
+                let old = SelectObject(dc, HGDIOBJ(f.0));
+                SetBkMode(dc, TRANSPARENT);
+                SetTextColor(dc, colorref(yasb_theme::Rgba::rgb(255, 255, 255)));
+                let w = if tracked {
+                    tracked_text(dc, "Purnimanta", 4, 4, 2)
+                } else {
+                    draw_text(dc, "Purnimanta", rect(4, 4, W - 8, 24), DT_LEFT)
+                };
+                let px = dib.pixels();
+                let lit = (0..(W * H) as usize)
+                    .filter(|&i| px[i * 4] > 60)
+                    .count();
+                let _ = SelectObject(dc, old);
+                let _ = DeleteObject(HGDIOBJ(f.0));
+
+                let which = if tracked { "tracked_text" } else { "draw_text" };
+                assert!(w > 0, "{which} reported a width of {w}");
+                assert!(
+                    lit > 100,
+                    "{which} drew {lit} lit pixels — it is drawing nothing. A rect \
+                     with bottom == top is empty and DrawTextW writes nothing into \
+                     it, which is how the row labels went blank once already."
+                );
+            }
+        }
+    }
+
+    /// [`font`] must ask for grayscale antialiasing, not ClearType.
+    ///
+    /// Checked by reading the `lfQuality` back out of the created `HFONT`
+    /// with `GetObjectW`, which is the only assertion that actually
+    /// discriminates here. An earlier version of this test rendered white text
+    /// onto a flat black memory DC and looked for coloured glyph edges — and it
+    /// passed with ClearType too, because subpixel rendering needs a real LCD
+    /// surface and a memory DC silently falls back to grayscale. A test that
+    /// passes either way is worse than no test, because it looks like
+    /// evidence.
+    #[test]
+    fn font_asks_for_greyscale_antialiasing_not_cleartype() {
+        unsafe {
+            let f = font(-16, 500, "Segoe UI");
+            let mut lf = LOGFONTW::default();
+            let got = GetObjectW(HGDIOBJ(f.0), std::mem::size_of::<LOGFONTW>() as i32, Some(&mut lf as *mut _ as *mut _));
+            let _ = DeleteObject(HGDIOBJ(f.0));
+            assert!(got != 0, "GetObjectW refused the font handle");
+            let quality = lf.lfQuality.0;
+            assert_eq!(
+                quality, ANTIALIASED_QUALITY.0,
+                "text is being rendered with quality {quality} — ClearType on a \
+                 surface this crate composites by hand puts coloured halos on \
+                 every glyph edge, worst on the 11-13px caps these panels are \
+                 full of"
+            );
+            assert_ne!(quality, CLEARTYPE_QUALITY.0);
+        }
+    }
+
     /// The backdrop blend is plain per-channel interpolation, so it can be
     /// checked without a display.
     #[test]
@@ -447,7 +598,7 @@ mod tests {
         let bd = Backdrop { pixels: px, w: w as i32, h: h as i32 };
         let out = bd.blurred(3);
 
-        let centre = (out.pixels[(10 * w + 10) * 4] as u32);
+        let centre = out.pixels[(10 * w + 10) * 4] as u32;
         assert!(centre > 0, "the impulse was erased instead of spread");
         assert!(centre < 255, "the impulse was not spread at all");
 

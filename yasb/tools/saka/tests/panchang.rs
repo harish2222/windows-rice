@@ -305,7 +305,50 @@ fn purnima_and_amavasya_are_distinguished() {
     assert_eq!(tithi_name_at(29, Script::Latin), "Amavasya");
     assert_eq!(tithi_name_at(0, Script::Latin), "Pratipada");
     assert_eq!(tithi_name_at(7, Script::Latin), "Ashtami");
-    assert_eq!(tithi_name_at(29, Script::Telugu), "Amavasya");
+}
+
+/// The fifteenth tithi answers in whichever script was asked for.
+///
+/// This assertion used to be `tithi_name_at(29, Script::Telugu) == "Amavasya"`
+/// — it was pinning the mixed-script defect rather than catching it. Every
+/// other row localised, so a Telugu column with one Latin value in it read as
+/// a rendering fault.
+#[test]
+fn the_fifteenth_tithi_is_localised() {
+    assert_eq!(tithi_name_at(29, Script::Telugu), saka::AMAVASYA_TE);
+    assert_eq!(tithi_name_at(14, Script::Telugu), "పూర్ణిమ");
+    // Still Latin for the Latin and Devanagari readers.
+    assert_eq!(tithi_name_at(29, Script::Devanagari), "Amavasya");
+}
+
+/// The moon phase column localises too, for the same reason: it was the one
+/// row still hard-wired to [`saka::Panchang::phase_name`] while the panel
+/// asked for `Script::Telugu`.
+#[test]
+fn the_moon_phase_column_is_localised() {
+    let p = panchang(2026, 10, 3);
+    let latin = p.phase_name_in(Script::Latin);
+    let telugu = p.phase_name_in(Script::Telugu);
+    assert_eq!(latin, saka::PHASES_HINDU[p.phase_index % 8]);
+    assert_eq!(telugu, saka::PHASES_HINDU_TE[p.phase_index % 8]);
+    assert_ne!(latin, telugu, "the Telugu phase table is not being used");
+    assert!(
+        telugu.chars().any(|c| ('\u{0C00}'..='\u{0C7F}').contains(&c)),
+        "the Telugu phase name {telugu} has no Telugu in it"
+    );
+    // Devanagari has no phase table of its own, so it borrows the Latin one
+    // deliberately rather than by accident.
+    assert_eq!(p.phase_name_in(Script::Devanagari), latin);
+}
+
+#[test]
+fn every_phase_name_is_distinct_in_both_scripts() {
+    for s in [Script::Latin, Script::Telugu] {
+        let mut seen = std::collections::HashSet::new();
+        for i in 0..8 {
+            assert!(seen.insert(s.phase(i)), "{:?} phase {i} is a duplicate", s);
+        }
+    }
 }
 
 #[test]
