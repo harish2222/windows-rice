@@ -18,7 +18,7 @@ use std::os::windows::process::CommandExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use windows::Win32::Foundation::{HINSTANCE, HWND, LPARAM, LRESULT, POINT, RECT, WPARAM};
+use windows::Win32::Foundation::{HINSTANCE, HWND, LPARAM, LRESULT, POINT, RECT, SIZE, WPARAM};
 use windows::Win32::Graphics::Gdi::*;
 use windows::Win32::System::LibraryLoader::GetModuleHandleW;
 use windows::Win32::UI::Input::KeyboardAndMouse::{
@@ -194,6 +194,23 @@ unsafe fn draw_cell(c: &mut yasb_chrome::Canvas, x: i32, y: i32, selected: bool,
 ///
 /// The edge matters more than it looks: several shipped light palettes have
 /// near-white swatches, and on a light cell those render as blank rectangles.
+/// Draw small-caps text with manual letter spacing; `DrawTextW` cannot
+/// letter-space and untracked 11px caps look cramped next to a 15px name.
+unsafe fn tracked_text(dc: HDC, text: &str, x: i32, y: i32, tracking: i32) -> i32 {
+    let mut cx = x;
+    let mut buf: Vec<u16> = Vec::with_capacity(2);
+    let mut units = [0u16; 2];
+    for ch in text.chars() {
+        buf.clear();
+        buf.extend_from_slice(ch.encode_utf16(&mut units[..]));
+        let mut sz = SIZE { cx: 0, cy: 0 };
+        let _ = GetTextExtentPoint32W(dc, &buf, &mut sz);
+        let _ = TextOutW(dc, cx, y, &buf);
+        cx += sz.cx + tracking;
+    }
+    cx - x
+}
+
 unsafe fn draw_swatches(c: &mut yasb_chrome::Canvas, x: i32, y: i32, item: &Item, t: &Theme) {
     let mut sx = x;
     for sw in item.swatches().into_iter().take(SWATCHES as usize) {
@@ -319,14 +336,13 @@ unsafe fn paint(hwnd: HWND) {
         for row in &rows {
             match row {
                 Row::Header(text) => {
+                    // Tracked caps, matching the weekday label in the saka
+                    // panel: two panels from the same system should not
+                    // disagree about what a section heading looks like.
                     SelectObject(dc, HGDIOBJ(label.0));
                     SetTextColor(dc, colorref(t.subtext));
-                    draw_text(
-                        dc,
-                        text,
-                        rect(PAD + 6, y, w - PAD * 2, layout::CELL_H),
-                        DT_LEFT | DT_VCENTER,
-                    );
+                    let caps = text.to_uppercase();
+                    tracked_text(dc, &caps, PAD + 6, y + 14, 2);
                     y += layout::CELL_H;
                 }
                 Row::Cell(ci) => {

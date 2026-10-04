@@ -360,7 +360,7 @@ unsafe fn paint(hwnd: HWND) {
         let (tx, tw, th) = l.track(w);
         for (i, r) in rows.iter().enumerate() {
             let Some((frac, _)) = &r.progress else { continue };
-            let y = l.row_y(i as i32) + 30;
+            let y = l.row_y(i as i32) + 32;
             c.round_rect(tx, y, tx + tw, y + th, layout::PILL, t.track);
             let fw = ((frac.clamp(0.0, 1.0)) * tw as f64).round() as i32;
             if fw > 0 {
@@ -411,53 +411,60 @@ unsafe fn paint(hwnd: HWND) {
         );
         draw_text(dc, &sub, rect(PAD, l.era_y, w - PAD * 2, 18), DT_LEFT | DT_VCENTER);
 
-        // Moon caption, right-aligned under the disc, inside the same band as
-        // the era line so the two never collide.
-        let cap_w = 150;
+        // Moon caption, centred under the disc. Centring it on the glyph —
+        // rather than right-aligning it to the panel edge — is what makes the
+        // disc look like the subject of the caption instead of something
+        // parked beside it.
+        let moon_w = MOON_R * 2 + 40;
+        let moon_x = (w - PAD - MOON_R * 2 + 40) / 2 - 20;
         draw_text(
             dc,
             p.phase_name(),
-            rect(w - PAD - cap_w, l.moon_y + 4, cap_w, 20),
-            DT_RIGHT | DT_VCENTER,
+            rect(moon_x, l.moon_y + 4, moon_w, 20),
+            DT_CENTER | DT_VCENTER,
         );
         let pct = format!("{}% illuminated", (p.illum * 100.0).round() as u32);
         draw_text(
             dc,
             &pct,
-            rect(w - PAD - cap_w, l.moon_y + 24, cap_w, 18),
-            DT_RIGHT | DT_VCENTER,
+            rect(moon_x, l.moon_y + 24, moon_w, 18),
+            DT_CENTER | DT_VCENTER,
         );
 
-        // Rows.
-        let (_tx, _tw, _th) = l.track(w);
+        // Rows: one line of text, then the bar under it.
+        //
+        // The label is set as tracked caps and the value in the body face, so
+        // the two are told apart by weight and case rather than by size alone.
+        // The caption is right-aligned to the same edge as the bar ends.
+        let cap_w = 96;
         for (i, r) in rows.iter().enumerate() {
             let y = l.row_y(i as i32);
-            SelectObject(dc, HGDIOBJ(small.0));
+
+            SelectObject(dc, HGDIOBJ(label.0));
             SetTextColor(dc, colorref(t.faint));
-            draw_text(dc, r.label, rect(PAD, y + 9, 86, 16), DT_LEFT | DT_VCENTER);
+            let caps = r.label.to_uppercase();
+            tracked_text(dc, &caps, PAD, y + 13, 1);
 
             SelectObject(dc, HGDIOBJ(body.0));
             SetTextColor(dc, colorref(t.text));
-            let value_w = (w - PAD * 2 - 86).max(60);
+            let value_x = layout::Layout::VALUE_X;
+            let value_w = (w - PAD * 2 - (value_x - PAD) - cap_w).max(40);
             draw_text(
                 dc,
                 &r.value,
-                rect(layout::Layout::VALUE_X, y + 5, value_w, 22),
+                rect(value_x, y + 7, value_w, 22),
                 DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS,
             );
 
             if let Some((_, cap)) = &r.progress {
-                // Right-aligned past the end of the bar, on the bar's own line.
                 SelectObject(dc, HGDIOBJ(small.0));
                 SetTextColor(dc, colorref(t.subtext));
-                let cw = 92;
                 draw_text(
                     dc,
                     cap,
-                    rect(w - PAD - cw, y + 26, cw, 16),
+                    rect(w - PAD - cap_w, y + 7, cap_w, 22),
                     DT_RIGHT | DT_VCENTER,
                 );
-                let _ = text_width(dc, cap);
             }
         }
 
