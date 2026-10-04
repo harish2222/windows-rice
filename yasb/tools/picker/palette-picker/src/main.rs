@@ -306,8 +306,30 @@ fn apply(name: &str) {
     // the bar, so killing it takes down the widget the user is still using,
     // and nothing guarantees the bar comes back. The file watch is the correct
     // mechanism and it is already in place.
+    run_theme(&["set", name]);
+
+    // Reroll the three popup motifs on every applied theme, so switching
+    // palettes also changes the artwork in the control centre, media and
+    // pomodoro panels. Run after `set` because both rewrite styles.css and
+    // `motif` must see the block `set` just activated -- it deals motifs out
+    // per theme block, so running it first would be a no-op for the theme
+    // actually being applied.
+    //
+    // Failure here must not fail the theme switch: the colours are already
+    // written by this point, and a missing motif would leave the panels on
+    // whatever art they had rather than breaking the bar.
+    run_theme(&["motif"]);
+}
+
+/// Run yasb-theme with the given arguments and wait for it.
+///
+/// `spawn` + `wait` rather than `status` so the caller's thread blocks until
+/// the file rewrite is complete; the picker redraws its own active-cell marker
+/// from the return value of `apply`, so returning early would let it paint a
+/// stale theme name over a bar that has already changed.
+fn run_theme(args: &[&str]) {
     let _ = Command::new(theme_exe())
-        .args(["set", name])
+        .args(args)
         .creation_flags(CREATE_NO_WINDOW)
         .spawn()
         .map(|mut c| {

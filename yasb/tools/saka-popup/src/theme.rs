@@ -160,13 +160,79 @@ fn luma(c: Rgba) -> f32 {
 }
 
 /// WCAG contrast ratio between two colours.
-#[cfg(test)]
-fn contrast(a: Rgba, b: Rgba) -> f32 {
+pub fn contrast(a: Rgba, b: Rgba) -> f32 {
     let (hi, lo) = {
         let (x, y) = (luma(a), luma(b));
         if x > y { (x, y) } else { (y, x) }
     };
     (hi + 0.05) / (lo + 0.05)
+}
+
+/// A dark desktop, sampled from the wallpaper actually behind the panel.
+///
+/// Used as a worst case for legibility: a light theme's ink is near-black, so
+/// the darker the backdrop, the more opaque the panel has to be to stay
+/// readable. Guessing a mid-grey here would understate the floor.
+const DARK_BACKDROP: Rgba = Rgba { r: 25, g: 20, b: 28, a: 255 };
+
+/// A light desktop, for the opposite reason: a dark theme's ink is near-white,
+/// so a *bright* wallpaper is what threatens it. Both are checked so the floor
+/// holds whatever the user's wallpaper happens to be.
+const LIGHT_BACKDROP: Rgba = Rgba { r: 240, g: 238, b: 232, a: 255 };
+
+/// `over`: composite `fg` at `alpha` (0..1) onto an opaque `bg`.
+fn over(fg: Rgba, alpha: f32, bg: Rgba) -> Rgba {
+    Rgba {
+        r: (alpha * fg.r as f32 + (1.0 - alpha) * bg.r as f32).round() as u8,
+        g: (alpha * fg.g as f32 + (1.0 - alpha) * bg.g as f32).round() as u8,
+        b: (alpha * fg.b as f32 + (1.0 - alpha) * bg.b as f32).round() as u8,
+        a: 255,
+    }
+}
+
+/// The lowest alpha at which `panel` still carries `ink` at `target` contrast,
+/// over every backdrop in `backdrops`.
+///
+/// # Why this replaced a flat floor
+///
+/// The panel used to force `bg.a` up to 235 — 92% opaque — whenever a theme
+/// shipped a faint `--acrylic`. That number was picked for Rangalipi Wine,
+/// which authors its acrylic at 1% and would otherwise be invisible. But it
+/// was applied to *every* theme, including the light ones that author a
+/// deliberate 50%, so those panels composited to a near-solid cream rectangle:
+/// measured off a live Wine Light panel, (215, 208, 196) where 0.50 would have
+/// given (128, 122, 119). Opaque, flat and lighter than the wallpaper, it read
+/// as a patch of white cement stuck on the wall rather than as glass.
+///
+/// Alpha cannot simply be lowered instead, because a light theme's ink is
+/// near-black (`#1A1816`) and a *translucent* cream panel over a dark desktop
+/// moves towards that dark backdrop — dropping to 0.28 alpha takes the text to
+/// 2.08:1, well under the 4.5:1 floor. The opacity and the legibility are
+/// genuinely coupled, so the only honest move is to ask for the least opacity
+/// that still clears the bar, per theme, instead of a constant.
+///
+/// Both a dark and a light backdrop are checked because the panel is a
+/// top-level window: what is behind it is whatever the desktop happens to be,
+/// and one backdrop would only prove the floor works over that one wallpaper.
+fn min_alpha_for_contrast(
+    panel: Rgba,
+    ink: Rgba,
+    backdrops: &[Rgba],
+    target: f32,
+) -> f32 {
+    let (mut lo, mut hi) = (0.0f32, 1.0f32);
+    for _ in 0..24 {
+        let mid = (lo + hi) / 2.0;
+        let ok = backdrops
+            .iter()
+            .all(|&bg| contrast(ink, over(panel, mid, bg)) >= target);
+        if ok {
+            hi = mid;
+        } else {
+            lo = mid;
+        }
+    }
+    hi
 }
 
 /// Brighten towards white. The light that falls on a surface.
@@ -324,16 +390,31 @@ impl Theme {
                 .unwrap_or(default)
         };
         let mut bg = col(&["--acrylic", "--glassmenu"], Rgba::rgb(24, 24, 37));
-        // The Rangalipi themes ship `--acrylic` at 1-2% alpha, which is right
-        // for a QSS popup sitting on the desktop but would make this window
-        // effectively invisible. Floor the alpha so the panel keeps the theme
-        // tint and stays readable over any wallpaper.
-        if bg.a < 235 {
-            bg.a = 235;
+
+        // The Rangalipi themes ship `--acrylic` as low as 1% (Wine), which is
+        // right for a QSS popup sitting on the desktop but would make this
+        // window effectively invisible. Floor the alpha so the panel keeps the
+        // theme tint and stays readable over any wallpaper.
+        //
+        // The floor is derived from the theme's own ink rather than fixed, so a
+        // theme that already authors a sensible opacity keeps it. A constant
+        // floor forced the light themes up to 92% opaque and turned their
+        // panels into flat cream slabs; see `min_alpha_for_contrast`.
+        let ink = col(&["--text"], Rgba::rgb(205, 214, 244));
+        let sub_ink = col(&["--subtext", "--text-muted"], Rgba::rgb(166, 173, 200));
+        let alpha = min_alpha_for_contrast(bg, ink, &[DARK_BACKDROP, LIGHT_BACKDROP], 4.5)
+            .max(min_alpha_for_contrast(
+                bg,
+                sub_ink,
+                &[DARK_BACKDROP, LIGHT_BACKDROP],
+                4.0,
+            ));
+        if bg.a as f32 / 255.0 < alpha {
+            bg.a = (alpha * 255.0).round().clamp(0.0, 255.0) as u8;
         }
 
-        let text = col(&["--text"], Rgba::rgb(205, 214, 244));
-        let subtext = col(&["--subtext", "--text-muted"], Rgba::rgb(166, 173, 200));
+        let text = ink;
+        let subtext = sub_ink;
         let faint = col(&["--text-faint"], Rgba::rgb(140, 140, 160));
         let border = col(&["--border", "--hairline"], Rgba::rgb(69, 71, 90));
         let accent = col(&["--accent", "--mauve"], Rgba::rgb(180, 190, 254));
@@ -493,11 +574,86 @@ mod tests {
     fn theme_uses_active_values() {
         let vars = active_theme_vars(SAMPLE);
         let t = Theme::from_vars(&vars);
-        // The alpha is floored for popup readability, so the tint survives.
-        assert_eq!(t.bg.a, 235);
+        // SAMPLE's ink is near-white, so the derived floor has to take the
+        // panel all the way opaque to keep it readable over a light
+        // wallpaper. The tint still survives, which is what the floor is for.
+        assert_eq!(t.bg.a, 255);
         assert_eq!((t.bg.r, t.bg.g, t.bg.b), (192, 78, 104));
         assert_eq!(t.text, Rgba::rgb(0xF1, 0xDF, 0xE3));
         assert_eq!(t.border, Rgba::rgb(0xC0, 0x4E, 0x68));
+    }
+
+    /// A light theme's panel must stop being a flat cream slab.
+    ///
+    /// The old floor was a constant 235, applied to every theme, so the light
+    /// blocks — which deliberately author `--acrylic` at 50% — were pushed to
+    /// 92% opaque anyway. Measured off a live `Rangalipi Wine Light` panel
+    /// that was (215, 208, 196): brighter than the wallpaper, flat, and
+    /// reading as a patch of white cement rather than as glass.
+    ///
+    /// The floor is now the least opacity that still clears 4.5:1 for the
+    /// theme's own near-black ink over a dark desktop, so the desktop and the
+    /// motif come back through.
+    #[test]
+    fn a_light_panel_keeps_its_glass_instead_of_going_opaque() {
+        // The real authored value, alpha and all. An opaque hex here would
+        // never engage the floor at all, which is exactly the mistake that
+        // let the old constant hide behind a passing test.
+        let t = Theme::from_vars(&[
+            ("--acrylic".into(), "rgba(231, 224, 210, 0.50)".into()),
+            ("--text".into(), "#1A1816".into()),
+            ("--subtext".into(), "#45423C".into()),
+            ("--accent".into(), "#A83E58".into()),
+        ]);
+        let alpha = t.bg.a as f32 / 255.0;
+        assert!(
+            t.bg.a < 200,
+            "light panel is still {} opaque, so it reads as a slab",
+            alpha
+        );
+        // And the transparency it kept is not bought with legibility.
+        let composited = over(t.bg, alpha, DARK_BACKDROP);
+        assert!(
+            contrast(t.text, composited) >= 4.5,
+            "text is only {:.2}:1 over the composited panel",
+            contrast(t.text, composited)
+        );
+        // Far more of the desktop shows through than the old constant floor
+        // allowed. 0.922 was 235/255; the derived floor lands at 0.698, and
+        // it is the *subtext* that binds rather than the main text (4.0:1 at
+        // 0.70 versus 4.5:1 at 0.53), because the light themes' subtext is a
+        // mid-dark grey that a translucent panel swallows first.
+        assert!(
+            alpha < 0.75,
+            "expected real transparency, got alpha {}",
+            alpha
+        );
+        assert!(
+            alpha < 235.0 / 255.0,
+            "the derived floor must beat the old constant"
+        );
+    }
+
+    /// The floor must hold on a light desktop too, not just a dark one: the
+    /// panel is a top-level window and the wallpaper behind it is whatever the
+    /// user happens to be using.
+    #[test]
+    fn the_floor_holds_over_a_light_desktop_as_well() {
+        let dark_ink = Theme::from_vars(&[
+            ("--acrylic".into(), "rgba(231, 224, 210, 0.50)".into()),
+            ("--text".into(), "#1A1816".into()),
+            ("--subtext".into(), "#45423C".into()),
+        ]);
+        let a = dark_ink.bg.a as f32 / 255.0;
+        assert!(contrast(dark_ink.text, over(dark_ink.bg, a, LIGHT_BACKDROP)) >= 4.5);
+
+        let light_ink = Theme::from_vars(&[
+            ("--acrylic".into(), "rgba(20, 20, 27, 0.01)".into()),
+            ("--text".into(), "#E7E0D2".into()),
+            ("--subtext".into(), "#B8B2A7".into()),
+        ]);
+        let b = light_ink.bg.a as f32 / 255.0;
+        assert!(contrast(light_ink.text, over(light_ink.bg, b, LIGHT_BACKDROP)) >= 4.5);
     }
 
     #[test]
