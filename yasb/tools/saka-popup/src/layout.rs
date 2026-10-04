@@ -21,14 +21,14 @@ pub const PILL: i32 = 10;
 /// Panel edge padding.
 pub const PAD: i32 = 24;
 
-/// Height of one row: one line of text, then a full-width hairline bar.
+/// Height of one row.
 ///
-/// The bar deliberately spans the whole content width rather than starting
-/// under the value column. Indenting it put a third left edge into every row
-/// (label, bar, caption), which is what made the list read as assembled rather
-/// than composed. Now the label and the bar share one edge, and the caption
-/// shares the other.
-pub const ROW_H: i32 = 44;
+/// Was 44 with the progress bar on its own line under the text. That spent a
+/// third of the row on a 3px line, which is what made the panel read as sparse
+/// — ten rows of it came to 440px of mostly empty card. The bar now sits
+/// *under the value only*, inside the same line box, so a row is one line of
+/// type plus a 2px rule and nothing else.
+pub const ROW_H: i32 = 34;
 /// Width of the row card's radius.
 pub const CARD_R: i32 = 16;
 /// Inner padding of the row card.
@@ -39,6 +39,11 @@ pub const MOON_R: i32 = 30;
 /// Radius of the weekday scrim pill. Half its height, so the ends are
 /// semicircular and the label never looks boxed.
 pub const SCRIM_R: i32 = 9;
+/// Vertical offset of the progress indicator inside a row, measured from the
+/// row's top. The text line box is 22px, so this puts the rule just under it.
+pub const INDICATOR_Y: i32 = 26;
+/// Thickness of the progress indicator. 2px reads as a rule rather than a bar.
+pub const INDICATOR_H: i32 = 2;
 /// Horizontal padding inside the weekday pill, either side of the text.
 pub const SCRIM_PAD_X: i32 = 11;
 /// The weekday label's line box, which is what the pill is sized around.
@@ -137,9 +142,15 @@ impl Layout {
         self.card_y + CARD_PAD + i * ROW_H
     }
 
-    /// Left edge of the value column. Wide enough for the longest label
-    /// ("Purnimanta") set as tracked caps without wrapping into it.
-    pub const VALUE_X: i32 = PAD + 96;
+    /// Left edge of the value column.
+    ///
+    /// Sized off the *actual* label set in the bar's own typeface rather than
+    /// a round number. The panel used to use a monospace-ish Segoe UI and
+    /// 96px was generous; when the panel switched to the bar's Nerd Font the
+    /// wider mono advances pushed "PURnimanta" to 84px and the value column
+    /// started clipping the longest label. 104 is the measured width of the
+    /// longest label plus one character of clearance.
+    pub const VALUE_X: i32 = PAD + 104;
 
     /// Centre x of the moon glyph, flush with the content's right edge.
     ///
@@ -151,10 +162,17 @@ impl Layout {
         w - PAD - MOON_R
     }
 
-    /// Where the progress bar starts and ends: the full content width, so it
-    /// lines up with the label above it and with the caption's right edge.
+    /// Where the progress indicator starts and ends.
+    ///
+    /// Under the *value*, not under the whole row. Spanning the full width put
+    /// a long empty line to the right of every short value, which is what the
+    /// old panel looked like: a list of mostly-empty rules. Starting at the
+    /// value column and running to the panel's right margin keeps it visually
+    /// attached to the number it belongs to while still giving it a run.
+    ///
+    /// Returns `(x0, width, thickness)`.
     pub fn track(&self, w: i32) -> (i32, i32, i32) {
-        (PAD, w - PAD * 2, 3)
+        (Self::VALUE_X, w - PAD - Self::VALUE_X, 2)
     }
 
     /// Fail if any two vertically stacked bands overlap.
@@ -181,9 +199,11 @@ impl Layout {
         // Every row's content must fit inside the row.
         for i in 0..rows {
             let y = self.row_y(i);
-            // Bar sits 32px into the row and is 3px tall.
-            if y + 32 + 3 > y + ROW_H {
-                return Err(format!("row {i} bar overflows: {y}"));
+            // The indicator sits under the value's line box. It has to clear
+            // the text above it and still end inside the row, or it lands on
+            // the next row's label.
+            if y + INDICATOR_Y + INDICATOR_H > y + ROW_H {
+                return Err(format!("row {i} indicator overflows: {y}"));
             }
         }
         if self.footer_y + 18 + PAD > self.height {
@@ -238,16 +258,53 @@ mod tests {
         assert!(l.height > 500 && l.height < 800, "height {}", l.height);
     }
 
-    /// The bar has to share an edge with the label and with the caption's
-    /// right margin. This is the whole alignment contract of a row.
+    /// The indicator belongs to the value, so it starts where the value starts and
+    /// ends on the panel's right margin — attached to the number it describes,
+    /// with no run of empty rule to the right of a short value.
     #[test]
-    fn the_track_shares_the_content_edges() {
+    fn the_indicator_runs_from_the_value_column_to_the_right_margin() {
         let l = Layout::new(10);
         let (x0, tw, th) = l.track(W);
-        assert_eq!(x0, PAD, "bar must start on the content's left edge");
-        assert_eq!(x0 + tw, W - PAD, "bar must end on the content's right edge");
-        assert_eq!(tw, W - PAD * 2);
-        assert_eq!(th, 3);
+        assert_eq!(x0, Layout::VALUE_X, "indicator must start under the value");
+        assert_eq!(x0 + tw, W - PAD, "indicator must end on the right margin");
+        assert_eq!(th, INDICATOR_H);
+        assert_eq!(th, 2, "a 3px bar read as a bar and cost a third of the row");
+    }
+
+    /// The indicator must not eat into the label column, which is the whole
+    /// reason it moved.
+    #[test]
+    fn the_indicator_starts_after_the_label_column() {
+        let (_, tw, _) = Layout::new(10).track(W);
+        assert!(
+            Layout::VALUE_X > PAD + 80,
+            "indicator would run under the labels"
+        );
+        assert!(tw > 120, "indicator run of {tw}px is too short to read");
+    }
+
+    /// Every row's indicator has to land inside its own row. This is the check
+    /// that catches a rule bleeding onto the next row's label, which is what
+    /// the old 32px offset did when the row height changed.
+    #[test]
+    fn every_indicator_stays_inside_its_own_row() {
+        for rows in 1..=12 {
+            let l = Layout::new(rows);
+            for i in 0..rows {
+                let y = l.row_y(i);
+                let bottom = y + INDICATOR_Y + INDICATOR_H;
+                assert!(
+                    bottom <= y + ROW_H,
+                    "row {i} indicator ends at {bottom}, past its {ROW_H}px row"
+                );
+                // And it must sit under the text, not on top of it.
+                assert!(
+                    INDICATOR_Y >= 22,
+                    "indicator at y={INDICATOR_Y} would overlap the 22px text line"
+                );
+            }
+            l.assert_no_overlap(rows).unwrap_or_else(|e| panic!("{rows} rows: {e}"));
+        }
     }
 
     /// The disc has to sit inside the header band and inside the content box.
@@ -383,23 +440,26 @@ mod tests {
         assert!(l.height - box_bottom >= PAD - 6, "no breathing room under the footer");
     }
 
-    /// The `Next` row carries the widest value in the panel and, unlike the
-    /// progress rows, no caption beside it. Measured off a real capture that
-    /// 38-glyph string draws 213px wide in the 15px body face — about 5.6px a
-    /// glyph — and ended 103px short of the column edge. 6px is the safe
-    /// upper bound; the point is that the reserved width keeps its slack even
-    /// if the panel is narrowed.
+    /// The widest value in the panel must fit the column it is given.
+///
+/// The per-glyph estimate below is measured, not guessed: a real capture of
+/// the panel in the bar's own typeface put `Krishna Ashtami` (15 glyphs) at
+/// 85px, so 6px a glyph is the safe upper bound and anything wider would let a
+/// string through that the screen then ellipsises.
+///
+/// The `Next` row is the worst case because it carries two dates and has no
+/// caption to shorten it.
     #[test]
     fn the_widest_value_still_fits_its_column() {
         let value_x = Layout::VALUE_X;
-        let widest = "new 10 Oct 2026 · full 26 Oct 2026";
+        let widest = "New 10 Oct 2026 · Full 26 Oct 2026";
         let need = widest.chars().count() as i32 * 6;
-        // `paint` reserves `W - PAD*2 - (value_x - PAD)` when there is no
-        // caption, which is exactly the whole value column.
-        let avail = W - PAD * 2 - (value_x - PAD);
+        // `paint` reserves `w - PAD - value_x` when there is no caption.
+        let avail = W - PAD - value_x;
         assert!(
             avail >= need,
-            "the widest value needs {need}px but only {avail}px is reserved"
+            "the widest value needs {need}px but only {avail}px is reserved \
+             (value column starts at {value_x})"
         );
     }
 

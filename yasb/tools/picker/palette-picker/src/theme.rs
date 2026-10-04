@@ -24,7 +24,7 @@ fn fallback() -> Vec<(String, String)> {
     .collect()
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Theme {
     pub bg: Rgba,
     pub text: Rgba,
@@ -37,6 +37,9 @@ pub struct Theme {
     /// This is acrylic's defining number and it is *high*: the material is
     /// only 15% opaque, so 85% of the blurred wallpaper is what you see.
     pub backdrop_opacity: f32,
+    /// The bar's own font, resolved against this machine's installed fonts.
+    /// See `yasb_chrome::Typeface`.
+    pub typeface: yasb_chrome::Typeface,
     /// Box-blur radius applied to the backdrop before it is blended.
     ///
     /// Acrylic is low-opacity *and* high-blur. Without the blur, 0.85 here
@@ -101,13 +104,17 @@ impl Theme {
             subtext: col(&["--subtext", "--text-muted"], Rgba::rgb(166, 173, 200)),
             accent: col(&["--accent", "--mauve"], Rgba::rgb(180, 190, 254)),
 
-            backdrop_opacity: 0.85,
+            // Same material as the saka panel: a 70%-opaque pane of glass.
+            // Kept in step deliberately, so the two panels do not read as two
+            // different materials when they swap places on the same click.
+            backdrop_opacity: 0.30,
             backdrop_blur: 12,
             // Lit from above, unconditionally, so the gradient does not invert
             // on a light theme. The alphas run higher than an opaque panel
             // would need: most of what is behind this window is now wallpaper,
             // and the gradient is the only wash standing between the grid and
             // a bright desktop.
+            typeface: yasb_chrome::Typeface::default(),
             sheen_top: Rgba { a: 46, ..lighten(bg, 0.55) },
             sheen_bottom: Rgba { a: 70, ..darken(bg, 0.45) },
             bloom: 0.10,
@@ -141,7 +148,16 @@ impl Theme {
         if vars.is_empty() {
             vars = fallback();
         }
-        Theme::from_vars(&vars)
+        let mut t = Theme::from_vars(&vars);
+        // `--system-font` is declared in `:root`, not in the active theme
+        // block, so it has to be read from the document. See `global_var`.
+        if let Some(f) = yasb_theme::global_var(&css, "system-font") {
+            let f = f.trim().trim_matches('"');
+            if !f.is_empty() {
+                t.typeface = yasb_chrome::Typeface::resolve(Some(f));
+            }
+        }
+        t
     }
 }
 
@@ -216,7 +232,7 @@ mod tests {
             // 15% opacity stated the other way round. Pin it, so a future
             // "let's calm it down" edit cannot quietly turn the glass back
             // into a sheet of plastic.
-            assert_eq!(t.backdrop_opacity, 0.85, "backdrop opacity drifted on {bg}");
+            assert!((t.backdrop_opacity - 0.30).abs() < f32::EPSILON, "backdrop opacity drifted to {} on {bg}", t.backdrop_opacity);
             // ...and the blur is what makes that number survivable. A radius
             // of zero would pass an opacity check and still be unreadable over
             // a busy desktop.

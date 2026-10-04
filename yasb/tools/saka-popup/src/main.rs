@@ -61,7 +61,7 @@ use yasb_chrome::canvas::moon_lit_mask;
 use yasb_chrome::gdi::{
     Backdrop, Dib, apply_round_region, blit_to_window, colorref, draw_text, font, rect,
 };
-use yasb_chrome::{DISPLAY_FAMILY, INDIC_FAMILY, TEXT_FAMILY};
+use yasb_chrome::INDIC_FAMILY;
 
 // Hyderabad / IST: the same defaults the saka CLI uses.
 const LAT: f64 = 17.3850;
@@ -72,9 +72,14 @@ const W: i32 = layout::W;
 const RADIUS: i32 = layout::RADIUS;
 const PAD: i32 = layout::PAD;
 const TIMER_ID: usize = 1;
-/// Posted by a second launch to ask the open panel to close. `WM_APP` is the
-/// range reserved for application-private window messages, so this cannot
-/// collide with anything the system or another program sends.
+/// Posted by a second launch to ask the open panel to raise itself.
+///
+/// `WM_APP` is the range reserved for application-private window messages, so
+/// this cannot collide with anything the system or another program sends.
+///
+/// Named `WM_TOGGLE_CLOSE` historically, when it closed the panel. It raises
+/// it now; the name is kept because renaming a message constant buys nothing
+/// and would only make the diff harder to read against the old behaviour.
 const WM_TOGGLE_CLOSE: u32 = WM_APP + 1;
 
 thread_local! {
@@ -279,7 +284,7 @@ impl App {
             },
             Row {
                 label: "Amanta",
-                value: format!("{} · day {}", s.month(p.amanta_month), p.amanta_tithi_day),
+                value: format!("{} · Day {}", s.month(p.amanta_month), p.amanta_tithi_day),
                 progress: None,
             },
             Row {
@@ -297,9 +302,8 @@ impl App {
                 progress: None,
             },
             Row {
-                label: "Next",
-                value: format!(
-                    "new {} · full {}",
+                label: "Next",value: format!(
+                    "New {} · Full {}",
                     p.day_label(p.next_new_moon_jd),
                     p.day_label(p.next_full_moon_jd)
                 ),
@@ -341,7 +345,11 @@ fn main() {
     // window procedure, which is the only place destroying the window is safe.
     match yasb_chrome::acquire("Local\\yasb-saka-popup") {
         Ok(None) => {
-            // `Action::None` means the previous instance is already gone but
+            // The panel is already open. Ask it to come to the front and stop; it
+            // is never re-created, so a second click cannot produce a second
+            // panel or make the first one flicker.
+            //
+            // `Action::None` means the previous instance has already gone but
             // has not released the name yet — a race between closing and
             // reopening. Treat the click as a request to open, or it is
             // swallowed and the panel appears to be stuck shut.
@@ -456,7 +464,7 @@ unsafe fn paint(hwnd: HWND) {
         // to be borrowed first and released.
         let weekday_w = {
             let dc = dib.dc();
-            let fam = if app.script == Script::Telugu { INDIC_FAMILY } else { TEXT_FAMILY };
+            let fam = if app.script == Script::Telugu { INDIC_FAMILY } else { t.typeface.family.as_str() };
             let f = font(-11, 600, fam);
             let saved = SelectObject(dc, HGDIOBJ(f.0));
             let width = measure_tracked(dc, &weekday, 2);
@@ -549,16 +557,21 @@ unsafe fn paint(hwnd: HWND) {
             t.hairline,
         );
 
-        // Progress bars. The geometry comes from the layout module so the
-        // shape pass and the text pass cannot disagree about where a bar is.
+        // Progress indicators. The geometry comes from the layout module so the
+        // shape pass and the text pass cannot disagree about where one is.
+        //
+        // Drawn as a hairline rule under the value rather than the old 3px bar
+        // on its own line: the bar was a third of the row's height spent on 3
+        // pixels, which is why the panel read as sparse. Two pixels under the
+        // number reads as part of the row and costs almost nothing.
         let (tx, tw, th) = l.track(w);
         for (i, r) in rows.iter().enumerate() {
             let Some((frac, _)) = &r.progress else { continue };
-            let y = l.row_y(i as i32) + 32;
-            c.round_rect(tx, y, tx + tw, y + th, layout::PILL, t.track);
+            let y = l.row_y(i as i32) + layout::INDICATOR_Y;
+            c.round_rect(tx, y, tx + tw, y + th, th / 2, t.track);
             let fw = ((frac.clamp(0.0, 1.0)) * tw as f64).round() as i32;
             if fw > 0 {
-                c.round_rect(tx, y, tx + fw, y + th, layout::PILL, t.accent);
+                c.round_rect(tx, y, tx + fw, y + th, th / 2, t.accent);
             }
         }
     }
@@ -566,12 +579,16 @@ unsafe fn paint(hwnd: HWND) {
     // ---- text pass -------------------------------------------------------
     {
         let dc = dib.dc();
-        // Brahmic labels need Nirmala UI; the Latin faces carry no Telugu
-        // glyphs and would render tofu.
-        let (display_family, text_family) = if app.script == Script::Telugu {
+        // The bar's own font, so the panel and the bar it hangs from are one
+        // typeface. Telugu switches the whole panel to Nirmala UI: a row's
+        // label and value are read as a pair, and setting one in a Latin face
+        // and the other in a Brahmic one looks broken even when both are
+        // individually correct.
+        let telugu = app.script == Script::Telugu;
+        let (display_family, text_family) = if telugu {
             (INDIC_FAMILY, INDIC_FAMILY)
         } else {
-            (DISPLAY_FAMILY, TEXT_FAMILY)
+            (t.typeface.display.as_str(), t.typeface.family.as_str())
         };
         let display = font(-28, 600, display_family);
         let body = font(-16, 500, text_family);
@@ -621,16 +638,16 @@ unsafe fn paint(hwnd: HWND) {
             SelectObject(dc, HGDIOBJ(label.0));
             SetTextColor(dc, colorref(t.faint));
             let caps = r.label.to_uppercase();
-            tracked_text(dc, &caps, PAD, y + 13, 1);
+            tracked_text(dc, &caps, PAD, y + 7, 1);
 
             SelectObject(dc, HGDIOBJ(body.0));
             SetTextColor(dc, colorref(t.text));
             let value_x = layout::Layout::VALUE_X;
-            let value_w = (w - PAD * 2 - (value_x - PAD) - cap_w).max(40);
+            let value_w = (w - PAD - value_x - cap_w).max(40);
             draw_text(
                 dc,
                 &r.value,
-                rect(value_x, y + 7, value_w, 22),
+                rect(value_x, y + 3, value_w, 22),
                 DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS,
             );
 
@@ -640,7 +657,7 @@ unsafe fn paint(hwnd: HWND) {
                 draw_text(
                     dc,
                     cap,
-                    rect(w - PAD - cap_w, y + 7, cap_w, 22),
+                    rect(w - PAD - cap_w, y + 3, cap_w, 22),
                     DT_RIGHT | DT_VCENTER,
                 );
             }
@@ -819,9 +836,24 @@ unsafe extern "system" fn wnd_proc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM)
             let _ = PostQuitMessage(0);
             LRESULT(0)
         }
-        // A second click on the bar chip: close this panel.
+        // A second click on the bar chip while this panel is already up.
+        //
+        // It raises the panel and does nothing else.
+        //
+        // This used to *toggle*: a second click destroyed the window, and a
+        // third opened it again. That is a small thing to want and an
+        // annoying thing to live with — the panel is a glanceable readout, so
+        // clicking the chip twice in a row (which is what a double-click is)
+        // used to make it vanish and come back, and a stray click while
+        // reaching for something else closed it outright.
+        //
+        // Now the panel is opened by clicking the chip and dismissed by
+        // Escape or by clicking the panel itself. Re-clicking the chip brings
+        // it back to the front if it has been buried by another window, which
+        // is the only thing a second click usefully needs to do.
         WM_TOGGLE_CLOSE => {
-            let _ = DestroyWindow(hwnd);
+            let _ = SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+            let _ = SetForegroundWindow(hwnd);
             LRESULT(0)
         }
         _ => DefWindowProcW(hwnd, msg, wp, lp),

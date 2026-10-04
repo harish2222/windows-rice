@@ -18,6 +18,10 @@ use std::cell::RefCell;
 use std::os::windows::process::CommandExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::mpsc::{self, Receiver, TryRecvError};
+use std::sync::Arc;
+use std::time::Duration;
 
 use windows::Win32::Foundation::{HINSTANCE, HWND, LPARAM, LRESULT, POINT, RECT, SIZE, WPARAM};
 use windows::Win32::Graphics::Gdi::*;
@@ -30,7 +34,7 @@ use windows::Win32::UI::WindowsAndMessaging::*;
 use yasb_chrome::gdi::{
     Backdrop, Dib, apply_round_region, blit_to_window, colorref, draw_text, font, rect, text_width,
 };
-use yasb_chrome::TEXT_FAMILY;
+
 
 use catalog::Item;
 use layout::Row;
@@ -63,6 +67,138 @@ thread_local! {
 thread_local! {
     /// The single global the window procedure reads and writes.
     static APP: RefCell<Option<App>> = const { RefCell::new(None) };
+    /// Snapshots from the background thread, newest last. Only ever drained,
+    /// never written to, and only ever on the message-loop thread.
+    static INBOX: RefCell<Option<Receiver<Snapshot>>> = const { RefCell::new(None) };
+    /// Set when the window is destroyed, so the worker stops computing into a
+    /// channel nobody is reading.
+    static STOP: RefCell<Option<Arc<AtomicBool>>> = const { RefCell::new(None) };
+}
+
+const TIMER_ID: usize = 1;
+/// How often the background thread re-reads the theme.
+///
+/// Longer than saka-popup's 1s on purpose. The picker has no clock to draw, so
+/// there is nothing to redraw every second; the only reason to poll is so a
+/// theme switched elsewhere while the panel is open is reflected without
+/// reopening it. Half a second is well inside "feels instant" for that, and it
+/// halves a per-second stylesheet read and CSS parse.
+const REFRESH_MS: u64 = 500;
+
+/// One complete set of values for a frame.
+///
+/// Plain data only — strings and colours, no handles — which is what makes it
+/// `Send` and therefore what allows the background thread to exist. A GDI HDC
+/// belongs to the thread that selected into it and a window may not be painted
+/// from a thread without a message queue, so the split is strict: the worker
+/// reads files, the message loop draws.
+#[derive(Clone, Debug)]
+struct Snapshot {
+    theme: Theme,
+    /// `Some` only on the first snapshot.
+    ///
+    /// `current` costs a subprocess spawn — `yasb-theme current` — so it is
+    /// fetched exactly once rather than on every tick. Re-reading it every
+    /// 500ms would mean two process spawns a second for a value that cannot
+    /// change while the picker is open.
+    current: Option<String>,
+}
+
+fn take_snapshot(first: bool) -> Snapshot {
+    Snapshot {
+        // Re-read every tick so a switch made while the panel is open shows up
+        // without reopening it. This is a file read and a CSS parse, which is
+        // the second reason to keep it off the UI thread.
+        theme: Theme::load(&styles_path()),
+        current: if first { Some(active_name()) } else { None },
+    }
+}
+
+/// Start the single background thread that produces [`Snapshot`]s.
+///
+/// One thread, not a pool: the work is one small file read and one CSS parse
+/// twice a second. A pool would add handoff overhead to buy nothing.
+fn spawn_worker() {
+    let (tx, rx) = mpsc::channel::<Snapshot>();
+    INBOX.with(|i| *i.borrow_mut() = Some(rx));
+    let stop = Arc::new(AtomicBool::new(false));
+    STOP.with(|s| *s.borrow_mut() = Some(stop.clone()));
+    std::thread::spawn(move || {
+        // Deliver one straight away rather than making the first paint wait.
+        if tx.send(take_snapshot(true)).is_err() {
+            return;
+        }
+        while !stop.load(Ordering::Relaxed) {
+            std::thread::sleep(Duration::from_millis(REFRESH_MS));
+            if stop.load(Ordering::Relaxed) {
+                break;
+            }
+            // A send error means the panel closed and dropped the receiver,
+            // which is the normal way this loop ends.
+            if tx.send(take_snapshot(false)).is_err() {
+                break;
+            }
+        }
+    });
+}
+
+/// Stop the worker. Called from WM_DESTROY.
+///
+/// Not joined: the thread is parked in a sleep when the flag flips, so it
+/// cannot be mid-write to anything the UI thread still owns, and joining would
+/// risk up to half a second of stall on close.
+fn stop_worker() {
+    STOP.with(|s| {
+        if let Some(flag) = s.borrow_mut().take() {
+            flag.store(true, Ordering::Relaxed);
+        }
+    });
+    INBOX.with(|i| *i.borrow_mut() = None);
+}
+
+/// Collapse everything queued into the single newest snapshot.
+///
+/// After a slow tick the channel can hold more than one. Returns `None` when
+/// nothing new arrived, which is the signal not to repaint at all.
+fn take_latest(rx: &mut Receiver<Snapshot>) -> Option<Snapshot> {
+    let mut newest = None;
+    loop {
+        match rx.try_recv() {
+            Ok(s) => newest = Some(s),
+            Err(TryRecvError::Empty) | Err(TryRecvError::Disconnected) => break,
+        }
+    }
+    newest
+}
+
+/// Move any fresh snapshot into the app state.
+///
+/// Returns whether the theme actually *changed*, which is the repaint
+/// condition. The picker polls the stylesheet even when nothing has been
+/// switched, and repainting an unchanged panel on every tick is pure GDI
+/// churn for no visible change.
+fn drain_inbox() -> bool {
+    let mut newest = None;
+    INBOX.with(|i| {
+        if let Some(rx) = i.borrow_mut().as_mut() {
+            newest = take_latest(rx);
+        }
+    });
+    let Some(s) = newest else { return false };
+    let mut repaint = false;
+    APP.with(|c| {
+        if let Some(a) = c.borrow_mut().as_mut() {
+            if let Some(name) = s.current {
+                a.current = name;
+                repaint = true;
+            }
+            if a.theme != s.theme {
+                a.theme = s.theme;
+                repaint = true;
+            }
+        }
+    });
+    repaint
 }
 
 #[derive(Clone)]
@@ -312,9 +448,9 @@ unsafe fn paint(hwnd: HWND) {
     // ---- text pass -------------------------------------------------------
     {
         let dc = dib.dc();
-        let body = font(-15, 500, TEXT_FAMILY);
-        let small = font(-12, 400, TEXT_FAMILY);
-        let label = font(-11, 600, TEXT_FAMILY);
+        let body = font(-15, 500, &t.typeface.family);
+        let small = font(-12, 400, &t.typeface.family);
+        let label = font(-11, 600, &t.typeface.family);
         SetBkMode(dc, TRANSPARENT);
 
         // The search line. When the query is empty the hint stands in for it,
@@ -358,7 +494,7 @@ unsafe fn paint(hwnd: HWND) {
                     // deliberate fit.
                     let mut drawn = false;
                     for size in [-15i32, -14, -13, -12] {
-                        let f = font(size, if is_current { 600 } else { 500 }, TEXT_FAMILY);
+                        let f = font(size, if is_current { 600 } else { 500 }, &t.typeface.family);
                         SelectObject(dc, HGDIOBJ(f.0));
                         if text_width(dc, &item.name) <= avail {
                             draw_text(
@@ -609,6 +745,11 @@ unsafe fn run() {
     let _ = SetWindowPos(hwnd, HWND_TOPMOST, origin.0, origin.1, W, 240, SWP_SHOWWINDOW);
     apply_shape(hwnd, W, 240);
     let _ = SetForegroundWindow(hwnd);
+    // From here on the background thread supplies the theme and the active
+    // name; the first paint below still uses the values read synchronously in
+    // `main`, so the grid is never briefly empty or unmarked.
+    spawn_worker();
+    let _ = SetTimer(hwnd, TIMER_ID, REFRESH_MS as u32, None);
     relayout(hwnd, W);
 
     let mut msg = MSG::default();
@@ -620,6 +761,16 @@ unsafe fn run() {
 
 unsafe extern "system" fn wnd_proc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM) -> LRESULT {
     match msg {
+        WM_TIMER if wp.0 == TIMER_ID => {
+            // The worker has been reading the stylesheet while this loop was
+            // busy. Draw only when something actually changed — the picker
+            // polls even when no theme was switched, and repainting an
+            // unchanged grid is pure GDI churn.
+            if drain_inbox() {
+                relayout(hwnd, W);
+            }
+            LRESULT(0)
+        }
         WM_PAINT => {
             let mut ps = PAINTSTRUCT::default();
             if !BeginPaint(hwnd, &mut ps).0.is_null() {
@@ -725,6 +876,8 @@ unsafe extern "system" fn wnd_proc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM)
             LRESULT(0)
         }
         WM_DESTROY => {
+            stop_worker();
+            let _ = KillTimer(hwnd, TIMER_ID);
             let _ = PostQuitMessage(0);
             LRESULT(0)
         }
