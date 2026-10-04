@@ -14,8 +14,8 @@ The crate is split so other tools can reuse the parsing instead of
 re-implementing it:
 
 - `src/lib.rs` — `parse`/`parse_header`/`is_var_line`, `Stylesheet::set`
-  and `::step`, `write_atomic`, `sync_config_colors`, plus the colour
-  helpers `Rgba`, `parse_color` and `active_theme_vars`.
+  and `::step`, `write_atomic`, `sync_config_colors`, `sync_cava_colors`,
+  plus the colour helpers `Rgba`, `parse_color` and `active_theme_vars`.
 - `src/main.rs` — the thin `yasb-theme` CLI over that library.
 
 `tools/saka-popup` links the library for `Rgba`/`parse_color`/
@@ -126,11 +126,35 @@ Every `set`/`next`/`prev` also rewrites two sections of `config.yaml` from
 the new theme's tokens, because YASB reads those colours straight from the
 config where no CSS variable can reach them:
 
-- `cava` — `foreground`/`gradient_color_1..3` from
-  `teal`/`blue`/`mauve`/`peach`, so the visualizer follows the palette.
+- `cava` — the bar widget's `foreground`/`gradient_color_1..3` from
+  `teal`/`blue`/`mauve`/`peach`.
 - `pomodoro` — `circle_work_progress_color` = `mauve`,
   `circle_break_progress_color` = `teal`. The native PomodoroWidget paints
   that ring itself, so the config hex is the only handle on it.
+
+### The standalone cava app
+
+`~/.config/cava/config` is a *different file* from YASB's `cava` widget
+block: it belongs to the cava program itself, which is the visualiser that
+actually runs here. Every `set`/`next`/`prev` rewrites its `[color]` section
+too, via `sync_cava_colors`:
+
+- `foreground` — `frame`.
+- `gradient_color_1..8`, bass to treble — `frame`, `red`, `peach`, `yellow`,
+  `green`, `teal`, `sapphire`, `sky`.
+
+The order is fixed across themes on purpose: a visualiser whose colours
+both reshuffle *and* reorder on every switch stops being readable as a
+level meter, because you learn the mapping by position.
+
+cava runs with `live-config = 1`, so it picks the change up without a
+restart. Only the nine colour values are touched — indentation, quote
+style and comments in that file are left byte-for-byte alone, so a
+hand-edited config does not get reformatted by a theme switch. A missing
+file is not an error, and a config with no `[color]` section is skipped
+rather than having one invented for it.
+
+Override the path with `--cava PATH` if cava lives somewhere unusual.
 
 Rebuild after touching the crate:
 

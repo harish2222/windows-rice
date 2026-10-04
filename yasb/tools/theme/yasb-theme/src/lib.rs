@@ -4,6 +4,7 @@
 //! styles.css; exactly one is active. See `../theme.md` for the block
 //! contract these invariants depend on.
 
+use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -108,6 +109,163 @@ pub fn sync_config_colors(config: &Path, sheet: &Stylesheet, theme: &str) -> Res
         out.push_str(&newline);
     }
     write_atomic(config, out.as_bytes())
+}
+
+/// The eight gradient stops cava paints, bass (1) to treble (8), and the flat
+/// `foreground` used when the gradient is off.
+///
+/// Bass leads with the theme's own frame colour so the bottom of the spectrum
+/// matches the bar's accent, then sweeps the palette warm-to-cool. The order is
+/// fixed across themes on purpose: a visualiser whose colours reshuffle *and*
+/// reorder on every theme switch is unreadable as a level meter, because you
+/// learn the mapping by position.
+const CAVA_STOPS: [(&str, &str); 8] = [
+    ("frame", "#c04e68"),
+    ("red", "#d84e4e"),
+    ("peach", "#e4935e"),
+    ("yellow", "#d8a854"),
+    ("green", "#92b060"),
+    ("teal", "#5ca89b"),
+    ("sapphire", "#62a3b5"),
+    ("sky", "#8ac9d2"),
+];
+
+/// `foreground`, paired with its fallback for themes that omit `--frame`.
+const CAVA_FOREGROUND: (&str, &str) = ("frame", "#c04e68");
+
+/// Rewrites the standalone cava app's `[color]` section so the visualiser
+/// follows the palette.
+///
+/// This is a different file from the `cava` block in YASB's own config.yaml —
+/// that one is the bar widget, and [`sync_config_colors`] already handles it.
+/// This is `~/.config/cava/config`, the app itself, which is what actually runs
+/// here (the YASB widget is not on the bar). It has `live-config = 1`, so the
+/// rewrite is picked up without restarting cava.
+///
+/// Deliberately separate from [`sync_config_colors`] because the formats are
+/// unrelated: that one edits double-quoted YAML inside a widget's `options:`
+/// block, this one edits single-quoted INI inside `[color]`. Sharing the line
+/// surgery between them would mean a parser that handles both badly.
+///
+/// A missing file is not an error — plenty of installs have no cava at all, and
+/// a theme switch must not start failing because of a program that isn't there.
+pub fn sync_cava_colors(cava: &Path, sheet: &Stylesheet, theme: &str) -> Result<(), String> {
+    if !cava.is_file() {
+        return Ok(());
+    }
+    let vars = sheet.theme_vars(theme);
+    let raw = fs::read(cava).map_err(|e| format!("cannot read {}: {e}", cava.display()))?;
+    let text =
+        String::from_utf8(raw).map_err(|e| format!("{} is not valid UTF-8: {e}", cava.display()))?;
+    let newline = if text.contains("\r\n") { "\r\n" } else { "\n" }.to_string();
+    let ends_with_newline = text.ends_with('\n');
+    let mut lines: Vec<String> = text.lines().map(str::to_string).collect();
+
+    let start = match lines.iter().position(|l| l.trim() == "[color]") {
+        Some(i) => i,
+        // No [color] section means the user has deliberately configured cava
+        // some other way. Leave it alone rather than invent a section.
+        None => return Ok(()),
+    };
+    // The section runs until the next `[header]`.
+    let mut end = lines.len();
+    for (j, line) in lines.iter().enumerate().skip(start + 1) {
+        if line.trim_start().starts_with('[') {
+            end = j;
+            break;
+        }
+    }
+
+    let mut changed = false;
+    for line in lines.iter_mut().take(end).skip(start + 1) {
+        if let Some(new) = recolour_line(line, &vars) {
+            if new != *line {
+                *line = new;
+                changed = true;
+            }
+        }
+    }
+
+    if !changed {
+        return Ok(());
+    }
+    let mut out = lines.join(&newline);
+    if ends_with_newline {
+        out.push_str(&newline);
+    }
+    write_atomic(cava, out.as_bytes())
+}
+
+/// Recompute one `key = value` line's colour, or `None` to leave it alone.
+///
+/// Pure and allocation-returning on purpose: the caller iterates a `&mut
+/// [&str]` over the same buffer it is writing into, so a function that took
+/// `&mut String` could not also read the line it was replacing.
+///
+/// Only the value is swapped. The indentation, the quote character and any
+/// trailing comment survive, because rewriting the whole assignment would
+/// silently reformat a hand-edited config on every single theme switch — the
+/// kind of drift that makes someone stop trusting the tool.
+fn recolour_line(line: &str, vars: &HashMap<String, String>) -> Option<String> {
+    let body = line.trim_start();
+    if body.is_empty() || body.starts_with('#') || body.starts_with(';') {
+        return None;
+    }
+    let indent = &line[..line.len() - body.len()];
+    let eq = body.find('=')?;
+    // Everything up to and including the `=` is reproduced verbatim.
+    let prefix = &body[..=eq];
+    let key = body[..eq].trim();
+    if key.is_empty() || !key.chars().all(|c| c.is_ascii_alphanumeric() || c == '_') {
+        return None;
+    }
+    let value = match key {
+        "foreground" => vars
+            .get(CAVA_FOREGROUND.0)
+            .map(String::as_str)
+            .unwrap_or(CAVA_FOREGROUND.1),
+        k => {
+            let n = k.strip_prefix("gradient_color_")?.parse::<usize>().ok()?;
+            if !(1..=CAVA_STOPS.len()).contains(&n) {
+                return None;
+            }
+            let (token, fallback) = CAVA_STOPS[n - 1];
+            // Falling back matters: a theme that omits a token would otherwise
+            // leave that stop holding the *previous* theme's colour, so a
+            // gradient would only half-change on the switch.
+            vars.get(token).map(String::as_str).unwrap_or(fallback)
+        }
+    };
+
+    let rest = &body[eq + 1..];
+    let trimmed = rest.trim_start();
+    let lead = &rest[..rest.len() - trimmed.len()];
+    let quote = match trimmed.chars().next() {
+        Some(q @ ('\'' | '"')) => q,
+        _ => '\0',
+    };
+    let after = if quote == '\0' { trimmed } else { &trimmed[1..] };
+    // The value runs to the closing quote, or to an inline comment if
+    // unquoted. `tail` keeps the closing quote when there is one, so it is
+    // appended verbatim rather than having a quote added to it.
+    let (old, tail) = if quote == '\0' {
+        match after.find('#') {
+            Some(i) => (&after[..i], &after[i..]),
+            None => (after, ""),
+        }
+    } else {
+        match after.find(quote) {
+            Some(i) => (&after[..i], &after[i..]),
+            // Unbalanced quotes: a line we do not understand is a line we do
+            // not touch.
+            None => return None,
+        }
+    };
+    if old.trim() == value {
+        return None;
+    }
+    let open = if quote == '\0' { String::new() } else { quote.to_string() };
+    Some(format!("{indent}{prefix}{lead}{open}{value}{tail}"))
 }
 
 pub fn read_styles(path: &Path) -> Result<String, String> {

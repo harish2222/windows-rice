@@ -6,7 +6,8 @@
 //! trailing-newline state and UTF-8 (no BOM) encoding byte-for-byte otherwise.
 //!
 //! Usage:
-//!   yasb-theme [--styles PATH] <list|current|set <name>|next|prev>
+//!   yasb-theme [--styles PATH] [--config PATH] [--cava PATH]
+//!             <list|current|set <name>|next|prev>
 //!
 //! Bar wiring (omega dropdown): run_cmd -> `yasb-theme.exe current`,
 //! left-click -> `yasb-theme.exe next`, right-click -> `yasb-theme.exe prev`
@@ -16,7 +17,7 @@ use std::env;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
-use yasb_theme::{parse, read_styles, sync_config_colors};
+use yasb_theme::{parse, read_styles, sync_cava_colors, sync_config_colors};
 
 fn main() -> ExitCode {
     match run() {
@@ -32,6 +33,7 @@ fn run() -> Result<(), String> {
     let mut args: Vec<String> = env::args().skip(1).collect();
     let mut styles_override: Option<PathBuf> = None;
     let mut config_override: Option<PathBuf> = None;
+    let mut cava_override: Option<PathBuf> = None;
     let mut i = 0;
     while i < args.len() {
         if args[i] == "--styles" {
@@ -46,12 +48,19 @@ fn run() -> Result<(), String> {
             }
             config_override = Some(PathBuf::from(args.remove(i + 1)));
             args.remove(i);
+        } else if args[i] == "--cava" {
+            if i + 1 >= args.len() {
+                return Err("--cava needs a path".to_string());
+            }
+            cava_override = Some(PathBuf::from(args.remove(i + 1)));
+            args.remove(i);
         } else {
             i += 1;
         }
     }
     let styles = styles_override.unwrap_or_else(default_styles_path);
     let config = config_override.unwrap_or_else(default_config_path);
+    let cava = cava_override.unwrap_or_else(default_cava_path);
     let Some(cmd) = args.first() else {
         return Err(
             "usage: yasb-theme [--styles PATH] [--config PATH] <list|current|set <name>|next|prev>"
@@ -85,6 +94,7 @@ fn run() -> Result<(), String> {
             let new = sheet.set(name)?;
             sheet.write(&styles)?;
             sync_config_colors(&config, &sheet, &new)?;
+            sync_cava_colors(&cava, &sheet, &new)?;
             println!("{new}");
             Ok(())
         }
@@ -93,6 +103,7 @@ fn run() -> Result<(), String> {
             let new = sheet.step(1)?;
             sheet.write(&styles)?;
             sync_config_colors(&config, &sheet, &new)?;
+            sync_cava_colors(&cava, &sheet, &new)?;
             println!("{new}");
             Ok(())
         }
@@ -101,6 +112,7 @@ fn run() -> Result<(), String> {
             let new = sheet.step(-1)?;
             sheet.write(&styles)?;
             sync_config_colors(&config, &sheet, &new)?;
+            sync_cava_colors(&cava, &sheet, &new)?;
             println!("{new}");
             Ok(())
         }
@@ -108,6 +120,16 @@ fn run() -> Result<(), String> {
             "unknown command '{other}'; expected list|current|set|next|prev"
         )),
     }
+}
+
+/// `%USERPROFILE%\.config\cava\config` — the visualiser's own INI.
+///
+/// Not derived from the exe's location: cava is a separate program with its
+/// own config directory, and it is not always installed at all. A missing file
+/// is treated as "nothing to sync" rather than an error.
+fn default_cava_path() -> PathBuf {
+    let home = env::var("USERPROFILE").unwrap_or_else(|_| ".".to_string());
+    Path::new(&home).join(".config").join("cava").join("config")
 }
 
 /// styles.css next to the binary, falling back to %USERPROFILE%\.config\yasb.
