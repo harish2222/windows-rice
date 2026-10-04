@@ -24,10 +24,6 @@
     --fontSize: 13px;
     --iconSize: 20px;
     --iconSizeSm: 12px;
-    /* Devanagari OM is much taller per em than the Greek lambda: measured,
-       --iconSize (20px) renders it 27px tall where the lambda is 15px. This
-       is the size at which the two glyphs come out the same height. */
-    --glyphOm: 15px;
 
     /* Pomodoro ring: the session state is the only thing the chip shows, so
        the colour has to carry it. */
@@ -35,6 +31,13 @@
     --pomodoroBreak: #30A46C;
     --fontSizeLarge: 16px;
     --fontWeight: 600;
+
+    /* UNRESOLVED: the OM glyph in the saka chip measures 27px tall against
+       the lambda's 15px. It is a <span> inside the label, and Qt QSS cannot
+       target rich-text spans, so no selector here will resize it -- an
+       earlier `.saka-widget .label span` rule was tried and measured as
+       having no effect. It has to be fixed in the widget's markup or by
+       giving it an icon field, not in this file. */
 
     /* BAR RHYTHM: one line box for every widget's icon and label, and one
        horizontal gap between widgets.
@@ -1614,16 +1617,6 @@
     font-weight: var(--fontWeight);
     letter-spacing: 0.5px;
     color: var(--subtext);
-}
-.saka-widget .label span {
-    /* The OM glyph is a span inside the label, not an icon, so it inherits the
-       label's font size while the lambda beside it renders at --iconSize.
-
-       Matching the *font size* is not the same as matching the *glyph*: OM is
-       Devanagari and carries tall ascenders, so at the lambda's 20px it drew
-       27px tall against the lambda's 15px. Sized by measurement instead --
-       see the comment on --glyphOm. */
-    font-size: var(--glyphOm);
 }
 .saka-widget .icon {
     font-size: var(--iconSizeSm);
