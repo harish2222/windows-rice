@@ -43,6 +43,10 @@ mod theme;
 
 use std::cell::RefCell;
 use std::path::PathBuf;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::mpsc::{self, Receiver, TryRecvError};
+use std::sync::Arc;
+use std::time::Duration;
 
 use saka::{Element, Panchang, Script, paksha_at, tithi_name_at};
 use theme::{Rgba, Theme};
@@ -79,6 +83,130 @@ thread_local! {
     /// it for the panel's whole life is what keeps the acrylic from feeding
     /// back on itself across the 1 Hz repaints.
     static BACKDROP: RefCell<Option<Backdrop>> = const { RefCell::new(None) };
+    /// Snapshots from the background thread, newest last. `None` until
+    /// [`spawn_worker`] runs. Only ever drained, never written to, and only
+    /// ever on the message-loop thread.
+    static INBOX: RefCell<Option<Receiver<Snapshot>>> = const { RefCell::new(None) };
+    /// Set when the window is destroyed, so the worker stops computing into a
+    /// channel nobody is reading.
+    static STOP: RefCell<Option<Arc<AtomicBool>>> = const { RefCell::new(None) };
+}
+
+/// How often the background thread recomputes. Matches the WM_TIMER period:
+/// the timer exists to *draw* the newest snapshot, not to produce one.
+const REFRESH_MS: u64 = 1000;
+
+/// One complete set of values for a frame.
+///
+/// Plain data only — numbers, strings and colours, no handles and no
+/// pointers. That is what makes it `Send`, and it is the whole reason the
+/// background thread is allowed to exist: nothing here can name a window, a
+/// DC or any other piece of per-thread GDI state.
+///
+/// A GDI HDC is owned by the thread that selected into it, and a window may
+/// not be painted from a thread that does not own its message queue. So the
+/// split is strict: the worker computes, the message loop paints. Both halves
+/// are useless alone.
+#[derive(Clone, Debug)]
+struct Snapshot {
+    panchangam: Panchang,
+    theme: Theme,
+}
+
+fn take_snapshot() -> Snapshot {
+    Snapshot {
+        panchangam: Panchang::now(LAT, LON, TZ),
+        // Re-read the theme every tick so a switch made while the popup is
+        // open shows up without reopening it. This is a file read and a CSS
+        // parse, which is a second reason to keep it off the UI thread.
+        theme: Theme::load(&styles_path()),
+    }
+}
+
+/// Start the single background thread that produces [`Snapshot`]s.
+///
+/// One thread, not a pool: the work is a calendar computation and one small
+/// file read once a second. A pool would add handoff overhead to buy nothing,
+/// and every extra thread would only widen the window in which a stale frame
+/// can be painted.
+fn spawn_worker() {
+    let (tx, rx) = mpsc::channel::<Snapshot>();
+    INBOX.with(|i| *i.borrow_mut() = Some(rx));
+    let stop = Arc::new(AtomicBool::new(false));
+    STOP.with(|s| *s.borrow_mut() = Some(stop.clone()));
+    std::thread::spawn(move || {
+        // Deliver one straight away rather than making the first open wait a
+        // full second on an empty inbox.
+        if tx.send(take_snapshot()).is_err() {
+            return;
+        }
+        while !stop.load(Ordering::Relaxed) {
+            std::thread::sleep(Duration::from_millis(REFRESH_MS));
+            if stop.load(Ordering::Relaxed) {
+                break;
+            }
+            // A send error means the panel closed and dropped the receiver,
+            // which is the normal way this loop ends.
+            if tx.send(take_snapshot()).is_err() {
+                break;
+            }
+        }
+    });
+}
+
+/// Stop the worker. Called from WM_DESTROY.
+///
+/// The thread is deliberately not joined. It is parked in a sleep when the
+/// flag flips, so it cannot be mid-write to anything the UI thread still owns;
+/// joining it would only risk blocking the message loop for up to a second on
+/// close, which is exactly the sort of input lag this whole change exists to
+/// remove.
+fn stop_worker() {
+    STOP.with(|s| {
+        if let Some(flag) = s.borrow_mut().take() {
+            flag.store(true, Ordering::Relaxed);
+        }
+    });
+    INBOX.with(|i| *i.borrow_mut() = None);
+}
+
+/// Collapse everything queued into the single newest snapshot.
+///
+/// After a slow tick the channel can hold more than one, and painting the
+/// oldest would be strictly worse than painting nothing — the whole point of
+/// the panel is that it shows *now*. Returns `None` when nothing new arrived,
+/// which is the signal not to repaint at all.
+fn take_latest(rx: &mut Receiver<Snapshot>) -> Option<Snapshot> {
+    let mut newest = None;
+    loop {
+        match rx.try_recv() {
+            Ok(s) => newest = Some(s),
+            Err(TryRecvError::Empty) | Err(TryRecvError::Disconnected) => break,
+        }
+    }
+    newest
+}
+
+/// Move any fresh snapshot into the app state. Returns whether there was one.
+fn drain_inbox() -> bool {
+    let mut newest = None;
+    INBOX.with(|i| {
+        if let Some(rx) = i.borrow_mut().as_mut() {
+            newest = take_latest(rx);
+        }
+    });
+    match newest {
+        Some(s) => {
+            APP.with(|c| {
+                if let Some(a) = c.borrow_mut().as_mut() {
+                    a.panchangam = s.panchangam;
+                    a.theme = s.theme;
+                }
+            });
+            true
+        }
+        None => false,
+    }
 }
 
 #[derive(Clone)]
@@ -568,7 +696,11 @@ unsafe fn run() {
     let _ = SetWindowPos(hwnd, HWND_TOPMOST, origin.0, origin.1, W, h, SWP_SHOWWINDOW);
     apply_round_region(hwnd, W, h, RADIUS);
     let _ = SetForegroundWindow(hwnd);
-    let _ = SetTimer(hwnd, TIMER_ID, 1000, None);
+    // From here on the background thread supplies the values; the first paint
+    // below still uses the synchronously-computed ones so the panel is never
+    // briefly empty.
+    spawn_worker();
+    let _ = SetTimer(hwnd, TIMER_ID, REFRESH_MS as u32, None);
     paint(hwnd);
 
     let mut msg = MSG::default();
@@ -591,16 +723,13 @@ unsafe extern "system" fn wnd_proc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM)
             LRESULT(0)
         }
         WM_TIMER if wp.0 == TIMER_ID => {
-            // Refresh the live values and repaint at 1 Hz.
-            APP.with(|c| {
-                if let Some(a) = c.borrow_mut().as_mut() {
-                    a.panchangam = Panchang::now(LAT, LON, TZ);
-                    // Re-read the theme so a switch while the popup is open is
-                    // picked up on the next tick.
-                    a.theme = Theme::load(&styles_path());
-                }
-            });
-            paint(hwnd);
+            // The worker has been producing values while this message loop
+            // was busy; collect whatever is waiting and draw it. Painting is
+            // skipped when nothing new arrived — there is no animation on this
+            // panel, so a repaint with identical inputs is pure GDI churn.
+            if drain_inbox() {
+                paint(hwnd);
+            }
             LRESULT(0)
         }
         WM_KEYDOWN => {
@@ -632,6 +761,7 @@ unsafe extern "system" fn wnd_proc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM)
         }
         WM_DESTROY => {
             let _ = KillTimer(hwnd, TIMER_ID);
+            stop_worker();
             let _ = PostQuitMessage(0);
             LRESULT(0)
         }
@@ -641,5 +771,67 @@ unsafe extern "system" fn wnd_proc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM)
             LRESULT(0)
         }
         _ => DefWindowProcW(hwnd, msg, wp, lp),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn snap(n: u32) -> Snapshot {
+        Snapshot {
+            panchangam: Panchang::now(LAT, LON, TZ),
+            theme: Theme::from_vars(&[("--accent".into(), format!("#{n:06x}"))]),
+        }
+    }
+
+    /// After a slow tick more than one snapshot can be queued, and the panel
+    /// has to show the newest. Painting the oldest would mean the popup could
+    /// go *backwards* in time after a stall, which is the one failure mode
+    /// that makes a clock untrustworthy.
+    #[test]
+    fn a_backlog_collapses_to_the_newest_snapshot() {
+        let (tx, mut rx) = mpsc::channel();
+        tx.send(snap(0x111111)).unwrap();
+        tx.send(snap(0x222222)).unwrap();
+        tx.send(snap(0x333333)).unwrap();
+        let got = take_latest(&mut rx).expect("three snapshots queued");
+        assert_eq!(
+            (got.theme.accent.r, got.theme.accent.g, got.theme.accent.b),
+            (0x33, 0x33, 0x33),
+            "took an older snapshot than the newest"
+        );
+    }
+
+    /// Nothing new means nothing to draw. Repainting identical inputs is pure
+    /// GDI churn, and on a panel with no animation it is the difference
+    /// between 1 Hz of work and 1 Hz of nothing.
+    #[test]
+    fn an_empty_inbox_reports_nothing_to_draw() {
+        let (_tx, mut rx) = mpsc::channel();
+        assert!(take_latest(&mut rx).is_none());
+    }
+
+    /// Draining must consume, not peek: a second drain with no new work has
+    /// to find nothing, or the same snapshot would be painted on every tick
+    /// forever.
+    #[test]
+    fn draining_consumes_the_snapshot() {
+        let (tx, mut rx) = mpsc::channel();
+        tx.send(snap(0x444444)).unwrap();
+        assert!(take_latest(&mut rx).is_some());
+        assert!(take_latest(&mut rx).is_none());
+    }
+
+    /// A disconnected sender means the worker has gone. That is not an error
+    /// to surface — it is how the panel learns to stop asking — so the drain
+    /// reports "nothing new" rather than looping or panicking.
+    #[test]
+    fn a_dead_worker_is_not_an_error() {
+        let (tx, mut rx) = mpsc::channel::<Snapshot>();
+        tx.send(snap(0x555555)).unwrap();
+        drop(tx);
+        assert!(take_latest(&mut rx).is_some(), "the queued value is still valid");
+        assert!(take_latest(&mut rx).is_none(), "then it reads as empty, forever");
     }
 }
