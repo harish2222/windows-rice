@@ -25,12 +25,14 @@
 
 pub mod canvas;
 pub mod gdi;
+pub mod singleton;
 
 pub use canvas::{Canvas, moon_lit_mask};
 pub use gdi::{
     Backdrop, Dib, apply_round_region, blit_to_window, colorref, draw_text, font, rect, styles_path,
     text_width,
 };
+pub use singleton::{acquire, raise_window_of_class};
 
 /// The font stack both panels draw with.
 ///

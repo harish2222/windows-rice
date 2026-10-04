@@ -1,0 +1,21 @@
+[package]
+name = "screen-shot"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "screen-shot"
+path = "src/main.rs"
+
+[dependencies]
+# PNG in and out. The Python version got this from Pillow; doing it by hand
+# would mean writing a zlib deflate stream for no benefit.
+png = "0.17"
+
+[dependencies.windows]
+version = "0.58"
+features = [
+    "Win32_Foundation",
+    "Win32_Graphics_Gdi",
+    "Win32_UI_WindowsAndMessaging",
+]
