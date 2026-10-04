@@ -26,6 +26,7 @@
 pub mod canvas;
 pub mod gdi;
 pub mod singleton;
+pub mod typeface;
 
 pub use canvas::{Canvas, moon_lit_mask};
 pub use gdi::{
@@ -33,17 +34,4 @@ pub use gdi::{
     text_width,
 };
 pub use singleton::{Action, acquire, notify_window_of_class, raise_window_of_class};
-
-/// The font stack both panels draw with.
-///
-/// `Segoe UI Variable Display` is the Windows 11 system face and is what gives
-/// the headings their large-x-height look; `Segoe UI` is the fallback for
-/// machines where the variable font is not installed. Mixing the two inside a
-/// panel is what makes a UI look assembled rather than designed, so a family
-/// is chosen once here rather than per call site.
-pub const DISPLAY_FAMILY: &str = "Segoe UI Variable Display";
-pub const TEXT_FAMILY: &str = "Segoe UI";
-
-/// Windows ships Nirmala UI for Brahmic scripts; Telugu labels fall back to it
-/// when the panel is switched to the Telugu script.
-pub const INDIC_FAMILY: &str = "Nirmala UI";
+pub use typeface::{INDIC_FAMILY, Typeface};

@@ -27,7 +27,29 @@
 
 use std::path::Path;
 
-pub use yasb_theme::{Rgba, active_theme_vars, parse_color};
+pub use yasb_theme::{Rgba, active_theme_vars, global_var, parse_color};
+
+/// Strip the quotes CSS puts around a font-family value.
+///
+/// `--system-font: "FiraCode Nerd Font Mono";` parses to `"FiraCode Nerd
+/// Font Mono"` including the quote characters, and GDI would then look for a
+/// family with quotes in its name and substitute. Worth a function because
+/// forgetting it produces a panel that looks *almost* right.
+pub fn unquote_font(value: &str) -> &str {
+    let v = value.trim();
+    v.strip_prefix('"')
+        .and_then(|v| v.strip_suffix('"'))
+        .unwrap_or(v)
+}
+
+/// The bar's font, as a raw (still quoted) `--system-font` value.
+///
+/// Read from the document level rather than the active theme block: the
+/// stylesheet declares it in `:root`, because it describes this machine's
+/// installed fonts rather than any palette. See [`global_var`].
+fn system_font(css: &str) -> Option<String> {
+    global_var(css, "system-font")
+}
 
 /// Fallback palette, only used when `styles.css` cannot be read at all. It
 /// matches the Catppuccin-ish defaults the picker uses.
@@ -100,6 +122,14 @@ pub struct Theme {
     pub moon_lit: Rgba,
     /// Halo around the moon glyph.
     pub moon_glow: f32,
+
+    // --- derived type -----------------------------------------------------
+    /// The font families this panel draws with.
+    ///
+    /// Not hardcoded: the bar renders in whatever `--system-font` the active
+    /// theme names, so a panel that picked its own face would visibly differ
+    /// from the bar it is attached to. See [`yasb_chrome::Typeface`].
+    pub typeface: yasb_chrome::Typeface,
 }
 
 /// Linear interpolation between two colours, alpha included.
@@ -326,12 +356,19 @@ impl Theme {
             accent,
             track,
 
-            // Acrylic is a 15%-opaque material: the panel should read as a
-            // pane of glass with the desktop behind it, not as a dark sheet
-            // laid over the desktop. The blur below is what makes that
-            // legible; the card underneath the rows is the second half of the
-            // bargain.
-            backdrop_opacity: 0.85,
+            // How much of the captured desktop shows through the panel.
+            //
+            // Stated the way the material is specified: this is a *70% opaque*
+            // panel, i.e. 30% of the blurred wallpaper still comes through.
+            // It was 0.85 (a 15%-opaque sheet of glass) and was changed on
+            // request — 85% wallpaper behind body text left too little margin
+            // on a busy desktop, and the rows' own contrast could not be
+            // guaranteed across the whole wallpaper range at that setting.
+            //
+            // The blur below is what still makes it read as acrylic rather
+            // than as flat paint, and the card under the rows supplies the
+            // local contrast the glass no longer does.
+            backdrop_opacity: 0.30,
             backdrop_blur: 12,
             sheen_top,
             sheen_bottom,
@@ -393,6 +430,11 @@ impl Theme {
             // like it is catching the same light as the rest of the panel.
             moon_lit: mix(lighten(bg, 0.94), accent, 0.10),
             moon_glow: 0.16,
+            // Whatever the bar is drawing in, resolved against the fonts this
+            // machine actually has.
+            typeface: yasb_chrome::Typeface::resolve(
+                find(&["--system-font"]).as_deref().map(unquote_font),
+            ),
         }
     }
 
@@ -405,7 +447,13 @@ impl Theme {
         if vars.is_empty() {
             vars = fallback();
         }
-        Theme::from_vars(&vars)
+        let mut t = Theme::from_vars(&vars);
+        // The font is a document-level setting, so it is applied after
+        // construction rather than being threaded through `from_vars`.
+        if let Some(f) = system_font(&css) {
+            t.typeface = yasb_chrome::Typeface::resolve(Some(unquote_font(&f)));
+        }
+        t
     }
 }
 
@@ -536,13 +584,24 @@ mod tests {
                 assert!(c.a < 255, "{name} on {bg} is opaque");
                 assert!(c.a > 0, "{name} on {bg} is invisible");
             }
-            // Acrylic must actually show wallpaper, and the value is not a
-            // free parameter: it is the material's 15% opacity stated the
-            // other way round. Pin it so a future "let's calm it down" edit
-            // cannot quietly turn the glass back into a sheet of plastic.
-            assert_eq!(
-                t.backdrop_opacity, 0.85,
-                "backdrop opacity drifted on {bg}"
+            // The panel must actually show some wallpaper, and the value is
+            // not a free parameter. 0.30 is a 70%-opaque panel: enough glass
+            // to read as a material, opaque enough that body text does not
+            // depend on what is on the desktop. Pinned so a future "let's
+            // make it more see-through" edit cannot quietly undo the
+            // legibility work.
+            assert!(
+                (t.backdrop_opacity - 0.30).abs() < f32::EPSILON,
+                "backdrop opacity drifted to {} on {bg}",
+                t.backdrop_opacity
+            );
+            // And it must stay in the glassy half of the range. At 0 the
+            // panel is opaque paint and the blur is doing nothing.
+            assert!(
+                t.backdrop_opacity >= 0.15 && t.backdrop_opacity <= 0.45,
+                "backdrop opacity {} on {bg} is no longer a translucent \
+                 material; 0.30 is the 70%-opaque panel this was specified as",
+                t.backdrop_opacity
             );
             // ...and the blur is what makes that number survivable. A radius
             // of zero here would pass an opacity check and still be
@@ -862,6 +921,8 @@ mod tests {
         if header { t.sheen_top.over(c) } else { t.sheen_bottom.over(c) }
     }
 }
+
+
 
 
 

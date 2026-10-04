@@ -684,6 +684,55 @@ pub fn active_theme_vars(css: &str) -> Vec<(String, String)> {
     parse_decls(&css[head..start + re_start.len() + end])
 }
 
+/// Read a variable that is declared at the *document* level, not in the active
+/// theme block.
+///
+/// `--system-font` is one of these. It sits in `:root` above the theme blocks
+/// because it is a machine-level choice — "which font is installed here" — not
+/// a property of a palette, and the stylesheet says so explicitly with a
+/// "MANUAL FONT SWITCH" comment listing the families to choose from. Looking
+/// for it with [`active_theme_vars`] therefore always fails, and the panels
+/// silently fell back to Segoe UI while the bar drew in FiraCode: the exact
+/// mismatch this function exists to close.
+///
+/// So this searches the whole stylesheet, ignoring comments, and takes the
+/// *last* declaration — which is how a browser resolves a repeated custom
+/// property in the same scope. The comment block above `:root` lists three
+/// candidate families as documentation; ignoring comments is what stops that
+/// documentation being mistaken for the live setting.
+pub fn global_var(css: &str, name: &str) -> Option<String> {
+    // Strip comments first. Without this the "MANUAL FONT SWITCH" block, which
+    // mentions every family in turn, wins over the real declaration below it.
+    let mut stripped = String::with_capacity(css.len());
+    let mut rest = css;
+    while let Some(open) = rest.find("/*") {
+        stripped.push_str(&rest[..open]);
+        match rest[open..].find("*/") {
+            Some(close) => rest = &rest[open + close + 2..],
+            None => {
+                rest = "";
+                break;
+            }
+        }
+    }
+    stripped.push_str(rest);
+
+    let key = format!("--{name}");
+    let mut found = None;
+    for line in stripped.lines() {
+        let line = line.trim();
+        let Some(rest) = line.strip_prefix(&key) else { continue };
+        // Require the exact property, so `--system-font-fallback` is not
+        // mistaken for `--system-font`.
+        let Some(rest) = rest.trim_start().strip_prefix(':') else { continue };
+        let value = rest.trim_end().trim_end_matches(';').trim();
+        if !value.is_empty() {
+            found = Some(value.to_string());
+        }
+    }
+    found
+}
+
 /// Fall back to the whole file when no active marker is present.
 fn whole_root(css: &str) -> Option<&str> {
     css.find(":root").map(|i| &css[i..])
