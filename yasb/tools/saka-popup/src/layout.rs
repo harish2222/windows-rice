@@ -12,8 +12,16 @@
 //! against its neighbours. [`Layout::assert_no_overlap`] is the test that would
 //! have caught the original defect.
 
-/// Width of the panel.
+/// Width of the panel, Latin.
 pub const W: i32 = 460;
+
+/// Width of the panel when the values are Telugu.
+///
+/// Telugu is drawn in Nirmala UI, which is wider per glyph than the Latin
+/// face: measured on the live panel, the widest row (Tithi plus its caption)
+/// already spans 283px of a 292px column at the Latin width. The Indic panel
+/// is given more room so nothing has to be ellipsised to fit.
+pub const W_INDIC: i32 = 520;
 /// Window corner radius.
 pub const RADIUS: i32 = 20;
 /// Panel edge padding. Scale step 6.
@@ -27,6 +35,16 @@ pub const PAD: i32 = yasb_chrome::space(6);
 /// *under the value only*, inside the same line box, so a row is one line of
 /// type plus a 2px rule and nothing else.
 pub const ROW_H: i32 = 34;
+
+/// Row height when the values are Telugu.
+///
+/// Telugu glyphs are 22px tall in the same 16px face that renders Latin
+/// values at 12px: the vowel signs sit above the head and the `cheepuru`
+/// below the baseline. At the Latin row height the descenders reach y+27
+/// while the progress rule is drawn at y+26, so every rule struck through
+/// the bottom of its own value. That is what made the Telugu panel read as
+/// smeared rather than merely tighter.
+pub const ROW_H_INDIC: i32 = 44;
 /// Width of the row card's radius.
 pub const CARD_R: i32 = 16;
 /// Inner padding of the row card. Scale step 3.
@@ -40,6 +58,13 @@ pub const SCRIM_R: i32 = 9;
 /// Vertical offset of the progress indicator inside a row, measured from the
 /// row's top. The text line box is 22px, so this puts the rule just under it.
 pub const INDICATOR_Y: i32 = 26;
+
+/// Offset of the progress rule inside an Indic row.
+///
+/// Clears a 22px Telugu glyph box that starts 3px below the row's top, with
+/// room to spare. Measured, not guessed: at the Latin offset the rule sat
+/// *inside* the glyphs.
+pub const INDICATOR_Y_INDIC: i32 = 34;
 /// Thickness of the progress indicator. 2px reads as a rule rather than a bar.
 pub const INDICATOR_H: i32 = 2;
 /// Horizontal padding inside the weekday pill, either side of the text.
@@ -75,11 +100,46 @@ pub struct Layout {
     pub footer_y: i32,
     /// Total height the panel needs.
     pub height: i32,
+    /// Whether the values are drawn in an Indic script.
+    pub indic: bool,
 }
 
 impl Layout {
     /// Compute the geometry for a panel with `rows` rows.
     pub fn new(rows: i32) -> Layout {
+        Self::build(rows, false)
+    }
+
+    /// Geometry for a panel whose values are in a Brahmic script.
+    pub fn new_indic(rows: i32) -> Layout {
+        Self::build(rows, true)
+    }
+
+    /// Width this layout's panel needs.
+    pub fn w(&self) -> i32 {
+        if self.indic { W_INDIC } else { W }
+    }
+
+    /// Height of one row.
+    pub fn row_h(&self) -> i32 {
+        if self.indic { ROW_H_INDIC } else { ROW_H }
+    }
+
+    /// Offset of the progress rule inside a row.
+    pub fn indicator_y(&self) -> i32 {
+        if self.indic { INDICATOR_Y_INDIC } else { INDICATOR_Y }
+    }
+
+    /// Height of a row's text line box.
+    ///
+    /// Telugu needs a taller box for the same reason it needs a taller row:
+    /// a 22px glyph in a 22px Latin box is centred but still overflows it.
+    pub fn text_h(&self) -> i32 {
+        if self.indic { 30 } else { 22 }
+    }
+
+    fn build(rows: i32, indic: bool) -> Layout {
+        let row_h = if indic { ROW_H_INDIC } else { ROW_H };
         let weekday_y = PAD;
         // The pill is centred on the label's line box, so the two can never
         // drift apart. It reaches a little above `weekday_y` and ends just
@@ -100,7 +160,7 @@ impl Layout {
         let moon_y = date_y;
         let moon_bottom = era_bottom;
         let card_y = rule_y + 18;
-        let card_bottom = card_y + CARD_PAD * 2 + rows * ROW_H;
+        let card_bottom = card_y + CARD_PAD * 2 + rows * row_h;
         let footer_y = card_bottom + 16;
         let height = footer_y + 18 + PAD;
         Layout {
@@ -117,6 +177,7 @@ impl Layout {
             card_bottom,
             footer_y,
             height,
+            indic,
         }
     }
 
@@ -148,7 +209,7 @@ impl Layout {
 
     /// Top of row `i` inside the card.
     pub fn row_y(&self, i: i32) -> i32 {
-        self.card_y + CARD_PAD + i * ROW_H
+        self.card_y + CARD_PAD + i * self.row_h()
     }
 
     /// Left edge of the value column.
@@ -481,7 +542,48 @@ mod tests {
                 "pill ends at {x1}, the moon limb starts at {disc_left} (text_w={text_w})"
             );
         }
-    }#[test]
+    }    #[test]
+    fn the_indic_rule_clears_an_indic_glyph() {
+        // Measured on the live panel: a Telugu value occupies 22px starting
+        // 9px below its row top, so it reaches y+27. The Latin rule is drawn
+        // at y+26 -- inside the glyph. Every progress bar was striking through
+        // the bottom of the value it described, which is what made the Telugu
+        // panel read as smeared rather than merely tighter.
+        const GLYPH_TOP: i32 = 9;
+        const GLYPH_H: i32 = 22;
+        let glyph_bottom = GLYPH_TOP + GLYPH_H;
+        let l = Layout::new_indic(10);
+        let rule = l.indicator_y();
+        assert!(
+            rule >= glyph_bottom,
+            "the rule at y+{rule} cuts through a Telugu glyph reaching y+{glyph_bottom}"
+        );
+        assert!(
+            rule + INDICATOR_H <= l.row_h(),
+            "the rule at y+{rule} runs past its {}-px row",
+            l.row_h()
+        );
+        // Latin is deliberately left alone: its values are 12px tall and end
+        // around y+21, so its rule at y+26 already clears them. An earlier
+        // version of this test asserted the Indic clearance against the Latin
+        // layout too and failed there for no reason -- the two scripts have
+        // genuinely different metrics and pretending otherwise would have
+        // forced the Latin row to be as tall as the Telugu one.
+        assert_eq!(Layout::new(10).indicator_y(), INDICATOR_Y);
+    }
+
+    #[test]
+    fn the_indic_panel_is_wider_and_its_rows_are_taller() {
+        let latin = Layout::new(10);
+        let indic = Layout::new_indic(10);
+        assert!(indic.w() > latin.w(), "indic panel is not wider");
+        assert!(indic.row_h() > latin.row_h(), "indic rows are not taller");
+        assert!(indic.text_h() > latin.text_h(), "indic text box is not taller");
+        latin.assert_no_overlap(10).unwrap();
+        indic.assert_no_overlap(10).unwrap();
+    }
+
+#[test]
 fn the_value_column_starts_after_the_label_column() {
         assert!(Layout::VALUE_X > PAD + 80, "label column and value column collide");
     }
