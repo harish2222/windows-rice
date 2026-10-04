@@ -69,7 +69,6 @@ const LAT: f64 = 17.3850;
 const LON: f64 = 78.4867;
 const TZ: f64 = 5.5;
 
-const W: i32 = layout::W;
 const RADIUS: i32 = layout::RADIUS;
 const PAD: i32 = layout::PAD;
 const TIMER_ID: usize = 1;
@@ -320,7 +319,12 @@ impl App {
     }
 
     fn layout(&self) -> layout::Layout {
-        layout::Layout::new(self.rows().len() as i32)
+        let n = self.rows().len() as i32;
+        if self.script == Script::Telugu {
+            layout::Layout::new_indic(n)
+        } else {
+            layout::Layout::new(n)
+        }
     }
 }
 
@@ -391,7 +395,7 @@ fn smoke(t: &Theme, p: &Panchang, script: Script) {
     // alone would catch.
     let l = app.layout();
     l.assert_no_overlap(app.rows().len() as i32).expect("layout overlaps");
-    println!("smoke: ok ({} rows, panel {}x{})", app.rows().len(), W, l.height);
+    println!("smoke: ok ({} rows, panel {}x{})", app.rows().len(), l.w(), l.height);
 }
 
 /// Width [`tracked_text`] would draw, without drawing it.
@@ -559,7 +563,7 @@ unsafe fn paint(hwnd: HWND) {
         let (tx, tw, th) = l.track(w);
         for (i, r) in rows.iter().enumerate() {
             let Some((frac, _)) = &r.progress else { continue };
-            let y = l.row_y(i as i32) + layout::INDICATOR_Y;
+            let y = l.row_y(i as i32) + l.indicator_y();
             c.round_rect(tx, y, tx + tw, y + th, th / 2, t.track);
             let fw = ((frac.clamp(0.0, 1.0)) * tw as f64).round() as i32;
             if fw > 0 {
@@ -655,7 +659,7 @@ unsafe fn paint(hwnd: HWND) {
             draw_text(
                 dc,
                 &r.value,
-                rect(value_x, y + 3, value_w, 22),
+                rect(value_x, y + 3, value_w, l.text_h()),
                 DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS,
             );
 
@@ -666,7 +670,7 @@ unsafe fn paint(hwnd: HWND) {
                     draw_text(
                         dc,
                         cap,
-                        rect(w - PAD - cap_w, y + 3, cap_w, 22),
+                        rect(w - PAD - cap_w, y + 3, cap_w, l.text_h()),
                         DT_LEFT | DT_VCENTER,
                     );
                 }
@@ -708,11 +712,14 @@ unsafe fn run() {
 
     // Height comes from the layout, so the window can never disagree with its
     // own contents.
-    let h = APP.with(|c| {
+    let (h, w) = APP.with(|c| {
         c.borrow()
             .as_ref()
-            .map(|a| a.layout().height)
-            .unwrap_or(layout::Layout::new(10).height)
+            .map(|a| {
+                let l = a.layout();
+                (l.height, l.w())
+            })
+            .unwrap_or((layout::Layout::new(10).height, layout::W))
     });
 
     // Centre on the monitor holding the cursor, just below the bar. The
@@ -724,7 +731,7 @@ unsafe fn run() {
     let mut mi = MONITORINFO { cbSize: std::mem::size_of::<MONITORINFO>() as u32, ..Default::default() };
     let _ = GetMonitorInfoW(mon, &mut mi);
     let cx = (mi.rcMonitor.left + mi.rcMonitor.right) / 2;
-    let origin = (cx - W / 2, mi.rcMonitor.top + 40);
+    let origin = (cx - w / 2, mi.rcMonitor.top + 40);
     APP.with(|c| {
         if let Some(a) = c.borrow_mut().as_mut() {
             a.origin = origin;
@@ -737,7 +744,7 @@ unsafe fn run() {
         // acrylic is a low-opacity *and* heavily blurred material.
         let t = &APP.with(|c| c.borrow().clone()).expect("app alive here").theme;
         *b.borrow_mut() =
-            Backdrop::capture(origin.0, origin.1, W, h).map(|bd| bd.blurred(t.backdrop_blur as i32));
+            Backdrop::capture(origin.0, origin.1, w, h).map(|bd| bd.blurred(t.backdrop_blur as i32));
     });
 
     let cls: Vec<u16> = "SakaPopupClass\0".encode_utf16().collect();
@@ -764,7 +771,7 @@ unsafe fn run() {
         WS_POPUP,
         origin.0,
         origin.1,
-        W,
+        w,
         h,
         None,
         None,
@@ -778,8 +785,8 @@ unsafe fn run() {
         }
     };
 
-    let _ = SetWindowPos(hwnd, HWND_TOPMOST, origin.0, origin.1, W, h, SWP_SHOWWINDOW);
-    apply_round_region(hwnd, W, h, RADIUS);
+    let _ = SetWindowPos(hwnd, HWND_TOPMOST, origin.0, origin.1, w, h, SWP_SHOWWINDOW);
+    apply_round_region(hwnd, w, h, RADIUS);
     let _ = SetForegroundWindow(hwnd);
     // From here on the background thread supplies the values; the first paint
     // below still uses the synchronously-computed ones so the panel is never
