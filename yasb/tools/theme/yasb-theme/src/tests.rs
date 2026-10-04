@@ -330,3 +330,145 @@ fn sync_is_a_no_op_when_the_widget_is_absent() {
     assert_eq!(fs::read_to_string(&config).unwrap(), body);
     fs::remove_file(&config).ok();
 }
+// ---- standalone cava sync -----------------------------------------------
+
+/// A stand-in for `~/.config/cava/config`, with the quoting and comment style
+/// the real file uses.
+const CAVA_INI: &str = "\
+[general]
+live-config = 1
+framerate = 60
+
+[color]
+background = default
+foreground = '#bb9af7'
+gradient = 1
+gradient_color_1 = '#bb9af7'
+gradient_color_2 = '#7aa2f7'
+gradient_color_6 = '#7dcfff'
+gradient_color_8 = '#c0caf5'
+# keep this note
+
+[smoothing]
+monstercat = 1
+";
+
+#[test]
+fn cava_gradient_follows_the_theme() {
+    let cava = temp("cava-1.ini", CAVA_INI);
+    let sheet = parse(CSS).unwrap();
+    sync_cava_colors(&cava, &sheet, "Rangalipi Moss").unwrap();
+    let out = fs::read_to_string(&cava).unwrap();
+    // Moss defines only teal; that stop must come from the theme, not from
+    // whatever was there before.
+    assert!(out.contains("gradient_color_6 = '#5f8f7a'"), "{out}");
+    // Stops the theme does not define fall back rather than keeping Tokyo
+    // Night's value.
+    assert!(out.contains("gradient_color_1 = '#7aa85f'") || out.contains("gradient_color_1 = '#c04e68'"), "{out}");
+    fs::remove_file(&cava).ok();
+}
+
+#[test]
+fn cava_switching_themes_replaces_every_stop() {
+    let cava = temp("cava-2.ini", CAVA_INI);
+    let sheet = parse(CSS).unwrap();
+    sync_cava_colors(&cava, &sheet, "Rangalipi Moss").unwrap();
+    let after_moss = fs::read_to_string(&cava).unwrap();
+    sync_cava_colors(&cava, &sheet, "Rangalipi Wine").unwrap();
+    let after_wine = fs::read_to_string(&cava).unwrap();
+    // No stop may be left holding the other theme's colour.
+    assert_ne!(
+        after_moss, after_wine,
+        "switching themes left the cava gradient unchanged"
+    );
+    assert!(!after_wine.contains("#bb9af7"), "Tokyo Night survived:\n{after_wine}");
+    assert!(!after_wine.contains("#7aa2f7"), "Tokyo Night survived:\n{after_wine}");
+    assert!(!after_wine.contains("#c0caf5"), "Tokyo Night survived:\n{after_wine}");
+    fs::remove_file(&cava).ok();
+}
+
+#[test]
+fn cava_preserves_quoting_comments_and_the_rest_of_the_file() {
+    let cava = temp("cava-3.ini", CAVA_INI);
+    let sheet = parse(CSS).unwrap();
+    sync_cava_colors(&cava, &sheet, "Rangalipi Moss").unwrap();
+    let out = fs::read_to_string(&cava).unwrap();
+    // Single quotes and the spacing around `=` survive: a hand-written config
+    // must not get reformatted by a theme switch.
+    assert!(out.contains("foreground = '#"), "{out}");
+    assert!(out.contains("gradient_color_2 = '#"), "{out}");
+    // The comment inside [color] and the following section are untouched.
+    assert!(out.contains("# keep this note"), "{out}");
+    assert!(out.contains("live-config = 1"), "{out}");
+    assert!(out.contains("monstercat = 1"), "{out}");
+    assert!(out.contains("background = default"), "{out}");
+    fs::remove_file(&cava).ok();
+}
+
+#[test]
+fn cava_sync_does_not_touch_other_sections() {
+    // `monstercat = 1` is not a colour, and a stray `gradient_color_9` beyond
+    // the 8 cava understands must be left exactly as written.
+    let body = format!("{CAVA_INI}\ngradient_color_9 = '#123456'\n");
+    let cava = temp("cava-4.ini", &body);
+    let sheet = parse(CSS).unwrap();
+    sync_cava_colors(&cava, &sheet, "Rangalipi Moss").unwrap();
+    let out = fs::read_to_string(&cava).unwrap();
+    assert!(out.contains("gradient_color_9 = '#123456'"), "{out}");
+    fs::remove_file(&cava).ok();
+}
+
+#[test]
+fn a_missing_cava_config_is_not_an_error() {
+    // Most machines have no cava at all; a theme switch must not start
+    // failing because of a program that isn't installed.
+    let sheet = parse(CSS).unwrap();
+    let missing = std::env::temp_dir().join("yasb-theme-test-no-such-cava.ini");
+    assert!(!missing.exists());
+    sync_cava_colors(&missing, &sheet, "Rangalipi Moss").unwrap();
+}
+
+#[test]
+fn a_cava_config_without_a_colour_section_is_left_alone() {
+    let body = "[general]\nframerate = 60\n";
+    let cava = temp("cava-5.ini", body);
+    let sheet = parse(CSS).unwrap();
+    sync_cava_colors(&cava, &sheet, "Rangalipi Moss").unwrap();
+    assert_eq!(fs::read_to_string(&cava).unwrap(), body);
+    fs::remove_file(&cava).ok();
+}
+
+#[test]
+fn cava_sync_is_idempotent() {
+    let cava = temp("cava-6.ini", CAVA_INI);
+    let sheet = parse(CSS).unwrap();
+    sync_cava_colors(&cava, &sheet, "Rangalipi Moss").unwrap();
+    let once = fs::read_to_string(&cava).unwrap();
+    sync_cava_colors(&cava, &sheet, "Rangalipi Moss").unwrap();
+    assert_eq!(fs::read_to_string(&cava).unwrap(), once);
+    fs::remove_file(&cava).ok();
+}
+
+#[test]
+fn cava_rewrites_double_quoted_values_too() {
+    let body = "[color]\nforeground = \"#111111\"\ngradient_color_1 = \"#222222\"\n";
+    let cava = temp("cava-7.ini", body);
+    let sheet = parse(CSS).unwrap();
+    sync_cava_colors(&cava, &sheet, "Rangalipi Moss").unwrap();
+    let out = fs::read_to_string(&cava).unwrap();
+    assert!(out.contains("foreground = \"#7aa85f\"") || out.contains("foreground = \"#c04e68\""), "{out}");
+    assert!(!out.contains("#111111"), "{out}");
+    fs::remove_file(&cava).ok();
+}
+
+#[test]
+fn an_unbalanced_quote_is_left_rather_than_mangled() {
+    let body = "[color]\nforeground = '#oops\ngradient_color_1 = '#111111'\n";
+    let cava = temp("cava-8.ini", body);
+    let sheet = parse(CSS).unwrap();
+    sync_cava_colors(&cava, &sheet, "Rangalipi Moss").unwrap();
+    let out = fs::read_to_string(&cava).unwrap();
+    assert!(out.contains("foreground = '#oops"), "{out}");
+    assert!(!out.contains("#111111"), "{out}");
+    fs::remove_file(&cava).ok();
+}
