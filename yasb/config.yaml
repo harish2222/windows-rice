@@ -325,7 +325,6 @@ widgets:
         # paints a rounded acrylic grid. Type to filter, arrows/Enter to apply.
         # It is single-instance: a second chip click raises the open picker
         # rather than stacking another one.
-        # palette-picker.py is kept alongside as a documented fallback.
         on_left: "exec silent-run C:\\Users\\haris\\.config\\yasb\\tools\\picker\\palette-picker\\target\\release\\palette-picker.exe"
         on_middle: "toggle_label"
         on_right: "exec silent-run C:\\Users\\haris\\.config\\yasb\\tools\\theme\\yasb-theme.exe next"

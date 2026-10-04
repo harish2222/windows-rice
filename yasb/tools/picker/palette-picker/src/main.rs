@@ -2,8 +2,9 @@
 //!
 //! A dmenu-style palette switcher: a filter line on top, a swatch grid
 //! below, type to narrow, arrows/Enter to apply, click to apply. It is the
-//! Rust replacement for `palette-picker.py`, which stays in the tree as a
-//! documented fallback.
+//! Rust replacement for the old PyQt6 `palette-picker.py`, which has since
+//! been retired along with its PyInstaller chain — there is one picker now,
+//! and keeping a second implementation around only invited drift.
 //!
 //! Raw Win32 + GDI rather than a GUI toolkit, matching saka-popup: this is
 //! one frameless window with hand-drawn cells, so there is no widget tree,

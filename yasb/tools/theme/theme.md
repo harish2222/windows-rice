@@ -92,12 +92,15 @@ asserts more than "the file exists":
   **dHash** — byte-uniqueness alone would still pass for two images that
   differ only in tint.
 
-`verify-mandala.py` is a thin shim: it runs `mandala-gen check` and then the
-switcher round-trip (activate all 22 in turn, assert the active block's
-`--motif-mandala` is bare, and the file comes back byte-identical).
+`verify-mandala.py` used to be a thin shim over this plus a switcher
+round-trip (activate all 22 in turn, assert the active block's
+`--motif-mandala` is bare, and the file comes back byte-identical). It is
+retired with the rest of the Python; both halves are covered natively now —
+`mandala-gen check` does the art and url invariants, and yasb-theme's
+`set_round_trips_byte_identically` proves the rewrite is byte-preserving.
 
 ```sh
-python tools/theme/verify-mandala.py
+cargo run --release --manifest-path tools/theme/mandala-gen/Cargo.toml -- check
 ```
 
 When a new design collides, change the *design* (a different set of
@@ -112,7 +115,6 @@ removed: nothing consumed them once the mandala filled the panel.
 |---|---|
 | `yasb-theme/src/` | crate source (zero deps; rescued into the repo from a scratch clone) |
 | `mandala-gen/` | draws the 22 distinct mandala PNGs and rewrites the `--motif-mandala` urls |
-| `verify-mandala.py` | shim: `mandala-gen check` + the 22-switch round-trip |
 | `yasb-theme-build.ps1` | rebuild + deploy: `cargo build --release`, copies the exe here, smoke-tests `current` (refreshes `silent-run` in scoop shims only if this crate ever builds one again) |
 | `yasb-theme-current.bat` / `-next.bat` / `-prev.bat` | one-line wrappers used by bar callbacks and keyboard launchers |
 | `yasb-theme-shell.ps1` | dot-source from your PowerShell profile to get `yt list / set / next / prev` |
