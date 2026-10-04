@@ -119,8 +119,7 @@
     --shade: #0D0D13;
     --accent-soft: rgba(217, 154, 43, 0.55);
     --frame: #D99A2B;
-    --motif: url("C:/Users/haris/.config/yasb/motif-wine.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-base-mandala.png");
+    --motif: url("C:/Users/haris/.config/yasb/motif-aubergine.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-base.svg"); */
 
     /* Rangalipi Ember */
@@ -174,8 +173,7 @@
     --shade: #110B07;
     --accent-soft: rgba(201, 111, 47, 0.55);
     --frame: #C96F2F;
-    --motif: url("C:/Users/haris/.config/yasb/motif-moss.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-ember-mandala.png");
+    --motif: url("C:/Users/haris/.config/yasb/motif-espresso.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-ember.svg"); */
 
     /* Rangalipi Ember Light */
@@ -229,8 +227,7 @@
     --shade: #EBE5D8;
     --accent-soft: rgba(180, 95, 39, 0.55);
     --frame: #8A6240;
-    --motif: url("C:/Users/haris/.config/yasb/motif-clay.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-ember-light-mandala.png");
+    --motif: url("C:/Users/haris/.config/yasb/motif-wine.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-ember.svg"); */
 
     /* Rangalipi Mossfern */
@@ -284,8 +281,7 @@
     --shade: #0A0E09;
     --accent-soft: rgba(130, 172, 84, 0.55);
     --frame: #82AC54;
-    --motif: url("C:/Users/haris/.config/yasb/motif-wine.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-mossfern-mandala.png");
+    --motif: url("C:/Users/haris/.config/yasb/motif-aubergine.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-moss.svg"); */
 
     /* Rangalipi Mossfern Light */
@@ -339,8 +335,7 @@
     --shade: #EBE5D8;
     --accent-soft: rgba(95, 138, 60, 0.55);
     --frame: #6B7444;
-    --motif: url("C:/Users/haris/.config/yasb/motif-moss.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-mossfern-light-mandala.png");
+    --motif: url("C:/Users/haris/.config/yasb/motif-espresso.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-moss.svg"); */
 
     /* Rangalipi Wine */
@@ -395,8 +390,7 @@
     --accent-soft: rgba(192, 78, 104, 0.55);
     --frame: #C04E68;
     --holiday: #D95D5D;
-    --motif: url("C:/Users/haris/.config/yasb/motif-clay.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-wine-mandala.png");
+    --motif: url("C:/Users/haris/.config/yasb/motif-wine.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-wine.svg"); */
 
     /* Rangalipi Wine Light - active */
@@ -450,8 +444,7 @@
     --shade: #EBE5D8;
     --accent-soft: rgba(168, 62, 88, 0.55);
     --frame: #8A5460;
-    --motif: url("C:/Users/haris/.config/yasb/motif-wine.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-wine-light-mandala.png");
+    --motif: url("C:/Users/haris/.config/yasb/motif-aubergine.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-wine.svg");
 
     /* Rangalipi Dune */
@@ -505,8 +498,7 @@
     --shade: #100C06;
     --accent-soft: rgba(192, 138, 36, 0.55);
     --frame: #C08A24;
-    --motif: url("C:/Users/haris/.config/yasb/motif-moss.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-dune-mandala.png");
+    --motif: url("C:/Users/haris/.config/yasb/motif-espresso.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-dune.svg"); */
 
     /* Rangalipi Dune Light */
@@ -560,8 +552,7 @@
     --shade: #EBE5D8;
     --accent-soft: rgba(168, 116, 28, 0.55);
     --frame: #8A6E3E;
-    --motif: url("C:/Users/haris/.config/yasb/motif-clay.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-dune-light-mandala.png");
+    --motif: url("C:/Users/haris/.config/yasb/motif-wine.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-dune.svg"); */
 
     /* Rangalipi Matcha */
@@ -615,8 +606,7 @@
     --shade: #0B0E06;
     --accent-soft: rgba(147, 176, 76, 0.55);
     --frame: #93B04C;
-    --motif: url("C:/Users/haris/.config/yasb/motif-wine.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-matcha-mandala.png");
+    --motif: url("C:/Users/haris/.config/yasb/motif-aubergine.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-matcha.svg"); */
 
     /* Rangalipi Matcha Light */
@@ -670,8 +660,7 @@
     --shade: #EBE5D8;
     --accent-soft: rgba(122, 148, 60, 0.55);
     --frame: #76794C;
-    --motif: url("C:/Users/haris/.config/yasb/motif-moss.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-matcha-light-mandala.png");
+    --motif: url("C:/Users/haris/.config/yasb/motif-espresso.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-matcha.svg"); */
 
     /* Rangalipi Espresso */
@@ -725,8 +714,7 @@
     --shade: #0F0A07;
     --accent-soft: rgba(198, 138, 75, 0.55);
     --frame: #C68A4B;
-    --motif: url("C:/Users/haris/.config/yasb/motif-clay.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-espresso-mandala.png");
+    --motif: url("C:/Users/haris/.config/yasb/motif-wine.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-espresso.svg"); */
 
     /* Rangalipi Espresso Light */
@@ -780,8 +768,7 @@
     --shade: #EBE5D8;
     --accent-soft: rgba(168, 116, 60, 0.55);
     --frame: #8A6E4E;
-    --motif: url("C:/Users/haris/.config/yasb/motif-wine.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-espresso-light-mandala.png");
+    --motif: url("C:/Users/haris/.config/yasb/motif-aubergine.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-espresso.svg"); */
 
     /* Rangalipi Noir */
@@ -835,8 +822,7 @@
     --shade: #0D080A;
     --accent-soft: rgba(206, 65, 82, 0.55);
     --frame: #CE4152;
-    --motif: url("C:/Users/haris/.config/yasb/motif-moss.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-noir-mandala.png");
+    --motif: url("C:/Users/haris/.config/yasb/motif-espresso.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-noir.svg"); */
 
     /* Rangalipi Noir Light */
@@ -890,8 +876,7 @@
     --shade: #EBE5D8;
     --accent-soft: rgba(174, 53, 70, 0.55);
     --frame: #8A525C;
-    --motif: url("C:/Users/haris/.config/yasb/motif-clay.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-noir-light-mandala.png");
+    --motif: url("C:/Users/haris/.config/yasb/motif-wine.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-noir.svg"); */
 
     /* Rangalipi Aubergine */
@@ -945,8 +930,7 @@
     --shade: #0D0811;
     --accent-soft: rgba(166, 127, 212, 0.55);
     --frame: #A67FD4;
-    --motif: url("C:/Users/haris/.config/yasb/motif-wine.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-aubergine-mandala.png");
+    --motif: url("C:/Users/haris/.config/yasb/motif-aubergine.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-aubergine.svg"); */
 
     /* Rangalipi Aubergine Light */
@@ -1000,8 +984,7 @@
     --shade: #EBE5D8;
     --accent-soft: rgba(138, 99, 184, 0.55);
     --frame: #6E5E8A;
-    --motif: url("C:/Users/haris/.config/yasb/motif-moss.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-aubergine-light-mandala.png");
+    --motif: url("C:/Users/haris/.config/yasb/motif-espresso.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-aubergine.svg"); */
 
     /* Rangalipi Clay */
@@ -1055,8 +1038,7 @@
     --shade: #0F0A05;
     --accent-soft: rgba(201, 104, 60, 0.55);
     --frame: #C9683C;
-    --motif: url("C:/Users/haris/.config/yasb/motif-clay.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-clay-mandala.png");
+    --motif: url("C:/Users/haris/.config/yasb/motif-wine.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-clay.svg"); */
 
     /* Rangalipi Clay Light */
@@ -1110,8 +1092,7 @@
     --shade: #EBE5D8;
     --accent-soft: rgba(168, 86, 48, 0.55);
     --frame: #8A5E44;
-    --motif: url("C:/Users/haris/.config/yasb/motif-wine.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-clay-light-mandala.png");
+    --motif: url("C:/Users/haris/.config/yasb/motif-aubergine.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-clay.svg"); */
 
     /* Rangalipi Olive */
@@ -1165,8 +1146,7 @@
     --shade: #0A0B05;
     --accent-soft: rgba(168, 160, 58, 0.55);
     --frame: #A8A03A;
-    --motif: url("C:/Users/haris/.config/yasb/motif-moss.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-olive-mandala.png");
+    --motif: url("C:/Users/haris/.config/yasb/motif-espresso.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-olive.svg"); */
 
     /* Rangalipi Olive Light */
@@ -1220,8 +1200,7 @@
     --shade: #EBE5D8;
     --accent-soft: rgba(138, 132, 48, 0.55);
     --frame: #74714A;
-    --motif: url("C:/Users/haris/.config/yasb/motif-clay.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-olive-light-mandala.png");
+    --motif: url("C:/Users/haris/.config/yasb/motif-wine.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-olive.svg"); */
 
     /* Bright-wallpaper theme.
@@ -1277,8 +1256,7 @@
     --shade: #EBE5D8;
     --accent-soft: rgba(179, 122, 26, 0.55);
     --frame: #8A6D3B;
-    --motif: url("C:/Users/haris/.config/yasb/motif-wine.svg");
-    --motif-mandala: url("C:/Users/haris/.config/yasb/motif-light-mandala.png");
+    --motif: url("C:/Users/haris/.config/yasb/motif-aubergine.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-base.svg"); */
 }
 
@@ -1649,16 +1627,48 @@
     padding-right: 3px;
 }
 /* The ring is the whole widget now, so it is centred on its own and takes its
-   colour from the session rather than from the theme accent. */
+   colour from the session rather than from the theme accent.
+
+   STATE SELECTORS. Upstream (src/core/widgets/yasb/pomodoro.py) puts
+   `work` / `break` / `paused` on the LABEL, not on the .pomodoro-widget
+   container, and only from inside the loop over the label's parts:
+
+       class_name = "paused" if paused else "break" if is_break else "work"
+       active_widgets[i].setProperty("class", f"label {class_name}")
+
+   So `.pomodoro-widget.break` never matches anything -- that was the old
+   guess and it is why both states painted the same colour. The container's
+   own class is fixed at construction: "pomodoro-widget <class_name>".
+
+   The ring itself is NOT styleable from here. ProgressBar is a QFrame that
+   paints its arc in _paint_circular() with a QPen built from `color` /
+   `background_color` out of config.yaml, and the only class it ever gets is
+   "progress-container" on its wrapper. QSS cannot repaint a QPainter arc, so
+   `background-color` on .progress-bar was doing nothing even where it matched.
+   The ring's work/break colours are the popup circle's
+   circle_work_progress_color / circle_break_progress_color, which
+   yasb-theme already rewrites from the theme on every switch.
+
+   What CSS *can* do is tint the label and the icon, which is what carries the
+   state on the bar chip. That needs a non-empty `label:` in config.yaml --
+   with `label: ""` the parts list is empty, the loop body never runs, and no
+   state class is ever applied to anything. */
 .pomodoro-widget {
     padding: 0 var(--widgetPadX);
 }
-.pomodoro-widget .progress-bar {
-    background-color: var(--pomodoroWork);
+.pomodoro-widget .label.work {
+    color: var(--pomodoroWork);
 }
-.pomodoro-widget.break .progress-bar,
-.pomodoro-widget.paused .progress-bar {
-    background-color: var(--pomodoroBreak);
+.pomodoro-widget .label.break,
+.pomodoro-widget .label.paused {
+    color: var(--pomodoroBreak);
+}
+.pomodoro-widget .icon.work {
+    color: var(--pomodoroWork);
+}
+.pomodoro-widget .icon.break,
+.pomodoro-widget .icon.paused {
+    color: var(--pomodoroBreak);
 }
 .pomodoro-widget:hover .label {
     color: var(--text);
@@ -2119,7 +2129,9 @@
     min-width: 220px;
     border: 3px double var(--border);
     border-radius: var(--border-radius);
-    /* mandala watermark under the glass, matching the media popup */
+    /* motif watermark under the glass, matching the media popup.
+       The 0.4 alpha is baked into motif-*.svg; Qt paints background-image
+       at full strength, so it cannot be dialled down here. */
     background-image: var(--motif);
     background-repeat: no-repeat;
     background-position: center;
@@ -2299,7 +2311,7 @@
 .media-menu {
     min-width: 440px;
     max-width: 440px;
-    /* media popup: 30% glass + mandala watermark (0.45 baked alpha) */
+    /* media popup: 30% glass + motif watermark (0.4 baked alpha) */
     background-color: rgba(29, 16, 21, 0.3);
     background-image: var(--motif);
     background-repeat: no-repeat;

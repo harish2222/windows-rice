@@ -1,19 +1,20 @@
 //! Random motif assignment from the SVG files already on disk.
 //!
-//! The generated mandala PNGs are no longer used. What is wanted instead is
-//! the hand-made SVG motifs that ship in the yasb folder — so this discovers
-//! them by globbing `motif-*.svg` rather than from a hard-coded list, which
-//! means dropping a new file in is enough to make it eligible.
+//! The generated mandala PNGs and their `--motif-mandala:` declarations have
+//! both been removed; what the popups paint now is the hand-made SVG motifs
+//! that ship in the yasb folder. So this discovers them by globbing
+//! `motif-*.svg` rather than from a hard-coded list, which means dropping a
+//! new file in is enough to make it eligible.
 //!
 //! Three are drawn at random and dealt out one per theme block, so switching
 //! themes changes the artwork without every theme looking identical. The draw
 //! is seeded from the system clock, which is what makes it actually random
 //! between runs rather than fixed at compile time.
 //!
-//! Only the `--motif:` line of each block is touched. `--motif-mandala:` is
-//! left exactly as it is: it still names the generated PNGs, which remain on
-//! disk, and a stale declaration costs nothing while a wrong one would draw the
-//! wrong art.
+//! Only the exact `--motif:` line of each block is touched. That exactness is
+//! not incidental: `--motif-mandala:` used to share the `--motif` prefix, so a
+//! prefix match would have rewritten the wrong variable and pointed a panel at
+//! art it was never meant to draw.
 
 use std::path::Path;
 
