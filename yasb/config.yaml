@@ -174,8 +174,11 @@ widgets:
       # so both follow the active theme. The two circle colours below are the
       # one part the widget paints itself: yasb-theme rewrites them from the
       # active theme block on every switch, like the cava widget's.
-      label: "<span>\uf252</span> {remaining}"
-      label_alt: "{session}/{total_sessions} - {remaining}"
+      # The ring is the whole widget: no hourglass, no clock. The session
+      # state reads off the colour instead.
+      label: ""
+      label_alt: ""
+      label_alt: ""
       work_duration: 55
       break_duration: 5
       long_break_duration: 15
@@ -187,7 +190,7 @@ widgets:
       progress_bar:
         enabled: true
         progress_type: "circular"
-        size: 18
+        size: 22
         thickness: 3
         position: "left"
         animation: true
@@ -202,8 +205,8 @@ widgets:
         offset_left: 0
         circle_size: 170
         circle_thickness: 8
-        circle_work_progress_color: "#A37AC0"
-        circle_break_progress_color: "#4FA3A0"
+        circle_work_progress_color: "#E5484D"
+        circle_break_progress_color: "#30A46C"
       callbacks:
         # `toggle_menu` is YASB's convention for widgets whose popup key is
         # `menu` (wifi/language/disk all use it). Middle keeps the old

@@ -23,8 +23,31 @@
     --border-radius3: 14px;
     --fontSize: 13px;
     --iconSize: 20px;
+    --iconSizeSm: 12px;
+    /* Devanagari OM is much taller per em than the Greek lambda: measured,
+       --iconSize (20px) renders it 27px tall where the lambda is 15px. This
+       is the size at which the two glyphs come out the same height. */
+    --glyphOm: 15px;
+
+    /* Pomodoro ring: the session state is the only thing the chip shows, so
+       the colour has to carry it. */
+    --pomodoroWork: #E5484D;
+    --pomodoroBreak: #30A46C;
     --fontSizeLarge: 16px;
     --fontWeight: 600;
+
+    /* BAR RHYTHM: one line box for every widget's icon and label, and one
+       horizontal gap between widgets.
+
+       Measured off the live bar before this existed: content tops ran from
+       8px to 14px while the baseline was uniform, and the gaps between
+       neighbouring widgets ran from 19px to 76px. Equal line-height is what
+       makes an icon and its label share a vertical centre without anybody
+       nudging one of them with padding; the gap token is what makes the
+       spacing even without each widget picking its own margin. */
+    --barLineHeight: 22px;
+    --widgetPadX: 7px;
+    --widgetGap: 3px;
 
     /* ACRYLIC POLICY: menus and popups paint --acrylic (theme base @ 50%);
        hover states paint --acrylic-hover (same base @ 65%). Literal rgba
@@ -1394,9 +1417,9 @@
    only - restating horizontal padding here is what previously made the
    clock sit visibly tighter than the saka and pomodoro chips beside it. */
 .widget {
-    padding-left: 7px;
-    padding-right: 7px;
-    margin: 0 3px;
+    padding-left: var(--widgetPadX);
+    padding-right: var(--widgetPadX);
+    margin: 0 var(--widgetGap);
     background-color: transparent;
     border-radius: 0;
     border: none;
@@ -1407,12 +1430,14 @@
     font-weight: var(--fontWeight);
     color: var(--yasb-icon-fg);
     font-family: var(--icons-font-fallback);
+    line-height: var(--barLineHeight);
 }
 
 .widget .label {
     color: var(--text);
     font-weight: var(--fontWeight);
-    padding-bottom: 2px;
+    font-size: var(--fontSize);
+    line-height: var(--barLineHeight);
 }
 
 /* UNIFORM TYPE POLICY: ONE family (--system-font) + ONE weight (--fontWeight)
@@ -1584,14 +1609,24 @@
 }
 .saka-widget .label {
     font-family: var(--system-font);
-    font-size: 11px;
-    line-height: 1.3;
+    font-size: var(--fontSize);
+    line-height: var(--barLineHeight);
     font-weight: var(--fontWeight);
     letter-spacing: 0.5px;
     color: var(--subtext);
 }
+.saka-widget .label span {
+    /* The OM glyph is a span inside the label, not an icon, so it inherits the
+       label's font size while the lambda beside it renders at --iconSize.
+
+       Matching the *font size* is not the same as matching the *glyph*: OM is
+       Devanagari and carries tall ascenders, so at the lambda's 20px it drew
+       27px tall against the lambda's 15px. Sized by measurement instead --
+       see the comment on --glyphOm. */
+    font-size: var(--glyphOm);
+}
 .saka-widget .icon {
-    font-size: 12px;
+    font-size: var(--iconSizeSm);
     color: var(--accent);
     padding-right: 3px;
 }
@@ -1608,17 +1643,29 @@
 }
 .pomodoro-widget .label {
     font-family: var(--system-font);
-    font-size: 11px;
-    line-height: 1.3;
+    font-size: var(--fontSize);
+    line-height: var(--barLineHeight);
     font-weight: var(--fontWeight);
     letter-spacing: 1px;
     font-variant-numeric: tabular-nums;
     color: var(--subtext);
 }
 .pomodoro-widget .icon {
-    font-size: 12px;
+    font-size: var(--iconSizeSm);
     color: var(--accent);
     padding-right: 3px;
+}
+/* The ring is the whole widget now, so it is centred on its own and takes its
+   colour from the session rather than from the theme accent. */
+.pomodoro-widget {
+    padding: 0 var(--widgetPadX);
+}
+.pomodoro-widget .progress-bar {
+    background-color: var(--pomodoroWork);
+}
+.pomodoro-widget.break .progress-bar,
+.pomodoro-widget.paused .progress-bar {
+    background-color: var(--pomodoroBreak);
 }
 .pomodoro-widget:hover .label {
     color: var(--text);
@@ -2030,7 +2077,7 @@
 .komorebi-active-layout .widget-container {}
 .komorebi-active-layout .label {
     font-family: var(--specialFont);
-    padding-top: 1px;
+    padding-top: 0;
     color: var(--sapphire);
 }
 
@@ -2626,14 +2673,14 @@ Example: "Windows Media" becomes "windows-media" */
 /* CPU widget */
 .cpu-widget .widget-container .icon {
     color: var(--mauve);
-    padding-bottom: 1px;
+    padding-bottom: 0;
 }
 
 .cpu-widget .widget-container .label {
-    padding-left: 3px;
+    padding-left: var(--widgetPadX);
 }
 .cpu-widget .widget-container .label.alt {
-    padding-left: 1.5px;
+    padding-left: var(--widgetPadX);
 }
 
 .cpu-widget {
@@ -2722,15 +2769,15 @@ Example: "Windows Media" becomes "windows-media" */
 
 /* Memory widget */
 .memory-widget .widget-container .label {
-    padding-left: 3px;
+    padding-left: var(--widgetPadX);
     color: var(--text);
 }
 .memory-widget .widget-container .label.alt {
-    padding-left: 1.5px;
+    padding-left: var(--widgetPadX);
 }
 .memory-widget .widget-container .icon {
     color: var(--blue);
-    padding-bottom: 1px;
+    padding-bottom: 0;
 }
 
 .memory-widget {
@@ -3159,7 +3206,7 @@ which is 16 pixels same as the other sections. */
 .cava-widget {
     padding: 0;
     margin: 0;
-    padding-bottom: 1px;
+    padding-bottom: 0;
 }
 .cava-widget .widget-container {}
 
@@ -3267,7 +3314,7 @@ which is 16 pixels same as the other sections. */
 .traffic-widget .widget-container .icon {
     font-size: 12px;
     color: var(--text);
-    padding-bottom: 1px;
+    padding-bottom: 0;
 }
 .traffic-widget .widget-container .icon.offline {
     color: var(--redFlash);
@@ -3561,7 +3608,7 @@ which is 16 pixels same as the other sections. */
 /* GPU - pink icon, Mocha status colors */
 .gpu-widget .widget-container .icon {
     color: var(--pink);
-    padding-bottom: 1px;
+    padding-bottom: 0;
 }
 .gpu-widget .widget-container .label {
     color: var(--text);
@@ -3653,7 +3700,7 @@ which is 16 pixels same as the other sections. */
 /* Disk - sapphire icon, Mocha status colors + group popup */
 .disk-widget .widget-container .icon {
     color: var(--sapphire);
-    padding-bottom: 1px;
+    padding-bottom: 0;
 }
 .disk-widget .widget-container .label {
     color: var(--text);
