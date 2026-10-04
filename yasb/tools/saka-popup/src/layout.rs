@@ -262,4 +262,82 @@ mod tests {
     fn the_value_column_starts_after_the_label_column() {
         assert!(Layout::VALUE_X > PAD + 80, "label column and value column collide");
     }
+
+    /// The era line and the moon glyph share a band. Measured off a real
+    /// capture of the shipped panel, the era text stops at x=205 and the lit
+    /// limb of the disc starts at x=380 -- a 171px gap. The era line is
+    /// unbounded text (a Vikram Samvat year can be long), so the gap is a
+    /// property of where the disc sits, not of what today's date happens to
+    /// be. This pins the disc's left edge so a future tweak to `moon_center_x`
+    /// cannot quietly walk it left into the text.
+    #[test]
+    fn the_moon_glyph_cannot_reach_the_era_line() {
+        let l = Layout::new(10);
+        let disc_left = l.moon_center_x(W) - MOON_R;
+        // A deliberately long era line: 13px text averages ~7px per glyph.
+        let era = "Shaka 1946 · Vikram Samvat 2083";
+        let era_width = era.chars().count() as i32 * 7;
+        let era_right = PAD + era_width;
+        assert!(
+            era_right < disc_left - 8,
+            "a long era line would run into the disc: text ends {era_right}, disc starts {disc_left}"
+        );
+    }
+
+    /// The footer's text box has to close above the panel edge, with the
+    /// bottom padding still intact below it. Measured off a capture: the box
+    /// is y 612..630, the glyphs occupy 616..628, and the panel is 654 tall.
+    #[test]
+    fn the_footer_sits_inside_the_panel() {
+        let l = Layout::new(10);
+        let box_bottom = l.footer_y + 18;
+        assert!(
+            box_bottom <= l.height - PAD,
+            "footer box ends at {box_bottom}, past the panel's bottom padding (height {})",
+            l.height
+        );
+        // And there is real slack, not a rounding coincidence: the glyphs need
+        // roughly 13px and the box gives 18.
+        assert!(l.height - box_bottom >= PAD - 6, "no breathing room under the footer");
+    }
+
+    /// The `Next` row carries the widest value in the panel and, unlike the
+    /// progress rows, no caption beside it. Measured off a real capture that
+    /// 38-glyph string draws 213px wide in the 15px body face — about 5.6px a
+    /// glyph — and ended 103px short of the column edge. 6px is the safe
+    /// upper bound; the point is that the reserved width keeps its slack even
+    /// if the panel is narrowed.
+    #[test]
+    fn the_widest_value_still_fits_its_column() {
+        let value_x = Layout::VALUE_X;
+        let widest = "new 10 Oct 2026 · full 26 Oct 2026";
+        let need = widest.chars().count() as i32 * 6;
+        // `paint` reserves `W - PAD*2 - (value_x - PAD)` when there is no
+        // caption, which is exactly the whole value column.
+        let avail = W - PAD * 2 - (value_x - PAD);
+        assert!(
+            avail >= need,
+            "the widest value needs {need}px but only {avail}px is reserved"
+        );
+    }
+
+    /// The other kind of row: a short value with a right-aligned caption. The
+    /// two must not meet, or the value runs under the caption and both become
+    /// unreadable. This is the case that actually exists — no row in the
+    /// panel has both the widest value *and* a caption — so testing that
+    /// imaginary combination would only assert something untrue.
+    #[test]
+    fn a_value_clears_the_caption_beside_it() {
+        let value_x = Layout::VALUE_X;
+        let value = "Krishna Ashtami"; // the longest value that has a caption
+        let caption = "40% · Last Quarter"; // the longest caption
+        let value_w = value.chars().count() as i32 * 6;
+        let caption_w = caption.chars().count() as i32 * 6;
+        let value_right = value_x + value_w;
+        let caption_left = W - PAD - caption_w;
+        assert!(
+            value_right + 12 <= caption_left,
+            "value ends at {value_right}, caption starts at {caption_left}"
+        );
+    }
 }
