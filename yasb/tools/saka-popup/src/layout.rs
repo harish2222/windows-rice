@@ -21,8 +21,14 @@ pub const PILL: i32 = 10;
 /// Panel edge padding.
 pub const PAD: i32 = 24;
 
-/// Height of one row. Two lines: the value, then the bar with its caption.
-pub const ROW_H: i32 = 46;
+/// Height of one row: one line of text, then a full-width hairline bar.
+///
+/// The bar deliberately spans the whole content width rather than starting
+/// under the value column. Indenting it put a third left edge into every row
+/// (label, bar, caption), which is what made the list read as assembled rather
+/// than composed. Now the label and the bar share one edge, and the caption
+/// shares the other.
+pub const ROW_H: i32 = 44;
 /// Width of the row card's radius.
 pub const CARD_R: i32 = 16;
 /// Inner padding of the row card.
@@ -94,19 +100,14 @@ impl Layout {
         self.card_y + CARD_PAD + i * ROW_H
     }
 
-    /// Left edge of the value column, shared by the value, the bar and the
-    /// label column's right edge.
-    pub const VALUE_X: i32 = PAD + 90;
+    /// Left edge of the value column. Wide enough for the longest label
+    /// ("Purnimanta") set as tracked caps without wrapping into it.
+    pub const VALUE_X: i32 = PAD + 96;
 
-    /// Where the progress bar starts and ends.
-    ///
-    /// The bar stops short of the right edge so the caption can be
-    /// right-aligned past it — running them into each other is what made the
-    /// old layout unreadable.
+    /// Where the progress bar starts and ends: the full content width, so it
+    /// lines up with the label above it and with the caption's right edge.
     pub fn track(&self, w: i32) -> (i32, i32, i32) {
-        let x0 = Self::VALUE_X;
-        let x1 = w - PAD - 96;
-        (x0, x1 - x0, 4)
+        (PAD, w - PAD * 2, 3)
     }
 
     /// Fail if any two vertically stacked bands overlap.
@@ -130,13 +131,12 @@ impl Layout {
                 return Err(format!("{an} ends at {a_bottom} but {bn} starts at {b_top}"));
             }
         }
-        // Every row, and the caption inside it, must fit the row.
+        // Every row's content must fit inside the row.
         for i in 0..rows {
             let y = self.row_y(i);
-            // The bar sits 30px into the row and is 4px tall; the caption is
-            // 14px tall on the same line.
-            if y + 30 + 14 > y + ROW_H {
-                return Err(format!("row {i} content overflows: {y}"));
+            // Bar sits 32px into the row and is 3px tall.
+            if y + 32 + 3 > y + ROW_H {
+                return Err(format!("row {i} bar overflows: {y}"));
             }
         }
         if self.footer_y + 18 + PAD > self.height {
@@ -191,19 +191,16 @@ mod tests {
         assert!(l.height > 500 && l.height < 800, "height {}", l.height);
     }
 
-    /// The bar has to end before the caption starts, or the two collide.
+    /// The bar has to share an edge with the label and with the caption's
+    /// right margin. This is the whole alignment contract of a row.
     #[test]
-    fn the_track_leaves_room_for_the_caption() {
+    fn the_track_shares_the_content_edges() {
         let l = Layout::new(10);
         let (x0, tw, th) = l.track(W);
-        assert_eq!(x0, Layout::VALUE_X);
-        assert!(tw > 80, "track too narrow: {tw}");
-        assert_eq!(th, 4);
-        assert!(
-            x0 + tw <= W - PAD - 90,
-            "track ends at {} leaving too little for the caption",
-            x0 + tw
-        );
+        assert_eq!(x0, PAD, "bar must start on the content's left edge");
+        assert_eq!(x0 + tw, W - PAD, "bar must end on the content's right edge");
+        assert_eq!(tw, W - PAD * 2);
+        assert_eq!(th, 3);
     }
 
     #[test]
