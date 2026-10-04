@@ -1,0 +1,47 @@
+//! Shared window chrome for the YASB bar's popups.
+//!
+//! Both `saka-popup` and `palette-picker` are the same kind of program: one
+//! frameless, always-on-top window, drawn by hand, with no widget toolkit. The
+//! two things they both need — anti-aliased shapes and themed text on top of
+//! them — used to be copy-pasted between them, which is how a rounding radius
+//! or a shadow radius ends up subtly different in two panels. They live here
+//! instead.
+//!
+//! The split is deliberate:
+//!
+//! * [`Canvas`] is pure buffer maths over a 32-bit BGRA pixel buffer. No GDI,
+//!   no window, no display. Every primitive is unit-tested by checking the
+//!   pixels it wrote.
+//! * [`gdi`] owns the display-side plumbing: the DIB section, the HDC that
+//!   text is drawn through, the backdrop snapshot that gives the panels their
+//!   acrylic look, and the blit onto the window.
+//!
+//! Both popups composite the same way, and the reason is worth recording:
+//! `UpdateLayeredWindow` on a `WS_EX_LAYERED` window *reports* success and puts
+//! nothing on screen on this machine (see `saka-popup`'s module docs), so
+//! translucency is faked the way a compositor would do it — snapshot the
+//! desktop behind the window once, alpha-blend the theme over it, and blit the
+//! result. See [`gdi::capture_backdrop`].
+
+pub mod canvas;
+pub mod gdi;
+
+pub use canvas::{Canvas, moon_lit_mask};
+pub use gdi::{
+    Backdrop, Dib, apply_round_region, blit_to_window, colorref, draw_text, font, rect, styles_path,
+    text_width,
+};
+
+/// The font stack both panels draw with.
+///
+/// `Segoe UI Variable Display` is the Windows 11 system face and is what gives
+/// the headings their large-x-height look; `Segoe UI` is the fallback for
+/// machines where the variable font is not installed. Mixing the two inside a
+/// panel is what makes a UI look assembled rather than designed, so a family
+/// is chosen once here rather than per call site.
+pub const DISPLAY_FAMILY: &str = "Segoe UI Variable Display";
+pub const TEXT_FAMILY: &str = "Segoe UI";
+
+/// Windows ships Nirmala UI for Brahmic scripts; Telugu labels fall back to it
+/// when the panel is switched to the Telugu script.
+pub const INDIC_FAMILY: &str = "Nirmala UI";

@@ -16,6 +16,11 @@ saka = { path = "../saka" }
 # palette picker cannot disagree about what the active theme looks like.
 yasb-theme = { path = "../theme/yasb-theme" }
 
+# Shared panel chrome: the anti-aliased canvas both popups draw their shapes
+# with, plus the DIB/backdrop/blit plumbing. Two copies of rounded-corner
+# maths is how two panels end up with subtly different radii.
+yasb-chrome = { path = "../chrome/yasb-chrome" }
+
 # Raw Win32 rather than a GUI toolkit. The popup repaints once a second and has
 # to stay visually identical to the YASB popups; a webview or a GPU toolkit
 # would cost far more than the hand-written paint code, and needs no build-time

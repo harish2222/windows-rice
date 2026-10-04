@@ -17,9 +17,14 @@ pub enum Row {
     Cell(usize),
 }
 
-pub const CELL_W: i32 = 178;
-pub const CELL_H: i32 = 28;
-pub const GAP: i32 = 6;
+/// Cell geometry. Wider and taller than a compact dmenu grid on purpose: the
+/// panel is read at a glance, and a 178x28 box crams 22 themes into a strip
+/// that needs no looking at but is hard to *choose* from. 232x40 fits the
+/// longest shipped name ("Rangalipi Mossfern Light") at body size next to its
+/// swatches, so the name never has to be shrunk to fit.
+pub const CELL_W: i32 = 232;
+pub const CELL_H: i32 = 40;
+pub const GAP: i32 = 10;
 /// Cell width + gap. The Python picker used the same divisor for its
 /// column count, so arrow-key movement feels identical across the two.
 pub const STRIDE: i32 = CELL_W + GAP;

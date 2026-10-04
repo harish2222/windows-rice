@@ -13,6 +13,11 @@ path = "src/main.rs"
 # custom property resolves to.
 yasb-theme = { path = "../../theme/yasb-theme" }
 
+# Shared panel chrome: the anti-aliased canvas, the DIB/backdrop/blit
+# plumbing. saka-popup uses the same crate, so the two panels cannot drift
+# apart on radii, fonts or the acrylic treatment.
+yasb-chrome = { path = "../../chrome/yasb-chrome" }
+
 # Raw Win32 + GDI rather than a GUI toolkit, matching saka-popup. The picker
 # is one small frameless window with a hand-drawn grid; there is no widget
 # toolkit, stylesheet engine or layout system worth pulling in for it.

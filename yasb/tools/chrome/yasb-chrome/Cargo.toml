@@ -1,0 +1,23 @@
+[package]
+name = "yasb-chrome"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "yasb_chrome"
+path = "src/lib.rs"
+
+[dependencies]
+# The same colour type the theme parser hands out, so the canvas can blend
+# theme colours without a conversion layer.
+yasb-theme = { path = "../../theme/yasb-theme" }
+
+# Only the GDI half of the crate needs it: the canvas primitives themselves are
+# plain buffer maths and are unit-tested without a window.
+[dependencies.windows]
+version = "0.58"
+features = [
+    "Win32_Foundation",
+    "Win32_Graphics_Gdi",
+    "Win32_UI_WindowsAndMessaging",
+]

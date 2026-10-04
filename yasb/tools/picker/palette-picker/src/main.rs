@@ -18,7 +18,7 @@ use std::os::windows::process::CommandExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use windows::Win32::Foundation::{COLORREF, HINSTANCE, HWND, LPARAM, LRESULT, POINT, RECT, SIZE, WPARAM};
+use windows::Win32::Foundation::{HINSTANCE, HWND, LPARAM, LRESULT, POINT, RECT, WPARAM};
 use windows::Win32::Graphics::Gdi::*;
 use windows::Win32::System::LibraryLoader::GetModuleHandleW;
 use windows::Win32::UI::Input::KeyboardAndMouse::{
@@ -26,27 +26,38 @@ use windows::Win32::UI::Input::KeyboardAndMouse::{
     VK_RETURN, VK_RIGHT, VK_TAB, VK_UP,
 };
 use windows::Win32::UI::WindowsAndMessaging::*;
+use yasb_chrome::gdi::{
+    Backdrop, Dib, apply_round_region, blit_to_window, colorref, draw_text, font, rect, text_width,
+};
+use yasb_chrome::TEXT_FAMILY;
 
 use catalog::Item;
 use layout::Row;
 use theme::{Rgba, Theme};
 
-const W: i32 = 680;
+const W: i32 = 760;
+/// Window corner radius, matched to saka-popup so the two panels read as one
+/// system when they swap places on the same click.
+const RADIUS: i32 = 20;
+/// Radius of a theme cell and of the search field.
+const CELL_R: i32 = 12;
 
-/// Set by `--debug-paint`; makes the paint path report each step so a
-/// blank window can be diagnosed without guessing.
-static DEBUG_PAINT: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+const PAD: i32 = 16;
+/// Swatch chips per cell, and their pitch. Kept as constants because the text
+/// pass positions the name from them: if these and `draw_swatches` disagree,
+/// the name lands on top of the chips.
+const SWATCHES: i32 = 3;
+const SWATCH_STRIDE: i32 = 22;
+const SEARCH_H: i32 = 64;
+const FOOT_H: i32 = 34;
+const MAX_H: i32 = 520;
 
-/// Set by `--no-layered`: paints through an ordinary blit instead of
-/// `UpdateLayeredWindow`, so the panel becomes a normal capturable
-/// window. Only for verifying layout on a machine where screen capture
-/// cannot see layered windows; the real picker always layers so it can
-/// have per-pixel alpha.
-static NO_LAYERED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
-const PAD: i32 = 12;
-const SEARCH_H: i32 = 30;
-const FOOT_H: i32 = 22;
-const MAX_H: i32 = 420;
+thread_local! {
+    /// The desktop snapshot, taken once before the window is created. Taking
+    /// it after would photograph the panel itself, and blending that back in
+    /// would get brighter on every 1 Hz repaint.
+    static BACKDROP: RefCell<Option<Backdrop>> = const { RefCell::new(None) };
+}
 
 thread_local! {
     /// The single global the window procedure reads and writes.
@@ -71,9 +82,9 @@ impl App {
         layout::rows_for(&self.filtered, &self.items)
     }
 
-    /// Client-space origin of the first cell row, below the filter line.
+    /// Client-space origin of the first cell row, below the search field.
     fn grid_origin(&self) -> (i32, i32) {
-        (PAD, PAD + SEARCH_H + 8)
+        (PAD, PAD + SEARCH_H + 12)
     }
 
     fn rects(&self, w: i32) -> Vec<(i32, i32)> {
@@ -150,299 +161,249 @@ fn apply(name: &str) {
         });
 }
 
-/// Widest visible name, so the font can be sized to fit the whole grid.
-fn longest_visible_name(app: &App) -> String {
-    app.filtered
-        .iter()
-        .map(|&i| app.items[i].name.as_str())
-        .max_by_key(|n| n.chars().count())
-        .unwrap_or("")
-        .to_string()
-}
-
-/// Smallest font size (within a sane range) whose rendering of the
-/// longest visible name still fits a cell. Measuring with
-/// `GetTextExtentPoint32W` under the actual font is reliable in a way
-/// that guessing from character counts is not.
-unsafe fn fit_name_font(dc: HDC, app: &App) -> HFONT {
-    let longest = longest_visible_name(app);
-    // Widest cell's available text width: cell - left pad - swatches - gap.
-    let swatch_w = 3 * 14 + 8;
-    let avail = layout::CELL_W - 8 - swatch_w - 4 - 6;
-    for size in [-11i32, -12, -13, -14] {
-        let f = make_font(size, 600);
-        let old = SelectObject(dc, HGDIOBJ(f.0));
-        let mut buf: Vec<u16> = longest.encode_utf16().collect();
-        buf.push(0);
-        let mut sz = SIZE { cx: 0, cy: 0 };
-        let got = GetTextExtentPoint32W(dc, &buf, &mut sz).as_bool();
-        SelectObject(dc, old);
-        let _ = DeleteObject(HGDIOBJ(f.0));
-        if got && sz.cx <= avail {
-            return make_font(size, 600);
+/// A theme cell: a rounded tile, filled more strongly and ringed in the accent
+/// when selected, with a marker for the theme that is currently active.
+///
+/// The current theme gets its own treatment (a dot plus accent-coloured text)
+/// because "selected" and "active" are different facts — the arrow keys move
+/// the first, and conflating them would make the panel lie about what is
+/// applied.
+unsafe fn draw_cell(c: &mut yasb_chrome::Canvas, x: i32, y: i32, selected: bool, is_current: bool, t: &Theme) {
+    let (x0, y0, x1, y1) = (x, y, x + layout::CELL_W, y + layout::CELL_H);
+    c.round_rect(x0, y0, x1, y1, CELL_R, if selected { t.cell_selected } else { t.cell });
+    if selected {
+        c.round_rect_border(x0, y0, x1, y1, CELL_R, 1, t.accent);
+    } else {
+        c.round_rect_border(x0, y0, x1, y1, CELL_R, 1, t.hairline);
+    }
+    if is_current {
+        // A small accent dot down the left edge marks the applied theme.
+        let cy = (y0 + y1) / 2;
+        for py in (cy - 3)..=(cy + 3) {
+            for px in (x0 + 9)..=(x0 + 15) {
+                let dx = px as f32 - (x0 + 12) as f32;
+                let dy = py as f32 - cy as f32;
+                let d = (dx * dx + dy * dy).sqrt() - 3.0;
+                c.blend_pixel(px, py, t.accent, (0.5 - d).clamp(0.0, 1.0));
+            }
         }
     }
-    make_font(-11, 600)
 }
 
-/// Build a UI font at a given pixel height and weight.
-unsafe fn make_font(size: i32, weight: i32) -> HFONT {
-    let family: Vec<u16> = "Segoe UI\0".encode_utf16().collect();
-    CreateFontW(
-        size, 0, 0, 0, weight, 0, 0, 0,
-        DEFAULT_CHARSET.0 as u32,
-        OUT_DEFAULT_PRECIS.0 as u32,
-        CLIP_DEFAULT_PRECIS.0 as u32,
-        CLEARTYPE_QUALITY.0 as u32,
-        DEFAULT_PITCH.0 as u32,
-        windows::core::PCWSTR(family.as_ptr()),
-    )
-}
-
-fn color(c: Rgba) -> COLORREF {
-    COLORREF(c.r as u32 | ((c.g as u32) << 8) | ((c.b as u32) << 16))
-}
-
-unsafe fn fill(dc: HDC, r: RECT, c: Rgba) {
-    let b = CreateSolidBrush(color(c));
-    let _ = FillRect(dc, &r, HBRUSH(b.0));
-    let _ = DeleteObject(HGDIOBJ(b.0));
-}
-
-/// Rounded-ish cell: Win32 has no cheap rounded fill in GDI, so the
-/// selection is drawn as a filled rect plus an accent border, which reads
-/// cleanly at this size and matches the flat bar aesthetic.
-unsafe fn draw_cell(dc: HDC, x: i32, y: i32, selected: bool, is_current: bool, t: &Theme) {
-    let r = RECT { left: x, top: y, right: x + layout::CELL_W, bottom: y + layout::CELL_H };
-    if selected {
-        fill(dc, r, t.surface);
-        let pen = CreatePen(PS_SOLID, 1, color(t.accent));
-        let old = SelectObject(dc, HGDIOBJ(pen.0));
-        let old_br = SelectObject(dc, GetStockObject(NULL_BRUSH));
-        FrameRect(dc, &r, HBRUSH(pen.0));
-        SelectObject(dc, old_br);
-        SelectObject(dc, old);
-        let _ = DeleteObject(HGDIOBJ(pen.0));
-    } else {
-        let pen = CreatePen(PS_SOLID, 1, color(t.border));
-        let old = SelectObject(dc, HGDIOBJ(pen.0));
-        let old_br = SelectObject(dc, GetStockObject(NULL_BRUSH));
-        FrameRect(dc, &r, HBRUSH(pen.0));
-        SelectObject(dc, old_br);
-        SelectObject(dc, old);
-        let _ = DeleteObject(HGDIOBJ(pen.0));
+/// Swatch chips with a hairline edge.
+///
+/// The edge matters more than it looks: several shipped light palettes have
+/// near-white swatches, and on a light cell those render as blank rectangles.
+unsafe fn draw_swatches(c: &mut yasb_chrome::Canvas, x: i32, y: i32, item: &Item, t: &Theme) {
+    let mut sx = x;
+    for sw in item.swatches().into_iter().take(SWATCHES as usize) {
+        c.round_rect(sx, y, sx + 18, y + 16, 5, sw);
+        c.round_rect_border(sx, y, sx + 18, y + 16, 5, 1, t.swatch_edge);
+        sx += SWATCH_STRIDE;
     }
-    let _ = is_current;
 }
 
-/// Paint the whole window into a 32-bit DIB and hand it to
-/// `UpdateLayeredWindow` for per-pixel alpha, as in saka-popup.
+/// Paint the panel: shapes into the DIB, then text through GDI on top.
+///
+/// Two passes, for the same reason as saka-popup: the shapes are direct pixel
+/// writes and the text needs a font selected into the DC, so interleaving them
+/// per element would mean dozens of font switches a frame.
 unsafe fn paint(hwnd: HWND) {
     let Some(app) = APP.with(|c| c.borrow().clone()) else { return };
-    let mut rc = RECT { left: 0, top: 0, right: 0, bottom: 0 };
-    if GetWindowRect(hwnd, &mut rc).is_err() {
+    let mut rc_win = RECT { left: 0, top: 0, right: 0, bottom: 0 };
+    if GetWindowRect(hwnd, &mut rc_win).is_err() {
         return;
     }
-    let w = rc.right - rc.left;
-    let h = rc.bottom - rc.top;
+    let w = rc_win.right - rc_win.left;
+    let h = rc_win.bottom - rc_win.top;
     if w <= 0 || h <= 0 {
         return;
     }
-    let dc_screen = GetDC(None);
-    if dc_screen.0.is_null() {
-        return;
-    }
-    let dc_mem = CreateCompatibleDC(dc_screen);
-    let bmi = BITMAPINFO {
-        bmiHeader: BITMAPINFOHEADER {
-            biSize: std::mem::size_of::<BITMAPINFOHEADER>() as u32,
-            biWidth: w,
-            biHeight: -h,
-            biPlanes: 1,
-            biBitCount: 32,
-            biCompression: BI_RGB.0,
-            ..Default::default()
-        },
-        ..Default::default()
-    };
-    let mut bits: *mut core::ffi::c_void = std::ptr::null_mut();
-    let Ok(bmp) = CreateDIBSection(dc_screen, &bmi, DIB_RGB_COLORS, &mut bits, None, 0) else {
-        let _ = DeleteDC(dc_mem);
-        let _ = DeleteDC(dc_screen);
-        eprintln!("debug: CreateDIBSection failed");
-        return;
-    };
-    let dbg = DEBUG_PAINT.load(std::sync::atomic::Ordering::Relaxed);
-    if dbg {
-        eprintln!("debug: window {w}x{h} rect=({}..{}, {}..{}) bits={:p}",
-            rc.left, rc.right, rc.top, rc.bottom, bits);
-    }
-    let old_bmp = SelectObject(dc_mem, HGDIOBJ(bmp.0));
 
-    // Panel fill.
-    fill(dc_mem, RECT { left: 0, top: 0, right: w, bottom: h }, app.theme.bg);
-
-    // Fonts.
-    let family: Vec<u16> = "Segoe UI\0".encode_utf16().collect();
-    let font = CreateFontW(
-        -15, 0, 0, 0, 400, 0, 0, 0,
-        DEFAULT_CHARSET.0 as u32,
-        OUT_DEFAULT_PRECIS.0 as u32,
-        CLIP_DEFAULT_PRECIS.0 as u32,
-        CLEARTYPE_QUALITY.0 as u32,
-        DEFAULT_PITCH.0 as u32,
-        windows::core::PCWSTR(family.as_ptr()),
-    );
-    let small = CreateFontW(
-        -12, 0, 0, 0, 400, 0, 0, 0,
-        DEFAULT_CHARSET.0 as u32,
-        OUT_DEFAULT_PRECIS.0 as u32,
-        CLIP_DEFAULT_PRECIS.0 as u32,
-        CLEARTYPE_QUALITY.0 as u32,
-        DEFAULT_PITCH.0 as u32,
-        windows::core::PCWSTR(family.as_ptr()),
-    );
-    let bold = CreateFontW(
-        -14, 0, 0, 0, 600, 0, 0, 0,
-        DEFAULT_CHARSET.0 as u32,
-        OUT_DEFAULT_PRECIS.0 as u32,
-        CLIP_DEFAULT_PRECIS.0 as u32,
-        CLEARTYPE_QUALITY.0 as u32,
-        DEFAULT_PITCH.0 as u32,
-        windows::core::PCWSTR(family.as_ptr()),
-    );
-    let old_font = SelectObject(dc_mem, HGDIOBJ(font.0));
-    SetBkMode(dc_mem, TRANSPARENT);
-
-    // Filter line: typed text, or the placeholder hint.
-    let hint = "palette — type to filter, arrows to move, enter to apply";
-    let (text, muted) = if app.query.is_empty() {
-        (hint.to_string(), true)
-    } else {
-        (app.query.clone(), false)
-    };
-    SetTextColor(dc_mem, color(if muted { app.theme.subtext } else { app.theme.text }));
-    draw_text(dc_mem, &text, PAD, PAD, w - PAD * 2);
-
-    // Divider under the filter line.
-    fill(
-        dc_mem,
-        RECT { left: PAD, top: PAD + SEARCH_H - 6, right: w - PAD, bottom: PAD + SEARCH_H - 5 },
-        app.theme.border,
-    );
-
-    // Grid. One font size for every name, sized to the longest visible name
-    // so nothing is clipped and no cell differs from its neighbour.
-    let name_font = unsafe { fit_name_font(dc_mem, &app) };
-    let old_name_font = SelectObject(dc_mem, HGDIOBJ(name_font.0));
-
+    let mut dib = Dib::new(w, h);
+    let t = &app.theme;
     let rows = app.rows();
-    let rects = layout::cell_rects(&rows, app.grid_origin(), w - PAD * 2);
-    let mut cell_i = 0usize;
-    let mut y = app.grid_origin().1;
-    for row in &rows {
-        match row {
-            Row::Header(label) => {
-                SelectObject(dc_mem, HGDIOBJ(small.0));
-                SetTextColor(dc_mem, color(app.theme.subtext));
-                draw_text(dc_mem, label, PAD, y, w - PAD * 2);
-                y += layout::CELL_H;
+    let origin = app.grid_origin();
+    let rects = layout::cell_rects(&rows, origin, w - PAD * 2);
+
+    // ---- shape pass ------------------------------------------------------
+    {
+        let mut c = dib.canvas();
+        c.clear(t.bg.over(Rgba::rgb(20, 20, 28)));
+        BACKDROP.with(|b| {
+            if let Some(bd) = b.borrow().as_ref() {
+                bd.draw_under(&mut c, 0, 0, t.backdrop_opacity);
             }
-            Row::Cell(ci) => {
-                let (x, cy) = rects[cell_i];
-                let item = &app.items[*ci];
-                let selected = app.filtered.get(app.sel) == Some(ci);
-                let is_current = item.name == app.current;
-                draw_cell(dc_mem, x, cy, selected, is_current, &app.theme);
+        });
+        c.v_gradient(0, 0, w, h, t.sheen_top, t.sheen_bottom);
+        // The bloom sits behind the search field, so the field looks lit from
+        // within rather than pasted on top.
+        c.radial_glow(
+            w as f32 * 0.5,
+            (PAD + SEARCH_H / 2) as f32,
+            w as f32 * 0.7,
+            t.accent,
+            t.bloom,
+        );
+        c.round_rect_border(1, 1, w - 1, h - 1, RADIUS, 1, t.hairline);
+        c.round_rect_border(1, 1, w - 1, 14, RADIUS, 1, t.highlight);
 
-                // Swatches.
-                let mut sx = x + 8;
-                for c in item.swatches() {
-                    fill(dc_mem, RECT { left: sx, top: cy + 8, right: sx + 11, bottom: cy + 19 }, c);
-                    sx += 14;
+        // The search field: an inset rounded pill.
+        let (fx0, fy0) = (PAD, PAD);
+        let (fx1, fy1) = (w - PAD, PAD + SEARCH_H);
+        c.round_rect(fx0, fy0, fx1, fy1, CELL_R + 6, t.field);
+        c.round_rect_border(fx0, fy0, fx1, fy1, CELL_R + 6, 1, t.hairline);
+
+        // Magnifier glyph: a ring plus a handle, drawn as geometry rather than
+        // an icon font so it matches the panel's stroke weight exactly and
+        // needs no asset on disk.
+        let gcx = fx0 as f32 + 28.0;
+        let gcy = (fy0 + fy1) as f32 / 2.0;
+        for py in (gcy as i32 - 11)..=(gcy as i32 + 11) {
+            for px in (gcx as i32 - 11)..=(gcx as i32 + 11) {
+                let dx = px as f32 + 0.5 - gcx;
+                let dy = py as f32 + 0.5 - gcy;
+                let d = (dx * dx + dy * dy).sqrt() - 6.0;
+                let cov = (0.5f32 - d.abs() / 1.7).clamp(0.0, 1.0);
+                if cov > 0.0 {
+                    c.blend_pixel(px, py, t.subtext, cov);
                 }
-
-                // Name; the current theme is painted in the accent. Shrink the font
-                // rather than clip the text: the longest names
-                // ("Rangalipi Mossfern Light") do not fit at body size.
-                let name_x = sx + 4;
-                let name_w = x + layout::CELL_W - name_x - 6;
-                SetTextColor(dc_mem, color(if is_current { app.theme.accent } else { app.theme.text }));
-                draw_text(dc_mem, &item.name, name_x, cy + 6, name_w);
-
-                y = cy + layout::CELL_H + layout::GAP;
-                cell_i += 1;
             }
         }
-    }
-
-    // Footer hint when a filter is active.
-    if !app.filtered.is_empty() && !app.query.is_empty() {
-        SelectObject(dc_mem, HGDIOBJ(small.0));
-        SetTextColor(dc_mem, color(app.theme.subtext));
-        let msg = format!("{} of {} themes", app.filtered.len(), app.items.len());
-        draw_text(dc_mem, &msg, PAD, h - FOOT_H, w - PAD * 2);
-    }
-
-    SelectObject(dc_mem, old_font);
-    SelectObject(dc_mem, old_name_font);
-    let _ = DeleteObject(HGDIOBJ(font.0));
-    let _ = DeleteObject(HGDIOBJ(small.0));
-    let _ = DeleteObject(HGDIOBJ(bold.0));
-    let _ = DeleteObject(HGDIOBJ(name_font.0));
-
-    // GDI left every alpha byte at0, which would make UpdateLayeredWindow
-    // render the whole panel transparent.
-    yasb_theme::force_opaque_alpha(bits.cast::<u8>(), w, h);
-
-    let src = POINT { x: 0, y: 0 };
-    let blend = BLENDFUNCTION {
-        BlendOp: AC_SRC_OVER as u8,
-        BlendFlags: 0,
-        SourceConstantAlpha: 255,
-        AlphaFormat: AC_SRC_ALPHA as u8,
-    };
-    let ulw = if NO_LAYERED.load(std::sync::atomic::Ordering::Relaxed) {
-        // Debug path: blit straight to the window so it is capturable.
-        let dc_win = GetWindowDC(hwnd);
-        let _ = BitBlt(dc_win, 0, 0, w, h, dc_mem, 0, 0, SRCCOPY);
-        let _ = ReleaseDC(hwnd, dc_win);
-        Ok(())
-    } else {
-        UpdateLayeredWindow(
-            hwnd, dc_screen, None, None, dc_mem, Some(&src), COLORREF(0), Some(&blend),
-            ULW_ALPHA,
-        )
-    };
-    if dbg {
-        // Sample the top-left, centre and bottom-right pixels of the DIB we
-        // just handed over: proves whether anything was actually drawn.
-        let px = |x: i32, y: i32| -> (u8, u8, u8, u8) {
-            let o = ((y * w + x) * 4) as usize;
-            unsafe {
-                let p = bits.cast::<u8>().add(o);
-                (*p, *p.add(1), *p.add(2), *p.add(3))
+        for i in 0..9 {
+            let hx = gcx + 5.5 + i as f32 * 0.75;
+            let hy = gcy + 5.5 + i as f32 * 0.75;
+            for (dx, dy) in [(0i32, 0i32), (1, 0), (0, 1), (1, 1)] {
+                c.blend_pixel(hx as i32 + dx, hy as i32 + dy, t.subtext, 0.85);
             }
-        };
-        eprintln!("debug: dib px(2,2)={:?} px({},{})={:?} px({},{})={:?}",
-            px(2, 2), w / 2, h / 2, px(w / 2, h / 2), w - 3, h - 3, px(w - 3, h - 3));
-        eprintln!("debug: UpdateLayeredWindow -> {ulw:?}");
+        }
+
+        // Cells and their swatches.
+        for (i, row) in rows.iter().filter(|r| matches!(r, Row::Cell(_))).enumerate() {
+            let Row::Cell(ci) = row else { continue };
+            let (x, cy) = rects[i];
+            let item = &app.items[*ci];
+            let selected = app.filtered.get(app.sel) == Some(ci);
+            draw_cell(&mut c, x, cy, selected, item.name == app.current, t);
+            draw_swatches(&mut c, x + 24, cy + 12, item, t);
+        }
+
+        c.hline(PAD, w - PAD, h - FOOT_H - 8, t.hairline);
     }
 
-    SelectObject(dc_mem, old_bmp);
-    let _ = DeleteObject(HGDIOBJ(bmp.0));
-    let _ = DeleteDC(dc_mem);
-    let _ = DeleteDC(dc_screen);
-}
+    // ---- text pass -------------------------------------------------------
+    {
+        let dc = dib.dc();
+        let body = font(-15, 500, TEXT_FAMILY);
+        let small = font(-12, 400, TEXT_FAMILY);
+        let label = font(-11, 600, TEXT_FAMILY);
+        SetBkMode(dc, TRANSPARENT);
 
-unsafe fn draw_text(dc: HDC, text: &str, x: i32, y: i32, max_w: i32) {
-    let mut buf: Vec<u16> = text.encode_utf16().collect();
-    buf.push(0);
-    let mut rc = RECT { left: x, top: y, right: x + max_w, bottom: y + 400 };
-    DrawTextW(dc, &mut buf, &mut rc, DT_LEFT | DT_TOP | DT_NOPREFIX | DT_SINGLELINE);
+        // The search line. When the query is empty the hint stands in for it,
+        // which is why the caret is drawn *before* the text rather than after:
+        // a caret to the left of the hint would imply the hint is the value.
+        let text_x = PAD + 48;
+        let empty = app.query.is_empty();
+        SelectObject(dc, HGDIOBJ(body.0));
+        SetTextColor(dc, colorref(if empty { t.subtext } else { t.text }));
+        draw_text(
+            dc,
+            if empty { "Type a theme name" } else { &app.query },
+            rect(text_x, PAD, w - text_x - PAD, SEARCH_H),
+            DT_LEFT | DT_VCENTER,
+        );
+
+        // Section headings, then the cell names.
+        let mut cell_i = 0usize;
+        let mut y = origin.1;
+        for row in &rows {
+            match row {
+                Row::Header(text) => {
+                    SelectObject(dc, HGDIOBJ(label.0));
+                    SetTextColor(dc, colorref(t.subtext));
+                    draw_text(
+                        dc,
+                        text,
+                        rect(PAD + 6, y, w - PAD * 2, layout::CELL_H),
+                        DT_LEFT | DT_VCENTER,
+                    );
+                    y += layout::CELL_H;
+                }
+                Row::Cell(ci) => {
+                    let (x, cy) = rects[cell_i];
+                    let item = &app.items[*ci];
+                    let is_current = item.name == app.current;
+                    let sw_x = x + 24 + SWATCHES * SWATCH_STRIDE + 8;
+                    let avail = (x + layout::CELL_W - sw_x - 14).max(24);
+                    SetTextColor(dc, colorref(if is_current { t.accent } else { t.text }));
+                    // Step the size down rather than clipping: a name cut off
+                    // mid-word reads as a bug, a smaller name reads as a
+                    // deliberate fit.
+                    let mut drawn = false;
+                    for size in [-15i32, -14, -13, -12] {
+                        let f = font(size, if is_current { 600 } else { 500 }, TEXT_FAMILY);
+                        SelectObject(dc, HGDIOBJ(f.0));
+                        if text_width(dc, &item.name) <= avail {
+                            draw_text(
+                                dc,
+                                &item.name,
+                                rect(sw_x, cy, avail, layout::CELL_H),
+                                DT_LEFT | DT_VCENTER,
+                            );
+                            drawn = true;
+                        }
+                        let _ = DeleteObject(HGDIOBJ(f.0));
+                        if drawn {
+                            break;
+                        }
+                    }
+                    if !drawn {
+                        SelectObject(dc, HGDIOBJ(body.0));
+                        draw_text(
+                            dc,
+                            &item.name,
+                            rect(sw_x, cy, avail, layout::CELL_H),
+                            DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS,
+                        );
+                    }
+                    y = cy + layout::CELL_H + layout::GAP;
+                    cell_i += 1;
+                }
+            }
+        }
+
+        // Footer: the match count, and the key hints.
+        SelectObject(dc, HGDIOBJ(small.0));
+        SetTextColor(dc, colorref(t.subtext));
+        let count = format!("{} of {} themes", app.filtered.len(), app.items.len());
+        draw_text(dc, &count, rect(PAD + 6, h - FOOT_H - 4, 240, FOOT_H), DT_LEFT | DT_VCENTER);
+        SetTextColor(dc, colorref(t.subtext));
+        draw_text(
+            dc,
+            "arrows select   enter apply   esc close",
+            rect(w - PAD - 360, h - FOOT_H - 4, 360, FOOT_H),
+            DT_RIGHT | DT_VCENTER,
+        );
+
+        let _ = DeleteObject(HGDIOBJ(body.0));
+        let _ = DeleteObject(HGDIOBJ(small.0));
+        let _ = DeleteObject(HGDIOBJ(label.0));
+    }
+
+    blit_to_window(hwnd, &dib);
 }
 
 /// Resize the window to fit the current filter, then repaint.
+/// Cut the panel's corners with a window region.
+///
+/// With no per-pixel alpha the corners cannot be antialiased, but
+/// `SetWindowRgn` still clips the window to a genuinely rounded shape.
+/// Resizing does not carry the region over, so this runs after every
+/// `SetWindowPos`.
+unsafe fn apply_shape(hwnd: HWND, w: i32, h: i32) {
+    apply_round_region(hwnd, w, h, RADIUS);
+}
+
 unsafe fn relayout(hwnd: HWND, w: i32) {
     APP.with(|c| {
         if let Some(a) = c.borrow().as_ref() {
@@ -458,6 +419,7 @@ unsafe fn relayout(hwnd: HWND, w: i32) {
             let cur_x = rc.left;
             let cur_y = rc.top;
             let _ = SetWindowPos(hwnd, HWND_TOPMOST, cur_x, cur_y, w, h, SWP_NOZORDER | SWP_NOACTIVATE);
+            apply_shape(hwnd, w, h);
         }
     });
     paint(hwnd);
@@ -491,11 +453,8 @@ fn main() {
         smoke(&mut app);
         return;
     }
-    if args.iter().any(|a| a == "--debug-paint") {
-        DEBUG_PAINT.store(true, std::sync::atomic::Ordering::Relaxed);
-    }
     if args.iter().any(|a| a == "--no-layered") {
-        NO_LAYERED.store(true, std::sync::atomic::Ordering::Relaxed);
+        eprintln!("palette-picker: --no-layered is gone; the window is never layered now");
     }
 
     APP.with(|c| *c.borrow_mut() = Some(app));
@@ -574,11 +533,7 @@ unsafe fn run() {
         std::process::exit(1);
     }
     let title: Vec<u16> = "Palette\0".encode_utf16().collect();
-    let ex = if NO_LAYERED.load(std::sync::atomic::Ordering::Relaxed) {
-        WS_EX_TOPMOST | WS_EX_TOOLWINDOW
-    } else {
-        WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_LAYERED
-    };
+    let ex = WS_EX_TOPMOST | WS_EX_TOOLWINDOW;
     let hwnd = match CreateWindowExW(
         ex,
         windows::core::PCWSTR(cls.as_ptr()),
@@ -599,14 +554,22 @@ unsafe fn run() {
         }
     });
 
-    // Centre on the monitor holding the cursor, just below the bar.
+    // Centre on the monitor holding the cursor, just below the bar. The
+    // backdrop is captured *before* the window is shown: taken afterwards it
+    // would photograph the panel itself, and blending that back in on every
+    // repaint would compound it into a brightening smear.
     let mut pt = POINT { x: 0, y: 0 };
     let _ = GetCursorPos(&mut pt);
     let mon = MonitorFromPoint(pt, MONITOR_DEFAULTTOPRIMARY);
     let mut mi = MONITORINFO { cbSize: std::mem::size_of::<MONITORINFO>() as u32, ..Default::default() };
     let _ = GetMonitorInfoW(mon, &mut mi);
     let cx = (mi.rcMonitor.left + mi.rcMonitor.right) / 2;
-    let _ = SetWindowPos(hwnd, HWND_TOPMOST, cx - W / 2, mi.rcMonitor.top + 48, W, 240, SWP_SHOWWINDOW);
+    let origin = (cx - W / 2, mi.rcMonitor.top + 48);
+    BACKDROP.with(|b| {
+        *b.borrow_mut() = Backdrop::capture(origin.0, origin.1, W, 520);
+    });
+    let _ = SetWindowPos(hwnd, HWND_TOPMOST, origin.0, origin.1, W, 240, SWP_SHOWWINDOW);
+    apply_shape(hwnd, W, 240);
     let _ = SetForegroundWindow(hwnd);
     relayout(hwnd, W);
 
@@ -619,6 +582,14 @@ unsafe fn run() {
 
 unsafe extern "system" fn wnd_proc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM) -> LRESULT {
     match msg {
+        WM_PAINT => {
+            let mut ps = PAINTSTRUCT::default();
+            if !BeginPaint(hwnd, &mut ps).0.is_null() {
+                paint(hwnd);
+                let _ = EndPaint(hwnd, &ps);
+            }
+            LRESULT(0)
+        }
         WM_KEYDOWN => {
             let vk = wp.0 as u16;
             match vk {
