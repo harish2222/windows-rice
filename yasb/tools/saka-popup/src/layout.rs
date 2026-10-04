@@ -16,8 +16,6 @@
 pub const W: i32 = 460;
 /// Window corner radius.
 pub const RADIUS: i32 = 20;
-/// Radius of the inner pills and the row card.
-pub const PILL: i32 = 10;
 /// Panel edge padding.
 pub const PAD: i32 = 24;
 
