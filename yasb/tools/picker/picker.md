@@ -57,8 +57,8 @@ keeps the dependency list at `windows` + the local `yasb-theme` crate.
 > ⚠ **Layered-window capture.** Windows drawn with `UpdateLayeredWindow`
 > are invisible to `PIL.ImageGrab` and to `PrintWindow`+`PW_RENDERFULLCONTENT`
 > (they come back blank). Use `BitBlt` with `CAPTUREBLT` (`0x40000000`) from
-> the screen DC — `palette-picker/capture-screen.py` does this and works.
-> To screenshot the real picker at all, run it with `--no-layered`.
+> the screen DC — `../screen-shot/` does this and works, and it is the tool to
+> reach for now that the old Python capture helpers are gone.
 
 > ⚠ **The alpha trap.** GDI (`FillRect`, `DrawText`, `FrameRect`) never
 > writes the alpha byte of a pixel, so a freshly created 32-bit DIB is
@@ -68,18 +68,19 @@ keeps the dependency list at `windows` + the local `yasb-theme` crate.
 
 ### Tests
 
-`cargo test --release` → 17 tests (5 catalog, 3 theme, 9 layout).
+`cargo test --release` → 20 tests (4 catalog, 6 theme, 10 layout).
 
-## palette-picker.py — documented fallback
+## The PyQt6 picker is retired
 
-The original PyQt6 picker (418 lines) is **kept on disk as a fallback** but
-is no longer wired to the bar. It behaves the same way (dmenu cards, Enter
-applies via `yasb-theme.exe`) but needs a Python + PyQt6 install and pulls
-in a large dependency tree, which is why the Rust twin exists.
+The original Python picker, its PyInstaller wrapper and its build chain are
+**gone**. They were a fallback for a tool that no longer needs one: the Rust
+picker has been the only thing wired to the bar for a while, and keeping a
+second implementation around meant two things that drift — the documented
+"fallback" and the code the bar actually runs.
 
-To go back to it, point the `palette` widget's `on_left` at
-`palette-picker.py` (or the prebuilt `palette-picker.exe` PyInstaller
-artifact) instead of the Rust release exe.
+`palette-picker-build.ps1` kept its filename and now runs
+`cargo build --release` instead, so `yasb-setup.ps1` needed no change. It
+copies nothing anywhere: `config.yaml` launches cargo's own output path.
 
 ## yasb-font.exe
 
@@ -97,13 +98,10 @@ tokens. Built with PyInstaller from `yasb-font.spec`.
 
 | File | Role |
 |---|---|
-| `palette-picker/` | **primary** picker: Rust crate (lib-less, 4 modules) + `Cargo.toml` |
-| `palette-picker/capture-screen.py` | `BitBlt`+`CAPTUREBLT` screenshot that works on layered windows |
-| `palette-picker/capture-window.py` | per-window capture helper |
+| `palette-picker/` | **the** picker: Rust crate (lib-less, 4 modules) + `Cargo.toml` |
 | `palette-themes.json` | theme catalog shown as cards (11 dark + 11 light) |
-| `palette-picker.py` | fallback picker source (PyQt6) |
-| `palette-picker-build.ps1` / `.spec` / `.bat` | PyInstaller build wrapper for the fallback |
-| `palette-picker.exe` | prebuilt PyInstaller artifact of the fallback |
+| `palette-picker-build.ps1` | `cargo build --release` wrapper, run by `yasb-setup.ps1` |
+| `../screen-shot/` | `BitBlt`+`CAPTUREBLT` capture that works on layered windows |
 | `yasb-font.spec` / `yasb-font.exe` | font picker spec + binary (source missing, see above) |
 
 Binaries and `target/` are gitignored; the Rust sources and this document
