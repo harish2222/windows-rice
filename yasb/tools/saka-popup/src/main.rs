@@ -707,6 +707,69 @@ fn month_abbr(m: u32) -> &'static str {
         [(m as usize - 1).min(11)]
 }
 
+/// Where the panel sits: horizontally centred on the monitor holding the
+/// cursor, 40px below its top edge — but never so low that the bottom runs off
+/// the screen.
+///
+/// The clamp is the reason this is a function. The Indic panel is 100px taller
+/// than the Latin one, so "monitor top + 40" is fine for one script and clips
+/// the footer on a short work area for the other.
+fn panel_origin(w: i32, h: i32) -> (i32, i32) {
+    let mut pt = POINT { x: 0, y: 0 };
+    let _ = unsafe { GetCursorPos(&mut pt) };
+    let mon = unsafe { MonitorFromPoint(pt, MONITOR_DEFAULTTOPRIMARY) };
+    let mut mi = MONITORINFO {
+        cbSize: std::mem::size_of::<MONITORINFO>() as u32,
+        ..Default::default()
+    };
+    unsafe { let _ = GetMonitorInfoW(mon, &mut mi); };
+
+    let left = mi.rcMonitor.left;
+    let right = mi.rcMonitor.right;
+    let top = mi.rcMonitor.top;
+    let bottom = mi.rcMonitor.bottom;
+    // `rcWork` excludes the taskbar and the bar itself; falling back to
+    // `rcMonitor` only matters on a degenerate report, where staying on screen
+    // is still better than trusting a zero-height work area.
+    let (work_top, work_bottom) =
+        if mi.rcWork.bottom > mi.rcWork.top { (mi.rcWork.top, mi.rcWork.bottom) } else { (top, bottom) };
+
+    let x = (left + right) / 2 - w / 2;
+    let mut y = work_top + 40;
+    if y + h > work_bottom {
+        y = work_bottom - h;
+    }
+    (x, y.max(work_top))
+}
+
+/// Resize the window to whatever the current script's layout needs, move it if
+/// the new size no longer fits, re-snapshot the backdrop at the new size, and
+/// repaint.
+///
+/// The backdrop has to be re-captured, not just reused: it is a bitmap of the
+/// exact rectangle the panel occupies, so at the old size it no longer covers
+/// the window and the acrylic would show unblurred desktop along the bottom.
+unsafe fn resize_to_script(hwnd: HWND) {
+    let Some(app) = APP.with(|c| c.borrow().clone()) else { return };
+    let l = app.layout();
+    let (w, h) = (l.w(), l.height);
+
+    let (x, y) = panel_origin(w, h);
+    APP.with(|c| {
+        if let Some(a) = c.borrow_mut().as_mut() {
+            a.origin = (x, y);
+        }
+    });
+    let _ = SetWindowPos(hwnd, HWND_TOPMOST, x, y, w, h, SWP_SHOWWINDOW);
+    apply_round_region(hwnd, w, h, RADIUS);
+
+    let t = &app.theme;
+    BACKDROP.with(|b| {
+        *b.borrow_mut() = Backdrop::capture(x, y, w, h).map(|bd| bd.blurred(t.backdrop_blur as i32));
+    });
+    paint(hwnd);
+}
+
 unsafe fn run() {
     let hinst = GetModuleHandleW(None).unwrap_or_default();
 
@@ -722,16 +785,11 @@ unsafe fn run() {
             .unwrap_or((layout::Layout::new(10).height, layout::W))
     });
 
-    // Centre on the monitor holding the cursor, just below the bar. The
-    // position is decided *before* the window exists so the desktop can be
-    // captured underneath it.
-    let mut pt = POINT { x: 0, y: 0 };
-    let _ = GetCursorPos(&mut pt);
-    let mon = MonitorFromPoint(pt, MONITOR_DEFAULTTOPRIMARY);
-    let mut mi = MONITORINFO { cbSize: std::mem::size_of::<MONITORINFO>() as u32, ..Default::default() };
-    let _ = GetMonitorInfoW(mon, &mut mi);
-    let cx = (mi.rcMonitor.left + mi.rcMonitor.right) / 2;
-    let origin = (cx - w / 2, mi.rcMonitor.top + 40);
+    // Centre on the monitor holding the cursor, just below the bar, clamped to
+    // the work area so a tall script cannot hang off the bottom. The position is
+    // decided *before* the window exists so the desktop can be captured
+    // underneath it.
+    let origin = panel_origin(w, h);
     APP.with(|c| {
         if let Some(a) = c.borrow_mut().as_mut() {
             a.origin = origin;
@@ -853,7 +911,11 @@ unsafe extern "system" fn wnd_proc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM)
                             };
                         }
                     });
-                    paint(hwnd);
+                    // Switching script changes the layout, and the layout owns
+                    // the window's size. Repainting alone left the taller Indic
+                    // layout painting into the shorter Latin window, so the
+                    // last rows were drawn outside the window and clipped away.
+                    resize_to_script(hwnd);
                 }
                 _ => {}
             }
@@ -903,6 +965,50 @@ mod tests {
         Snapshot {
             panchangam: Panchang::now(LAT, LON, TZ),
             theme: Theme::from_vars(&[("--accent".into(), format!("#{n:06x}"))]),
+        }
+    }
+
+    /// The window is sized from the layout, so switching script has to change
+    /// the size `paint` draws into.
+    ///
+    /// This is the defect behind the clipped Telugu panel: `run()` computed
+    /// `w`/`h` once from the launch-time script, `VK_TAB` only flipped the
+    /// script and repainted, and `paint` reads its canvas from the *window
+    /// rect*. So the Indic layout painted 657px of rows into a 557px window and
+    /// the last rows were clipped away. Asserting the two layouts differ is
+    /// weak on its own; what matters is that a single size cannot serve both,
+    /// which is exactly the case that used to break.
+    #[test]
+    fn the_two_scripts_need_different_window_sizes() {
+        let latin = layout::Layout::new(10);
+        let indic = layout::Layout::new_indic(10);
+        assert_ne!(
+            (latin.w(), latin.height),
+            (indic.w(), indic.height),
+            "one window size cannot serve both scripts"
+        );
+        assert!(
+            indic.height > latin.height,
+            "the Indic layout is the taller one, so it is the one that clips"
+        );
+    }
+
+    /// The panel must fit the work area at either size.
+    ///
+    /// Without the clamp, `monitor top + 40` plus the taller Indic panel puts
+    /// the footer below the bottom of a short work area. A 1080p screen has
+    /// 1048px to play with, which both sizes fit, so the test pins the
+    /// arithmetic rather than the current monitor.
+    #[test]
+    fn both_scripts_fit_a_work_area_that_can_just_hold_them() {
+        for (name, l) in [("latin", layout::Layout::new(10)), ("indic", layout::Layout::new_indic(10))] {
+            let work_h = 700;
+            let y = work_h - l.height;
+            assert!(
+                y >= 0,
+                "{name} panel of {}px cannot fit a {work_h}px work area",
+                l.height
+            );
         }
     }
 
