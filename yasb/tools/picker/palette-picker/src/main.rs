@@ -296,6 +296,16 @@ const CREATE_NO_WINDOW: u32 = 0x0800_0000;
 /// Apply a theme by name, waiting for the stylesheet rewrite to finish so
 /// the bar cannot still be repainting from the old theme when we return.
 fn apply(name: &str) {
+    // No explicit reload is needed, and adding one would be actively harmful.
+    // YASB already watches styles.css: `yasb-theme set` rewrites it with
+    // write_atomic (temp file + rename), and the rename is a single change
+    // event with complete content, so the bar reloads on its own.
+    //
+    // The obvious "make sure it reloads" move -- killing yasb-bar so it
+    // restarts -- was written and then removed: the picker is launched *from*
+    // the bar, so killing it takes down the widget the user is still using,
+    // and nothing guarantees the bar comes back. The file watch is the correct
+    // mechanism and it is already in place.
     let _ = Command::new(theme_exe())
         .args(["set", name])
         .creation_flags(CREATE_NO_WINDOW)

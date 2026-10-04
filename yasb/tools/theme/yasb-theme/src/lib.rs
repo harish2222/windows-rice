@@ -810,3 +810,5 @@ fn parse_decls(chunk: &str) -> Vec<(String, String)> {
 #[cfg(test)]
 #[path = "tests.rs"]
 mod tests;
+
+pub mod motifs;

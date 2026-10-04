@@ -7,7 +7,7 @@
 //!
 //! Usage:
 //!   yasb-theme [--styles PATH] [--config PATH] [--cava PATH]
-//!             <list|current|set <name>|next|prev>
+//!             <list|current|set <name>|next|prev|motif>
 //!
 //! Bar wiring (omega dropdown): run_cmd -> `yasb-theme.exe current`,
 //! left-click -> `yasb-theme.exe next`, right-click -> `yasb-theme.exe prev`
@@ -17,7 +17,7 @@ use std::env;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
-use yasb_theme::{parse, read_styles, sync_cava_colors, sync_config_colors};
+use yasb_theme::{motifs, parse, read_styles, sync_cava_colors, sync_config_colors};
 
 fn main() -> ExitCode {
     match run() {
@@ -34,6 +34,7 @@ fn run() -> Result<(), String> {
     let mut styles_override: Option<PathBuf> = None;
     let mut config_override: Option<PathBuf> = None;
     let mut cava_override: Option<PathBuf> = None;
+    let mut motif_dir_override: Option<PathBuf> = None;
     let mut i = 0;
     while i < args.len() {
         if args[i] == "--styles" {
@@ -53,6 +54,12 @@ fn run() -> Result<(), String> {
                 return Err("--cava needs a path".to_string());
             }
             cava_override = Some(PathBuf::from(args.remove(i + 1)));
+            args.remove(i);
+        } else if args[i] == "--motif-dir" {
+            if i + 1 >= args.len() {
+                return Err("--motif-dir needs a path".to_string());
+            }
+            motif_dir_override = Some(PathBuf::from(args.remove(i + 1)));
             args.remove(i);
         } else {
             i += 1;
@@ -116,10 +123,45 @@ fn run() -> Result<(), String> {
             println!("{new}");
             Ok(())
         }
+        "motif" => {
+            // Deal fresh motifs out to the theme blocks: three drawn at random
+            // from the SVG motifs on disk, cycling if there are fewer motifs
+            // than themes.
+            //
+            // Seeded from the clock on purpose -- the point is that the art
+            // changes between runs, so a fixed seed would make this a no-op
+            // dressed up as a feature.
+            let dir = motif_dir_override.unwrap_or_else(default_motif_dir);
+            let found = motifs::discover(&dir);
+            if found.is_empty() {
+                return Err(format!("no motif-*.svg found in {}", dir.display()));
+            }
+            let seed = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map(|d| d.as_nanos() as u64)
+                .unwrap_or(0x9E3779B97F4A7C15);
+            let chosen = motifs::pick(&found, 3, seed);
+            let mut sheet = parse(&read_styles(&styles)?)?;
+            let n = motifs::assign(&mut sheet.lines, &sheet.regions, &chosen);
+            if n == 0 {
+                return Err("no --motif: declarations found to rewrite".to_string());
+            }
+            sheet.write(&styles)?;
+            let names: Vec<&str> = chosen.iter().map(|m| m.stem.as_str()).collect();
+            println!("{} motifs from {} themes: {}", names.join(", "), n, found.len());
+            Ok(())
+        }
         other => Err(format!(
-            "unknown command '{other}'; expected list|current|set|next|prev"
+            "unknown command '{other}'; expected list|current|set|next|prev|motif"
         )),
     }
+}
+
+/// `%USERPROFILE%\.config\yasb` — where the SVG motifs live, alongside the
+/// stylesheet that references them.
+fn default_motif_dir() -> PathBuf {
+    let home = env::var("USERPROFILE").unwrap_or_else(|_| ".".to_string());
+    Path::new(&home).join(".config").join("yasb")
 }
 
 /// `%USERPROFILE%\.config\cava\config` — the visualiser's own INI.
