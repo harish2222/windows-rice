@@ -36,12 +36,23 @@ pub const CARD_PAD: i32 = 12;
 /// Radius of the moon glyph. Lives here, not in `main.rs`, because the shape
 /// pass and the text pass both need it and they must not disagree.
 pub const MOON_R: i32 = 30;
+/// Radius of the weekday scrim pill. Half its height, so the ends are
+/// semicircular and the label never looks boxed.
+pub const SCRIM_R: i32 = 9;
+/// Horizontal padding inside the weekday pill, either side of the text.
+pub const SCRIM_PAD_X: i32 = 11;
+/// The weekday label's line box, which is what the pill is sized around.
+pub const WEEKDAY_H: i32 = 18;
 
 /// Where each band starts and ends, measured from the panel's top.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Layout {
     /// Tracked weekday label (11px caps).
     pub weekday_y: i32,
+    /// Top of the weekday's scrim pill.
+    pub weekday_top: i32,
+    /// Bottom of the weekday's scrim pill.
+    pub weekday_bottom: i32,
     /// The date, in the 28px display face.
     pub date_y: i32,
     /// The era line: Saka / Vikram Samvat.
@@ -67,8 +78,14 @@ impl Layout {
     /// Compute the geometry for a panel with `rows` rows.
     pub fn new(rows: i32) -> Layout {
         let weekday_y = PAD;
+        // The pill is centred on the label's line box, so the two can never
+        // drift apart. It reaches a little above `weekday_y` and ends just
+        // above the date, which is why `date_y` is derived from the pill's
+        // bottom rather than from the label's own y.
+        let weekday_top = weekday_y - 3;
+        let weekday_bottom = weekday_top + WEEKDAY_H + 6;
         // 11px caps: 14px line.
-        let date_y = weekday_y + 20;
+        let date_y = weekday_bottom + 2;
         // 28px display: 36px line.
         let era_y = date_y + 38;
         // 13px: 18px line.
@@ -85,6 +102,8 @@ impl Layout {
         let height = footer_y + 18 + PAD;
         Layout {
             weekday_y,
+            weekday_top,
+            weekday_bottom,
             date_y,
             era_y,
             era_bottom,
@@ -96,6 +115,21 @@ impl Layout {
             footer_y,
             height,
         }
+    }
+
+    /// The weekday scrim pill, given the measured width of the label.
+    ///
+    /// The pill is sized from the text rather than fixed, because a fixed box
+    /// would either clip `WEDNESDAY` or trail a long gap behind `SUN`. The
+    /// text is inset by [`SCRIM_PAD_X`] on both sides so the caps never touch
+    /// the edge.
+    pub fn weekday_pill(&self, text_w: i32) -> (i32, i32, i32, i32) {
+        (
+            PAD - SCRIM_PAD_X,
+            self.weekday_top,
+            PAD + text_w + SCRIM_PAD_X,
+            self.weekday_bottom,
+        )
     }
 
     /// Top of row `i` inside the card.
@@ -130,7 +164,7 @@ impl Layout {
     /// compared.
     pub fn assert_no_overlap(&self, rows: i32) -> Result<(), String> {
         let stacked = [
-            ("weekday", self.weekday_y, self.date_y),
+            ("weekday pill", self.weekday_bottom, self.date_y),
             ("date", self.date_y, self.era_y),
             ("era", self.era_y, self.era_bottom),
             ("rule", self.rule_y, self.rule_y + 1),
@@ -256,6 +290,54 @@ mod tests {
             room_below < needed,
             "a caption now fits under the disc (room={room_below}) — add it back deliberately"
         );
+    }
+
+    /// The weekday label has to sit *inside* its scrim on both axes, and the
+    /// pill has to clear the date below it. The vertical relationship is the
+    /// one that actually broke once: the pill was drawn from the label's own
+    /// `y`, and adding padding to it pushed the bottom into the date.
+    #[test]
+    fn the_weekday_sits_inside_its_scrim_and_the_scrim_clears_the_date() {
+        let l = Layout::new(10);
+        assert!(l.weekday_top <= l.weekday_y, "pill starts below its label");
+        assert!(l.weekday_y + WEEKDAY_H <= l.weekday_bottom, "label overflows the pill");
+        assert!(
+            l.weekday_bottom <= l.date_y,
+            "pill ends at {} but the date starts at {}",
+            l.weekday_bottom,
+            l.date_y
+        );
+        // The pill is vertically centred on the line box, not flush to it.
+        let above = l.weekday_y - l.weekday_top;
+        let below = l.weekday_bottom - (l.weekday_y + WEEKDAY_H);
+        assert!(
+            (above - below).abs() <= 1,
+            "label is off-centre in its pill: {above} above, {below} below"
+        );
+    }
+
+    /// The pill is sized from the measured text, so the widest weekday in
+    /// either script has to fit inside the panel's content box with room for
+    /// its padding — and the pill must not run into the moon glyph, which is
+    /// why the right edge is checked rather than just the left.
+    #[test]
+    fn the_weekday_pill_fits_the_header_on_both_sides() {
+        let l = Layout::new(10);
+        for text_w in [40, 70, 96, 120] {
+            let (x0, _y0, x1, y1) = l.weekday_pill(text_w);
+            assert!(x0 >= 0, "pill leaves the panel at text_w={text_w}");
+            assert!(x1 <= W, "pill overflows the panel at text_w={text_w}");
+            assert!(y1 <= l.date_y, "pill collides with the date at text_w={text_w}");
+            // Left edge is PAD - SCRIM_PAD_X, so the text itself still starts
+            // on the content edge and the pill does not shift the label.
+            assert_eq!(x0 + SCRIM_PAD_X, PAD);
+            // The moon disc's left limb, worst case for a long label.
+            let disc_left = l.moon_center_x(W) - MOON_R;
+            assert!(
+                x1 + 8 <= disc_left,
+                "pill ends at {x1}, the moon limb starts at {disc_left} (text_w={text_w})"
+            );
+        }
     }
 
     #[test]
