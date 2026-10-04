@@ -41,11 +41,25 @@ const SS: usize = 2;
 /// which is exactly the regression this tool exists to prevent.
 const MIN_PATTERN_DISTANCE: u32 = 10;
 
+/// Ceiling on any single layer's alpha.
+///
+/// The control-center, media and pomodoro panels all paint this art *under*
+/// their text, and `.control-center-menu` sets `background-color: var(--acrylic)`
+/// — which the Rangalipi blocks declare at 1% alpha. So there is no panel fill
+/// to hide behind: the PNG's alpha is the only thing keeping the motif from
+/// sitting at full strength under the labels.
+///
+/// The floor is not arbitrary. Measured on the art, this keeps 99% of the
+/// motif's pixels below luminance 0.23, which is where `#F1DFE3` body text on
+/// the darkest theme still clears 3:1. Running the layers to 0.55-0.60 pushed
+/// the top 1% to 0.48 and body text to 1.6:1.
+const MAX_WATERMARK_ALPHA: f64 = 0.50;
+
 // ---------------------------------------------------------------------------
 // Palette roles: which styles.css token tints a layer
 // ---------------------------------------------------------------------------
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 enum Role {
     Frame,
     Mauve,
@@ -58,6 +72,10 @@ enum Role {
     Pink,
     Maroon,
     Rosewater,
+    Red,
+    Sapphire,
+    Sky,
+    Flamingo,
 }
 
 impl Role {
@@ -74,10 +92,21 @@ impl Role {
             Role::Pink => "pink",
             Role::Maroon => "maroon",
             Role::Rosewater => "rosewater",
+            Role::Red => "red",
+            Role::Sapphire => "sapphire",
+            Role::Sky => "sky",
+            Role::Flamingo => "flamingo",
         }
     }
 
-    fn all() -> [Role; 11] {
+    /// Every accent token the 22 blocks all declare.
+    ///
+    /// The four added last (`red`, `sapphire`, `sky`, `flamingo`) are the
+    /// most saturated tokens in the palette — `--red` is 0.71 chroma against
+    /// mauve's 0.38 — and leaving them out of the vocabulary is what kept
+    /// every design looking washed out. A design can only be as colourful as
+    /// the colours it is allowed to reach for.
+    fn all() -> [Role; 15] {
         [
             Role::Frame,
             Role::Mauve,
@@ -90,6 +119,10 @@ impl Role {
             Role::Pink,
             Role::Maroon,
             Role::Rosewater,
+            Role::Red,
+            Role::Sapphire,
+            Role::Sky,
+            Role::Flamingo,
         ]
     }
 }
@@ -592,12 +625,38 @@ fn design_for(stem: &str) -> Result<(&'static str, Vec<Layer>), String> {
             ],
         ),
         "wine" => (
-            "spirograph weave",
+            // Six distinct roles across seven layers. The previous
+            // "spirograph weave" used three, two of which were near-neighbours
+            // on the wheel, which is why this motif read as a flat mauve
+            // smudge no matter how much alpha it was given: more opacity on
+            // one hue is not vibrancy, hue variety is.
+            //
+            // The alphas stay in the 0.40-0.50 band every other design uses,
+            // and that is deliberate. Running them higher does make the motif
+            // more visible, but the control-center panel paints it over a
+            // `--acrylic` that is 1% opaque, so the PNG's own alpha is the
+            // *only* thing keeping the art behind the text: at 0.55-0.60 the
+            // brightest stroke reached luminance 0.48 and body text dropped
+            // to 1.6:1 against it. The vibrancy here is bought with hue
+            // variety, which costs no contrast at all.
+            "kalamkari bloom",
             vec![
-                Spiro { big: 0.62, small: 0.23, off: 0.52, w: 0.006, role: Role::Mauve, alpha: 0.50 },
-                Ring { r: 0.96, w: 0.009, role: Role::Frame, alpha: 0.45 },
-                Ring { r: 0.18, w: 0.007, role: Role::Peach, alpha: 0.40 },
-                Disc { r: 0.04, role: Role::Frame, alpha: 0.50 },
+                Ring { r: 0.97, w: 0.010, role: Role::Frame, alpha: 0.45 },
+                Petal { n: 14, phase: 0.0, base: 0.56, amp: 0.30, k: 1.7, w: 0.008, role: Role::Pink, alpha: 0.44 },
+                Scallop { n: 12, phase: 0.25, ring: 0.52, rad: 0.26, w: 0.008, role: Role::Yellow, alpha: 0.40 },
+                // Keeps Wine's spirograph character from the design it replaces, so the
+                // motif still belongs to the theme it was drawn for — but in
+                // `--sapphire` at 0.38 rather than mauve at 0.50, which is
+                // where both the extra hue and the lower brightness come from.
+                Spiro { big: 0.62, small: 0.23, off: 0.52, w: 0.006, role: Role::Sapphire, alpha: 0.38 },
+                // `--rosewater` is the lightest token in the palette (luma
+                // 0.72), so at the usual 0.45 it alone set the motif's
+                // brightest pixel and dragged body text down to 2.6:1 over
+                // the top 1% of the art. Held back to 0.32 it keeps its hue
+                // in the palette mix without being the thing you notice.
+                Dots { ring: 0.34, n: 18, phase: 0.22, size: 0.016, role: Role::Rosewater, alpha: 0.32 },
+                Star { n: 8, inner: 0.20, outer: 0.42, w: 0.008, role: Role::Red, alpha: 0.44 },
+                Disc { r: 0.05, role: Role::Frame, alpha: 0.50 },
             ],
         ),
         "wine-light" => (
@@ -1149,5 +1208,149 @@ fn main() {
     if let Err(e) = result {
         eprintln!("error: {e}");
         std::process::exit(1);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::HashSet;
+
+    /// The stylesheet, located from the crate rather than the cwd.
+    ///
+    /// `cargo test --manifest-path` runs with the cwd set to the crate
+    /// directory, which is not where `find_styles` looks, so the tests would
+    /// otherwise fail for a reason that has nothing to do with what they
+    /// assert.
+    fn sheet() -> Stylesheet {
+        let manifest = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        // mandala-gen -> theme -> tools -> yasb
+        let candidates = [
+            manifest.join("../../../styles.css"),
+            manifest.join("../../../../yasb/styles.css"),
+        ];
+        let found = candidates
+            .iter()
+            .find(|p| p.exists())
+            .unwrap_or_else(|| {
+                panic!(
+                    "styles.css not found; looked at {:?}",
+                    candidates.iter().map(|p| p.display().to_string()).collect::<Vec<_>>()
+                )
+            });
+        let css = read_styles(found).expect("styles.css should be readable");
+        parse(&css).expect("styles.css should parse")
+    }
+
+    /// Every theme the shipped stylesheet declares must have a design, and
+    /// every layer in it must respect the watermark contract.
+    ///
+    /// Read from the real stylesheet rather than a hardcoded stem list, so a
+    /// 23rd theme fails here until it gets its own design — which is the
+    /// point. `generate` would otherwise draw it from whatever `design_for`
+    /// happened to fall through to.
+    fn every_theme() -> Vec<(String, String, Vec<Layer>)> {
+        sheet()
+            .regions
+            .iter()
+            .map(|r| {
+                let stem = stem_of(&r.name);
+                let (_label, layers) =
+                    design_for(&stem).unwrap_or_else(|e| panic!("{}: {e}", r.name));
+                (r.name.clone(), stem, layers)
+            })
+            .collect()
+    }
+
+    /// The control-center panel paints this art over a `--acrylic` that is 1%
+    /// opaque, so the PNG's own alpha is the only thing between the motif and
+    /// the body text. Nothing here may exceed `MAX_WATERMARK_ALPHA`, or the
+    /// brightest stroke lands under the text at a contrast no theme can
+    /// recover.
+    #[test]
+    fn no_layer_is_opaque_enough_to_fight_the_text() {
+        for (name, _stem, layers) in every_theme() {
+            for (i, l) in layers.iter().enumerate() {
+                let (alpha, role) = layer_alpha(l);
+                assert!(
+                    alpha > 0.0 && alpha <= MAX_WATERMARK_ALPHA,
+                    "{name}: layer {i} has alpha {alpha}, outside (0, {MAX_WATERMARK_ALPHA}]"
+                );
+                assert!(
+                    role != Role::Frame || alpha <= 0.52,
+                    "{name}: layer {i} puts the accent colour at alpha {alpha}"
+                );
+            }
+        }
+    }
+
+    /// Vibrancy comes from hue variety, not opacity. Wine's old
+    /// "spirograph weave" used three roles, two of them near-neighbours on the
+    /// wheel, and read as a flat mauve smudge no matter how much alpha it was
+    /// given. Two roles is the floor at which a design stops being able to
+    /// show more than one colour.
+    #[test]
+    fn every_design_uses_enough_distinct_colours_to_look_vibrant() {
+        for (name, _stem, layers) in every_theme() {
+            let roles: HashSet<Role> = layers.iter().map(layer_role).collect();
+            assert!(
+                roles.len() >= 3,
+                "{name}: only {} distinct colours ({:?}) — it will read as one flat hue",
+                roles.len(),
+                roles
+            );
+        }
+    }
+
+    /// A design with one layer is not a mandala, and an empty one is a bug
+    /// that renders as a blank square.
+    #[test]
+    fn every_design_has_layers() {
+        for (name, _stem, layers) in every_theme() {
+            assert!(!layers.is_empty(), "{name} has no layers");
+        }
+    }
+
+    /// The palette lookup must not silently fall back for the tokens every
+    /// block declares. A missing role is how a design ends up recoloured to
+    /// the accent.
+    #[test]
+    fn every_role_maps_to_a_token_the_stylesheet_declares() {
+        let sheet = sheet();
+        for region in &sheet.regions {
+            let vars = sheet.theme_vars(&region.name);
+            for role in Role::all() {
+                let key = role.key().to_string();
+                assert!(
+                    vars.contains_key(&key),
+                    "{}: role {} has no `{key}` token",
+                    region.name,
+                    role.key()
+                );
+            }
+        }
+    }
+
+    fn layer_alpha(l: &Layer) -> (f64, Role) {
+        use Layer::*;
+        match *l {
+            Disc { alpha, role, .. }
+            | Ring { alpha, role, .. }
+            | Dots { alpha, role, .. }
+            | Wave { alpha, role, .. }
+            | Petal { alpha, role, .. }
+            | Ray { alpha, role, .. }
+            | Scallop { alpha, role, .. }
+            | Diamond { alpha, role, .. }
+            | Chevron { alpha, role, .. }
+            | Star { alpha, role, .. }
+            | Pinwheel { alpha, role, .. }
+            | Spiro { alpha, role, .. }
+            | Tri { alpha, role, .. } => (alpha, role),
+        }
+    }
+
+    fn layer_role(l: &Layer) -> Role {
+        layer_alpha(l).1
     }
 }
