@@ -32,7 +32,7 @@ pub use gdi::{
     Backdrop, Dib, apply_round_region, blit_to_window, colorref, draw_text, font, rect, styles_path,
     text_width,
 };
-pub use singleton::{acquire, raise_window_of_class};
+pub use singleton::{Action, acquire, notify_window_of_class, raise_window_of_class};
 
 /// The font stack both panels draw with.
 ///

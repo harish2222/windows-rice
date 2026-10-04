@@ -17,11 +17,11 @@
 //! nothing at all. That "it does nothing" behaviour was the original symptom
 //! being chased here.
 
-use windows::Win32::Foundation::{BOOL, ERROR_ALREADY_EXISTS, GetLastError, HWND, LPARAM};
+use windows::Win32::Foundation::{BOOL, ERROR_ALREADY_EXISTS, GetLastError, HWND, LPARAM, WPARAM};
 use windows::Win32::System::Threading::CreateMutexW;
 use windows::Win32::UI::WindowsAndMessaging::{
-    EnumWindows, GetClassNameW, IsWindowVisible, SetForegroundWindow, SetWindowPos, HWND_TOPMOST,
-    SWP_NOMOVE, SWP_NOSIZE,
+    EnumWindows, GetClassNameW, IsWindowVisible, PostMessageW, SetForegroundWindow, SetWindowPos,
+    HWND_TOPMOST, SWP_NOMOVE, SWP_NOSIZE,
 };
 use windows::core::PCWSTR;
 
@@ -74,15 +74,26 @@ impl Drop for Instance {
     }
 }
 
-/// Raise the topmost visible window whose class matches, if any.
-///
-/// Returns whether one was found. Used when [`acquire`] reports a duplicate:
-/// the window is still there, it just lost focus.
-pub fn raise_window_of_class(class: &str) -> bool {
+/// The window a duplicate launch found and acted on.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum Action {
+    /// No window of that class was on screen.
+    None,
+    /// The window was raised.
+    Raised,
+    /// The message was posted to the window.
+    Messaged,
+}
+
+fn find_topmost_of_class_inner(class: &str, msg: u32, action: Action) -> Action {
     thread_local! {
-        static FOUND: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+        static RESULT: std::cell::Cell<Action> = const { std::cell::Cell::new(Action::None) };
+        /// What to do to the window once found, and the action to report.
+        static ACT: std::cell::RefCell<Option<(u32, Action)>> =
+            const { std::cell::RefCell::new(None) };
     }
-    FOUND.with(|f| f.set(false));
+    RESULT.with(|r| r.set(Action::None));
+    ACT.with(|a| *a.borrow_mut() = Some((msg, action)));
     let mut needle = class.to_string();
 
     unsafe extern "system" fn cb(hwnd: HWND, lp: LPARAM) -> BOOL {
@@ -97,9 +108,20 @@ pub fn raise_window_of_class(class: &str) -> bool {
             // but taking the first keeps this correct if the guard is ever
             // bypassed.
             if name == *needle && unsafe { IsWindowVisible(hwnd) }.as_bool() {
-                let _ = unsafe { SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE) };
-                let _ = unsafe { SetForegroundWindow(hwnd) };
-                FOUND.with(|f| f.set(true));
+                let (msg, action) = ACT
+                    .with(|a| a.borrow().unwrap_or((0, Action::None)));
+                match msg {
+                    0 => {
+                        let _ = unsafe {
+                            SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE)
+                        };
+                        let _ = unsafe { SetForegroundWindow(hwnd) };
+                    }
+                    _ => {
+                        let _ = unsafe { PostMessageW(hwnd, msg, WPARAM(0), LPARAM(0)) };
+                    }
+                }
+                RESULT.with(|r| r.set(action));
                 // Stop at the first match: the rest are behind it.
                 return BOOL(0);
             }
@@ -108,7 +130,29 @@ pub fn raise_window_of_class(class: &str) -> bool {
     }
 
     let _ = unsafe { EnumWindows(Some(cb), LPARAM(&mut needle as *mut String as isize)) };
-    FOUND.with(|f| f.get())
+    RESULT.with(|r| r.get())
+}
+
+/// Raise the topmost visible window whose class matches, if any.
+///
+/// Returns whether one was found. Used when [`acquire`] reports a duplicate:
+/// the window is still there, it just lost focus.
+pub fn raise_window_of_class(class: &str) -> bool {
+    find_topmost_of_class_inner(class, 0, Action::Raised) == Action::Raised
+}
+
+/// Post `msg` to the topmost visible window of `class`.
+///
+/// This is how a panel is toggled closed. A duplicate launch owns no window of
+/// its own, so it cannot destroy the first one's — it can only ask. The
+/// receiving panel handles the message in its own window procedure, which is
+/// the only place where destroying the window is safe.
+///
+/// Returns whether a window was found. `None` means the instance that held the
+/// name has already exited and there is nothing left to close, so the caller
+/// should open a fresh window rather than treating the click as consumed.
+pub fn notify_window_of_class(class: &str, msg: u32) -> Action {
+    find_topmost_of_class_inner(class, msg, Action::Messaged)
 }
 
 #[cfg(test)]
@@ -133,5 +177,16 @@ mod tests {
     #[test]
     fn raising_a_class_that_is_not_running_reports_false() {
         assert!(!raise_window_of_class("NoSuchWindowClassForThisTest"));
+    }
+
+    #[test]
+    fn notifying_a_class_that_is_not_running_does_nothing() {
+        // Nothing to message: the caller must be able to tell the difference
+        // between "closed the open panel" and "there was nothing there", or a
+        // click that lands during a close would be swallowed.
+        assert_eq!(
+            notify_window_of_class("NoSuchWindowClassForThisTest", 0x8001),
+            Action::None
+        );
     }
 }

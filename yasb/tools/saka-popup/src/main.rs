@@ -68,6 +68,10 @@ const W: i32 = layout::W;
 const RADIUS: i32 = layout::RADIUS;
 const PAD: i32 = layout::PAD;
 const TIMER_ID: usize = 1;
+/// Posted by a second launch to ask the open panel to close. `WM_APP` is the
+/// range reserved for application-private window messages, so this cannot
+/// collide with anything the system or another program sends.
+const WM_TOGGLE_CLOSE: u32 = WM_APP + 1;
 
 thread_local! {
     static APP: RefCell<Option<App>> = const { RefCell::new(None) };
@@ -202,13 +206,22 @@ fn main() {
     }
 
     APP.with(|c| *c.borrow_mut() = Some(App { theme, panchangam, script, origin: (0, 0) }));
-    // One panel, ever. The bar fires this on every click of the saka chip, and
-    // a stacked second copy would capture its own backdrop and repaint over
-    // the first at 1 Hz. A duplicate launch raises the panel that is already
-    // open and exits.
+    // One panel, ever, and the bar chip toggles it.
+    //
+    // A second launch owns no window, so it cannot destroy the first one's; it
+    // posts a message instead and exits. The open panel handles it in its own
+    // window procedure, which is the only place destroying the window is safe.
     match yasb_chrome::acquire("Local\\yasb-saka-popup") {
         Ok(None) => {
-            yasb_chrome::raise_window_of_class("SakaPopupClass");
+            // `Action::None` means the previous instance is already gone but
+            // has not released the name yet — a race between closing and
+            // reopening. Treat the click as a request to open, or it is
+            // swallowed and the panel appears to be stuck shut.
+            if yasb_chrome::notify_window_of_class("SakaPopupClass", WM_TOGGLE_CLOSE)
+                == yasb_chrome::Action::None
+            {
+                unsafe { run() };
+            }
             return;
         }
         // If the guard itself fails, still open the panel.
@@ -614,6 +627,11 @@ unsafe extern "system" fn wnd_proc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM)
         WM_DESTROY => {
             let _ = KillTimer(hwnd, TIMER_ID);
             let _ = PostQuitMessage(0);
+            LRESULT(0)
+        }
+        // A second click on the bar chip: close this panel.
+        WM_TOGGLE_CLOSE => {
+            let _ = DestroyWindow(hwnd);
             LRESULT(0)
         }
         _ => DefWindowProcW(hwnd, msg, wp, lp),
