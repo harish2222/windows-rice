@@ -660,6 +660,37 @@ pub const VARAS_TE: [&str; 7] = [
     "శుక్రవార", "శనివార",
 ];
 
+/// Moon phases under their traditional Indian names, indexed by the same
+/// 45-degree sector `phase_index` uses.
+///
+/// Each name is the tithi that dominates its sector: `phase_index` 4 lands on
+/// 180 degrees of elongation, which is the fifteenth tithi — Purnima — and 0
+/// is Amavasya. Keeping the table in the same tithi vocabulary as
+/// [`TITHIS`] is the point; a reader who knows the tithi column can predict
+/// the phase column.
+pub const PHASES_HINDU: [&str; 8] = [
+    "Amavasya",
+    "Shukla Chaturthi",
+    "Shukla Ashtami",
+    "Shukla Ekadashi",
+    "Purnima",
+    "Krishna Panchami",
+    "Krishna Ashtami",
+    "Krishna Ekadashi",
+];
+
+/// The western astronomical names for the same eight sectors.
+pub const PHASES_WESTERN: [&str; 8] = [
+    "New Moon",
+    "Waxing Crescent",
+    "First Quarter",
+    "Waxing Gibbous",
+    "Full Moon",
+    "Waning Gibbous",
+    "Last Quarter",
+    "Waning Crescent",
+];
+
 /// Karanas: seven repeating plus four fixed. Index 0 of a lunar month is
 /// always Kimstughna, then the seven repeat, and the month closes with
 /// Shakuni, Chatushpada and Naga.
@@ -1094,12 +1125,28 @@ impl Panchang {
        _self_place(jd, lat, lon, utc_offset)
     }
 
-        pub fn phase_name(&self) -> &'static str {
-        const PHASES: [&str; 8] = [
-            "New Moon", "Waxing Crescent", "First Quarter", "Waxing Gibbous",
-            "Full Moon", "Waning Gibbous", "Last Quarter", "Waning Crescent",
-        ];
-        PHASES[self.phase_index]
+    /// The moon's phase, named the way an Indian almanac names it.
+    ///
+    /// The western eight-name scheme (new moon, waxing crescent, ...) is
+    /// descriptive but foreign: it describes the *shape* and gives no way to
+    /// say which tithi the moon is in. The traditional names name the tithi
+    /// that dominates each 45-degree sector of the cycle, which is why they
+    /// are in the same vocabulary as every other row in the panchangam —
+    /// `Amavasya` and `Purnima` are literally the fifteenth tithis.
+    ///
+    /// Romanised rather than in Telugu or Devanagari, because the panel is
+    /// read alongside English labels and mixing scripts in one row makes the
+    /// value column hard to scan.
+    pub fn phase_name(&self) -> &'static str {
+        PHASES_HINDU[self.phase_index % 8]
+    }
+
+    /// The same phase under its western astronomical name.
+    ///
+    /// Kept because it is the term anyone searching a calendar outside India
+    /// will recognise, so the CLI can print both.
+    pub fn phase_name_western(&self) -> &'static str {
+        PHASES_WESTERN[self.phase_index % 8]
     }
 
     pub fn paksha(&self) -> &'static str {

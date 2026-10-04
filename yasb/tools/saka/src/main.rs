@@ -80,9 +80,10 @@ fn render_panel(p: &saka::Panchang, s: Script) -> String {
     ));
     o.push_str(&format!("Vara       {vara:<22}\n"));
     o.push_str(&format!(
-        "Moon       {:<22} {:>3.0}% illuminated\n",
+        "Moon       {:<22} {:>3.0}% illuminated ({})\n",
         p.phase_name(),
-        p.illum * 100.0
+        p.illum * 100.0,
+        p.phase_name_western()
     ));
     o.push_str(&rule);
     o.push('\n');

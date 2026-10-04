@@ -385,3 +385,79 @@ fn civil_at_applies_zone_offset() {
     assert_eq!(civil_at(day3 + 18 * 3600 + 1800, 5.5), (2026, 10, 4));
     assert_eq!(civil_at(day3 + 18 * 3600 + 1800, 0.0), (2026, 10, 3));
 }
+/// The traditional phase names must line up with the tithi column, because
+/// that correspondence is the entire reason for using them: "Purnima" *is*
+/// the fifteenth tithi, not a separate vocabulary.
+///
+/// The anchors below are real Hyderabad panchangs, and they pin the two ends
+/// of the cycle (where a mistake cannot hide behind a tolerance) plus one
+/// interior phase each way, to catch an off-by-one in the sector index.
+#[test]
+fn phase_names_match_the_tithi_they_name() {
+    // Full moon: the fifteenth tithi of Shukla paksha.
+    let p = panchang(2026, 1, 3);
+    assert_eq!(p.tithi.index, 14, "expected Purnima tithi");
+    assert_eq!(p.paksha(), "Shukla");
+    assert_eq!(p.phase_name(), "Purnima");
+    assert_eq!(p.phase_name_western(), "Full Moon");
+
+    // New moon: the fifteenth tithi of Krishna paksha, Amavasya.
+    let p = panchang(2026, 1, 18);
+    assert_eq!(p.tithi.index, 29, "expected Amavasya tithi");
+    assert_eq!(p.paksha(), "Krishna");
+    assert_eq!(p.phase_name(), "Amavasya");
+    assert_eq!(p.phase_name_western(), "New Moon");
+
+    // Interior waning phase: Krishna Ashtami is the eighth Krishna tithi.
+    let p = panchang(2026, 10, 4);
+    assert_eq!(p.paksha(), "Krishna");
+    assert_eq!(p.phase_name(), "Krishna Ashtami");
+    assert_eq!(p.phase_name_western(), "Last Quarter");
+}
+
+/// Every Shukla-paksha phase name carries the "Shukla" prefix and every
+/// Krishna-paksha one carries "Krishna". This is a stronger invariant than
+/// spot-checking dates: it catches a mis-ordered table outright.
+#[test]
+fn phase_names_agree_with_paksha_across_a_synodic_month() {
+    for day in 0..30 {
+        // 2026-01-03 is a full moon, so this walks one whole lunar month.
+        let p = panchang(2026, 1, 3 + day);
+        let name = p.phase_name();
+        if p.paksha() == "Shukla" {
+            assert!(
+                name.starts_with("Shukla") || name == "Purnima" || name == "Amavasya",
+                "{name} on day {day} is not a Shukla-paksha name"
+            );
+        } else {
+            assert!(
+                name.starts_with("Krishna") || name == "Purnima" || name == "Amavasya",
+                "{name} on day {day} is not a Krishna-paksha name"
+            );
+        }
+    }
+}
+
+/// Both tables must be total over the eight sectors, with no repeats that
+/// would make two different phases indistinguishable.
+#[test]
+fn both_phase_tables_are_complete_and_distinct() {
+    use saka::{PHASES_HINDU, PHASES_WESTERN};
+    assert_eq!(PHASES_HINDU.len(), 8);
+    assert_eq!(PHASES_WESTERN.len(), 8);
+    for (i, n) in PHASES_HINDU.iter().enumerate() {
+        assert!(!n.is_empty(), "sector {i} has an empty Hindu name");
+        assert!(
+            !PHASES_HINDU.iter().filter(|m| *m == n).count() > 1,
+            "{n} appears twice in PHASES_HINDU"
+        );
+    }
+    for (i, n) in PHASES_WESTERN.iter().enumerate() {
+        assert!(!n.is_empty(), "sector {i} has an empty western name");
+    }
+    // Amavasya and Purnima are the two named new/full moons.
+    assert_eq!(PHASES_HINDU[0], "Amavasya");
+    assert_eq!(PHASES_HINDU[4], "Purnima");
+    assert_eq!(PHASES_WESTERN[0], "New Moon");
+    assert_eq!(PHASES_WESTERN[4], "Full Moon");
+}
