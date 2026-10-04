@@ -399,6 +399,31 @@ unsafe fn tracked_text(dc: HDC, text: &str, x: i32, y: i32, tracking: i32) -> i3
     cx - x
 }
 
+/// Width [`tracked_text`] would draw, without drawing it.
+///
+/// The weekday scrim has to be sized around its label, and the label is drawn
+/// with the manual tracking above — which `DrawTextW`'s `DT_CALCRECT` does not
+/// model, because the tracking is applied here rather than in GDI. Measuring
+/// glyph by glyph the same way is the only way to get a pill that is neither
+/// clipping the text nor trailing empty space behind it.
+///
+/// Requires `font` to already be selected into `dc`.
+unsafe fn measure_tracked(dc: HDC, text: &str, tracking: i32) -> i32 {
+    let mut total = 0i32;
+    let mut buf: Vec<u16> = Vec::with_capacity(2);
+    let mut units = [0u16; 2];
+    for ch in text.chars() {
+        buf.clear();
+        buf.extend_from_slice(ch.encode_utf16(&mut units[..]));
+        let mut sz = SIZE { cx: 0, cy: 0 };
+        let _ = GetTextExtentPoint32W(dc, &buf, &mut sz);
+        total += sz.cx + tracking;
+    }
+    // `tracked_text` adds `tracking` after the final glyph too, so the
+    // trailing one is not part of the visible width.
+    (total - tracking).max(0)
+}
+
 /// Paint the whole panel: shapes into the DIB, then text through GDI on top.
 ///
 /// Two passes because GDI's text rendering needs the font selected into the DC,
@@ -420,9 +445,26 @@ unsafe fn paint(hwnd: HWND) {
     let t = &app.theme;
     let rows = app.rows();
     let l = app.layout();
+    // Hoisted out of both passes: the shape pass sizes the scrim around this
+    // string and the text pass draws it.
+    let weekday = app.script.vara(app.panchangam.vara).to_uppercase();
 
     // ---- shape pass ------------------------------------------------------
     {
+        // Measured before the canvas is taken: `dib.canvas()` borrows the DIB
+        // mutably for the whole block, so the DC needed to size the text has
+        // to be borrowed first and released.
+        let weekday_w = {
+            let dc = dib.dc();
+            let fam = if app.script == Script::Telugu { INDIC_FAMILY } else { TEXT_FAMILY };
+            let f = font(-11, 600, fam);
+            let saved = SelectObject(dc, HGDIOBJ(f.0));
+            let width = measure_tracked(dc, &weekday, 2);
+            SelectObject(dc, saved);
+            let _ = DeleteObject(HGDIOBJ(f.0));
+            width
+        };
+
         let mut c = dib.canvas();
         // Base fill. The theme's own translucency is deliberately ignored here:
         // the acrylic comes from the backdrop snapshot blended on top of this,
@@ -445,6 +487,19 @@ unsafe fn paint(hwnd: HWND) {
         c.round_rect_border(1, 1, w - 1, h - 1, RADIUS, 1, t.border);
         c.round_rect_border(1, 1, w - 1, 14, RADIUS, 1, t.highlight);
         c.hline(PAD, w - PAD, l.rule_y, t.hairline);
+
+        // The weekday's scrim, drawn before the moon so the glyph's halo can
+        // still bleed over it if the two ever approach.
+        //
+        // This is the only opaque surface in the panel. The weekday label is
+        // the only place the accent touches type, and the accent is chosen to
+        // sit near the theme's own mid-tone — so on a wallpaper brighter than
+        // the theme it loses contrast, and at 85% acrylic the wallpaper is
+        // most of what is behind it. `t.scrim` is derived away from the
+        // accent's luminance (see `Theme::from_vars`) so the pair holds at
+        // both ends of the range without recolouring any theme.
+        let (sx0, sy0, sx1, sy1) = l.weekday_pill(weekday_w);
+        c.round_rect(sx0, sy0, sx1, sy1, layout::SCRIM_R, t.scrim);
 
         // Moon disc: a dim body, the lit limb, and a soft halo. It rides at the
         // right of the header, level with the date. No caption: the phase name
@@ -525,10 +580,9 @@ unsafe fn paint(hwnd: HWND) {
         SetBkMode(dc, TRANSPARENT);
 
         // Weekday, small, tracked, in the accent — the one place the accent
-        // touches type.
+        // touches type. It sits on the opaque scrim drawn in the shape pass.
         SelectObject(dc, HGDIOBJ(label.0));
         SetTextColor(dc, colorref(t.accent));
-        let weekday = app.script.vara(app.panchangam.vara).to_uppercase();
         tracked_text(dc, &weekday, PAD, l.weekday_y, 2);
 
         // The date, large. This line carries the panel's whole hierarchy.
