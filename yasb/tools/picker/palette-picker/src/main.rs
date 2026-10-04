@@ -458,7 +458,21 @@ fn main() {
     }
 
     APP.with(|c| *c.borrow_mut() = Some(app));
-    unsafe { run() }
+    // One picker, ever. The bar fires this on every click of the palette
+    // chip, so without the guard a triple click stacks three windows and each
+    // of them repaints over the others at 1 Hz. A duplicate launch raises the
+    // panel that is already open and exits, so a second click brings it back
+    // to you instead of doing nothing.
+    match yasb_chrome::acquire("Local\\yasb-palette-picker") {
+        Ok(None) => {
+            yasb_chrome::raise_window_of_class("PalettePickerClass");
+            return;
+        }
+        // If the guard itself fails, still open: a second window is a smaller
+        // problem than a picker that refuses to appear.
+        Err(e) => eprintln!("palette-picker: single-instance guard unavailable: {e}"),
+        Ok(Some(_instance)) => unsafe { run() },
+    }
 }
 
 /// Headless self-test: exercises catalog, filter, layout and the pick
