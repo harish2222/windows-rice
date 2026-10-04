@@ -155,11 +155,42 @@ impl Backdrop {
         })
     }
 
+    /// A blurred copy of this snapshot: three box passes, which lands close
+    /// enough to a gaussian to be indistinguishable through a light tint.
+    ///
+    /// This is what makes a strongly transparent panel survivable. Real
+    /// acrylic is only 15-20% opaque *and* heavily blurred, so what comes
+    /// through is a wash of the wallpaper's colour rather than its detail.
+    /// Blending an unblurred snapshot at the same strength puts crisp icons
+    /// and window edges directly behind body text, and no amount of
+    /// material tuning rescues readability after that.
+    ///
+    /// Edges clamp rather than wrap, so a panel near the screen edge does
+    /// not pick up the far side of the desktop.
+    pub fn blurred(&self, radius: i32) -> Backdrop {
+        if radius <= 0 {
+            return Backdrop { pixels: self.pixels.clone(), w: self.w, h: self.h };
+        }
+        let (w, h) = (self.w as usize, self.h as usize);
+        if w == 0 || h == 0 {
+            return Backdrop { pixels: self.pixels.clone(), w: self.w, h: self.h };
+        }
+        let r = radius as usize;
+        let mut a = self.pixels.clone();
+        let mut b = vec![0u8; a.len()];
+        for _ in 0..3 {
+            box_blur_h(&a, &mut b, w, h, r);
+            box_blur_v(&b, &mut a, w, h, r);
+        }
+        Backdrop { pixels: a, w: self.w, h: self.h }
+    }
+
     /// Blend this snapshot into `canvas` at `(x, y)`, clipped to it.
     ///
     /// `opacity` is how much of the desktop shows through: 0.0 replaces it
-    /// entirely, 1.0 leaves it untouched. The panels sit around 0.55-0.7,
-    /// which is roughly what a real acrylic material does.
+    /// entirely, 1.0 leaves it untouched. The panels sit high, around 0.85,
+    /// which is the acrylic look — but only because they blend a
+    /// [`Backdrop::blurred`] copy, not the raw capture.
     pub fn draw_under(&self, canvas: &mut Canvas, x: i32, y: i32, opacity: f32) {
         let k = opacity.clamp(0.0, 1.0);
         if k <= 0.0 {
@@ -187,6 +218,65 @@ impl Backdrop {
                     let s = self.pixels[so + ch] as f32;
                     canvas.px[dofs + ch] = (d + (s - d) * k + 0.5).clamp(0.0, 255.0) as u8;
                 }
+            }
+        }
+    }
+}
+
+/// One horizontal box-blur pass, `src` into `dst`.
+///
+/// Uses per-row prefix sums rather than a sliding window: at these sizes the
+/// extra memory traffic is irrelevant and the prefix form has no edge case
+/// where the running sum drifts out of sync with the window bounds.
+fn box_blur_h(src: &[u8], dst: &mut [u8], w: usize, h: usize, r: usize) {
+    let mut pre = vec![0u32; (w + 1) * 4];
+    for y in 0..h {
+        for ch in 0..4 {
+            pre[ch] = 0;
+        }
+        for x in 0..w {
+            let so = (y * w + x) * 4;
+            for ch in 0..4 {
+                pre[(x + 1) * 4 + ch] = pre[x * 4 + ch] + src[so + ch] as u32;
+            }
+        }
+        for x in 0..w {
+            let lo = x.saturating_sub(r);
+            let hi = (x + r).min(w - 1);
+            // Round-half-up: without the +n/2 every box average truncates
+            // down and a large flat region very slowly loses value.
+            let n = (hi - lo + 1) as u32;
+            let dofs = (y * w + x) * 4;
+            for ch in 0..4 {
+                let sum = pre[(hi + 1) * 4 + ch] - pre[lo * 4 + ch];
+                dst[dofs + ch] = ((sum + n / 2) / n) as u8;
+            }
+        }
+    }
+}
+
+/// One vertical box-blur pass, `src` into `dst`. The transpose of
+/// [`box_blur_h`], and correct for `src != dst`.
+fn box_blur_v(src: &[u8], dst: &mut [u8], w: usize, h: usize, r: usize) {
+    let mut pre = vec![0u32; (h + 1) * 4];
+    for x in 0..w {
+        for ch in 0..4 {
+            pre[ch] = 0;
+        }
+        for y in 0..h {
+            let so = (y * w + x) * 4;
+            for ch in 0..4 {
+                pre[(y + 1) * 4 + ch] = pre[y * 4 + ch] + src[so + ch] as u32;
+            }
+        }
+        for y in 0..h {
+            let lo = y.saturating_sub(r);
+            let hi = (y + r).min(h - 1);
+            let n = (hi - lo + 1) as u32;
+            let dofs = (y * w + x) * 4;
+            for ch in 0..4 {
+                let sum = pre[(hi + 1) * 4 + ch] - pre[lo * 4 + ch];
+                dst[dofs + ch] = ((sum + n / 2) / n) as u8;
             }
         }
     }
@@ -317,5 +407,162 @@ mod tests {
         let bd = Backdrop { pixels: vec![0u8; 2 * 2 * 4], w: 2, h: 2 };
         bd.draw_under(&mut c, 50, 50, 1.0);
         assert_eq!(px, before);
+    }
+
+    /// A checkerboard with `radius <= 0` must come back untouched — callers
+    /// rely on radius 0 meaning "no blur", not "blur by an accident of
+    /// clamping".
+    #[test]
+    fn zero_radius_is_the_identity() {
+        let bd = checkerboard(8, 8);
+        let out = bd.blurred(0);
+        assert_eq!(out.pixels, bd.pixels);
+        assert_eq!((out.w, out.h), (8, 8));
+    }
+
+    /// A flat image has no detail to smear, so any correct blur is a no-op
+    /// on it. This is the cheap guard against a prefix-sum bug that darkens
+    /// or lightens the wallpaper.
+    #[test]
+    fn flat_image_survives_the_blur_unchanged() {
+        let bd = Backdrop { pixels: vec![137u8; 16 * 16 * 4], w: 16, h: 16 };
+        let out = bd.blurred(4);
+        assert!(
+            out.pixels.chunks(4).all(|p| p[0] == 137 && p[1] == 137 && p[2] == 137),
+            "a flat backdrop must not gain or lose value"
+        );
+    }
+
+    /// The point of the whole exercise: high-frequency detail has to actually
+    /// go away, or a 0.85 acrylic tint puts crisp window edges behind body
+    /// text.
+    #[test]
+    fn blur_spreads_an_impulse_and_preserves_the_mean() {
+        let (w, h) = (21usize, 21usize);
+        let mut px = vec![0u8; w * h * 4];
+        // One white pixel in the middle of black.
+        px[(10 * w + 10) * 4] = 255;
+        px[(10 * w + 10) * 4 + 1] = 255;
+        px[(10 * w + 10) * 4 + 2] = 255;
+        let bd = Backdrop { pixels: px, w: w as i32, h: h as i32 };
+        let out = bd.blurred(3);
+
+        let centre = (out.pixels[(10 * w + 10) * 4] as u32);
+        assert!(centre > 0, "the impulse was erased instead of spread");
+        assert!(centre < 255, "the impulse was not spread at all");
+
+        // Energy has to land on the neighbours, and it must be somewhere
+        // near the centre — a blur that leaked to a corner would be wrapping
+        // or indexing wrong.
+        let left = out.pixels[(10 * w + 8) * 4] as u32;
+        assert!(left > 0, "no blur energy reached the neighbouring column");
+
+        let sum: u32 = out.pixels.chunks(4).map(|p| p[0] as u32).sum();
+        // Energy is conserved in exact arithmetic, but every one of the six
+        // passes rounds a mean back down into a u8, so a little is lost. A
+        // real leak would show up as a factor, not as a few percent.
+        assert!(
+            (230..=281).contains(&sum),
+            "blur lost or invented energy: {sum} vs 255"
+        );
+    }
+
+    /// A checkerboard's peak-to-trough range has to shrink measurably. Any
+    /// correct blur does this; this catches a blur that only runs on one
+    /// axis, which is the easy way to get it wrong.
+    #[test]
+    fn blur_attenuates_a_checkerboard_in_both_axes() {
+        let bd = checkerboard(32, 32);
+        let out = bd.blurred(2);
+        let span = |px: &[u8]| {
+            let mut lo = 255u8;
+            let mut hi = 0u8;
+            for p in px.chunks(4) {
+                lo = lo.min(p[0]);
+                hi = hi.max(p[0]);
+            }
+            (hi - lo) as u32
+        };
+        let before = span(&bd.pixels);
+        let after = span(&out.pixels);
+        assert!(before > 200, "test input is not a checkerboard: {before}");
+        assert!(
+            after * 4 < before * 3,
+            "checkerboard range barely moved: {before} -> {after}"
+        );
+    }
+
+    /// Edges must clamp, not wrap. Wrapping is the classic separable-blur
+    /// bug and it is invisible on a uniform desktop but very visible on a
+    /// real one: a panel near the screen edge would blend in whatever is on
+    /// the opposite edge of the display.
+    ///
+    /// The test is direct rather than statistical — perturb the far border
+    /// and require the near border's output to be bit-identical.
+    #[test]
+    fn blur_clamps_at_the_edges_instead_of_wrapping() {
+        let (w, h) = (48usize, 48usize);
+        let a = checkerboard(w, h);
+        let mut b_px = a.pixels.clone();
+        // Repaint the last row and the last column white. Wrapping would drag
+        // this into the first row and the first column.
+        for x in 0..w {
+            for ch in 0..3 {
+                b_px[((h - 1) * w + x) * 4 + ch] = 255;
+            }
+        }
+        for y in 0..h {
+            for ch in 0..3 {
+                b_px[(y * w + (w - 1)) * 4 + ch] = 255;
+            }
+        }
+        let b = Backdrop { pixels: b_px, w: w as i32, h: h as i32 };
+        let radius = 3;
+        let (oa, ob) = (a.blurred(radius), b.blurred(radius));
+        // Three box passes of radius 3 add up, so a sample influences
+        // everything within 3*3 = 9 pixels. The perturbed border sits at
+        // index n-1 and reaches down to n-1-9, so the last index that is
+        // still provably untouched is n-10 — hence the `- 1` on the range
+        // end as well as the inset.
+        const PASSES: usize = 3;
+        let inset = radius as usize * PASSES;
+        for y in inset..h - inset - 1 {
+            for x in inset..w - inset - 1 {
+                let o = (y * w + x) * 4;
+                assert_eq!(
+                    oa.pixels[o..o + 3],
+                    ob.pixels[o..o + 3],
+                    "pixel ({x}, {y}) saw the far border — the blur wrapped"
+                );
+            }
+        }
+        // And the near border must be clamped, not left sharp: the first row
+        // cannot still be alternating.
+        let first_row: Vec<u8> = (0..w).map(|x| oa.pixels[x * 4]).collect();
+        let spread = first_row.iter().copied().max().unwrap() as i32
+            - first_row.iter().copied().min().unwrap() as i32;
+        assert!(spread < 100, "first row is still sharp: range {spread}");
+        // Clamping smears the border inwards; it must not have darkened it
+        // into a shadow the panel would then show as a hard rim.
+        let first_row_mean =
+            first_row.iter().map(|&v| v as i32).sum::<i32>() / w as i32;
+        assert!(
+            (100..=156).contains(&first_row_mean),
+            "first row mean drifted off the checkerboard's 127: {first_row_mean}"
+        );
+    }
+
+    fn checkerboard(w: usize, h: usize) -> Backdrop {
+        let mut px = vec![0u8; w * h * 4];
+        for y in 0..h {
+            for x in 0..w {
+                let v = if (x + y) % 2 == 0 { 255u8 } else { 0u8 };
+                let o = (y * w + x) * 4;
+                px[o] = v;
+                px[o + 1] = v;
+                px[o + 2] = v;
+            }
+        }
+        Backdrop { pixels: px, w: w as i32, h: h as i32 }
     }
 }

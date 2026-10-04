@@ -32,8 +32,17 @@ pub struct Theme {
     pub accent: Rgba,
 
     // --- derived material (see saka-popup's theme.rs for the rationale) ----
-    /// How much of the captured desktop shows through.
+    /// How much of the captured desktop shows through the panel.
+    ///
+    /// This is acrylic's defining number and it is *high*: the material is
+    /// only 15% opaque, so 85% of the blurred wallpaper is what you see.
     pub backdrop_opacity: f32,
+    /// Box-blur radius applied to the backdrop before it is blended.
+    ///
+    /// Acrylic is low-opacity *and* high-blur. Without the blur, 0.85 here
+    /// would drop crisp icons and window edges straight behind the grid and
+    /// no amount of material tuning would rescue readability after that.
+    pub backdrop_blur: u32,
     /// Top and bottom of the panel's light gradient.
     pub sheen_top: Rgba,
     pub sheen_bottom: Rgba,
@@ -92,22 +101,31 @@ impl Theme {
             subtext: col(&["--subtext", "--text-muted"], Rgba::rgb(166, 173, 200)),
             accent: col(&["--accent", "--mauve"], Rgba::rgb(180, 190, 254)),
 
-            backdrop_opacity: 0.62,
+            backdrop_opacity: 0.85,
+            backdrop_blur: 12,
             // Lit from above, unconditionally, so the gradient does not invert
-            // on a light theme.
-            sheen_top: Rgba { a: 30, ..lighten(bg, 0.55) },
-            sheen_bottom: Rgba { a: 46, ..darken(bg, 0.45) },
+            // on a light theme. The alphas run higher than an opaque panel
+            // would need: most of what is behind this window is now wallpaper,
+            // and the gradient is the only wash standing between the grid and
+            // a bright desktop.
+            sheen_top: Rgba { a: 46, ..lighten(bg, 0.55) },
+            sheen_bottom: Rgba { a: 70, ..darken(bg, 0.45) },
             bloom: 0.10,
             highlight: Rgba { a: 38, ..lighten(text, 0.25) },
             hairline: Rgba { a: 150, ..border },
             // Unselected cells are a faint lift so the grid reads as a set of
             // tiles; the selected one is a stronger lift plus an accent ring,
-            // so selection survives a glance.
-            cell: Rgba { a: 90, ..lighten(bg, 0.07) },
-            cell_selected: Rgba { a: 170, ..lighten(bg, 0.16) },
+            // so selection survives a glance. Both are heavier than an opaque
+            // panel would want: at 85% bleed the cell is what the name text
+            // actually sits on, so it has to deliver the contrast the panel
+            // used to.
+            cell: Rgba { a: 175, ..lighten(bg, 0.07) },
+            cell_selected: Rgba { a: 215, ..lighten(bg, 0.16) },
             // The search field is inset, so it is *below* the panel rather than
-            // above it — the opposite direction to the raised cells.
-            field: Rgba { a: 150, ..darken(bg, 0.22) },
+            // above it — the opposite direction to the raised cells. It also
+            // carries the query text, which is the one string in this window
+            // the user is guaranteed to read.
+            field: Rgba { a: 200, ..darken(bg, 0.22) },
             // Without this, a near-white swatch on a light theme is a
             // featureless white rectangle on a near-white cell.
             swatch_edge: Rgba { a: 90, ..darken(bg, 0.35) },
@@ -194,6 +212,19 @@ mod tests {
             ] {
                 assert!(c.a > 0 && c.a < 255, "{name} on {bg} has alpha {}", c.a);
             }
+            // The acrylic value is not a free parameter: it is the material's
+            // 15% opacity stated the other way round. Pin it, so a future
+            // "let's calm it down" edit cannot quietly turn the glass back
+            // into a sheet of plastic.
+            assert_eq!(t.backdrop_opacity, 0.85, "backdrop opacity drifted on {bg}");
+            // ...and the blur is what makes that number survivable. A radius
+            // of zero would pass an opacity check and still be unreadable over
+            // a busy desktop.
+            assert!(
+                t.backdrop_blur >= 8,
+                "backdrop blur {} on {bg} is too small to read as acrylic",
+                t.backdrop_blur
+            );
         }
     }
 
@@ -219,5 +250,71 @@ mod tests {
                 (hi + 0.05) / (lo + 0.05)
             );
         }
+    }
+
+    /// Acrylic is 15% opaque, so 85% of whatever is on the desktop ends up
+    /// behind this panel. `names_stay_readable_on_cells` measures against
+    /// `t.bg`, which is no longer the surface the names sit on: it is the
+    /// cell, which is the cell, which is on a wash of the wallpaper.
+    ///
+    /// So this replays `main.rs::paint`'s chain in order — theme fill,
+    /// wallpaper, sheen, cell — and measures what actually ends up under the
+    /// text, across both ends of the wallpaper range. One hostile wallpaper
+    /// is not enough: a dark theme loses its text to a bright wallpaper and a
+    /// light theme loses its text to a dark one, so checking only one of them
+    /// would declare victory while the other was unreadable.
+    #[test]
+    fn the_grid_stays_legible_across_the_whole_wallpaper_range() {
+        let cases: [(&str, &str, &str, &str); 2] = [
+            ("Rangalipi", "#14141B", "#E7E0D2", "#B8B2A7"),
+            ("Rangalipi Matcha Light", "#E7E0D2", "#1A1816", "#45423C"),
+        ];
+        for (name, bg, text, subtext) in cases {
+            let t = Theme::from_vars(&[
+                ("--background".into(), bg.into()),
+                ("--text".into(), text.into()),
+                ("--subtext".into(), subtext.into()),
+            ]);
+            for wall in [Rgba::rgb(0, 0, 0), Rgba::rgb(255, 255, 255)] {
+                let where_ = format!("{:?} wallpaper", (wall.r, wall.g, wall.b));
+                // Unselected cell, at the darker end of the gradient.
+                let cell = t.cell.over(panel_over(&t, wall, false));
+                let name_ratio = ratio(t.text, cell);
+                let sub_ratio = ratio(t.subtext, cell);
+                assert!(
+                    name_ratio >= 4.5,
+                    "{name}: theme name is {name_ratio:.1}:1 over a {where_}"
+                );
+                assert!(
+                    sub_ratio >= 3.0,
+                    "{name}: subtitle is {sub_ratio:.1}:1 over a {where_}"
+                );
+                // The query in the search field, at the top of the panel.
+                let field = t.field.over(panel_over(&t, wall, true));
+                let query_ratio = ratio(t.text, field);
+                assert!(
+                    query_ratio >= 4.5,
+                    "{name}: search query is {query_ratio:.1}:1 over a {where_}"
+                );
+            }
+        }
+    }
+
+    /// Replay `main.rs::paint`'s base chain — theme fill, the backdrop pull,
+    /// then one end of the vertical gradient — and return what lands there.
+    fn panel_over(t: &Theme, wall: Rgba, header: bool) -> Rgba {
+        let mut c = t.bg.over(Rgba::rgb(20, 20, 28));
+        let k = t.backdrop_opacity;
+        let pull = |from: u8, to: u8| (from as f32 + (to as f32 - from as f32) * k + 0.5) as u8;
+        c = Rgba { r: pull(c.r, wall.r), g: pull(c.g, wall.g), b: pull(c.b, wall.b), a: 255 };
+        if header { t.sheen_top.over(c) } else { t.sheen_bottom.over(c) }
+    }
+
+    fn ratio(a: Rgba, b: Rgba) -> f32 {
+        let (hi, lo) = {
+            let (x, y) = (luma(a), luma(b));
+            if x > y { (x, y) } else { (y, x) }
+        };
+        (hi + 0.05) / (lo + 0.05)
     }
 }

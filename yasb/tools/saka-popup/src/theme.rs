@@ -64,7 +64,18 @@ pub struct Theme {
 
     // --- derived material -------------------------------------------------
     /// How much of the captured desktop shows through the panel.
+    ///
+    /// This is acrylic's defining number and it is *high*: the material is
+    /// only 15% opaque, so 85% of the blurred wallpaper is what you see.
     pub backdrop_opacity: f32,
+    /// Box-blur radius applied to the backdrop before it is blended.
+    ///
+    /// Acrylic is low-opacity *and* high-blur. Without the blur, 0.85 here
+    /// would drop crisp icons and window edges straight behind the body
+    /// text and nothing else about the material could rescue it. This is a
+    /// material token rather than a constant in the paint path so the two
+    /// panels can be tuned independently.
+    pub backdrop_blur: u32,
     /// Top and bottom of the panel's vertical light gradient.
     pub sheen_top: Rgba,
     pub sheen_bottom: Rgba,
@@ -104,11 +115,6 @@ fn linearize(v: u8) -> f32 {
 }
 
 /// WCAG relative luminance, 0.0 (black) to 1.0 (white).
-///
-/// Only the tests need this, which is deliberate: the derived tokens above are
-/// unconditional light/dark rather than contrast-adaptive, so nothing in the
-/// paint path branches on luminance. These assertions exist to prove that
-/// unconditional choice is right for both light and dark themes.
 #[cfg(test)]
 fn luma(c: Rgba) -> f32 {
     0.2126 * linearize(c.r) + 0.7152 * linearize(c.g) + 0.0722 * linearize(c.b)
@@ -167,9 +173,12 @@ impl Theme {
         let track = col(&["--background2"], Rgba::rgb(49, 50, 68));
 
         // Directional terms: brighten the top, darken the bottom. This is
-        // deliberately not contrast-dependent.
-        let sheen_top = Rgba { a: 30, ..lighten(bg, 0.55) };
-        let sheen_bottom = Rgba { a: 46, ..darken(bg, 0.45) };
+        // deliberately not contrast-dependent. The alphas are higher than a
+        // solid panel would need because most of what is behind this window
+        // is now wallpaper: the gradient is the only wash standing between
+        // the header text and a bright icon.
+        let sheen_top = Rgba { a: 46, ..lighten(bg, 0.55) };
+        let sheen_bottom = Rgba { a: 70, ..darken(bg, 0.45) };
 
         Theme {
             bg,
@@ -180,10 +189,13 @@ impl Theme {
             accent,
             track,
 
-            // Acrylic shows a lot of wallpaper: Big Sur's material sits around
-            // 60-70% opaque. Much less and body text over a bright wallpaper
-            // stops being readable.
-            backdrop_opacity: 0.62,
+            // Acrylic is a 15%-opaque material: the panel should read as a
+            // pane of glass with the desktop behind it, not as a dark sheet
+            // laid over the desktop. The blur below is what makes that
+            // legible; the card underneath the rows is the second half of the
+            // bargain.
+            backdrop_opacity: 0.85,
+            backdrop_blur: 12,
             sheen_top,
             sheen_bottom,
             // The bloom is the accent at low alpha, so a light theme with a
@@ -194,7 +206,10 @@ impl Theme {
             // A raised card is lighter than the panel on both light and dark
             // themes — that is how macOS does it — and the hairline supplies
             // the edge where the two are too close in luminance to separate.
-            card: Rgba { a: 130, ..lighten(bg, 0.09) },
+            // Heavier than it would be on an opaque panel: at 85% bleed this
+            // card is what the body text actually sits on, so it has to
+            // deliver the contrast the panel used to.
+            card: Rgba { a: 175, ..lighten(bg, 0.09) },
             // The unlit limb is dim, not black: the moon's dark side catches
             // earthshine, and a pure black disc reads as a hole in the panel.
             moon_dim: lighten(bg, 0.16),
@@ -345,16 +360,36 @@ mod tests {
                 assert!(c.a < 255, "{name} on {bg} is opaque");
                 assert!(c.a > 0, "{name} on {bg} is invisible");
             }
-            // Acrylic must actually show wallpaper.
-            assert!(
-                t.backdrop_opacity > 0.3 && t.backdrop_opacity < 0.85,
-                "backdrop opacity {} on {bg}",
-                t.backdrop_opacity
+            // Acrylic must actually show wallpaper, and the value is not a
+            // free parameter: it is the material's 15% opacity stated the
+            // other way round. Pin it so a future "let's calm it down" edit
+            // cannot quietly turn the glass back into a sheet of plastic.
+            assert_eq!(
+                t.backdrop_opacity, 0.85,
+                "backdrop opacity drifted on {bg}"
             );
+            // ...and the blur is what makes that number survivable. A radius
+            // of zero here would pass an opacity check and still be
+            // unreadable over a busy desktop.
+            assert!(
+                t.backdrop_blur >= 8,
+                "backdrop blur {} on {bg} is too small to read as acrylic",
+                t.backdrop_blur
+            );
+            // The accent as ink is deliberately *not* pinned to a luminance band
+            // here, and there is a reason worth writing down. Any fixed
+            // colour has a luminance at which its contrast against a
+            // background falls to 1:1, and at 85% acrylic the panel's
+            // luminance is the wallpaper's. So there is no value that makes
+            // the weekday label legible over every wallpaper, and clamping
+            // the accent into a band would only move the problem to a
+            // different wallpaper while quietly recolouring all 22 themes.
+            // The label's contrast is measured against the theme's own
+            // background in `text_contrast_survives_the_acrylic_floor`.
         }
     }
 
-    /// Text has to stay legible on the panel it sits on, or letting 62% of
+    /// Text has to stay legible on the panel it sits on, or letting 85% of
     /// the wallpaper through was pointless.
     ///
     /// The colour pairs are copied from the real Rangalipi blocks, not
@@ -403,5 +438,71 @@ mod tests {
                 contrast(t.accent, t.bg)
             );
         }
+    }
+
+    /// The one that matters now that 85% of the wallpaper is showing.
+    ///
+    /// The other contrast test measures theme tokens against `t.bg`, which
+    /// was the surface the text sat on when the panel was opaque. It is not
+    /// any more: at `backdrop_opacity` the text sits on the *card*, which
+    /// sits on a wash of whatever is on the desktop. So this test replays
+    /// `main.rs::paint`'s chain in order — theme fill, wallpaper, sheen,
+    /// card — and measures what actually ends up under the text.
+    ///
+    /// It runs the whole range, not one hostile wallpaper. A panel at 85%
+    /// glass can end up nearly as dark as the theme or nearly as light as
+    /// the desktop, and the two extremes fail for opposite reasons: a dark
+    /// theme loses its text to a bright wallpaper, a light theme loses its
+    /// text to a dark one. Checking only the white wallpaper would have
+    /// declared victory while the black one was unreadable.
+    #[test]
+    fn rows_stay_legible_across_the_whole_wallpaper_range() {
+        let cases: [(&str, &str, &str, &str); 3] = [
+            ("Rangalipi", "#14141B", "#E7E0D2", "#B8B2A7"),
+            ("Rangalipi Ember", "#1A1310", "#F0E4D4", "#C9A37E"),
+            ("Rangalipi Matcha Light", "#E7E0D2", "#1A1816", "#45423C"),
+        ];
+        for (name, bg, text, subtext) in cases {
+            let t = Theme::from_vars(&[
+                ("--acrylic".into(), bg.into()),
+                ("--background".into(), bg.into()),
+                ("--text".into(), text.into()),
+                ("--subtext".into(), subtext.into()),
+                ("--accent".into(), "#D99A2B".into()),
+            ]);
+
+            for wall in [Rgba::rgb(0, 0, 0), Rgba::rgb(255, 255, 255)] {
+                // The rows sit on the card; the card sits on the bottom of
+                // the panel, which is the darker end of the gradient.
+                let card = t.card.over(panel_over(&t, wall, false));
+                let text_ratio = contrast(t.text, card);
+                let subtext_ratio = contrast(t.subtext, card);
+                // WCAG AA for body text.
+                let where_ = format!("{:?} wallpaper", (wall.r, wall.g, wall.b));
+                assert!(
+                    text_ratio >= 4.5,
+                    "{name}: text on the card is {text_ratio:.1}:1 over a {where_}"
+                );
+                assert!(
+                    subtext_ratio >= 3.0,
+                    "{name}: subtext on the card is {subtext_ratio:.1}:1 over a {where_}"
+                );
+            }
+        }
+    }
+
+    /// Replay `main.rs::paint`'s base chain — theme fill, then the backdrop
+    /// pull, then one end of the vertical gradient — and return the colour
+    /// that ends up there.
+    ///
+    /// `header` picks which end of the gradient: true for the top, where the
+    /// weekday label lives, false for the bottom, which is the darker end
+    /// and so the fair case for the card.
+    fn panel_over(t: &Theme, wall: Rgba, header: bool) -> Rgba {
+        let mut c = t.bg.over(Rgba::rgb(20, 20, 28));
+        let k = t.backdrop_opacity;
+        let pull = |from: u8, to: u8| (from as f32 + (to as f32 - from as f32) * k + 0.5) as u8;
+        c = Rgba { r: pull(c.r, wall.r), g: pull(c.g, wall.g), b: pull(c.b, wall.b), a: 255 };
+        if header { t.sheen_top.over(c) } else { t.sheen_bottom.over(c) }
     }
 }
