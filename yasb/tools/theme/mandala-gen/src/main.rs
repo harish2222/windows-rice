@@ -62,6 +62,28 @@ const MIN_PATTERN_DISTANCE: u32 = 10;
 #[cfg(test)]
 const MAX_WATERMARK_ALPHA: f64 = 0.50;
 
+/// Global opacity of the whole motif, applied to every layer at [`prepare`]
+/// time.
+///
+/// This is the knob the request "decrease the opacity of the mandala art"
+/// needs, and it is deliberately *not* a per-layer edit. The 22 designs in
+/// [`design_for`] declare their own alphas — a bold motif wants a heavy outer
+/// ring, a fine one wants hairlines — so scaling those individually would mean
+/// 22 designs re-tuned to hit one visual target, and they would drift apart
+/// again the next time any design was touched. One multiplier moves all of them
+/// together and leaves the relative weighting intact.
+///
+/// The PNG's alpha is the *only* thing keeping the motif off the text: the
+/// control-center panel paints `var(--acrylic)`, which the Rangalipi blocks
+/// declare at 1%, so there is effectively no panel fill to hide behind. Which
+/// is why this has to be baked into the image rather than left to CSS — Qt
+/// draws `background-image` at full strength.
+///
+/// 0.62 keeps every layer proportional while pulling the motif clearly back
+/// under the labels. Regenerate with `mandala-gen generate` after changing it;
+/// editing the constant alone changes nothing on screen.
+const WATERMARK_GAIN: f64 = 0.62;
+
 // ---------------------------------------------------------------------------
 // Palette roles: which styles.css token tints a layer
 // ---------------------------------------------------------------------------
@@ -454,7 +476,7 @@ fn prepare(layer: &Layer, pal: &HashMap<Role, Rgba>) -> Prim {
             )
         }
     };
-    Prim { kind, color: rgb(role), alpha }
+    Prim { kind, color: rgb(role), alpha: alpha * WATERMARK_GAIN }
 }
 
 /// Stroke coverage of one prim at (u, v); `rr`/`th` are the polar forms.
@@ -1269,11 +1291,32 @@ mod tests {
             .collect()
     }
 
+    /// The gain is what actually decides how strong the watermark reads, so a
+    /// silent edit to it would change all 22 motifs with nothing to notice.
+    ///
+    /// It has to stay in `(0, 1]`: at 1.0 the motif is at its authored
+    /// strength, and above that the ceiling test below becomes the only thing
+    /// standing between a stroke and the body text. At 0 the PNGs would be
+    /// fully transparent and the themes would lose the art entirely, which
+    /// `generate` would not report as an error -- it only checks the files are
+    /// distinct.
+    #[test]
+    fn the_watermark_gain_is_a_real_reduction_not_a_no_op() {
+        assert!(
+            WATERMARK_GAIN > 0.0 && WATERMARK_GAIN <= 1.0,
+            "WATERMARK_GAIN is {WATERMARK_GAIN}, outside (0, 1]"
+        );
+    }
+
     /// The control-center panel paints this art over a `--acrylic` that is 1%
     /// opaque, so the PNG's own alpha is the only thing between the motif and
     /// the body text. Nothing here may exceed `MAX_WATERMARK_ALPHA`, or the
     /// brightest stroke lands under the text at a contrast no theme can
     /// recover.
+    ///
+    /// The bound is on the authored alpha, so it holds *before* the gain is
+    /// applied. That is deliberate: it keeps the designs honest as documents of
+    /// their own intent, independently of the global opacity knob.
     #[test]
     fn no_layer_is_opaque_enough_to_fight_the_text() {
         for (name, _stem, layers) in every_theme() {
