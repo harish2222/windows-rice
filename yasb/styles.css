@@ -2904,10 +2904,10 @@ Example: "Windows Media" becomes "windows-media" */
     min-width: 360px;
     border: 3px double var(--border);
     border-radius: var(--border-radius);
-    /* Mandala fills the whole popup rather than sitting in one corner: the
-       full 420px motif, scaled with `cover` and centred, so it reads as a
-       backdrop behind every section instead of a corner decoration. The PNG
-       carries its own low alpha, so it stays a watermark under the text. */
+    /* The motif fills the whole popup rather than sitting in one corner: it
+       is scaled with `cover` and centred, so it reads as a backdrop behind
+       every section instead of a corner decoration. The SVG carries its own
+       0.4 opacity, so it stays a watermark under the text. */
     background-image: var(--motif);
     background-repeat: no-repeat;
     background-position: center;
