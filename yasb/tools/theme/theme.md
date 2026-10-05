@@ -54,67 +54,63 @@ the palette's 10 s `current` poll only ever see a complete stylesheet, so
 a switch can no longer reload a half-written file and drop every theme
 variable.
 
-### `--motif-mandala` must exist in every block
+### `--motif` — the panel artwork
 
-The control-center, home and pomodoro panels paint the full-panel mandala
-via `background-image: var(--motif-mandala)`. Declaring that variable in
-only the *active* block meant the art vanished on every theme switch, so
-**all 22 blocks declare it**, each pointing at its own
-`motif-<stem>-mandala.png`.
+The control-center, media and pomodoro panels paint a motif via
+`background-image: var(--motif)`. Declaring that variable in only the
+*active* block would make the art vanish on every theme switch, so **all 22
+blocks declare it**.
 
-### mandala-gen — one *distinct* design per theme
-
-`mandala-gen/` (Rust) draws the art. It builds each theme's mandala from a
-shared vocabulary of primitives — petals, rays, waves, scallops, lattices,
-spirograph weaves, chevrons, pinwheels — tinted from **that theme's own**
-`styles.css` tokens via `yasb_theme::Stylesheet::theme_vars`, so a palette
-change flows through to its art on the next run.
+Three motifs are drawn at random from the `motif-*.svg` files in the yasb
+folder and dealt out one per theme block, so switching themes changes the
+artwork without every theme looking identical:
 
 ```sh
-cargo run --release --manifest-path tools/theme/mandala-gen/Cargo.toml -- generate
-cargo run --release --manifest-path tools/theme/mandala-gen/Cargo.toml -- check
+C:\Users\haris\.config\yasb\tools\theme\yasb-theme.exe motif
 ```
 
-`generate` rewrites the 22 `url(...)` values (and inserts the declaration in
-a block that lacks one, so adding a theme is just: add the block, run
-`generate`) and redraws all 22 PNGs at 420x420 with 2x2 supersampled
-painter's-over compositing, on a transparent background at low alpha so the
-art reads as a watermark under the panel.
+`yasb-theme motif` discovers the SVGs by globbing `motif-*.svg`, so dropping
+a new file into that folder is enough to make it eligible — there is no
+hard-coded list to update. Only the `--motif:` declaration of each block is
+rewritten, and the match is on the whole key: the key is stripped and the
+value skipped if it continues with a `-`. That guard is not incidental —
+`--motif-mandala:` shared the prefix, so a bare prefix match would have
+rewritten the wrong variable and pointed a panel at art it was never meant
+to draw. `assign_rewrites_motif_but_never_motif_mandala` in `motifs.rs` is
+the test that holds that line.
 
-**The distinctness contract.** An earlier hand-drawn set had only 11 distinct
-images for 22 themes — light/dark halves of a palette shared one file and
-`motif-wine-mandala.png` was byte-identical to the paisley one. So `check`
-asserts more than "the file exists":
+The palette picker runs `motif` after every `set`, so applying a theme also
+rerolls the three motifs.
 
-- 22 regions, each url exactly `motif-<stem>-mandala.png` for its own block,
-- every file present, every pair byte-unique,
-- every pair at least `MIN_PATTERN_DISTANCE` (10) bits apart on a 64-bit
-  **dHash** — byte-uniqueness alone would still pass for two images that
-  differ only in tint.
+**Opacity is baked into the asset, not the stylesheet.** Each `motif-*.svg`
+carries `opacity="0.4"` on its root element. Qt paints `background-image` at
+full strength, so a QSS `opacity` on the panel cannot dim the art — it has to
+be in the file.
 
-`verify-mandala.py` used to be a thin shim over this plus a switcher
-round-trip (activate all 22 in turn, assert the active block's
-`--motif-mandala` is bare, and the file comes back byte-identical). It is
-retired with the rest of the Python; both halves are covered natively now —
-`mandala-gen check` does the art and url invariants, and yasb-theme's
-`set_round_trips_byte_identically` proves the rewrite is byte-preserving.
+### mandala-gen — retired
 
-```sh
-cargo run --release --manifest-path tools/theme/mandala-gen/Cargo.toml -- check
-```
+`mandala-gen/` and its 22 `motif-*-mandala.png` files are **gone**. The
+panels moved to the local SVG motifs above, after which nothing referenced
+either the PNGs or the `--motif-mandala:` declarations that named them, so
+the generator and both were removed rather than left as dead weight.
 
-When a new design collides, change the *design* (a different set of
-primitives, counts or phases) rather than lowering the threshold.
+The distinctness contract it enforced — 22 byte-unique files, pairwise at
+least `MIN_PATTERN_DISTANCE` bits apart on a 64-bit dHash so two designs
+differing only in tint would not slip through — does not carry over, because
+the motifs are now hand-drawn and are not generated per theme. Nothing
+checks that the 12 SVGs are visually distinct from one another; if that
+matters, it wants a test of its own rather than the deleted generator's.
 
 The legacy `--motif-corner` variable and its `*-mandala-corner.png` art were
-removed: nothing consumed them once the mandala filled the panel.
+removed earlier, for the same reason: nothing consumed them once the panel
+had a background image at all.
 
 ## Wrappers and shell helper
 
 | File | Role |
 |---|---|
 | `yasb-theme/src/` | crate source (zero deps; rescued into the repo from a scratch clone) |
-| `mandala-gen/` | draws the 22 distinct mandala PNGs and rewrites the `--motif-mandala` urls |
+| `motifs.rs` | discovers `motif-*.svg`, draws 3 at random and deals them out across the 22 theme blocks (`yasb-theme motif`) |
 | `yasb-theme-build.ps1` | rebuild + deploy: `cargo build --release`, copies the exe here, smoke-tests `current` (refreshes `silent-run` in scoop shims only if this crate ever builds one again) |
 | `yasb-theme-current.bat` / `-next.bat` / `-prev.bat` | one-line wrappers used by bar callbacks and keyboard launchers |
 | `yasb-theme-shell.ps1` | dot-source from your PowerShell profile to get `yt list / set / next / prev` |
