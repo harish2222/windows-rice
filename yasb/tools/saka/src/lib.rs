@@ -884,6 +884,15 @@ pub struct Panchang {
     pub illum: f64,
     pub waxing: bool,
     pub phase_index: usize,
+    /// JD at which the moon entered the 45° sector [`phase_index`] names.
+    ///
+    /// The phase name is a sector, not an instant, so it has a beginning and
+    /// an end like every other element in the panchangam. Bracketing it is
+    /// what lets the panel print *when* the phase it is naming runs, which is
+    /// the question a reader of a row saying `Amavasya` actually has.
+    pub phase_start_jd: f64,
+    /// JD at which the moon leaves that sector for the next one.
+    pub phase_end_jd: f64,
 
     // Eras.
     /// Vikram Samvat (Telugu) year; rolls at Ugadi, not 1 January.
@@ -960,6 +969,47 @@ pub fn paksha_at(index: usize, s: Script) -> &'static str {
             if waxing { "Shukla" } else { "Krishna" }
         }
     }
+}
+
+/// The two edges of the 45° elongation sector `idx`, as (entry, exit) JDs.
+///
+/// Sector `idx` is the window `[idx*45 - 22.5, (idx+1)*45 - 22.5)` of lunar
+/// elongation — exactly the window `Panchang::phase_index` rounds to — so this
+/// is the interval in which the phase the panel is naming is actually in
+/// force. Returns `(jd, jd + 45° worth of synodic month)` only if the solver
+/// fails, which it does not for the elongation curve: the pair is a display
+/// value, and a wrong time on one row is worse than a visibly odd span.
+fn phase_sector_bounds(jd: f64, idx: usize) -> (f64, f64) {
+    let edge = |k: f64| norm360(k * 45.0 - 22.5);
+    let start_target = edge(idx as f64);
+    let end_target = edge(idx as f64 + 1.0);
+    // 45/360 of a synodic month: the mean sector length, used only as a
+    // fallback width.
+    const MEAN_SECTOR: f64 = SYNODIC / 8.0;
+
+    let end = solve_angle_after(jd, &elongation, end_target, STEP_ELONG)
+        .unwrap_or(jd + MEAN_SECTOR);
+
+    // First crossing after `jd - BACK` is at most one sector ahead of that
+    // point, so with BACK = 8 (> 2 mean sectors, and sectors only span ~3.4 to
+    // ~4.0 days) it is guaranteed to be at or before `jd` — and at worst one
+    // sector early, which the loop below then advances past.
+    const BACK: f64 = 8.0;
+    let mut start = solve_angle_after(jd - BACK, &elongation, start_target, STEP_ELONG)
+        .unwrap_or(jd - MEAN_SECTOR);
+    for _ in 0..8 {
+        if start > jd {
+            break;
+        }
+        match solve_angle_after(start + 1e-7, &elongation, start_target, STEP_ELONG) {
+            Some(nxt) if nxt <= jd => start = nxt,
+            _ => break,
+        }
+    }
+    // A solver that overshot would report a phase beginning after it ends.
+    // Clamping to the mean keeps the row monotone instead of inverted.
+    let start = if start > end { end - MEAN_SECTOR } else { start };
+    (start, end)
 }
 
 fn tithi_at(jd: f64) -> Element {
@@ -1080,9 +1130,21 @@ impl Panchang {
         let karana_slot = karana_slot_global.saturating_sub((amanta_tithi_day as usize - 1) * 2);
 
         // Moon phase.
-        let illum = (1.0 - cosd(elongation(jd))) / 2.0;
-        let waxing = elongation(jd) < 180.0;
-        let phase_index = ((elongation(jd) + 22.5) / 45.0).floor() as usize % 8;
+        let elong_now = elongation(jd);
+        let illum = (1.0 - cosd(elong_now)) / 2.0;
+        let waxing = elong_now < 180.0;
+        let phase_index = ((elong_now + 22.5) / 45.0).floor() as usize % 8;
+        // Bracket the sector the moon is in right now.
+        //
+        // Sector `k` spans `[k*45 - 22.5, (k+1)*45 - 22.5)`, so its two edges
+        // are the elongation targets below. The exit is a plain forward
+        // solve; the entry has to be found *backwards*, and
+        // `last_angle_at_or_before` only walks four crossings — enough for the
+        // synodic month (one crossing per 29.5 days) but not for a curve that
+        // turns every ~3.7 days. So the search starts eight days back (more
+        // than two sectors) and steps forward until it has passed `jd`.
+        let (phase_start_jd, phase_end_jd) =
+            phase_sector_bounds(jd, phase_index);
 
         // Vikram Samvat rolls at Ugadi = amanta Chaitra 1, i.e. the new moon
         // that falls in March. Search forward from 1 February and stop as soon
@@ -1136,6 +1198,8 @@ impl Panchang {
             illum,
             waxing,
             phase_index,
+            phase_start_jd,
+            phase_end_jd,
             vikram_year,
             sunrise_jd: sunrise,
             sunset_jd: sunset,
@@ -1199,6 +1263,19 @@ impl Panchang {
     /// will recognise, so the CLI can print both.
     pub fn phase_name_western(&self) -> &'static str {
         PHASES_WESTERN[self.phase_index % 8]
+    }
+
+    /// Fraction of the current phase sector already elapsed, 0.0 .. 1.0.
+    ///
+    /// Separate from the raw bracket so a caller cannot divide by a zero-width
+    /// span itself: the fallbacks in `phase_sector_bounds` are mean-width, not
+    /// guaranteed positive relative to `jd`.
+    pub fn phase_progress(&self) -> f64 {
+        let span = self.phase_end_jd - self.phase_start_jd;
+        if span <= f64::EPSILON {
+            return 0.0;
+        }
+        ((self.jd - self.phase_start_jd) / span).clamp(0.0, 1.0)
     }
 
     pub fn paksha(&self) -> &'static str {

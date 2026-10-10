@@ -240,10 +240,13 @@ fn recolour_line(line: &str, vars: &HashMap<String, String>) -> Option<String> {
     let rest = &body[eq + 1..];
     let trimmed = rest.trim_start();
     let lead = &rest[..rest.len() - trimmed.len()];
-    let quote = match trimmed.chars().next() {
-        Some(q @ ('\'' | '"')) => q,
-        _ => '\0',
-    };
+    // Only `'` and `"` open a quoted value; anything else (including a hex
+    // `#`) is an unquoted value and takes the comment-splitting path below.
+    let quote = trimmed
+        .chars()
+        .next()
+        .filter(|c| matches!(c, '\'' | '"'))
+        .unwrap_or('\0');
     let after = if quote == '\0' { trimmed } else { &trimmed[1..] };
     // The value runs to the closing quote, or to an inline comment if
     // unquoted. `tail` keeps the closing quote when there is one, so it is
@@ -254,11 +257,9 @@ fn recolour_line(line: &str, vars: &HashMap<String, String>) -> Option<String> {
             None => (after, ""),
         }
     } else {
-        match after.find(quote) {
-            Some(i) => (&after[..i], &after[i..]),
-            // Unbalanced quotes: a line we do not understand is a line we do
-            // not touch.
-            None => return None,
+        {
+            let i = after.find(quote)?;
+            (&after[..i], &after[i..])
         }
     };
     if old.trim() == value {
@@ -622,12 +623,11 @@ pub fn parse_color(value: &str) -> Option<Rgba> {
             _ => None,
         };
     }
-    let (fn_name, inner) = if v.starts_with("rgba(") {
-        ("rgba", &v[5..])
-    } else if v.starts_with("rgb(") {
-        ("rgb", &v[4..])
+    let (fn_name, inner) = if let Some(inner) = v.strip_prefix("rgba(") {
+        ("rgba", inner)
     } else {
-        return None;
+        let inner = v.strip_prefix("rgb(")?;
+        ("rgb", inner)
     };
     let inner = inner.strip_suffix(')')?;
     let parts: Vec<&str> = inner
@@ -752,7 +752,15 @@ fn whole_root(css: &str) -> Option<&str> {
 /// `UpdateLayeredWindow`.
 ///
 /// `bits` is the DIB pixel pointer, `w`x`h` pixels, 4 bytes each.
-pub fn force_opaque_alpha(bits: *mut u8, w: i32, h: i32) {
+///
+/// # Safety
+///
+/// When `bits` is non-null and `w > 0` and `h > 0`, it must point to at
+/// least `w * h * 4` writable bytes — the pixel buffer of a top-down 32-bit
+/// BGRA DIB. A null pointer or a degenerate size is accepted and ignored,
+/// because `CreateDIBSection` failing mid-paint is exactly when a caller
+/// reaches for this.
+pub unsafe fn force_opaque_alpha(bits: *mut u8, w: i32, h: i32) {
     if bits.is_null() || w <= 0 || h <= 0 {
         return;
     }

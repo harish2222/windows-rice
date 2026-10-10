@@ -115,6 +115,11 @@ impl<'a> Canvas<'a> {
     /// field minus the same field inset by the thickness. Blitting a filled
     /// rounded rect and then a smaller filled one would erase the interior
     /// rather than hollow it out.
+    ///
+    /// Seven parameters past the canvas because they *are* the shape: four
+    /// bounds, a radius, a thickness, and an ink. Collapsing any of them into
+    /// a bundle would just move the arithmetic to every call site.
+    #[allow(clippy::too_many_arguments)]
     pub fn round_rect_border(
         &mut self,
         x0: i32,

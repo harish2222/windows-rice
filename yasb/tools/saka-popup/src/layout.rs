@@ -13,14 +13,28 @@
 //! have caught the original defect.
 
 /// Width of the panel, Latin.
-pub const W: i32 = 460;
+///
+/// Sized from the widest row that carries **both** a value and a caption,
+/// because that is the one [`Layout::row_split`] cannot give full width to,
+/// and a caption narrower than its own text paints as `...`. The worst case is
+/// Tithi: `Krishna Chaturdashi` is 200px at [`yasb_chrome::Type::Lead`], a
+/// `100% · 03:56` caption is 102px, and [`Self::CAPTION_GAP`] is 16 — so the
+/// value column needs 318px. [`Self::VALUE_X`] sits 168px in from the panel
+/// edge, which makes 460 the width that starves it: the column was 292px and
+/// the tithi end time was ellipsised to `...` on every long tithi.
+///
+/// 496 gives the column 328px — the full caption with 10px to spare, and 51px
+/// clear for the `Phase` row's two date-times (277px measured).
+pub const W: i32 = 496;
 
 /// Width of the panel when the values are Telugu.
 ///
-/// Telugu is drawn in Nirmala UI, which is wider per glyph than the Latin
-/// face: measured on the live panel, the widest row (Tithi plus its caption)
-/// already spans 283px of a 292px column at the Latin width. The Indic panel
-/// is given more room so nothing has to be ellipsised to fit.
+/// Telugu is drawn in Nirmala UI, and the Indic panel is given more room than
+/// the Latin one so nothing has to be ellipsised to fit. Measured on the live
+/// panel the widest Indic row, Tithi plus its caption, is 176px of the 352px
+/// column; the new `Phase` row is ASCII date-times in both scripts and needs
+/// 277px. So the Indic panel keeps its width — it is the Latin one that had
+/// fallen behind its own content.
 pub const W_INDIC: i32 = 520;
 /// Window corner radius.
 pub const RADIUS: i32 = 20;
@@ -230,11 +244,6 @@ impl Layout {
     /// Gap between a row's value and its right-aligned caption. Scale step 4.
     pub const CAPTION_GAP: i32 = yasb_chrome::space(4);
 
-    /// A caption narrower than this is not worth keeping: half a time or half
-    /// a percentage is worse than none, because the reader cannot tell whether
-    /// it ran out of room or means something.
-    pub const MIN_CAPTION_W: i32 = 48;
-
     /// Split one row's line box between its value and its optional caption.
     ///
     /// Returns `(value_w, caption_w)`, with `caption_w == 0` when the row has
@@ -257,14 +266,18 @@ impl Layout {
         if value_need + Self::CAPTION_GAP + cap_need <= avail {
             return (avail - Self::CAPTION_GAP - cap_need, cap_need);
         }
-        // The value keeps everything it needs; the caption gets the slack, and
-        // is dropped outright rather than shown as a stub.
-        let spare = avail - value_need - Self::CAPTION_GAP;
-        if spare >= Self::MIN_CAPTION_W {
-            (avail - spare, spare)
-        } else {
-            (avail, 0)
-        }
+        // They cannot coexist, and the caption is what yields: the value is the
+        // datum, the caption is a percentage and an end time.
+        //
+        // It is dropped *whole*. The previous version handed it whatever was
+        // left over after the value took what it needed and called that
+        // "dropped outright rather than shown as a stub" — but the leftover is
+        // by construction less than the caption needs (the branch above would
+        // otherwise have fired), so `paint` measured it, found it narrower than
+        // its own text and drew `DT_END_ELLIPSIS`: the tithi row showed `...`
+        // where the end time belongs. Half a time is worse than none, because
+        // the reader cannot tell whether it ran out of room or means something.
+        (avail, 0)
     }
 
     /// Right edge of the era line's text box.
@@ -406,10 +419,9 @@ mod tests {
     #[test]
     fn the_indicator_starts_after_the_label_column() {
         let (_, tw, _) = Layout::new(10).track(W);
-        assert!(
-            Layout::VALUE_X > PAD + 80,
-            "indicator would run under the labels"
-        );
+        const {
+            assert!(Layout::VALUE_X > PAD + 80, "indicator would run under the labels");
+        }
         assert!(tw > 120, "indicator run of {tw}px is too short to read");
     }
 
@@ -418,6 +430,11 @@ mod tests {
     /// the old 32px offset did when the row height changed.
     #[test]
     fn every_indicator_stays_inside_its_own_row() {
+        // Row-invariant: hoisted out of the loops and made compile-time, so a
+        // future ROW_H tweak cannot silently reintroduce the overlap.
+        const {
+            assert!(INDICATOR_Y >= 22, "indicator would overlap the 22px text line");
+        }
         for rows in 1..=12 {
             let l = Layout::new(rows);
             for i in 0..rows {
@@ -426,11 +443,6 @@ mod tests {
                 assert!(
                     bottom <= y + ROW_H,
                     "row {i} indicator ends at {bottom}, past its {ROW_H}px row"
-                );
-                // And it must sit under the text, not on top of it.
-                assert!(
-                    INDICATOR_Y >= 22,
-                    "indicator at y={INDICATOR_Y} would overlap the 22px text line"
                 );
             }
             l.assert_no_overlap(rows).unwrap_or_else(|e| panic!("{rows} rows: {e}"));
@@ -583,9 +595,11 @@ mod tests {
         indic.assert_no_overlap(10).unwrap();
     }
 
-#[test]
-fn the_value_column_starts_after_the_label_column() {
-        assert!(Layout::VALUE_X > PAD + 80, "label column and value column collide");
+    #[test]
+    fn the_value_column_starts_after_the_label_column() {
+        const {
+            assert!(Layout::VALUE_X > PAD + 80, "label column and value column collide");
+        }
     }
 
     /// The label column, measured against the largest label at the size it is
@@ -604,9 +618,9 @@ fn the_value_column_starts_after_the_label_column() {
             DeleteObject, GetDC, HGDIOBJ, ReleaseDC, SelectObject,
         };
 
-        const LABELS: [&str; 10] = [
+        const LABELS: [&str; 11] = [
             "TITHI", "NAKSHATRA", "YOGA", "KARANA", "VARA",
-            "MOON", "AMANTA", "PURNIMANTA", "SUN", "NEXT",
+            "MOON", "PHASE", "AMANTA", "PURNIMANTA", "SUN", "NEXT",
         ];
         const TRACKING: i32 = 1;
         let avail = Layout::VALUE_X - PAD;
@@ -689,6 +703,10 @@ fn the_value_column_starts_after_the_label_column() {
 
         // (value, caption) exactly as `App::rows` builds them.
         let rows: &[(&str, Option<&str>)] = &[
+            // The worst row in the panel: the longest tithi name against the
+            // longest caption it can carry. This is the pair the old 460px
+            // panel could not hold, and the reason `W` is 496.
+            ("Krishna Chaturdashi", Some("100% · 03:56")),
             ("Krishna Navami", Some("58% · 03:56")),
             ("Punarvasu", Some("75% · 00:15")),
             ("Shiva", Some("29% · 09:51")),
@@ -700,6 +718,9 @@ fn the_value_column_starts_after_the_label_column() {
             ("Asvina", None),
             ("06:07 · 18:03", None),
             ("New 10 Oct · Full 26 Oct", None),
+            // The `Phase` row: two date-times, no caption. `day_label_short`
+            // drops the year, so this length never varies.
+            ("09 Oct 21:04 · 13 Oct 15:30", None),
         ];
 
         unsafe {
@@ -743,6 +764,29 @@ fn the_value_column_starts_after_the_label_column() {
         let (value_w, cap_w) = Layout::row_split(W, avail, Some(100));
         assert_eq!(value_w, avail, "the value must keep its width");
         assert_eq!(cap_w, 0, "a caption with no room must be dropped, not stubbed");
+    }
+
+    /// A caption narrower than its own text is not a shorter caption, it is
+    /// `...` — `paint` hands it `DT_END_ELLIPSIS`. So `row_split` must return
+    /// either the caption's full width or none of it, for any pair of needs.
+    ///
+    /// This is the regression fence for the tithi row's `...`: the old
+    /// implementation handed the caption whatever was left over, which was
+    /// always short by construction.
+    #[test]
+    fn a_caption_is_either_whole_or_absent_never_a_stub() {
+        for w in [W, W_INDIC, 460, 420, 640] {
+            for value_need in (0..=400).step_by(20) {
+                for cap_need in 0..=140 {
+                    let (_, cap_w) = Layout::row_split(w, value_need, Some(cap_need));
+                    assert!(
+                        cap_w == 0 || cap_w >= cap_need,
+                        "at w={w}, value={value_need}, need={cap_need}: caption got {cap_w}px — \
+                         that is an ellipsis, not a caption"
+                    );
+                }
+            }
+        }
     }
 
     /// A row with no caption gets the whole column. This is the case the flat
