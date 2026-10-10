@@ -87,7 +87,7 @@ impl Image {
         let px = match (info.color_type, info.bit_depth) {
             (png::ColorType::Rgb, png::BitDepth::Eight) => buf,
             (png::ColorType::Rgba, png::BitDepth::Eight) => buf
-                .chunks_exact(4)
+                .as_chunks::<4>().0.iter()
                 .flat_map(|c| [c[0], c[1], c[2]])
                 .collect(),
             (png::ColorType::Grayscale, png::BitDepth::Eight) => {
@@ -145,7 +145,7 @@ unsafe fn grab(x: i32, y: i32, w: i32, h: i32, layered: bool) -> Result<(Image, 
 
     let src = std::slice::from_raw_parts(bits.cast::<u8>(), (w * h * 4) as usize);
     let mut px = Vec::with_capacity((w * h * 3) as usize);
-    for p in src.chunks_exact(4) {
+    for p in src.as_chunks::<4>().0 {
         px.push(p[2]); // R from BGRA
         px.push(p[1]);
         px.push(p[0]);
@@ -345,7 +345,7 @@ fn main() {
 /// signal. A blank or all-one-colour capture answers immediately.
 fn distinct_colours(img: &Image) -> usize {
     let mut seen = std::collections::HashSet::with_capacity(4096);
-    for p in img.px.chunks_exact(3) {
+    for p in img.px.as_chunks::<3>().0 {
         seen.insert([p[0], p[1], p[2]]);
         if seen.len() > 200_000 {
             break;

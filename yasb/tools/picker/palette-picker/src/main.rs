@@ -19,7 +19,7 @@ use std::os::windows::process::CommandExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::mpsc::{self, Receiver, TryRecvError};
+use std::sync::mpsc::{self, Receiver};
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -169,11 +169,8 @@ fn stop_worker() {
 /// nothing new arrived, which is the signal not to repaint at all.
 fn take_latest(rx: &mut Receiver<Snapshot>) -> Option<Snapshot> {
     let mut newest = None;
-    loop {
-        match rx.try_recv() {
-            Ok(s) => newest = Some(s),
-            Err(TryRecvError::Empty) | Err(TryRecvError::Disconnected) => break,
-        }
+    while let Ok(s) = rx.try_recv() {
+        newest = Some(s);
     }
     newest
 }
@@ -370,7 +367,6 @@ unsafe fn draw_cell(c: &mut yasb_chrome::Canvas, x: i32, y: i32, selected: bool,
 ///
 /// The edge matters more than it looks: several shipped light palettes have
 /// near-white swatches, and on a light cell those render as blank rectangles.
-
 unsafe fn draw_swatches(c: &mut yasb_chrome::Canvas, x: i32, y: i32, item: &Item, t: &Theme) {
     let mut sx = x;
     for sw in item.swatches().into_iter().take(layout::SWATCHES as usize) {
@@ -653,7 +649,6 @@ fn main() {
     match yasb_chrome::acquire("Local\\yasb-palette-picker") {
         Ok(None) => {
             yasb_chrome::raise_window_of_class("PalettePickerClass");
-            return;
         }
         // If the guard itself fails, still open: a second window is a smaller
         // problem than a picker that refuses to appear.
@@ -825,10 +820,10 @@ unsafe extern "system" fn wnd_proc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM)
         WM_KEYDOWN => {
             let vk = wp.0 as u16;
             match vk {
-                k if k == VK_ESCAPE.0 as u16 => {
+                k if k == VK_ESCAPE.0 => {
                     let _ = DestroyWindow(hwnd);
                 }
-                k if k == VK_RETURN.0 as u16 => {
+                k if k == VK_RETURN.0 => {
                     // Apply the selected theme, then close.
                     let name = APP.with(|c| c.borrow().as_ref().and_then(|a| a.selected_name()).map(str::to_string));
                     if let Some(n) = name {
@@ -836,7 +831,7 @@ unsafe extern "system" fn wnd_proc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM)
                     }
                     let _ = DestroyWindow(hwnd);
                 }
-                k if k == VK_BACK.0 as u16 => {
+                k if k == VK_BACK.0 => {
                     APP.with(|c| {
                         if let Some(a) = c.borrow_mut().as_mut() {
                             a.query.pop();
@@ -845,39 +840,39 @@ unsafe extern "system" fn wnd_proc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM)
                     });
                     relayout(hwnd, W);
                 }
-                k if k == VK_DOWN.0 as u16 => {
+                k if k == VK_DOWN.0 => {
                     let cols = layout::columns(W - PAD * 2) as isize;
                     APP.with(|c| {
                         if let Some(a) = c.borrow_mut().as_mut() { a.move_sel(cols, W); }
                     });
                     paint(hwnd);
                 }
-                k if k == VK_UP.0 as u16 => {
+                k if k == VK_UP.0 => {
                     let cols = layout::columns(W - PAD * 2) as isize;
                     APP.with(|c| {
                         if let Some(a) = c.borrow_mut().as_mut() { a.move_sel(-cols, W); }
                     });
                     paint(hwnd);
                 }
-                k if k == VK_RIGHT.0 as u16 || k == VK_TAB.0 as u16 => {
+                k if k == VK_RIGHT.0 || k == VK_TAB.0 => {
                     APP.with(|c| {
                         if let Some(a) = c.borrow_mut().as_mut() { a.move_sel(1, W); }
                     });
                     paint(hwnd);
                 }
-                k if k == VK_LEFT.0 as u16 => {
+                k if k == VK_LEFT.0 => {
                     APP.with(|c| {
                         if let Some(a) = c.borrow_mut().as_mut() { a.move_sel(-1, W); }
                     });
                     paint(hwnd);
                 }
-                k if k == VK_NEXT.0 as u16 => {
+                k if k == VK_NEXT.0 => {
                     APP.with(|c| {
                         if let Some(a) = c.borrow_mut().as_mut() { a.move_sel(8, W); }
                     });
                     paint(hwnd);
                 }
-                k if k == VK_PRIOR.0 as u16 => {
+                k if k == VK_PRIOR.0 => {
                     APP.with(|c| {
                         if let Some(a) = c.borrow_mut().as_mut() { a.move_sel(-8, W); }
                     });
@@ -921,7 +916,7 @@ unsafe extern "system" fn wnd_proc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM)
         WM_DESTROY => {
             stop_worker();
             let _ = KillTimer(hwnd, TIMER_ID);
-            let _ = PostQuitMessage(0);
+            PostQuitMessage(0);
             LRESULT(0)
         }
         _ => DefWindowProcW(hwnd, msg, wp, lp),

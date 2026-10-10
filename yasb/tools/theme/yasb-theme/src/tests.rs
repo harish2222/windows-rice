@@ -248,7 +248,7 @@ fn force_opaque_alpha_sets_only_the_alpha_byte() {
         px[1] = 0xAA;
         px[2] = 0x55;
     }
-    force_opaque_alpha(buf.as_mut_ptr(), w, h);
+    unsafe { force_opaque_alpha(buf.as_mut_ptr(), w, h) };
     assert!(
         buf.chunks(4).all(|px| px[3] == 255),
         "alpha byte not set everywhere"
@@ -261,14 +261,16 @@ fn force_opaque_alpha_sets_only_the_alpha_byte() {
 fn force_opaque_alpha_tolerates_degenerate_input() {
     // A null DIB is a real possibility when CreateDIBSection fails and the
     // caller wants to bail out quietly rather than fault.
-    force_opaque_alpha(std::ptr::null_mut(), 4, 4);
-    let mut buf = vec![0u8; 16];
-    force_opaque_alpha(buf.as_mut_ptr(), 0, 4);
-    force_opaque_alpha(buf.as_mut_ptr(), 4, -1);
-    assert!(
-        buf.iter().all(|&b| b == 0),
-        "degenerate sizes must not write"
-    );
+    unsafe {
+        force_opaque_alpha(std::ptr::null_mut(), 4, 4);
+        let mut buf = vec![0u8; 16];
+        force_opaque_alpha(buf.as_mut_ptr(), 0, 4);
+        force_opaque_alpha(buf.as_mut_ptr(), 4, -1);
+        assert!(
+            buf.iter().all(|&b| b == 0),
+            "degenerate sizes must not write"
+        );
+    }
 }
 
 // ---- config sync -------------------------------------------------------

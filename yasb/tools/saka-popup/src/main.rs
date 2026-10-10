@@ -44,7 +44,7 @@ mod theme;
 use std::cell::RefCell;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::mpsc::{self, Receiver, TryRecvError};
+use std::sync::mpsc::{self, Receiver};
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -183,11 +183,8 @@ fn stop_worker() {
 /// which is the signal not to repaint at all.
 fn take_latest(rx: &mut Receiver<Snapshot>) -> Option<Snapshot> {
     let mut newest = None;
-    loop {
-        match rx.try_recv() {
-            Ok(s) => newest = Some(s),
-            Err(TryRecvError::Empty) | Err(TryRecvError::Disconnected) => break,
-        }
+    while let Ok(s) = rx.try_recv() {
+        newest = Some(s);
     }
     newest
 }
@@ -282,6 +279,29 @@ impl App {
                     ),
                 )),
             },
+            // When the phase the row above names is actually in force.
+            //
+            // A phase is a 45-degree sector, not an instant, so it has a start
+            // and an end like the tithi and nakshatra rows above — and until it
+            // had a bracket there was no way to ask the panel *when*. Both ends
+            // are date *and* time because the sector runs about 3.7 days: a date
+            // alone would be two days out at the boundary, a time alone
+            // meaningless across a midnight.
+            //
+            // No caption, for the same reason the `Sun` and `Next` rows have
+            // none: the value already carries both times, and a progress bar
+            // here would duplicate the illumination bar on the `Moon` row.
+            Row {
+                label: "Phase",
+                value: format!(
+                    "{} {} · {} {}",
+                    p.day_label_short(p.phase_start_jd),
+                    p.hhmm(p.phase_start_jd),
+                    p.day_label_short(p.phase_end_jd),
+                    p.hhmm(p.phase_end_jd)
+                ),
+                progress: None,
+            },
             Row {
                 label: "Amanta",
                 value: format!(
@@ -308,7 +328,10 @@ impl App {
                     p.sunset_jd.map(|j| p.hhmm(j)).unwrap_or_else(|| "--:--".into())
                 ),
                 progress: None,
-            },Row { label: "Next",value: format!(
+            },
+            Row {
+                label: "Next",
+                value: format!(
                     "New {} · Full {}",
                     p.day_label_short(p.next_new_moon_jd),
                     p.day_label_short(p.next_full_moon_jd)
@@ -369,7 +392,6 @@ fn main() {
             {
                 unsafe { run() };
             }
-            return;
         }
         // If the guard itself fails, still open the panel.
         Err(e) => eprintln!("saka-popup: single-instance guard unavailable: {e}"),
@@ -395,6 +417,50 @@ fn smoke(t: &Theme, p: &Panchang, script: Script) {
     // alone would catch.
     let l = app.layout();
     l.assert_no_overlap(app.rows().len() as i32).expect("layout overlaps");
+
+    // Fit check.
+    //
+    // `paint` hands the value `DT_END_ELLIPSIS`, so a row that does not fit
+    // shows up on screen as a trailing "..." and nowhere else — no test, no
+    // log, no exit code. Measuring the shipped strings with the same faces
+    // and the same `row_split` the paint pass uses is what makes a truncating
+    // row fail here instead of on someone's desktop.
+    let text_family: &str =
+        if script == Script::Telugu { INDIC_FAMILY } else { t.typeface.family.as_str() };
+    let mut bad: Vec<String> = Vec::new();
+    unsafe {
+        let dc = GetDC(None);
+        let body = font(Type::Lead.gdi(), 500, text_family);
+        let small = font(Type::Meta.gdi(), 400, text_family);
+        for r in app.rows() {
+            SelectObject(dc, HGDIOBJ(body.0));
+            let value_need = text_width(dc, &r.value);
+            let cap_need = r.progress.as_ref().map(|(_, c)| {
+                SelectObject(dc, HGDIOBJ(small.0));
+                text_width(dc, c)
+            });
+            let (value_w, cap_w) = layout::Layout::row_split(l.w(), value_need, cap_need);
+            println!(
+                "  fit {:<11} value {value_need:>4}px in {value_w:<4} caption {}",
+                r.label,
+                cap_need.map(|n| format!("{n:>4}px in {cap_w}")).unwrap_or("-- none --".into())
+            );
+            if value_w < value_need {
+                bad.push(format!("{}'s value {value_need}px > {value_w}px", r.label));
+            }
+            if let Some(n) = cap_need {
+                if cap_w < n {
+                    bad.push(format!("{}'s caption {n}px > {cap_w}px", r.label));
+                }
+            }
+        }
+        let _ = ReleaseDC(None, dc);
+        let _ = DeleteObject(HGDIOBJ(body.0));
+        let _ = DeleteObject(HGDIOBJ(small.0));
+    }
+    if !bad.is_empty() {
+        panic!("rows that need an ellipsis: {}", bad.join("; "));
+    }
     println!("smoke: ok ({} rows, panel {}x{})", app.rows().len(), l.w(), l.height);
 }
 
@@ -898,10 +964,10 @@ unsafe extern "system" fn wnd_proc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM)
         }
         WM_KEYDOWN => {
             match wp.0 as u16 {
-                k if k == VK_ESCAPE.0 as u16 => {
+                k if k == VK_ESCAPE.0 => {
                     let _ = DestroyWindow(hwnd);
                 }
-                k if k == VK_TAB.0 as u16 => {
+                k if k == VK_TAB.0 => {
                     APP.with(|c| {
                         if let Some(a) = c.borrow_mut().as_mut() {
                             a.script = if a.script == Script::Telugu {
@@ -930,7 +996,7 @@ unsafe extern "system" fn wnd_proc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM)
         WM_DESTROY => {
             let _ = KillTimer(hwnd, TIMER_ID);
             stop_worker();
-            let _ = PostQuitMessage(0);
+            PostQuitMessage(0);
             LRESULT(0)
         }
         // A second click on the bar chip while this panel is already up.

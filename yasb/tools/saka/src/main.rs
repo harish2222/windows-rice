@@ -146,11 +146,11 @@ fn main() {
                 // Optional argument: `saka.exe --today` means "now", and the
                 // bar passes no argument at all.
                 let maybe = args.get(i + 1).cloned();
-                if let Some(v) = maybe {
-                    if let Ok(n) = v.parse::<i64>() {
-                        epoch_days = Some(n);
-                        i += 1;
-                    }
+                if let Some(v) = maybe
+                    && let Ok(n) = v.parse::<i64>()
+                {
+                    epoch_days = Some(n);
+                    i += 1;
                 }
                 today = true;
             }

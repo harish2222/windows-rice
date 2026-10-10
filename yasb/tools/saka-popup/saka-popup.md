@@ -1,10 +1,16 @@
 # saka-popup — the panchangam panel
 
 A frameless, always-on-top panel that shows the full Telugu panchangam: tithi
-with a progress bar, nakshatra, yoga, karana, vara, moon phase and
-illumination, the amanta and purnimanta months, the Saka and Vikram Samvat
-eras, sunrise/sunset, and the next new and full moons. It refreshes every
-second and re-reads the active theme on every tick.
+with a progress bar, nakshatra, yoga, karana, vara, the moon phase and its
+illumination, the start and end of that phase as a date *and* a time, the
+amanta and purnimanta months, the Saka and Vikram Samvat eras, sunrise/sunset,
+and the next new and full moons. It refreshes every second and re-reads the
+active theme on every tick.
+
+Eleven rows, laid out in one place (`src/layout.rs`) so the shape pass and the
+text pass cannot disagree: 496×591 Latin, 520×701 Telugu. The widths are
+measured, not round numbers — see [`Layout::W`] for the arithmetic that rules
+out 460.
 
 ## Why it is a separate window
 
@@ -16,9 +22,10 @@ a custom widget cannot be a native YASB popup and has to be its own top-level
 window. That is what this is, and it is the same pattern the palette picker has
 always used.
 
-The window is a layered Win32 window painted with GDI and presented through
-`UpdateLayeredWindow`, which is how it gets per-pixel alpha without a
-compositor or a blur pass — matching the bar's own "no blur anywhere" policy.
+The window is a GDI window: the desktop behind it is captured before it is
+shown, the theme colour is blended over that capture, and the result is
+blitted to the window. That is how it gets a translucent material without a
+compositor — matching the bar's own "no blur anywhere" policy.
 
 ## Controls
 
@@ -45,37 +52,39 @@ Two deliberate departures from a plain QSS popup:
 
 * **Alpha floor.** The Rangalipi themes ship `--acrylic` at 1–2% alpha, which is
   right for a YASB popup sitting on the desktop but would make this window
-  essentially invisible. The fill alpha is floored at 235/255, so the panel
-  keeps the theme tint and stays readable over any wallpaper.
+  essentially invisible. The floor is **derived, not constant**: it is the least
+  opacity at which the theme's own `--text` and `--subtext` still clear 4.5:1
+  and 4.0:1 against *both* a dark and a light desktop, found by binary search
+  in `min_alpha_for_contrast` (`src/theme.rs`).
+
+  The old rule was a flat `if bg.a < 235 { bg.a = 235 }`, tuned for the 1%
+  Wine block and then applied to all 22 themes — including the light ones that
+  deliberately author 50%. The result was a panel *brighter than the
+  wallpaper* behind it, which is what "a patch of white cement stuck onto the
+  wall" describes. The derived floor lands at 0.698 for Rangalipi Wine Light,
+  with the wallpaper contributing 30% rather than 8%.
 * **Fonts.** Segoe UI carries the Latin text; Nirmala UI is selected when the
   Telugu script is toggled on, because GDI does no automatic font fallback for
   missing glyphs.
 
-## The alpha trap (read before touching the paint code)
+## The panel is not layered (read before touching the paint code)
 
-Windows presented with `UpdateLayeredWindow` + `AC_SRC_ALPHA` are composited
-**from the alpha byte of every pixel**. GDI — `FillRect`, `DrawText`,
-`FrameRect` — writes RGB but never writes that alpha byte, so a freshly
-created 32-bit DIB is `alpha = 0` across the whole surface and
-`UpdateLayeredWindow` renders **nothing at all**: the window exists, is
-topmost, and is invisible.
+An earlier version of this panel was a `WS_EX_LAYERED` window presented with
+`UpdateLayeredWindow` + `AC_SRC_ALPHA`. It reported success and put **nothing**
+on screen: GDI writes RGB but never the alpha byte, so a fresh 32-bit DIB is
+`alpha = 0` everywhere and the compositor drops the whole surface.
 
-The fix lives in the shared theme library so the panel and the palette picker
-cannot drift:
-
-```rust
-// tools/theme/yasb-theme/src/lib.rs
-pub fn force_opaque_alpha(bits: *mut u8, w: i32, h: i32)
-```
-
-Call it **after** all GDI drawing and **before** `UpdateLayeredWindow`. The
-debug assertion for this is one line: after painting, a DIB pixel at (0, 0)
-must read `(r, g, b, 255)` — e.g. `(21, 16, 29, 255)` for Rangalipi Wine's
-`--acrylic`. If the fourth byte is 0, this is why.
+Rather than patch that path, the panel stopped being layered. It now captures
+the desktop (`Backdrop::capture`, optionally blurred), blends the theme colour
+over it into a DIB, and `blit_to_window`s the result — so every pixel carries a
+real alpha byte and nothing depends on GDI writing one. `yasb-theme`'s
+`force_opaque_alpha` still exists for anything that *does* present through
+`UpdateLayeredWindow`, but this panel no longer calls it.
 
 The same class of bug also blocks screenshots: `PIL.ImageGrab` and
-`PrintWindow`+`PW_RENDERFULLCONTENT` both miss layered windows. Use `BitBlt`
-with `CAPTUREBLT` (`0x40000000`) from the screen DC.
+`PrintWindow`+`PW_RENDERFULLCONTENT` both miss these windows. Use `BitBlt`
+with `CAPTUREBLT` (`0x40000000`) from the screen DC — which is what
+`tools/screen-shot` does.
 
 ## Building
 
@@ -100,25 +109,41 @@ broken build is caught without opening something on your desktop. Output looks
 like:
 
 ```
-theme bg=Rgba { r: 29, g: 16, b: 21, a: 235 } text=... border=...
+theme bg=Rgba { r: 29, g: 16, b: 21, a: 203 } text=... border=...
 tithi=22 nak=5 yoga=17 karana=2 vara=6
-  Tithi       Krishna Ashtami
+moon phase="Krishna Panchami" western="Waxing Crescent" illum=37%
+  Tithi       Krishna Chaturdashi
   Nakshatra   Ardra
   ...
-smoke: ok (10 rows)
+  Phase       09 Oct 01:12 · 12 Oct 19:08
+  ...
+  fit Tithi       value  200px in 218  caption   94px in 94
+  ...
+smoke: ok (11 rows, panel 496x591)
 ```
+
+The `fit` lines are the point: `paint` hands both the value and the caption
+`DT_END_ELLIPSIS`, so a row that does not fit shows up on screen as a trailing
+`...` and nowhere else. Measuring every shipped string with the same faces and
+the same `Layout::row_split` the paint pass uses is what turns a truncating row
+into a failed self-test instead of a silent defect. That is how the tithi end
+time's `...` was found: the panel was 460px wide and the column was 16px short.
 
 `--te` starts in Telugu instead of Latin.
 
 ## Tests
 
-`cargo test` covers the theme layer: the active block is selected and inactive
-blocks cannot leak values, every CSS colour form parses, alpha composites
-correctly, and a missing `styles.css` falls back to a default palette instead of
-panicking. The engine's own tests live in `../saka` (`tests/panchang.rs`), where
-the elements are pinned to Drik Panchang. `src/theme.rs` re-exports `Rgba`,
-`parse_color` and `active_theme_vars` straight from the shared `yasb-theme`
-library rather than re-implementing them.
+`cargo test` covers the theme layer (the active block is selected and inactive
+blocks cannot leak values, every CSS colour form parses, the derived alpha
+floor clears 4.5:1 and 4.0:1 over a dark *and* a light desktop, and a missing
+`styles.css` falls back to a default palette instead of panicking) and the
+layout layer (no band overlaps at any row count, every label fits the label
+column at its drawn size, no shipped row needs an ellipsis, and a caption is
+either whole or absent — never a stub). The engine's own tests live in
+`../saka` (`tests/panchang.rs`), where the elements are pinned to Drik Panchang
+and the phase bracket is checked against the 45° sector edges.
+`src/theme.rs` re-exports `Rgba`, `parse_color` and `active_theme_vars` straight
+from the shared `yasb-theme` library rather than re-implementing them.
 
 ## Known limits
 

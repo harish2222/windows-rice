@@ -178,7 +178,6 @@ widgets:
       # state reads off the colour instead.
       label: ""
       label_alt: ""
-      label_alt: ""
       work_duration: 55
       break_duration: 5
       long_break_duration: 15
@@ -205,8 +204,8 @@ widgets:
         offset_left: 0
         circle_size: 170
         circle_thickness: 8
-        circle_work_progress_color: "#8A4E80"
-        circle_break_progress_color: "#3E8A80"
+        circle_work_progress_color: "#B084BE"
+        circle_break_progress_color: "#5EA698"
       callbacks:
         # `toggle_menu` is YASB's convention for widgets whose popup key is
         # `menu` (wifi/language/disk all use it). Middle keeps the old
@@ -517,7 +516,12 @@ widgets:
       controls_hide: false
       thumbnail_alpha: 80
       thumbnail_padding: 8
-      thumbnail_corner_radius: 16
+      # 16 can never work here: the bar is 32px, and PIL's rounded_rectangle
+      # throws "y1 must be greater than or equal to y0" whenever the mask box
+      # is at most 2*radius tall — so every render logged an ERROR in yasb.log
+      # (3,335 hits) and silently fell back to square corners. 8 keeps the
+      # rounding (box 64px vs mask 32px) and is the upstream menu default.
+      thumbnail_corner_radius: 8
       icons:
         prev_track: "\ue892"
         next_track: "\ue893"
@@ -937,11 +941,11 @@ widgets:
       waveform: 0
       sleep_timer: 5
       hide_empty: true
-      foreground: "#3E8A80"
+      foreground: "#5EA698"
       gradient: 1
-      gradient_color_1: "#4A7A9A"
-      gradient_color_2: "#8A4E80"
-      gradient_color_3: "#C47A4E"
+      gradient_color_1: "#7E98BE"
+      gradient_color_2: "#B084BE"
+      gradient_color_3: "#E2905E"
       callbacks:
         on_left: "do_nothing"
         on_middle: "do_nothing"

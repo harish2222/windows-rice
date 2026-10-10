@@ -341,6 +341,55 @@ fn the_moon_phase_column_is_localised() {
     assert_eq!(p.phase_name_in(Script::Devanagari), latin);
 }
 
+/// The phase row prints *when* the named phase runs, so the bracket has to be
+/// the real edges of the sector — not two arbitrary JDs either side of `jd`.
+///
+/// Checked two ways: geometrically (elongation at each edge is the boundary
+/// the `phase_index` rounding implies, to a tenth of a degree) and structurally
+/// (start <= now <= end, span in the 3.4..4.0 day window a 45° sector actually
+/// takes, progress within 0..1). A solver that returned the previous sector's
+/// start would pass the ordering and fail the edge.
+#[test]
+fn the_phase_bracket_is_the_edges_of_the_current_sector() {
+    for &(y, m, d) in &[(2026, 10, 3), (2026, 9, 12), (2026, 9, 26), (2027, 3, 19)] {
+        let p = panchang(y, m, d);
+        let idx = p.phase_index;
+        assert!(
+            p.phase_start_jd <= p.jd && p.jd <= p.phase_end_jd,
+            "{y}-{m}-{d}: bracket [{}, {}] does not contain jd {}",
+            p.phase_start_jd, p.phase_end_jd, p.jd
+        );
+        let span = p.phase_end_jd - p.phase_start_jd;
+        assert!(
+            (3.0..5.5).contains(&span),
+            "{y}-{m}-{d}: sector span {span} days is not a 45° sector"
+        );
+
+        let at_start = saka::elongation(p.phase_start_jd);
+        let at_end = saka::elongation(p.phase_end_jd);
+        let want_start = (idx as f64 * 45.0 - 22.5 + 360.0) % 360.0;
+        let want_end = ((idx as f64 + 1.0) * 45.0 - 22.5 + 360.0) % 360.0;
+        // Circular difference, since both values live in [0, 360).
+        let diff = |a: f64, b: f64| {
+            let d = (a - b).rem_euclid(360.0);
+            if d > 180.0 { 360.0 - d } else { d }
+        };
+        assert!(
+            diff(at_start, want_start) < 0.1,
+            "{y}-{m}-{d}: phase starts at {at_start}°, expected {want_start}°"
+        );
+        assert!(
+            diff(at_end, want_end) < 0.1,
+            "{y}-{m}-{d}: phase ends at {at_end}°, expected {want_end}°"
+        );
+        assert!(
+            (0.0..=1.0).contains(&p.phase_progress()),
+            "{y}-{m}-{d}: progress {} out of range",
+            p.phase_progress()
+        );
+    }
+}
+
 #[test]
 fn every_phase_name_is_distinct_in_both_scripts() {
     for s in [Script::Latin, Script::Telugu] {

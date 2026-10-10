@@ -231,8 +231,8 @@ impl Backdrop {
 fn box_blur_h(src: &[u8], dst: &mut [u8], w: usize, h: usize, r: usize) {
     let mut pre = vec![0u32; (w + 1) * 4];
     for y in 0..h {
-        for ch in 0..4 {
-            pre[ch] = 0;
+        for slot in pre.iter_mut().take(4) {
+            *slot = 0;
         }
         for x in 0..w {
             let so = (y * w + x) * 4;
@@ -260,8 +260,8 @@ fn box_blur_h(src: &[u8], dst: &mut [u8], w: usize, h: usize, r: usize) {
 fn box_blur_v(src: &[u8], dst: &mut [u8], w: usize, h: usize, r: usize) {
     let mut pre = vec![0u32; (h + 1) * 4];
     for x in 0..w {
-        for ch in 0..4 {
-            pre[ch] = 0;
+        for slot in pre.iter_mut().take(4) {
+            *slot = 0;
         }
         for y in 0..h {
             let so = (y * w + x) * 4;
