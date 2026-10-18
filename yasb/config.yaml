@@ -10,7 +10,7 @@ bars:
     enabled: true
     style: "adaptive"
     screens:
-    - '*'
+    - '**'
     class_name: yasb-bar
     alignment:
       position: top
@@ -302,7 +302,7 @@ widgets:
       label_icon_size: 20
       max_length: 32
       max_length_ellipsis: '...'
-      monitor_exclusive: true
+      monitor_exclusive: false
   lines:
     type: "yasb.custom.CustomWidget"
     options:
