@@ -77,3 +77,11 @@ quick-find = true
 # vsync and render options can be set here if needed
 
 sidebar-width = 140
+
+# ================================================
+# Frost Glass Background
+# ================================================
+background-opacity = 0.85
+background-blur = true
+window-material = "glass"
+panel-material = "vibrancy-regular"
