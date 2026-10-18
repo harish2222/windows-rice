@@ -11,6 +11,6 @@ elevate = false
 shell-integration = true
 
 [appearance]
-theme = ""
-theme-dark = ""
-title-prefix = ""
+theme = "glass-dark"
+theme-dark = "glass-dark"
+title-prefix = "glass-dark"

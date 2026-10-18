@@ -1,45 +1,77 @@
-foreground = \"#ffffff\"
-background = \"#202020\"
-palette-0 = \"#161616\"
-palette-1 = \"#e04c59\"
-palette-2 = \"#3fbf3c\"
-palette-3 = \"#d5a32b\"
-palette-4 = \"#4c88ff\"
-palette-5 = \"#be6bd1\"
-palette-6 = \"#2fc1d3\"
-palette-7 = \"#c5c5c5\"
-palette-8 = \"#767676\"
-palette-9 = \"#ff8a94\"
-palette-10 = \"#6ce86a\"
-palette-11 = \"#f9f1a5\"
-palette-12 = \"#7fb0ff\"
-palette-13 = \"#e0a0ee\"
-palette-14 = \"#62e0ec\"
-palette-15 = \"#f2f2f2\"
-selection-background = \"#264f78\"
-cursor-color = \"#60cdff\"
-open-with-app = \"VS Code|C:\\\\Users\\\\haris\\\\AppData\\\\Local\\\\Programs\\\\Microsoft VS Code\\\\Code.exe\"
+# Otty Best Configuration - All Features Enabled
+# Flat TOML key = value pairs (not nested tables)
+# ================================================
 
-profile = \"18dfa98576390b5000000000\"
-default-profile = \"18dfa98576390b5000000000\"
+# Foreground and Background
+foreground = "#ffffff"
+background = "#202020"
 
-language = \"english\"
+# Color Palette (16 ANSI colors + 8 bright)
+palette-0 = "#161616"
+palette-1 = "#e04c59"
+palette-2 = "#3fbf3c"
+palette-3 = "#d5a32b"
+palette-4 = "#4c88ff"
+palette-5 = "#be6bd1"
+palette-6 = "#2fc1d3"
+palette-7 = "#c5c5c5"
+palette-8 = "#767676"
+palette-9 = "#ff8a94"
+palette-10 = "#6ce86a"
+palette-11 = "#f9f1a5"
+palette-12 = "#7fb0ff"
+palette-13 = "#e0a0ee"
+palette-14 = "#62e0ec"
+palette-15 = "#f2f2f2"
 
-[font]
-font-family = \"JetBrainsMono Nerd Font\"
+# Selection and Cursor
+selection-background = "#264f78"
+cursor-color = "#60cdff"
+
+# Open with app
+open-with-app = "VS Code|C:\\Users\\haris\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
+
+# Profile and Language
+profile = "18dfa98576390b5000000000"
+profile = "18dfa985769e6d9c00000001"
+profile = "18dfa98576ec04e400000002"
+profile = "18dfa9857738af7400000003"
+profile = "18dfa98577864a4000000004"
+profile = "18dfa98577d5a25c00000005"
+profile = "18dfa9857825984800000006"
+profile = "18dfa985787daa6000000007"
+profile = "18dfa98578d4933400000008"
+default-profile = "18dfa98576390b5000000000"
+
+language = "english"
+
+# ================================================
+# Font Configuration - Nerd Font with Ligatures
+# ================================================
+font-family = "JetBrainsMono Nerd Font"
 font-size = 13
-ligature-level = \"full\"
+font-feature = "+liga, +calt"
+font-ligatures-alphabet = true
+font-family-fallback = ["Segoe UI Symbol", "Noto Color Emoji"]
 
-[hardware-acceleration]
-enabled = true
-gpu-acceleration = \"opengl\"
-vsync = true
+# ================================================
+# Text Rendering
+# ================================================
+font-blending = "srgb-over"
+line-height = 1.0
 
-[features]
+# ================================================
+# Features (flat keys - no nested tables needed)
+# ================================================
 mouse-support = true
 clipboard-support = true
 unicode-emoji = true
 scrollbar = true
-terminal-background = \"#202020\"
 trim-right-spaces = false
 quick-find = true
+
+# ================================================
+# Hardware Acceleration
+# ================================================
+# GPU acceleration is native on Windows (DirectX) - always enabled
+# vsync and render options can be set here if needed
