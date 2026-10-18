@@ -75,3 +75,5 @@ quick-find = true
 # ================================================
 # GPU acceleration is native on Windows (DirectX) - always enabled
 # vsync and render options can be set here if needed
+
+sidebar-width = 140
