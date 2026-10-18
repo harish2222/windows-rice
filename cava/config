@@ -41,19 +41,19 @@ show_idle_bar_heads = 1
 
 # transparent background = inherits your terminal's rice
 background = default
-foreground = '#CE4152'
+foreground = '#C68A4B'
 
 # Rewritten by `yasb-theme set|next|prev` so the visualiser follows the bar.
 # Stops run bottom (bass) → top (treble); only the values below are touched.
 gradient = 1
-gradient_color_1 = '#CE4152'
-gradient_color_2 = '#E25050'
-gradient_color_3 = '#E2905E'
-gradient_color_4 = '#CEA854'
-gradient_color_5 = '#90AC60'
-gradient_color_6 = '#5EA698'
-gradient_color_7 = '#64A0B2'
-gradient_color_8 = '#8CC4CE'
+gradient_color_1 = '#C68A4B'
+gradient_color_2 = '#C65746'
+gradient_color_3 = '#E2A05E'
+gradient_color_4 = '#CCA04E'
+gradient_color_5 = '#98AC5C'
+gradient_color_6 = '#67A694'
+gradient_color_7 = '#64A09A'
+gradient_color_8 = '#8CC9BC'
 
 [smoothing]
 

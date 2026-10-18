@@ -204,8 +204,8 @@ widgets:
         offset_left: 0
         circle_size: 170
         circle_thickness: 8
-        circle_work_progress_color: "#B084BE"
-        circle_break_progress_color: "#5EA698"
+        circle_work_progress_color: "#B294B8"
+        circle_break_progress_color: "#67A694"
       callbacks:
         # `toggle_menu` is YASB's convention for widgets whose popup key is
         # `menu` (wifi/language/disk all use it). Middle keeps the old
@@ -941,11 +941,11 @@ widgets:
       waveform: 0
       sleep_timer: 5
       hide_empty: true
-      foreground: "#5EA698"
+      foreground: "#67A694"
       gradient: 1
-      gradient_color_1: "#7E98BE"
-      gradient_color_2: "#B084BE"
-      gradient_color_3: "#E2905E"
+      gradient_color_1: "#7AA0BC"
+      gradient_color_2: "#B294B8"
+      gradient_color_3: "#E2A05E"
       callbacks:
         on_left: "do_nothing"
         on_middle: "do_nothing"
