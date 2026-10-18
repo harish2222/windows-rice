@@ -1,0 +1,16 @@
+[profile]
+name = "Developer Command Prompt 18"
+icon = 'exe:C:\WINDOWS\SYSTEM32\cmd.exe'
+
+[launch]
+shell = 'cmd.exe /k "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\Common7\Tools\VsDevCmd.bat"'
+command = ""
+cwd = ""
+env = []
+elevate = false
+shell-integration = true
+
+[appearance]
+theme = ""
+theme-dark = ""
+title-prefix = ""

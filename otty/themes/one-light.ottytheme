@@ -1,0 +1,33 @@
+[meta]
+name = "One Light"
+mode = "light"
+
+[terminal]
+foreground = "#2A2B33"
+background = "#F8F8F8"
+palette = [
+    "#000000", "#DE3D35", "#3E953A", "#D2B67B",
+    "#2F5AF3", "#A00095", "#3E953A", "#44444C",
+    "#848489", "#DE3D35", "#3E953A", "#D2B67B",
+    "#2F5AF3", "#A00095", "#3E953A", "#2C2C34",
+]
+
+[tab-bar]
+border-bottom = "1px solid auto"
+separator = true
+
+[titlebar]
+background = "#ffffff"
+
+# ── Windows ────────────────────────────────────────────────────────────────
+# The chrome column wears Acrylic here, the way the Windows 11 shell wears it:
+# scoped to `[windows.sidebar]` rather than `[windows]`, so the material is the
+# navigation column alone. The content column keeps the opaque paper white and
+# runs the full height of the window — title strip included — which is what
+# makes the two columns read as columns instead of a band across the top.
+#
+# No `color`: an acrylic with no tint of its own takes the system's light one
+# (the theme's own light/dark decides which, not Windows'), so the column picks
+# up whatever is behind the window instead of a colour we picked for it.
+[windows.sidebar]
+material = "acrylic"

@@ -1,0 +1,16 @@
+[profile]
+name = "Git Bash"
+icon = 'exe:C:\Program Files\Git\bin\bash.exe'
+
+[launch]
+shell = '"C:\Program Files\Git\bin\bash.exe" -li'
+command = ""
+cwd = ""
+env = []
+elevate = false
+shell-integration = true
+
+[appearance]
+theme = "floating-card"
+theme-dark = "floating-card"
+title-prefix = "floating-card"

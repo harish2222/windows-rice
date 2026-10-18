@@ -1,0 +1,16 @@
+[profile]
+name = "Command Prompt"
+icon = 'exe:C:\WINDOWS\System32\cmd.exe'
+
+[launch]
+shell = 'C:\WINDOWS\System32\cmd.exe'
+command = ""
+cwd = ""
+env = []
+elevate = false
+shell-integration = true
+
+[appearance]
+theme = "april"
+theme-dark = "april"
+title-prefix = "april"

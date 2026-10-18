@@ -1,0 +1,16 @@
+[profile]
+name = "podman-machine-default"
+icon = 'exe:C:\WINDOWS\SYSTEM32\wsl.exe'
+
+[launch]
+shell = "wsl.exe -d podman-machine-default"
+command = ""
+cwd = ""
+env = []
+elevate = false
+shell-integration = true
+
+[appearance]
+theme = "dracula"
+theme-dark = "dracula"
+title-prefix = "dracula"

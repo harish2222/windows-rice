@@ -1,0 +1,16 @@
+[profile]
+name = "PowerShell"
+icon = "terminal"
+
+[launch]
+shell = '"C:\Program Files\PowerShell\7\pwsh.exe"'
+command = ""
+cwd = ""
+env = []
+elevate = false
+shell-integration = true
+
+[appearance]
+theme = "acrylic-dark"
+theme-dark = "acrylic-dark"
+title-prefix = "acrylic-dark"

@@ -1,0 +1,139 @@
+[meta]
+name        = "Acrylic Dark"
+author      = "Otty"
+mode        = "dark"
+description = "Fluent dark chrome on one continuous Windows 11 acrylic surface, with the terminal as a rounded layer card."
+
+# Colors are the Windows 11 / WinUI 2.6+ Fluent tokens where one exists:
+#   background      SolidBackgroundFillColorBase   #202020
+#   foreground      TextFillColorPrimary           #FFFFFF
+#   ANSI 7          TextFillColorSecondary         #C5C5C5
+#   ANSI 8          TextFillColorDisabled          #767676
+#   ANSI 15         Campbell brightWhite           #F2F2F2
+#   accent / cursor SystemAccentColorLight2        #60CDFF
+# The ANSI hues keep the Campbell (Windows console) identity but are lifted
+# for readability on #202020 — Campbell's own blue (#0037DA) lands at 1.3:1
+# there. Every text-weight entry (1-7, 9-15) clears 4:1 against the
+# background; 0 stays under it as a fill colour and 8 sits at the ~3.5:1
+# dim-text target, with 15 (14.6) > 7 (9.4) > 8 (3.6) so dim/normal/bold
+# keep their ordering.
+
+[terminal]
+foreground           = "#FFFFFF"
+background           = "#202020"
+palette = [
+    "#161616", "#E04C59", "#3FBF3C", "#D5A32B",
+    "#4C88FF", "#BE6BD1", "#2FC1D3", "#C5C5C5",
+    "#767676", "#FF8A94", "#6CE86A", "#F9F1A5",
+    "#7FB0FF", "#E0A0EE", "#62E0EC", "#F2F2F2",
+]
+cursor               = "#60CDFF"
+selection-background = "#264F78"
+
+[token]
+foreground = "#FFFFFF"
+secondary  = "#C5C5C5"
+tertiary   = "#8B8B8B"
+accent     = "#60CDFF"
+# SystemFillColorSuccess / Caution / Critical (dark).
+success    = "#6CCB5F"
+warning    = "#FCE100"
+danger     = "#FF99A4"
+# SubtleFillColorSecondary / Tertiary — the list-row wash Fluent uses.
+hover-bg   = "rgba(255,255,255,0.06)"
+active-bg  = "rgba(255,255,255,0.10)"
+radius     = 4
+shadow     = "0 8px 16px rgba(0,0,0,0.28)"
+font-ui    = ["Segoe UI Variable Text", "Segoe UI", "sans-serif"]
+font-mono  = ["Cascadia Mono", "Cascadia Code", "Consolas", "monospace"]
+font-size  = 13
+
+# Chrome frame around the grid — the colour dialogs, the command palette and
+# the settings surfaces land on. Matches the acrylic tint so those floating
+# panels read as the same material gone opaque, `surface` one Fluent step up.
+[panel]
+background = "#2C2C2C"
+surface    = "#383838"
+border     = "#454545"
+
+# The macOS look: ONE material under the whole window. `background` is the
+# material's OWN tint, not a fill layered over it, and `opacity` is how strongly
+# that tint beats the blurred desktop — 0.8 is what Fluent's own base acrylic
+# uses, and lands the surface on ~#2C2C2C with a hint of wallpaper still in it.
+#
+# Deliberately no `[sidebar].background` / `[details-panel].background`: a
+# chrome column with no colour of its own inherits the window's, so the sidebar,
+# the details panel and the title strip are one unbroken surface rather than
+# separate fills that meet at a visible seam.
+
+[window]
+material   = "glass"
+background = "#2C2C2C"
+opacity    = 0.8
+radius     = 8
+
+# ── Windows ────────────────────────────────────────────────────────────────
+# TWO COLUMNS, not one surface. Windows 11's own shell (Explorer, Settings,
+# Terminal) does not float its content on the material — the material is the
+# NAVIGATION column and the content column is an opaque plate beside it, both
+# running the full height of the window, with the title strip being nothing but
+# the top of those two columns. Scoping the material to `[windows.sidebar]`
+# instead of `[windows]` is how a theme says that: the window itself stays
+# opaque, so `MainBackground` keeps its fill all the way up through the title
+# row, and only the chrome columns are punched through to the acrylic.
+#
+# The one-surface version (material on `[windows]`) left the title strip on the
+# window tint while the grid below it sat on #202020 — one flat band across the
+# top that read as a separate titlebar, which is exactly what two columns fixes.
+[windows]
+material = "none"
+# The content column's colour, and the reason it reaches the top edge: with no
+# material on the window this is a flat fill, not a tint, and it matches
+# `[terminal].background` so the strip above the grid and the grid itself are
+# one continuous plate.
+color    = "#202020"
+
+# `acrylic` is `DesktopAcrylicKind::Base` — the Windows spelling of what
+# `[window].material = "glass"` asks for on macOS. `color` here is the
+# material's TINT (the column paints no fill of its own over it), `opacity` its
+# luminosity opacity.
+[windows.sidebar]
+material = "acrylic"
+color    = "#2C2C2C"
+opacity  = 0.8
+
+[sidebar]
+border-right = "none"
+
+[details-panel]
+border-right = "none"
+
+[titlebar]
+foreground = "#FFFFFF"
+
+# NavigationView item: 4pt pill, subtle wash when selected, accent bar on the
+# leading edge.
+
+[tab]
+radius          = 4
+foreground      = "#C5C5C5"
+font-weight     = 400
+indicator       = "bar"
+indicator-color = "#60CDFF"
+
+[tab.active]
+background  = "#FFFFFF17"
+foreground  = "#FFFFFF"
+border      = "1px solid #FFFFFF14"
+font-weight = 600
+
+[tab.hover]
+background = "#FFFFFF0F"
+
+# Two columns, not a floating island: no `[container]` margin/radius, so the
+# terminal fills its column edge to edge and the acrylic is the sidebar and the
+# title strip beside it. `background` alone keeps the grid's own gutter on the
+# terminal colour rather than letting the window tint bleed into it.
+
+[container]
+background = "#202020"

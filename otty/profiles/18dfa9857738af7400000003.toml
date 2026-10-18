@@ -1,0 +1,16 @@
+[profile]
+name = "Ubuntu-26.04"
+icon = 'exe:C:\WINDOWS\SYSTEM32\wsl.exe'
+
+[launch]
+shell = "wsl.exe -d Ubuntu-26.04"
+command = ""
+cwd = ""
+env = []
+elevate = false
+shell-integration = true
+
+[appearance]
+theme = "ayu-dark"
+theme-dark = "ayu-dark"
+title-prefix = "ayu-dark"

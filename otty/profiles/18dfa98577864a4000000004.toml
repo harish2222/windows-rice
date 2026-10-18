@@ -1,0 +1,16 @@
+[profile]
+name = "docker-desktop"
+icon = 'exe:C:\WINDOWS\SYSTEM32\wsl.exe'
+
+[launch]
+shell = "wsl.exe -d docker-desktop"
+command = ""
+cwd = ""
+env = []
+elevate = false
+shell-integration = true
+
+[appearance]
+theme = "ayu-light"
+theme-dark = "ayu-light"
+title-prefix = "ayu-light"

@@ -2,7 +2,15 @@
   "$schema": "https://app.kilo.ai/config.json",
   "permission": {
     "bash": {
-      "git -C *": "allow"
+      "git -C *": "allow",
+      "Get-Content *": "allow",
+      "Write-Output *": "allow",
+      "Select-Object *": "allow",
+      "Select-String *": "allow",
+      "python -c *": "allow",
+      "tail *": "allow",
+      "python3 *": "allow",
+      "Get-ChildItem *": "allow"
     },
     "*": {
       "*": "allow"

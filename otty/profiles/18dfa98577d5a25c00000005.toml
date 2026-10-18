@@ -1,0 +1,16 @@
+[profile]
+name = "openSUSE-Leap-16.0"
+icon = 'exe:C:\WINDOWS\SYSTEM32\wsl.exe'
+
+[launch]
+shell = "wsl.exe -d openSUSE-Leap-16.0"
+command = ""
+cwd = ""
+env = []
+elevate = false
+shell-integration = true
+
+[appearance]
+theme = "catppuccin-mocha"
+theme-dark = "catppuccin-mocha"
+title-prefix = "catppuccin-mocha"

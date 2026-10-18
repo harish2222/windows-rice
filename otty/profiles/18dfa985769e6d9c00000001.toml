@@ -1,0 +1,16 @@
+[profile]
+name = "Windows PowerShell"
+icon = "builtin:powershell"
+
+[launch]
+shell = 'C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe'
+command = ""
+cwd = ""
+env = []
+elevate = false
+shell-integration = true
+
+[appearance]
+theme = "april-dark"
+theme-dark = "april-dark"
+title-prefix = "april-dark"
