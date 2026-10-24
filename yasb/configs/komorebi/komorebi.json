@@ -55,525 +55,45 @@
   "monitors": [
     {
       "workspaces": [
-        {
-          "name": "1",
-          "layout": "BSP",
-          "initial_workspace_rules": [
-            {
-              "kind": "Exe",
-              "id": "WindowsTerminal.exe",
-              "matching_strategy": "Equals"
-            },
-            {
-              "kind": "Exe",
-              "id": "otty.exe",
-              "matching_strategy": "Equals"
-            },
-            {
-              "kind": "Exe",
-              "id": "alacritty.exe",
-              "matching_strategy": "Equals"
-            }
-          ]
-        },
-        {
-          "name": "2",
-          "layout": "BSP",
-          "initial_workspace_rules": [
-            {
-              "kind": "Exe",
-              "id": "zen.exe",
-              "matching_strategy": "Equals"
-            },
-            {
-              "kind": "Exe",
-              "id": "brave.exe",
-              "matching_strategy": "Equals"
-            },
-            {
-              "kind": "Exe",
-              "id": "chrome.exe",
-              "matching_strategy": "Equals"
-            },
-            {
-              "kind": "Exe",
-              "id": "msedge.exe",
-              "matching_strategy": "Equals"
-            },
-            {
-              "kind": "Exe",
-              "id": "firefox.exe",
-              "matching_strategy": "Equals"
-            }
-          ]
-        },
-        {
-          "name": "3",
-          "layout": "BSP",
-          "initial_workspace_rules": [
-            {
-              "kind": "Exe",
-              "id": "Discord.exe",
-              "matching_strategy": "Equals"
-            },
-            {
-              "kind": "Exe",
-              "id": "ms-teams.exe",
-              "matching_strategy": "Equals"
-            },
-            {
-              "kind": "Exe",
-              "id": "Slack.exe",
-              "matching_strategy": "Equals"
-            },
-            {
-              "kind": "Exe",
-              "id": "Telegram.exe",
-              "matching_strategy": "Equals"
-            }
-          ]
-        },
-        {
-          "name": "4",
-          "layout": "BSP",
-          "initial_workspace_rules": [
-            {
-              "kind": "Exe",
-              "id": "WINWORD.EXE",
-              "matching_strategy": "Equals"
-            },
-            {
-              "kind": "Exe",
-              "id": "EXCEL.EXE",
-              "matching_strategy": "Equals"
-            },
-            {
-              "kind": "Exe",
-              "id": "POWERPNT.EXE",
-              "matching_strategy": "Equals"
-            },
-            {
-              "kind": "Exe",
-              "id": "OUTLOOK.EXE",
-              "matching_strategy": "Equals"
-            }
-          ]
-        },
-        {
-          "name": "5",
-          "layout": "BSP",
-          "initial_workspace_rules": [
-            {
-              "kind": "Exe",
-              "id": "PotPlayerMini64.exe",
-              "matching_strategy": "Equals"
-            },
-            {
-              "kind": "Exe",
-              "id": "PotPlayer64.exe",
-              "matching_strategy": "Equals"
-            },
-            {
-              "kind": "Exe",
-              "id": "vlc.exe",
-              "matching_strategy": "Equals"
-            },
-            {
-              "kind": "Exe",
-              "id": "mpv.exe",
-              "matching_strategy": "Equals"
-            },
-            {
-              "kind": "Exe",
-              "id": "Kodi.exe",
-              "matching_strategy": "Equals"
-            },
-            {
-              "kind": "Exe",
-              "id": "Spotify.exe",
-              "matching_strategy": "Equals"
-            },
-            {
-              "kind": "Exe",
-              "id": "SpotiFLAC(1).exe",
-              "matching_strategy": "Equals"
-            },
-            {
-              "kind": "Exe",
-              "id": "SpotiFLAC.exe",
-              "matching_strategy": "Equals"
-            }
-          ]
-        },
-        {
-          "name": "6",
-          "layout": "BSP",
-          "initial_workspace_rules": [
-            {
-              "kind": "Exe",
-              "id": "Code.exe",
-              "matching_strategy": "Equals"
-            },
-            {
-              "kind": "Exe",
-              "id": "runemacs.exe",
-              "matching_strategy": "Equals"
-            },
-            {
-              "kind": "Exe",
-              "id": "emacs.exe",
-              "matching_strategy": "Equals"
-            }
-          ]
-        },
-        {
-          "name": "7",
-          "layout": "BSP"
-        },
-        {
-          "name": "8",
-          "layout": "BSP"
-        },
-        {
-          "name": "9",
-          "layout": "BSP"
-        }
+        { "name": "1", "layout": "BSP" },
+        { "name": "2", "layout": "BSP" },
+        { "name": "3", "layout": "BSP" },
+        { "name": "4", "layout": "BSP" },
+        { "name": "5", "layout": "BSP" },
+        { "name": "6", "layout": "BSP" },
+        { "name": "7", "layout": "BSP" },
+        { "name": "8", "layout": "BSP" },
+        { "name": "9", "layout": "BSP" }
       ]
     },
     {
       "workspaces": [
-        {
-          "name": "1",
-          "layout": "BSP"
-        },
-        {
-          "name": "2",
-          "layout": "BSP"
-        },
-        {
-          "name": "3",
-          "layout": "BSP"
-        },
-        {
-          "name": "4",
-          "layout": "BSP"
-        },
-        {
-          "name": "5",
-          "layout": "BSP"
-        },
-        {
-          "name": "6",
-          "layout": "BSP"
-        },
-        {
-          "name": "7",
-          "layout": "BSP"
-        },
-        {
-          "name": "8",
-          "layout": "BSP"
-        },
-        {
-          "name": "9",
-          "layout": "BSP"
-        }
+        { "name": "1", "layout": "BSP" },
+        { "name": "2", "layout": "BSP" },
+        { "name": "3", "layout": "BSP" },
+        { "name": "4", "layout": "BSP" },
+        { "name": "5", "layout": "BSP" },
+        { "name": "6", "layout": "BSP" },
+        { "name": "7", "layout": "BSP" },
+        { "name": "8", "layout": "BSP" },
+        { "name": "9", "layout": "BSP" }
       ]
     },
     {
       "workspaces": [
-        {
-          "name": "1",
-          "layout": "BSP"
-        },
-        {
-          "name": "2",
-          "layout": "BSP"
-        },
-        {
-          "name": "3",
-          "layout": "BSP"
-        },
-        {
-          "name": "4",
-          "layout": "BSP"
-        },
-        {
-          "name": "5",
-          "layout": "BSP"
-        },
-        {
-          "name": "6",
-          "layout": "BSP"
-        },
-        {
-          "name": "7",
-          "layout": "BSP"
-        },
-        {
-          "name": "8",
-          "layout": "BSP"
-        },
-        {
-          "name": "9",
-          "layout": "BSP"
-        }
+        { "name": "1", "layout": "BSP" },
+        { "name": "2", "layout": "BSP" },
+        { "name": "3", "layout": "BSP" },
+        { "name": "4", "layout": "BSP" },
+        { "name": "5", "layout": "BSP" },
+        { "name": "6", "layout": "BSP" },
+        { "name": "7", "layout": "BSP" },
+        { "name": "8", "layout": "BSP" },
+        { "name": "9", "layout": "BSP" }
       ]
-    }
-  ],
-  "manage_rules": [
-    {
-      "kind": "Class",
-      "matching_strategy": "Equals",
-      "id": "CASCADIA_HOSTING_WINDOW_CLASS"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "otty.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "alacritty.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "zen.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "brave.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "chrome.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "msedge.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "firefox.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "Code.exe"
     }
   ],
   "ignore_rules": [
-    {
-      "kind": "Class",
-      "matching_strategy": "Equals",
-      "id": "IME"
-    },
-    {
-      "kind": "Class",
-      "matching_strategy": "Equals",
-      "id": "MSCTFIME UI"
-    },
-    {
-      "kind": "Title",
-      "matching_strategy": "Equals",
-      "id": "Default IME"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "PowerToys.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "Microsoft.CmdPal.UI.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "PowerToys.PowerLauncher.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "PowerToys.ColorPickerUI.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "PowerToys.Peek.UI.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "PowerToys.CropAndLock.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "PowerToys.AdvancedPaste.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "PowerToys.PowerAccent.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "PowerToys.FileLocksmithUI.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "PowerToys.QuickAccess.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "PowerToys.AlwaysOnTop.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "PowerToys.FancyZonesEditor.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "PowerToys.Awake.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "PowerToys.WorkspacesEditor.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "PowerToys.WorkspacesLauncherUI.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "PowerToys.WorkspacesSnapshotTool.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "PowerToys.ZoomIt.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "keybind.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "saka-popup.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "palette-picker.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "komorebi-sync.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "Flow.Launcher.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "Wox.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "Raycast.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "CredentialUIBroker.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "AuthHost.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "Taskmgr.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "SnippingTool.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "ScreenSketch.exe"
-    },
-    {
-      "kind": "Class",
-      "matching_strategy": "Equals",
-      "id": "Windows.UI.Core.CoreWindow"
-    },
-    {
-      "kind": "Class",
-      "matching_strategy": "Equals",
-      "id": "ShellExperienceHost.exe"
-    },
-    {
-      "kind": "Class",
-      "matching_strategy": "Equals",
-      "id": "StartMenuExperienceHost.exe"
-    },
-    {
-      "kind": "Class",
-      "matching_strategy": "Equals",
-      "id": "SearchHost.exe"
-    },
-    {
-      "kind": "Class",
-      "matching_strategy": "Equals",
-      "id": "LockApp.exe"
-    },
-    {
-      "kind": "Class",
-      "matching_strategy": "Equals",
-      "id": "#32770"
-    },
-    {
-      "kind": "Class",
-      "matching_strategy": "Equals",
-      "id": "OperationStatusWindow"
-    },
-    {
-      "kind": "Title",
-      "matching_strategy": "Contains",
-      "id": "Picture-in-Picture"
-    },
-    {
-      "kind": "Title",
-      "matching_strategy": "Contains",
-      "id": "Picture in picture"
-    },
     {
       "kind": "Exe",
       "matching_strategy": "Equals",
@@ -597,74 +117,22 @@
     {
       "kind": "Exe",
       "matching_strategy": "Equals",
-      "id": "msrdc.exe"
+      "id": "saka-popup.exe"
     },
     {
       "kind": "Exe",
       "matching_strategy": "Equals",
-      "id": "mstsc.exe"
-    },
-    {
-      "kind": "Class",
-      "matching_strategy": "Equals",
-      "id": "TscShellContainerClass"
-    },
-    {
-      "kind": "Class",
-      "matching_strategy": "Equals",
-      "id": "TscShellAxHostClass"
-    },
-    {
-      "kind": "Title",
-      "matching_strategy": "Contains",
-      "id": "RemoteApp"
-    },
-    {
-      "kind": "Class",
-      "matching_strategy": "Equals",
-      "id": "SnippingToolWindowClass"
-    },
-    {
-      "kind": "Class",
-      "matching_strategy": "Equals",
-      "id": "ScreenSketch"
-    },
-    {
-      "kind": "Class",
-      "matching_strategy": "Equals",
-      "id": "MS_SnipSketch"
-    }
-  ],
-  "floating_applications": [
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "CalculatorApp.exe"
+      "id": "palette-picker.exe"
     },
     {
       "kind": "Exe",
       "matching_strategy": "Equals",
-      "id": "Calculator.exe"
+      "id": "keybind.exe"
     },
     {
       "kind": "Exe",
       "matching_strategy": "Equals",
-      "id": "control.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "SecHealthUI.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "Photos.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "ApplicationFrameHost.exe"
+      "id": "komorebi-sync.exe"
     }
   ]
 }

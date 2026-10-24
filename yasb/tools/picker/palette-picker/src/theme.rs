@@ -62,6 +62,14 @@ pub struct Theme {
     pub field: Rgba,
     /// Swatch chip border, which keeps light swatches visible on a light panel.
     pub swatch_edge: Rgba,
+    /// Subtle neutral border (#383D47) from Apple design specification.
+    pub subtle_border: Rgba,
+    /// Restrained Apple accent (#B8C8EE).
+    pub apple_accent: Rgba,
+    /// Elevated card surface (#272B33).
+    pub elevated_surface: Rgba,
+    /// Muted metadata text (#858C9A).
+    pub muted: Rgba,
 }
 
 /// Linear interpolation between two colours.
@@ -136,6 +144,10 @@ impl Theme {
             // Without this, a near-white swatch on a light theme is a
             // featureless white rectangle on a near-white cell.
             swatch_edge: Rgba { a: 90, ..darken(bg, 0.35) },
+            subtle_border: Rgba::rgb(56, 61, 71),
+            apple_accent: col(&["--accent-apple", "--lavender", "--sapphire"], Rgba::rgb(184, 200, 238)),
+            elevated_surface: Rgba { a: 225, ..lighten(bg, 0.13) },
+            muted: col(&["--muted", "--overlay0"], Rgba::rgb(133, 140, 154)),
         }
     }
 

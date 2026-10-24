@@ -943,7 +943,7 @@ unsafe fn paint(hwnd: HWND) {
         SetTextColor(dc, colorref(t.faint));
         draw_text(
             dc,
-            if app.mode == layout::LayoutMode::Compact { "m: Mode" } else { "Tab: Telugu / English · m: Mode" },
+            if app.mode == layout::LayoutMode::Compact { "m: Mode" } else { "Tab: English / Telugu · m: Mode" },
             rect(PAD, l.footer_y, 250, 18),
             DT_LEFT | DT_VCENTER,
         );

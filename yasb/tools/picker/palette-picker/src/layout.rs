@@ -43,22 +43,38 @@ pub const GAP: i32 = 10;
 pub const STRIDE: i32 = CELL_W + GAP;
 
 /// Two-way frosted glass toggle button dimensions.
-pub const TOGGLE_W: i32 = 180;
-pub const TOGGLE_H: i32 = 56;
+pub const TOGGLE_W: i32 = 160;
+pub const TOGGLE_H: i32 = 30;
+
+/// Header height containing "Appearance" title, subtitle, and toggle button.
+pub const TOP_HEADER_H: i32 = 44;
+/// Height of the dedicated search box.
+pub const SEARCH_H: i32 = 40;
 
 /// Bounds of the search box: (x0, y0, x1, y1)
-pub fn search_box(w: i32, pad: i32, search_h: i32) -> (i32, i32, i32, i32) {
+pub fn search_box(w: i32, pad: i32, _search_h: i32) -> (i32, i32, i32, i32) {
     let x0 = pad;
-    let y0 = pad;
-    let x1 = w - pad - TOGGLE_W - 12;
-    let y1 = pad + search_h;
+    let y0 = pad + TOP_HEADER_H;
+    let x1 = w - pad;
+    let y1 = y0 + SEARCH_H;
     (x0, y0, x1, y1)
 }
 
-/// Bounds of the frosted glass toggle button: (x0, y0, x1, y1)
-pub fn toggle_btn(w: i32, pad: i32, search_h: i32) -> (i32, i32, i32, i32) {
+/// Bounds of the clear search (×) button on the right of the search field.
+pub fn search_clear_btn(w: i32, pad: i32) -> (i32, i32, i32, i32) {
+    let (_, y0, x1, y1) = search_box(w, pad, SEARCH_H);
+    (x1 - 32, y0 + 6, x1 - 8, y1 - 6)
+}
+
+pub fn hit_search_clear(w: i32, pad: i32, x: i32, y: i32) -> bool {
+    let (x0, y0, x1, y1) = search_clear_btn(w, pad);
+    x >= x0 && x <= x1 && y >= y0 && y <= y1
+}
+
+/// Bounds of the frosted glass toggle button in the header: (x0, y0, x1, y1)
+pub fn toggle_btn(w: i32, pad: i32, _search_h: i32) -> (i32, i32, i32, i32) {
     let x0 = w - pad - TOGGLE_W;
-    let y0 = pad + (search_h - TOGGLE_H) / 2;
+    let y0 = pad + 6;
     let x1 = w - pad;
     let y1 = y0 + TOGGLE_H;
     (x0, y0, x1, y1)
@@ -68,6 +84,10 @@ pub fn toggle_btn(w: i32, pad: i32, search_h: i32) -> (i32, i32, i32, i32) {
 pub fn hit_toggle(w: i32, pad: i32, search_h: i32, x: i32, y: i32) -> bool {
     let (x0, y0, x1, y1) = toggle_btn(w, pad, search_h);
     x >= x0 && x <= x1 && y >= y0 && y <= y1
+}
+
+pub fn grid_origin_y(pad: i32) -> i32 {
+    pad + TOP_HEADER_H + SEARCH_H + 16
 }
 
 /// Swatch chips per cell, and their pitch.
@@ -224,7 +244,7 @@ pub fn cell_rects(rows: &[Row], origin: (i32, i32), max_w: i32) -> Vec<(i32, i32
 pub fn content_height(rows: &[Row], origin_y: i32, max_w: i32) -> i32 {
     match cell_rects(rows, (0, origin_y), max_w).last() {
         Some(&(_, y)) => y + CELL_H - origin_y,
-        None => 0,
+        None => 64,
     }
 }
 
@@ -492,7 +512,7 @@ fn keyboard_moves_by_a_visual_row() {
     fn the_footer_never_overlaps_the_last_row_of_cells() {
         let it = items();
         let rows = rows_for(&visible(&it, ""), &it);
-        let origin_y = 16 + 64 + 12;
+        let origin_y = grid_origin_y(16);
         let grid_h = content_height(&rows, origin_y, 1020 - 32);
         let grid_bottom = origin_y + grid_h;
         let h = window_height(grid_bottom, 34, 16);
@@ -509,11 +529,11 @@ fn keyboard_moves_by_a_visual_row() {
     fn toggle_button_geometry_and_hit_test() {
         let w = 1020;
         let pad = 16;
-        let search_h = 56;
-        let (sx0, sy0, sx1, _sy1) = search_box(w, pad, search_h);
+        let search_h = 40;
+        let (sx0, sy0, _sx1, _sy1) = search_box(w, pad, search_h);
         let (tx0, ty0, tx1, ty1) = toggle_btn(w, pad, search_h);
 
-        assert!(sx1 < tx0, "search box and toggle button must not collide");
+        assert!(sy0 >= ty1, "search box must be below toggle button in header");
         assert_eq!(tx1, w - pad);
         assert_eq!(tx1 - tx0, TOGGLE_W);
         assert_eq!(ty1 - ty0, TOGGLE_H);

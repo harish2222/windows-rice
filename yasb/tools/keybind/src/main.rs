@@ -1,4 +1,4 @@
-//! Omarchy-style Keybindings cheatsheet popup with fuzzy search.
+//! Omarchy-style Keybindings cheatsheet popup with fuzzy search and Apple design.
 //! Built with yasb-chrome and yasb-theme for seamless design integration.
 
 mod layout;
@@ -21,7 +21,7 @@ use windows::Win32::UI::Input::KeyboardAndMouse::*;
 use windows::Win32::UI::WindowsAndMessaging::*;
 use yasb_chrome::Type;
 use yasb_chrome::gdi::{
-    Backdrop, Dib, apply_round_region, blit_to_window, colorref, draw_text, font, rect,
+    Backdrop, Dib, apply_round_region, blit_to_window, colorref, draw_text, font, rect, text_width, tracked_text,
 };
 
 const CLASS_NAME: &str = "YasbKeybindClass";
@@ -93,6 +93,8 @@ fn drain_inbox() -> bool {
 #[derive(Clone)]
 pub struct App {
     all: Vec<Keybind>,
+    categories: Vec<&'static str>,
+    selected_category: usize,
     filtered: Vec<usize>,
     query: String,
     sel: usize,
@@ -104,10 +106,14 @@ pub struct App {
 impl App {
     pub fn new(styles_path: &Path) -> Self {
         let all = model::all_keybinds();
+        let mut categories = vec!["All"];
+        categories.extend(model::categories(&all));
         let filtered = (0..all.len()).collect();
         let theme = Theme::load(styles_path);
         Self {
             all,
+            categories,
+            selected_category: 0,
             filtered,
             query: String::new(),
             sel: 0,
@@ -118,9 +124,28 @@ impl App {
     }
 
     pub fn refilter(&mut self) {
-        self.filtered = model::filter_keybinds(&self.all, &self.query);
+        let cat = self.categories[self.selected_category];
+        self.filtered = model::filter_keybinds_with_category(&self.all, &self.query, Some(cat));
         self.sel = 0;
         self.scroll = 0;
+    }
+
+    pub fn set_category(&mut self, idx: usize) {
+        if idx < self.categories.len() {
+            self.selected_category = idx;
+            self.refilter();
+        }
+    }
+
+    pub fn next_category(&mut self) {
+        self.selected_category = (self.selected_category + 1) % self.categories.len();
+        self.refilter();
+    }
+
+    pub fn prev_category(&mut self) {
+        let n = self.categories.len();
+        self.selected_category = (self.selected_category + n - 1) % n;
+        self.refilter();
     }
 
     pub fn move_sel(&mut self, delta: isize) {
@@ -151,6 +176,14 @@ impl App {
     pub fn selected_cmd(&self) -> Option<&'static str> {
         self.filtered.get(self.sel).map(|&idx| self.all[idx].cmd)
     }
+
+    pub fn category_count(&self, cat: &str) -> usize {
+        if cat == "All" {
+            self.all.len()
+        } else {
+            self.all.iter().filter(|k| k.category == cat).count()
+        }
+    }
 }
 
 fn styles_path() -> PathBuf {
@@ -164,6 +197,16 @@ fn execute_command(cmd: &str) {
     let _ = std::process::Command::new("cmd")
         .args(["/c", "start", "", "cmd", "/c", cmd])
         .spawn();
+}
+
+fn parse_keycaps(keys: &str) -> Vec<&str> {
+    if keys.contains(" + ") {
+        keys.split(" + ").collect()
+    } else if keys.contains(" / ") {
+        keys.split(" / ").collect()
+    } else {
+        vec![keys]
+    }
 }
 
 fn main() {
@@ -193,6 +236,10 @@ fn smoke(app: &mut App) {
     app.refilter();
     assert!(!app.filtered.is_empty());
     println!("keybind smoke: filter 'focus' matches={}", app.filtered.len());
+    app.query.clear();
+    app.set_category(1); // Navigation
+    assert_eq!(app.filtered.len(), 8);
+    println!("keybind smoke: category Navigation matches={}", app.filtered.len());
     println!("smoke: ok");
 }
 
@@ -211,8 +258,8 @@ unsafe fn run() {
         std::process::exit(1);
     }
 
-    let title: Vec<u16> = "Keybindings\0".encode_utf16().collect();
-    let total_rows = APP.with(|c| c.borrow().as_ref().map_or(11, |a| a.filtered.len()));
+    let title: Vec<u16> = "Keyboard Shortcuts\0".encode_utf16().collect();
+    let total_rows = APP.with(|c| c.borrow().as_ref().map_or(layout::VISIBLE_ROWS, |a| a.filtered.len()));
     let h = layout::total_height(total_rows);
     let ex = WS_EX_TOPMOST | WS_EX_TOOLWINDOW;
 
@@ -243,7 +290,6 @@ unsafe fn run() {
         }
     });
 
-    // Center on monitor with cursor
     let mut pt = POINT { x: 0, y: 0 };
     let _ = GetCursorPos(&mut pt);
     let mon = MonitorFromPoint(pt, MONITOR_DEFAULTTOPRIMARY);
@@ -332,6 +378,30 @@ unsafe extern "system" fn wnd_proc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM)
                     }
                     let _ = DestroyWindow(hwnd);
                 }
+                k if k == VK_TAB.0 => {
+                    APP.with(|c| {
+                        if let Some(a) = c.borrow_mut().as_mut() {
+                            a.next_category();
+                        }
+                    });
+                    relayout(hwnd);
+                }
+                k if k == VK_LEFT.0 => {
+                    APP.with(|c| {
+                        if let Some(a) = c.borrow_mut().as_mut() {
+                            a.prev_category();
+                        }
+                    });
+                    relayout(hwnd);
+                }
+                k if k == VK_RIGHT.0 => {
+                    APP.with(|c| {
+                        if let Some(a) = c.borrow_mut().as_mut() {
+                            a.next_category();
+                        }
+                    });
+                    relayout(hwnd);
+                }
                 k if k == VK_BACK.0 => {
                     APP.with(|c| {
                         if let Some(a) = c.borrow_mut().as_mut() {
@@ -392,16 +462,42 @@ unsafe extern "system" fn wnd_proc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM)
         WM_LBUTTONDOWN => {
             let x = (lp.0 & 0xFFFF) as i16 as i32;
             let y = ((lp.0 >> 16) & 0xFFFF) as i16 as i32;
-            let origin_y = layout::PAD + layout::SEARCH_H + 12;
 
-            let clicked_row = if y >= origin_y && x >= layout::PAD && x <= layout::W - layout::PAD - 10 {
-                let row_idx = ((y - origin_y) / (layout::ROW_H + layout::GAP)) as usize;
-                Some(row_idx)
-            } else {
-                None
-            };
+            // Search clear button
+            if layout::hit_search_clear(layout::W, layout::PAD, layout::SEARCH_H, x, y) {
+                APP.with(|c| {
+                    if let Some(a) = c.borrow_mut().as_mut() {
+                        if !a.query.is_empty() {
+                            a.query.clear();
+                            a.refilter();
+                        }
+                    }
+                });
+                relayout(hwnd);
+                return LRESULT(0);
+            }
 
-            if let Some(row_idx) = clicked_row {
+            // Click on sidebar category
+            let (sx0, sy0, sx1, sy1) = layout::sidebar_rect(layout::PAD, layout::SEARCH_H);
+            if x >= sx0 && x <= sx1 && y >= sy0 && y <= sy1 {
+                let cat_y_start = sy0 + 20;
+                if y >= cat_y_start {
+                    let cat_idx = ((y - cat_y_start) / 32) as usize;
+                    APP.with(|c| {
+                        if let Some(a) = c.borrow_mut().as_mut() {
+                            a.set_category(cat_idx);
+                        }
+                    });
+                    relayout(hwnd);
+                    return LRESULT(0);
+                }
+            }
+
+            // Click on shortcut row in right list
+            let (lx0, ly0, lx1, ly1) = layout::list_rect(layout::W, layout::PAD, layout::SEARCH_H);
+            let rows_y_start = ly0 + 20;
+            if x >= lx0 && x <= lx1 - 10 && y >= rows_y_start && y <= ly1 {
+                let row_idx = ((y - rows_y_start) / (layout::ROW_H + layout::GAP)) as usize;
                 APP.with(|c| {
                     if let Some(a) = c.borrow_mut().as_mut() {
                         let actual_idx = a.scroll + row_idx;
@@ -415,23 +511,9 @@ unsafe extern "system" fn wnd_proc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM)
                     }
                 });
                 let _ = DestroyWindow(hwnd);
-            } else if x >= layout::W - layout::PAD - 8 && y >= origin_y {
-                // Clicked on scrollbar area - page scroll
-                let total_h = (layout::ROW_H + layout::GAP) * layout::VISIBLE_ROWS as i32;
-                if y <= origin_y + total_h {
-                    let rel_y = y - origin_y;
-                    let frac = (rel_y as f32 / total_h as f32).clamp(0.0, 1.0);
-                    APP.with(|c| {
-                        if let Some(a) = c.borrow_mut().as_mut() {
-                            if a.filtered.len() > layout::VISIBLE_ROWS {
-                                let max_scroll = (a.filtered.len() - layout::VISIBLE_ROWS) as f32;
-                                a.scroll = (frac * max_scroll) as usize;
-                            }
-                        }
-                    });
-                    paint(hwnd);
-                }
+                return LRESULT(0);
             }
+
             LRESULT(0)
         }
         WM_DESTROY => {
@@ -491,12 +573,10 @@ unsafe fn paint(hwnd: HWND) {
 fn render(dib: &mut Dib, app: &App, w: i32, h: i32) {
     let t = &app.theme;
     let total_filtered = app.filtered.len();
-    let has_scrollbar = total_filtered > layout::VISIBLE_ROWS;
-    let rows_w = if has_scrollbar {
-        w - layout::PAD - layout::SCROLLBAR_W - 8
-    } else {
-        w - layout::PAD
-    };
+    let (fx0, fy0, fx1, fy1) = layout::search_box(w, layout::PAD, layout::SEARCH_H);
+    let (sx0, sy0, sx1, sy1) = layout::sidebar_rect(layout::PAD, layout::SEARCH_H);
+    let (lx0, ly0, lx1, _ly1) = layout::list_rect(w, layout::PAD, layout::SEARCH_H);
+    let list_rows_y = ly0 + 20;
 
     // ---- shape pass ----
     {
@@ -509,63 +589,79 @@ fn render(dib: &mut Dib, app: &App, w: i32, h: i32) {
         });
         c.v_gradient(0, 0, w, h, t.sheen_top, t.sheen_bottom);
 
-        // Radiant glow behind search field for luxurious illuminated aesthetic
+        // Radiant subtle glow behind search field
         c.radial_glow(
             w as f32 * 0.5,
-            (layout::PAD + layout::SEARCH_H / 2) as f32,
+            (fy0 + layout::SEARCH_H / 2) as f32,
             w as f32 * 0.75,
-            t.accent,
+            t.apple_accent,
             t.bloom,
         );
 
-        // Subtle borders with anti-aliasing
-        c.round_rect_border(1, 1, w - 1, h - 1, layout::RADIUS, 1, t.hairline);
+        // Outer window border
+        c.round_rect_border(1, 1, w - 1, h - 1, layout::RADIUS, 1, t.subtle_border);
         c.round_rect_border(1, 1, w - 1, 14, layout::RADIUS, 1, t.highlight);
 
         // Inset search field
-        let (fx0, fy0, fx1, fy1) = layout::search_box(w, layout::PAD, layout::SEARCH_H);
-        c.round_rect(fx0, fy0, fx1, fy1, 14, t.field);
-        c.round_rect_border(fx0, fy0, fx1, fy1, 14, 1, t.hairline);
+        c.round_rect(fx0, fy0, fx1, fy1, 10, t.field);
+        c.round_rect_border(fx0, fy0, fx1, fy1, 10, 1, t.subtle_border);
 
-        // Magnifier glyph: crisp geometric vector
-        let gcx = fx0 as f32 + 24.0;
+        // Magnifier vector glyph
+        let gcx = fx0 as f32 + 20.0;
         let gcy = (fy0 + fy1) as f32 / 2.0;
         for py in (gcy as i32 - 9)..=(gcy as i32 + 9) {
             for px in (gcx as i32 - 9)..=(gcx as i32 + 9) {
                 let dx = px as f32 + 0.5 - gcx;
                 let dy = py as f32 + 0.5 - gcy;
-                let d = (dx * dx + dy * dy).sqrt() - 5.5;
+                let d = (dx * dx + dy * dy).sqrt() - 5.0;
                 let cov = (0.5f32 - d.abs() / 1.7).clamp(0.0, 1.0);
                 if cov > 0.0 {
                     c.blend_pixel(px, py, t.subtext, cov);
                 }
             }
         }
-        for i in 0..8 {
-            let hx = gcx + 5.0 + i as f32 * 0.75;
-            let hy = gcy + 5.0 + i as f32 * 0.75;
+        for i in 0..7 {
+            let hx = gcx + 4.5 + i as f32 * 0.75;
+            let hy = gcy + 4.5 + i as f32 * 0.75;
             for (dx, dy) in [(0i32, 0i32), (1, 0), (0, 1), (1, 1)] {
                 c.blend_pixel(hx as i32 + dx, hy as i32 + dy, t.subtext, 0.85);
             }
         }
 
-        // Visible rows
-        let origin_y = layout::PAD + layout::SEARCH_H + 12;
+        // Left sidebar background pane
+        c.round_rect(sx0, sy0, sx1, sy1, 10, t.field);
+        c.round_rect_border(sx0, sy0, sx1, sy1, 10, 1, t.hairline);
+
+        // Category pills inside sidebar
+        let cat_y_start = sy0 + 20;
+        for (i, _) in app.categories.iter().enumerate() {
+            let cy0 = cat_y_start + i as i32 * 32;
+            let cy1 = cy0 + 26;
+            if cy1 > sy1 - 4 {
+                break;
+            }
+            if i == app.selected_category {
+                c.round_rect(sx0 + 6, cy0, sx1 - 6, cy1, 6, t.elevated_surface);
+                c.round_rect_border(sx0 + 6, cy0, sx1 - 6, cy1, 6, 1, t.subtle_border);
+            }
+        }
+
+        // Right pane shortcut rows
         let visible_count = total_filtered
             .saturating_sub(app.scroll)
             .min(layout::VISIBLE_ROWS);
 
+        let rows_w = lx1 - 10;
         for i in 0..visible_count {
             let actual_idx = app.scroll + i;
-            let ry = layout::row_y(origin_y, i);
+            let ry = layout::row_y(list_rows_y, i);
             let selected = actual_idx == app.sel;
 
-            let rx0 = layout::PAD;
+            let rx0 = lx0;
             let rx1 = rows_w;
             let ry0 = ry;
             let ry1 = ry + layout::ROW_H;
 
-            // Row background
             let fill = if selected {
                 t.row_selected
             } else {
@@ -573,41 +669,17 @@ fn render(dib: &mut Dib, app: &App, w: i32, h: i32) {
             };
             c.round_rect(rx0, ry0, rx1, ry1, 8, fill);
             if selected {
-                c.round_rect_border(rx0, ry0, rx1, ry1, 8, 1, t.accent);
+                c.round_rect_border(rx0, ry0, rx1, ry1, 8, 1, t.apple_accent);
             } else {
-                c.round_rect_border(rx0, ry0, rx1, ry1, 8, 1, t.hairline);
+                c.round_rect_border(rx0, ry0, rx1, ry1, 8, 1, t.subtle_border);
             }
-
-            // Key badge hardware keycap pill
-            let (bx0, by0, bx1, by1) = layout::key_badge_rect(rx0, ry0);
-            c.round_rect(bx0, by0, bx1, by1, 6, t.badge_bg);
-            c.round_rect_border(
-                bx0,
-                by0,
-                bx1,
-                by1,
-                6,
-                1,
-                if selected { t.accent } else { t.badge_border },
-            );
-            // Subtle top sheen on keycap for hardware depth
-            c.hline(bx0 + 4, bx1 - 4, by0 + 1, t.highlight);
-
-            // Category tag pill on right
-            let tag_w = 120;
-            let tag_x1 = rx1 - 8;
-            let tag_x0 = tag_x1 - tag_w;
-            let tag_y0 = ry0 + 7;
-            let tag_y1 = ry1 - 7;
-            c.round_rect(tag_x0, tag_y0, tag_x1, tag_y1, 6, t.field);
-            c.round_rect_border(tag_x0, tag_y0, tag_x1, tag_y1, 6, 1, t.hairline);
         }
 
-        // Visual Scrollbar Track and Thumb
+        // Scrollbar
         let rows_total_h = (layout::ROW_H + layout::GAP) * layout::VISIBLE_ROWS as i32 - layout::GAP;
         if let Some((track, thumb)) = layout::scrollbar_rects(
             w,
-            origin_y,
+            list_rows_y,
             rows_total_h,
             total_filtered,
             layout::VISIBLE_ROWS,
@@ -622,18 +694,39 @@ fn render(dib: &mut Dib, app: &App, w: i32, h: i32) {
         c.hline(layout::PAD, w - layout::PAD, footer_rule_y, t.hairline);
     }
 
-    // ---- text pass (ClearType subpixel antialiasing) ----
+    // ---- text pass ----
     unsafe {
         let dc = dib.dc();
+        let title_font = font(Type::Title.gdi(), 700, &t.typeface.display);
         let body = font(Type::Body.gdi(), 500, &t.typeface.family);
         let mono = font(Type::Body.gdi(), 600, yasb_chrome::GOHU_FAMILY);
-        let small = font(Type::Foot.gdi(), 500, &t.typeface.family);
+        let small = font(Type::Foot.gdi(), 400, &t.typeface.family);
+        let label = font(Type::Label.gdi(), 600, &t.typeface.family);
         SetBkMode(dc, TRANSPARENT);
 
+        // Header: Title & Subtitle
+        SelectObject(dc, HGDIOBJ(title_font.0));
+        SetTextColor(dc, colorref(t.text));
+        draw_text(
+            dc,
+            "Keyboard Shortcuts",
+            rect(layout::PAD + 2, layout::PAD + 2, 280, 24),
+            DT_LEFT | DT_VCENTER,
+        );
+
+        SelectObject(dc, HGDIOBJ(small.0));
+        SetTextColor(dc, colorref(t.subtext));
+        draw_text(
+            dc,
+            "Search commands, apps, and window shortcuts",
+            rect(layout::PAD + 2, layout::PAD + 24, 320, 16),
+            DT_LEFT | DT_VCENTER,
+        );
+
         // Search text
-        let (fx0, _fy0, fx1, _fy1) = layout::search_box(w, layout::PAD, layout::SEARCH_H);
-        let text_x = fx0 + 42;
+        let text_x = fx0 + 38;
         let empty = app.query.is_empty();
+        let avail_search = (fx1 - text_x - 36).max(20);
         SelectObject(dc, HGDIOBJ(body.0));
         SetTextColor(dc, colorref(if empty { t.subtext } else { t.text }));
         draw_text(
@@ -643,76 +736,199 @@ fn render(dib: &mut Dib, app: &App, w: i32, h: i32) {
             } else {
                 &app.query
             },
-            rect(text_x, layout::PAD, fx1 - text_x - 12, layout::SEARCH_H),
+            rect(text_x, fy0, avail_search, layout::SEARCH_H),
             DT_LEFT | DT_VCENTER,
         );
 
-        // Visible rows
-        let origin_y = layout::PAD + layout::SEARCH_H + 12;
-        let visible_count = total_filtered
-            .saturating_sub(app.scroll)
-            .min(layout::VISIBLE_ROWS);
-
-        for i in 0..visible_count {
-            let actual_idx = app.scroll + i;
-            let item_idx = app.filtered[actual_idx];
-            let item = &app.all[item_idx];
-            let selected = actual_idx == app.sel;
-            let ry = layout::row_y(origin_y, i);
-            let rx0 = layout::PAD;
-            let rx1 = rows_w;
-            let (bx0, by0, bx1, by1) = layout::key_badge_rect(rx0, ry);
-
-            // Key badge text (centered in hardware keycap)
-            SelectObject(dc, HGDIOBJ(mono.0));
-            SetTextColor(dc, colorref(if selected { t.accent } else { t.text }));
+        if !empty {
+            SelectObject(dc, HGDIOBJ(label.0));
+            SetTextColor(dc, colorref(t.subtext));
             draw_text(
                 dc,
-                item.keys,
-                rect(bx0, by0, bx1 - bx0, by1 - by0),
+                "×",
+                rect(fx1 - 30, fy0, 20, layout::SEARCH_H),
                 DT_CENTER | DT_VCENTER,
             );
+        }
 
-            // Description text
-            SelectObject(dc, HGDIOBJ(body.0));
-            SetTextColor(dc, colorref(if selected { t.text } else { t.text }));
-            let desc_x = bx1 + 16;
-            let tag_w = 120;
-            let desc_w = (rx1 - 8 - tag_w - desc_x - 12).max(40);
-            draw_text(
-                dc,
-                item.desc,
-                rect(desc_x, ry, desc_w, layout::ROW_H),
-                DT_LEFT | DT_VCENTER,
-            );
+        // Sidebar categories text
+        SelectObject(dc, HGDIOBJ(label.0));
+        SetTextColor(dc, colorref(t.subtext));
+        tracked_text(dc, "CATEGORIES", sx0 + 10, sy0 + 4, 1);
 
-            // Category tag (pill-centered on right)
+        let cat_y_start = sy0 + 20;
+        for (i, &cat) in app.categories.iter().enumerate() {
+            let cy0 = cat_y_start + i as i32 * 32;
+            let cy1 = cy0 + 26;
+            if cy1 > sy1 - 4 {
+                break;
+            }
+            let is_sel = i == app.selected_category;
+
+            // Category name
             SelectObject(dc, HGDIOBJ(small.0));
-            SetTextColor(dc, colorref(if selected { t.accent } else { t.subtext }));
-            let tag_x1 = rx1 - 8;
-            let tag_x0 = tag_x1 - tag_w;
+            SetTextColor(dc, colorref(if is_sel { t.apple_accent } else { t.subtext }));
             draw_text(
                 dc,
-                item.category,
-                rect(tag_x0, ry, tag_w, layout::ROW_H),
+                cat,
+                rect(sx0 + 12, cy0, layout::SIDEBAR_W - 46, 26),
+                DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS,
+            );
+
+            // Category item count
+            let cnt_str = format!("{}", app.category_count(cat));
+            SetTextColor(dc, colorref(t.muted));
+            draw_text(
+                dc,
+                &cnt_str,
+                rect(sx1 - 36, cy0, 26, 26),
+                DT_RIGHT | DT_VCENTER,
+            );
+        }
+
+        // Right pane: category header
+        SelectObject(dc, HGDIOBJ(label.0));
+        SetTextColor(dc, colorref(t.subtext));
+        let active_cat_name = app.categories[app.selected_category].to_uppercase();
+        tracked_text(dc, &active_cat_name, lx0 + 4, ly0 + 4, 1);
+
+        let count_str = format!("{} ITEMS", total_filtered);
+        draw_text(
+            dc,
+            &count_str,
+            rect(lx1 - 100, ly0 + 2, 90, 16),
+            DT_RIGHT | DT_VCENTER,
+        );
+
+        // Right pane: rows
+        if app.filtered.is_empty() {
+            SelectObject(dc, HGDIOBJ(body.0));
+            SetTextColor(dc, colorref(t.text));
+            draw_text(
+                dc,
+                "No shortcuts found",
+                rect(lx0, ly0 + 80, lx1 - lx0, 26),
                 DT_CENTER | DT_VCENTER,
             );
+            SelectObject(dc, HGDIOBJ(small.0));
+            SetTextColor(dc, colorref(t.muted));
+            draw_text(
+                dc,
+                "Try searching by chord (e.g. Alt, Win) or action name",
+                rect(lx0, ly0 + 110, lx1 - lx0, 18),
+                DT_CENTER | DT_VCENTER,
+            );
+        } else {
+            let visible_count = total_filtered
+                .saturating_sub(app.scroll)
+                .min(layout::VISIBLE_ROWS);
+
+            for i in 0..visible_count {
+                let actual_idx = app.scroll + i;
+                let item_idx = app.filtered[actual_idx];
+                let item = &app.all[item_idx];
+                let selected = actual_idx == app.sel;
+                let ry = layout::row_y(list_rows_y, i);
+                let rx0 = lx0;
+                let rx1 = lx1 - 10;
+
+                // Render keycaps
+                let key_tokens = parse_keycaps(item.keys);
+                let mut cur_kx = rx0 + 12;
+                let keycap_y = ry + 8;
+                let keycap_h = 26;
+
+                for (ki, token) in key_tokens.iter().enumerate() {
+                    SelectObject(dc, HGDIOBJ(mono.0));
+                    let tw = text_width(dc, token).max(18);
+                    let kw = tw + 14;
+
+                    // Draw keycap pill into DIB canvas directly
+                    let mut c = dib.canvas();
+                    c.round_rect(cur_kx, keycap_y, cur_kx + kw, keycap_y + keycap_h, 5, t.keycap_bg);
+                    c.round_rect_border(
+                        cur_kx,
+                        keycap_y,
+                        cur_kx + kw,
+                        keycap_y + keycap_h,
+                        5,
+                        1,
+                        if selected { t.apple_accent } else { t.keycap_border },
+                    );
+
+                    // Text inside keycap
+                    SetTextColor(dc, colorref(if selected { t.apple_accent } else { t.text }));
+                    draw_text(
+                        dc,
+                        token,
+                        rect(cur_kx, keycap_y, kw, keycap_h),
+                        DT_CENTER | DT_VCENTER,
+                    );
+
+                    cur_kx += kw + 4;
+                    if ki + 1 < key_tokens.len() {
+                        SelectObject(dc, HGDIOBJ(small.0));
+                        SetTextColor(dc, colorref(t.muted));
+                        let sep = if item.keys.contains(" / ") { "/" } else { "+" };
+                        draw_text(
+                            dc,
+                            sep,
+                            rect(cur_kx, keycap_y, 10, keycap_h),
+                            DT_CENTER | DT_VCENTER,
+                        );
+                        cur_kx += 12;
+                    }
+                }
+
+                // Description text aligned to column
+                let desc_x = rx0 + 200;
+                let desc_w = (rx1 - desc_x - 120).max(60);
+                SelectObject(dc, HGDIOBJ(body.0));
+                SetTextColor(dc, colorref(t.text));
+                draw_text(
+                    dc,
+                    item.desc,
+                    rect(desc_x, ry, desc_w, layout::ROW_H),
+                    DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS,
+                );
+
+                // Category pill on right
+                let tag_w = 100;
+                let tag_x = rx1 - tag_w - 8;
+                SelectObject(dc, HGDIOBJ(small.0));
+                SetTextColor(dc, colorref(if selected { t.apple_accent } else { t.muted }));
+                draw_text(
+                    dc,
+                    item.category,
+                    rect(tag_x, ry, tag_w, layout::ROW_H),
+                    DT_RIGHT | DT_VCENTER,
+                );
+            }
         }
 
         // Footer status text
         let footer_y = h - layout::FOOT_H - 4;
         SelectObject(dc, HGDIOBJ(small.0));
         SetTextColor(dc, colorref(t.subtext));
-        let footer_text = format!(
-            "Showing {} of {} keybindings · ↑↓ or Wheel to scroll · Enter to run · Esc to close",
-            total_filtered,
-            app.all.len()
-        );
+        let footer_left = format!("{} shortcuts", total_filtered);
         draw_text(
             dc,
-            &footer_text,
-            rect(layout::PAD, footer_y, w - layout::PAD * 2, layout::FOOT_H),
-            DT_CENTER | DT_VCENTER,
+            &footer_left,
+            rect(layout::PAD, footer_y, 160, layout::FOOT_H),
+            DT_LEFT | DT_VCENTER,
         );
+
+        draw_text(
+            dc,
+            "↑↓ Navigate   Tab Category   Enter Run   Esc Close",
+            rect(w - layout::PAD - 360, footer_y, 360, layout::FOOT_H),
+            DT_RIGHT | DT_VCENTER,
+        );
+
+        let _ = DeleteObject(HGDIOBJ(title_font.0));
+        let _ = DeleteObject(HGDIOBJ(body.0));
+        let _ = DeleteObject(HGDIOBJ(mono.0));
+        let _ = DeleteObject(HGDIOBJ(small.0));
+        let _ = DeleteObject(HGDIOBJ(label.0));
     }
 }

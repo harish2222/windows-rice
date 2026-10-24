@@ -38,6 +38,18 @@ pub struct Theme {
     pub field: Rgba,
     pub scrollbar_track: Rgba,
     pub scrollbar_thumb: Rgba,
+    /// Subtle neutral border (#383D47) from Apple specification
+    pub subtle_border: Rgba,
+    /// Elevated surface (#272B33)
+    pub elevated_surface: Rgba,
+    /// Keycap surface (#303540)
+    pub keycap_bg: Rgba,
+    /// Keycap border (#4B5260)
+    pub keycap_border: Rgba,
+    /// Restrained Apple accent (#B8C8EE)
+    pub apple_accent: Rgba,
+    /// Muted metadata (#858C9A)
+    pub muted: Rgba,
 }
 
 fn mix(a: Rgba, b: Rgba, t: f32) -> Rgba {
@@ -98,6 +110,12 @@ impl Theme {
             field: Rgba { a: 200, ..darken(bg, 0.22) },
             scrollbar_track: Rgba { a: 35, ..darken(bg, 0.30) },
             scrollbar_thumb: Rgba { a: 180, ..accent },
+            subtle_border: Rgba::rgb(56, 61, 71),
+            elevated_surface: Rgba::rgb(39, 43, 51),
+            keycap_bg: Rgba::rgb(48, 53, 64),
+            keycap_border: Rgba::rgb(75, 82, 96),
+            apple_accent: col(&["--accent-apple", "--lavender", "--sapphire"], Rgba::rgb(184, 200, 238)),
+            muted: col(&["--muted", "--overlay0"], Rgba::rgb(133, 140, 154)),
         }
     }
 

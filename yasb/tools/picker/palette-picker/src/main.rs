@@ -236,7 +236,7 @@ impl App {
 
     /// Client-space origin of the first cell row, below the search field.
     fn grid_origin(&self) -> (i32, i32) {
-        (PAD, PAD + SEARCH_H + 12)
+        (PAD, layout::grid_origin_y(PAD))
     }
 
     fn rects(&self, w: i32) -> Vec<(i32, i32)> {
@@ -354,23 +354,20 @@ fn run_theme(args: &[&str]) {
 /// applied.
 unsafe fn draw_cell(c: &mut yasb_chrome::Canvas, x: i32, y: i32, selected: bool, is_current: bool, t: &Theme) {
     let (x0, y0, x1, y1) = (x, y, x + layout::CELL_W, y + layout::CELL_H);
-    c.round_rect(x0, y0, x1, y1, CELL_R, if selected { t.cell_selected } else { t.cell });
-    if selected {
-        c.round_rect_border(x0, y0, x1, y1, CELL_R, 1, t.accent);
+    let fill = if selected {
+        t.cell_selected
+    } else if is_current {
+        t.elevated_surface
     } else {
+        t.cell
+    };
+    c.round_rect(x0, y0, x1, y1, CELL_R, fill);
+    if selected {
+        c.round_rect_border(x0, y0, x1, y1, CELL_R, 1, t.apple_accent);
+    } else if is_current {
         c.round_rect_border(x0, y0, x1, y1, CELL_R, 1, t.hairline);
-    }
-    if is_current {
-        // A small accent dot down the left edge marks the applied theme.
-        let cy = (y0 + y1) / 2;
-        for py in (cy - 3)..=(cy + 3) {
-            for px in (x0 + 9)..=(x0 + 15) {
-                let dx = px as f32 - (x0 + 12) as f32;
-                let dy = py as f32 - cy as f32;
-                let d = (dx * dx + dy * dy).sqrt() - 3.0;
-                c.blend_pixel(px, py, t.accent, (0.5 - d).clamp(0.0, 1.0));
-            }
-        }
+    } else {
+        c.round_rect_border(x0, y0, x1, y1, CELL_R, 1, t.subtle_border);
     }
 }
 
@@ -410,12 +407,12 @@ unsafe fn paint(hwnd: HWND) {
     let origin = app.grid_origin();
     let rects = layout::cell_rects(&rows, origin, w - PAD * 2);
     let (fx0, fy0, fx1, fy1) = layout::search_box(w, PAD, SEARCH_H);
-    let (tx0, ty0, tx1, ty1) = layout::toggle_btn(w, PAD, SEARCH_H);
-    let sw_w = 146;
+    let (tx0, ty0, tx1, _ty1) = layout::toggle_btn(w, PAD, SEARCH_H);
+    let sw_w = 76;
     let sw_h = 24;
-    let sw_x0 = tx0 + (layout::TOGGLE_W - sw_w) / 2;
-    let sw_y0 = ty0 + 26;
-    let sw_x1 = sw_x0 + sw_w;
+    let sw_x0 = tx1 - sw_w;
+    let sw_y0 = ty0 + (layout::TOGGLE_H - sw_h) / 2;
+    let sw_x1 = tx1;
     let sw_y1 = sw_y0 + sw_h;
 
     // ---- shape pass ------------------------------------------------------
@@ -432,51 +429,46 @@ unsafe fn paint(hwnd: HWND) {
         // within rather than pasted on top.
         c.radial_glow(
             w as f32 * 0.5,
-            (PAD + SEARCH_H / 2) as f32,
+            (fy0 + SEARCH_H / 2) as f32,
             w as f32 * 0.7,
-            t.accent,
+            t.apple_accent,
             t.bloom,
         );
-        c.round_rect_border(1, 1, w - 1, h - 1, RADIUS, 1, t.hairline);
+        c.round_rect_border(1, 1, w - 1, h - 1, RADIUS, 1, t.subtle_border);
         c.round_rect_border(1, 1, w - 1, 14, RADIUS, 1, t.highlight);
 
         // The search field: an inset rounded pill.
-        c.round_rect(fx0, fy0, fx1, fy1, CELL_R + 6, t.field);
-        c.round_rect_border(fx0, fy0, fx1, fy1, CELL_R + 6, 1, t.hairline);
+        c.round_rect(fx0, fy0, fx1, fy1, 10, t.field);
+        c.round_rect_border(fx0, fy0, fx1, fy1, 10, 1, t.subtle_border);
 
-        // Frosted glass two-way toggle button
-        c.round_rect(tx0, ty0, tx1, ty1, CELL_R + 6, t.field);
-        c.round_rect_border(tx0, ty0, tx1, ty1, CELL_R + 6, 1, t.hairline);
-
+        // Frosted glass toggle button container
         c.round_rect(sw_x0, sw_y0, sw_x1, sw_y1, 12, t.bg);
-        c.round_rect_border(sw_x0, sw_y0, sw_x1, sw_y1, 12, 1, t.hairline);
+        c.round_rect_border(sw_x0, sw_y0, sw_x1, sw_y1, 12, 1, t.subtle_border);
 
         let half_w = sw_w / 2;
         if app.frosted {
-            c.round_rect(sw_x0 + 1, sw_y0 + 1, sw_x0 + half_w, sw_y1 - 1, 11, t.accent);
+            c.round_rect(sw_x0 + 1, sw_y0 + 1, sw_x0 + half_w, sw_y1 - 1, 11, t.apple_accent);
         } else {
-            c.round_rect(sw_x0 + half_w, sw_y0 + 1, sw_x1 - 1, sw_y1 - 1, 11, t.cell_selected);
+            c.round_rect(sw_x0 + half_w, sw_y0 + 1, sw_x1 - 1, sw_y1 - 1, 11, t.elevated_surface);
         }
 
-        // Magnifier glyph: a ring plus a handle, drawn as geometry rather than
-        // an icon font so it matches the panel's stroke weight exactly and
-        // needs no asset on disk.
-        let gcx = fx0 as f32 + 28.0;
+        // Magnifier glyph
+        let gcx = fx0 as f32 + 20.0;
         let gcy = (fy0 + fy1) as f32 / 2.0;
-        for py in (gcy as i32 - 11)..=(gcy as i32 + 11) {
-            for px in (gcx as i32 - 11)..=(gcx as i32 + 11) {
+        for py in (gcy as i32 - 9)..=(gcy as i32 + 9) {
+            for px in (gcx as i32 - 9)..=(gcx as i32 + 9) {
                 let dx = px as f32 + 0.5 - gcx;
                 let dy = py as f32 + 0.5 - gcy;
-                let d = (dx * dx + dy * dy).sqrt() - 6.0;
+                let d = (dx * dx + dy * dy).sqrt() - 5.0;
                 let cov = (0.5f32 - d.abs() / 1.7).clamp(0.0, 1.0);
                 if cov > 0.0 {
                     c.blend_pixel(px, py, t.subtext, cov);
                 }
             }
         }
-        for i in 0..9 {
-            let hx = gcx + 5.5 + i as f32 * 0.75;
-            let hy = gcy + 5.5 + i as f32 * 0.75;
+        for i in 0..7 {
+            let hx = gcx + 4.5 + i as f32 * 0.75;
+            let hy = gcy + 4.5 + i as f32 * 0.75;
             for (dx, dy) in [(0i32, 0i32), (1, 0), (0, 1), (1, 1)] {
                 c.blend_pixel(hx as i32 + dx, hy as i32 + dy, t.subtext, 0.85);
             }
@@ -499,40 +491,45 @@ unsafe fn paint(hwnd: HWND) {
     // ---- text pass -------------------------------------------------------
     {
         let dc = dib.dc();
+        let title_font = font(Type::Title.gdi(), 700, &t.typeface.display);
         let body = font(Type::Body.gdi(), 500, &t.typeface.family);
         let small = font(Type::Foot.gdi(), 400, &t.typeface.family);
         let label = font(Type::Label.gdi(), 600, &t.typeface.family);
         SetBkMode(dc, TRANSPARENT);
 
-        // The search line. When the query is empty the hint stands in for it,
-        // which is why the caret is drawn *before* the text rather than after:
-        // a caret to the left of the hint would imply the hint is the value.
-        let text_x = PAD + 48;
-        let empty = app.query.is_empty();
-        let avail_search = (fx1 - text_x - 12).max(20);
-        SelectObject(dc, HGDIOBJ(body.0));
-        SetTextColor(dc, colorref(if empty { t.subtext } else { t.text }));
+        // Header: Title & Subtitle
+        SelectObject(dc, HGDIOBJ(title_font.0));
+        SetTextColor(dc, colorref(t.text));
         draw_text(
             dc,
-            if empty { "Type a theme name" } else { &app.query },
-            rect(text_x, PAD, avail_search, SEARCH_H),
+            "Appearance",
+            rect(PAD + 2, PAD + 2, 240, 22),
+            DT_LEFT | DT_VCENTER,
+        );
+
+        SelectObject(dc, HGDIOBJ(small.0));
+        SetTextColor(dc, colorref(t.subtext));
+        draw_text(
+            dc,
+            "Choose a theme for your YASB widgets",
+            rect(PAD + 2, PAD + 24, 300, 16),
             DT_LEFT | DT_VCENTER,
         );
 
         // Frosted glass toggle button text
-        SelectObject(dc, HGDIOBJ(label.0));
+        let sw_label_w = tx1 - sw_w - 8 - tx0;
+        SelectObject(dc, HGDIOBJ(small.0));
         SetTextColor(dc, colorref(t.subtext));
         draw_text(
             dc,
-            "FROSTED GLASS",
-            rect(tx0, ty0 + 6, layout::TOGGLE_W, 16),
-            DT_CENTER | DT_VCENTER,
+            "Frosted Glass",
+            rect(tx0, ty0, sw_label_w, layout::TOGGLE_H),
+            DT_RIGHT | DT_VCENTER,
         );
 
-        SelectObject(dc, HGDIOBJ(small.0));
         let half_w = sw_w / 2;
         // Left half: ON
-        SetTextColor(dc, colorref(if app.frosted { t.bg } else { t.subtext }));
+        SetTextColor(dc, colorref(if app.frosted { Rgba::rgb(16, 18, 22) } else { t.subtext }));
         draw_text(
             dc,
             "ON",
@@ -548,91 +545,135 @@ unsafe fn paint(hwnd: HWND) {
             DT_CENTER | DT_VCENTER,
         );
 
-        // Section headings, then the cell names.
-        let mut cell_i = 0usize;
-        let mut y = origin.1;
-        for row in &rows {
-            match row {
-                Row::Header(text) => {
-                    // Tracked caps, matching the weekday label in the saka
-                    // panel: two panels from the same system should not
-                    // disagree about what a section heading looks like.
-                    //
-                    // Centred in the heading's own 20px line box. It used to
-                    // be drawn at `y + 14` of a full 40px band that the cells
-                    // below also started at, which is how `LIGHT` ended up
-                    // painted across the first light cell.
-                    SelectObject(dc, HGDIOBJ(label.0));
-                    SetTextColor(dc, colorref(t.subtext));
-                    let caps = text.to_uppercase();
-                    tracked_text(dc, &caps, PAD + 6, y + 4, 2);
-                    y += layout::header_advance();
-                }
-                Row::Cell(ci) => {
-                    let (x, cy) = rects[cell_i];
-                    let item = &app.items[*ci];
-                    let is_current = item.name == app.current;
-                    let sw_x = x + layout::NAME_DX;
-                    let avail = layout::name_avail().max(24);
-                    SetTextColor(dc, colorref(if is_current { t.accent } else { t.text }));
-                    // Step the size down rather than clipping: a name cut off
-                    // mid-word reads as a bug, a smaller name reads as a
-                    // deliberate fit.
-                    let mut drawn = false;
-                    // The step-down ladder. `-13` is not decoration: the longest shipped
-                    // name measures 208px at 13px against a 214px column, so
-                    // 13px is the size that lets it render at full weight
-                    // rather than dropping to 12px. Naming only the ends of
-                    // the scale quietly deleted it.
-                    for size in [Type::Body.gdi(), -14, -13, Type::Foot.gdi()] {
-                        let f = font(size, if is_current { 600 } else { 500 }, &t.typeface.family);
-                        SelectObject(dc, HGDIOBJ(f.0));
-                        if text_width(dc, &item.name) <= avail {
+        // Search text
+        let text_x = fx0 + 38;
+        let empty = app.query.is_empty();
+        let avail_search = (fx1 - text_x - 36).max(20);
+        SelectObject(dc, HGDIOBJ(body.0));
+        SetTextColor(dc, colorref(if empty { t.subtext } else { t.text }));
+        draw_text(
+            dc,
+            if empty { "Search themes..." } else { &app.query },
+            rect(text_x, fy0, avail_search, layout::SEARCH_H),
+            DT_LEFT | DT_VCENTER,
+        );
+
+        if !empty {
+            SelectObject(dc, HGDIOBJ(label.0));
+            SetTextColor(dc, colorref(t.subtext));
+            draw_text(
+                dc,
+                "×",
+                rect(fx1 - 30, fy0, 22, layout::SEARCH_H),
+                DT_CENTER | DT_VCENTER,
+            );
+        }
+
+        // If search results are empty, display empty state
+        if app.filtered.is_empty() {
+            SelectObject(dc, HGDIOBJ(body.0));
+            SetTextColor(dc, colorref(t.text));
+            draw_text(
+                dc,
+                "No themes found",
+                rect(PAD, origin.1 + 12, w - PAD * 2, 22),
+                DT_CENTER | DT_VCENTER,
+            );
+            SelectObject(dc, HGDIOBJ(small.0));
+            SetTextColor(dc, colorref(t.muted));
+            draw_text(
+                dc,
+                "Press Esc or Backspace to clear search",
+                rect(PAD, origin.1 + 36, w - PAD * 2, 18),
+                DT_CENTER | DT_VCENTER,
+            );
+        } else {
+            // Section headings, then the cell names.
+            let mut cell_i = 0usize;
+            let mut y = origin.1;
+            for row in &rows {
+                match row {
+                    Row::Header(text) => {
+                        SelectObject(dc, HGDIOBJ(label.0));
+                        SetTextColor(dc, colorref(t.subtext));
+                        let caps = text.to_uppercase();
+                        tracked_text(dc, &caps, PAD + 6, y + 4, 2);
+                        y += layout::header_advance();
+                    }
+                    Row::Cell(ci) => {
+                        let (x, cy) = rects[cell_i];
+                        let item = &app.items[*ci];
+                        let is_current = item.name == app.current;
+                        let sw_x = x + layout::NAME_DX;
+                        let avail = (layout::name_avail() - 24).max(24);
+                        SetTextColor(dc, colorref(if is_current { t.apple_accent } else { t.text }));
+
+                        let mut drawn = false;
+                        for size in [Type::Body.gdi(), -14, -13, Type::Foot.gdi()] {
+                            let f = font(size, if is_current { 600 } else { 500 }, &t.typeface.family);
+                            SelectObject(dc, HGDIOBJ(f.0));
+                            if text_width(dc, &item.name) <= avail {
+                                draw_text(
+                                    dc,
+                                    &item.name,
+                                    rect(sw_x, cy, avail, layout::CELL_H),
+                                    DT_LEFT | DT_VCENTER,
+                                );
+                                drawn = true;
+                            }
+                            let _ = DeleteObject(HGDIOBJ(f.0));
+                            if drawn {
+                                break;
+                            }
+                        }
+                        if !drawn {
+                            SelectObject(dc, HGDIOBJ(body.0));
                             draw_text(
                                 dc,
                                 &item.name,
                                 rect(sw_x, cy, avail, layout::CELL_H),
-                                DT_LEFT | DT_VCENTER,
+                                DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS,
                             );
-                            drawn = true;
                         }
-                        let _ = DeleteObject(HGDIOBJ(f.0));
-                        if drawn {
-                            break;
+
+                        // Checkmark for currently applied theme
+                        if is_current {
+                            SelectObject(dc, HGDIOBJ(body.0));
+                            SetTextColor(dc, colorref(t.apple_accent));
+                            draw_text(
+                                dc,
+                                "\u{2713}",
+                                rect(x + layout::CELL_W - 28, cy, 20, layout::CELL_H),
+                                DT_CENTER | DT_VCENTER,
+                            );
                         }
+
+                        y = cy + layout::CELL_H + layout::GAP;
+                        cell_i += 1;
                     }
-                    if !drawn {
-                        SelectObject(dc, HGDIOBJ(body.0));
-                        draw_text(
-                            dc,
-                            &item.name,
-                            rect(sw_x, cy, avail, layout::CELL_H),
-                            DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS,
-                        );
-                    }
-                    y = cy + layout::CELL_H + layout::GAP;
-                    cell_i += 1;
                 }
             }
         }
 
         // Footer: the match count, and the key hints.
-        //
-        // Always drawn — the count is useful with no filter active — so its
-        // height is always reserved in `relayout`.
         let (_, foot_y, foot_h) = layout::footer_rows(h, FOOT_H, PAD);
         SelectObject(dc, HGDIOBJ(small.0));
         SetTextColor(dc, colorref(t.subtext));
-        let count = format!("{} of {} themes", app.filtered.len(), app.items.len());
+        let count = if app.query.is_empty() {
+            format!("{} themes", app.items.len())
+        } else {
+            format!("{} of {} themes", app.filtered.len(), app.items.len())
+        };
         draw_text(dc, &count, rect(PAD + 6, foot_y, 240, foot_h), DT_LEFT | DT_VCENTER);
         SetTextColor(dc, colorref(t.subtext));
         draw_text(
             dc,
-            "arrows select   enter apply   esc close",
+            "↑↓ Navigate   Enter Apply   Esc Close",
             rect(w - PAD - 360, foot_y, 360, foot_h),
             DT_RIGHT | DT_VCENTER,
         );
 
+        let _ = DeleteObject(HGDIOBJ(title_font.0));
         let _ = DeleteObject(HGDIOBJ(body.0));
         let _ = DeleteObject(HGDIOBJ(small.0));
         let _ = DeleteObject(HGDIOBJ(label.0));
@@ -974,6 +1015,19 @@ unsafe extern "system" fn wnd_proc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM)
                     }
                 });
                 paint(hwnd);
+                return LRESULT(0);
+            }
+
+            if layout::hit_search_clear(W, PAD, x, y) {
+                APP.with(|c| {
+                    if let Some(a) = c.borrow_mut().as_mut() {
+                        if !a.query.is_empty() {
+                            a.query.clear();
+                            a.refilter();
+                        }
+                    }
+                });
+                relayout(hwnd, W);
                 return LRESULT(0);
             }
 

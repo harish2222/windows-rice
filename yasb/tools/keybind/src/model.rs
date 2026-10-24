@@ -141,19 +141,53 @@ pub fn match_score(item: &Keybind, query: &str) -> Option<i32> {
 }
 
 /// Filter and sort keybindings by relevance.
+#[allow(dead_code)]
 pub fn filter_keybinds(all: &[Keybind], query: &str) -> Vec<usize> {
-    if query.trim().is_empty() {
-        return (0..all.len()).collect();
+    filter_keybinds_with_category(all, query, None)
+}
+
+/// Distinct categories preserving source order.
+pub fn categories(all: &[Keybind]) -> Vec<&'static str> {
+    let mut list = Vec::new();
+    for it in all {
+        if !list.contains(&it.category) {
+            list.push(it.category);
+        }
     }
-    let mut matches: Vec<(usize, i32)> = all
+    list
+}
+
+/// Filter keybindings with optional category constraint.
+pub fn filter_keybinds_with_category(
+    all: &[Keybind],
+    query: &str,
+    category: Option<&str>,
+) -> Vec<usize> {
+    let q = query.trim();
+    let mut indices: Vec<(usize, i32)> = all
         .iter()
         .enumerate()
-        .filter_map(|(idx, item)| match_score(item, query).map(|s| (idx, s)))
+        .filter(|(_, it)| {
+            if let Some(cat) = category {
+                if cat != "All" && it.category != cat {
+                    return false;
+                }
+            }
+            true
+        })
+        .filter_map(|(idx, item)| {
+            if q.is_empty() {
+                Some((idx, 0))
+            } else {
+                match_score(item, q).map(|score| (idx, score))
+            }
+        })
         .collect();
 
-    // Stable sort by score descending
-    matches.sort_by(|a, b| b.1.cmp(&a.1));
-    matches.into_iter().map(|(idx, _)| idx).collect()
+    if !q.is_empty() {
+        indices.sort_by(|a, b| b.1.cmp(&a.1));
+    }
+    indices.into_iter().map(|(idx, _)| idx).collect()
 }
 
 #[cfg(test)]
@@ -183,5 +217,27 @@ mod tests {
         let res = filter_keybinds(&all, "fllscrn");
         assert!(!res.is_empty());
         assert_eq!(all[res[0]].keys, "Alt + F");
+    }
+
+    #[test]
+    fn category_filtering_works() {
+        let all = all_keybinds();
+        let nav = filter_keybinds_with_category(&all, "", Some("Navigation"));
+        assert_eq!(nav.len(), 8);
+        for &idx in &nav {
+            assert_eq!(all[idx].category, "Navigation");
+        }
+        let term = filter_keybinds_with_category(&all, "terminal", Some("Launchers"));
+        assert_eq!(term.len(), 3);
+    }
+
+    #[test]
+    fn categories_list_is_complete() {
+        let all = all_keybinds();
+        let cats = categories(&all);
+        assert!(cats.contains(&"Navigation"));
+        assert!(cats.contains(&"Move Window"));
+        assert!(cats.contains(&"Launchers"));
+        assert!(cats.contains(&"Workspaces"));
     }
 }

@@ -1,7 +1,7 @@
 //! Persistent state for saka-popup.
 //!
 //! Remembers the user's chosen layout mode (`Portrait`, `Landscape`, `Compact`)
-//! and script (`Latin`, `Telugu`) across launches by persisting to
+//! and script (`English`, `Telugu`) across launches by persisting to
 //! `~/.config/yasb/saka-state.json`.
 
 use std::path::{Path, PathBuf};
@@ -18,7 +18,7 @@ impl Default for AppState {
     fn default() -> Self {
         Self {
             mode: LayoutMode::Portrait,
-            script: Script::Latin,
+            script: Script::Latin, // English
         }
     }
 }
@@ -46,9 +46,7 @@ pub fn load_state(path: &Path) -> AppState {
         } else if line.starts_with("\"script\":") {
             if line.contains("telugu") {
                 state.script = Script::Telugu;
-            } else if line.contains("devanagari") {
-                state.script = Script::Devanagari;
-            } else if line.contains("latin") {
+            } else if line.contains("english") || line.contains("latin") {
                 state.script = Script::Latin;
             }
         }
@@ -63,9 +61,8 @@ pub fn save_state(path: &Path, state: &AppState) {
         LayoutMode::Compact => "compact",
     };
     let script_str = match state.script {
-        Script::Latin => "latin",
         Script::Telugu => "telugu",
-        Script::Devanagari => "devanagari",
+        _ => "english",
     };
     let content = format!(
         "{{\n  \"mode\": \"{}\",\n  \"script\": \"{}\"\n}}\n",
@@ -88,7 +85,7 @@ mod tests {
         let path = temp_dir.join("test_state.json");
 
         for mode in [LayoutMode::Portrait, LayoutMode::Landscape, LayoutMode::Compact] {
-            for script in [Script::Latin, Script::Telugu, Script::Devanagari] {
+            for script in [Script::Latin, Script::Telugu] {
                 let s = AppState { mode, script };
                 save_state(&path, &s);
                 let loaded = load_state(&path);
