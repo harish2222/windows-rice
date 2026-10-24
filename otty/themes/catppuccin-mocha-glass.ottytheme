@@ -45,7 +45,7 @@ border     = "#313244"
 [windows]
 material = "acrylic-thin"
 color    = "#181825"
-opacity  = 0.85
+opacity  = 0.5
 
 [windows.sidebar]
 material = "acrylic"

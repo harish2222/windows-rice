@@ -1,24 +1,21 @@
-# Komorebi startup script v2 (runs via Startup .lnk with -NoProfile)
-# Ownership:
-#   - komorebi.lnk (official `komorebic enable-autostart`) starts komorebi
-#   - this script: guarded fallback start + wait-until-ready + YASB + apps
-# Fixes vs v1: removed `komorebic stop` (errored when no instance was running
-# and raced the start guard), removed profile load (threw on every spawn).
+# Komorebi startup script (single startup owner; runs hidden via Startup .lnk)
+# Starts Komorebi once, waits briefly for its IPC endpoint, then starts YASB
+# and the selected desktop apps.
 param([switch]$NoApps)
 
 $ErrorActionPreference = 'SilentlyContinue'
 
-# 1. Fallback: start komorebi only if the official autostart did not
+# 1. Start Komorebi if it is not already running.
 if (-not (Get-Process -Name komorebi -ErrorAction SilentlyContinue)) {
     $null = komorebic start --config "$env:USERPROFILE\.config\komorebi\komorebi.json" 2>&1
 }
 
-# 2. Wait until komorebi responds (up to 30s)
+# 2. Wait for Komorebi IPC, checking every 250 ms (up to 5 seconds).
 $ready = $false
-for ($i = 0; $i -lt 30; $i++) {
+for ($i = 0; $i -lt 20; $i++) {
     $null = komorebic state 2>&1
     if ($LASTEXITCODE -eq 0) { $ready = $true; break }
-    Start-Sleep -Seconds 1
+    Start-Sleep -Milliseconds 250
 }
 if (-not $ready) { exit 1 }
 

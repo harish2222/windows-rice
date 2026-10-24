@@ -1,10 +1,10 @@
 {
   "$schema": "https://raw.githubusercontent.com/LGUG2Z/komorebi/master/schema.json",
   "animation": {
-    "style": "EaseOutBack",
-    "fps": 60,
+    "style": "EaseInOutCubic",
+    "fps": 240,
     "enabled": true,
-    "duration": 200,
+    "duration": 250,
     "ghost_movement": true
   },
   "border": true,

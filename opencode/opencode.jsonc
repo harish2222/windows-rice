@@ -8,17 +8,30 @@
     },
     "agentdb": {
       "type": "local",
-      "command": ["npx", "-y", "agentdb", "mcp", "start"],
+      "command": ["cmd.exe", "/d", "/c", "npx", "-y", "agentdb@latest", "mcp", "start"],
       "enabled": true
     },
     "claude-flow": {
       "type": "local",
-      "command": ["npx", "-y", "claude-flow@v3alpha", "mcp", "start"],
+      "command": ["cmd.exe", "/d", "/c", "npx", "-y", "claude-flow@3.61.1", "mcp", "start"],
       "enabled": true
     },
     "caveman": {
       "type": "local",
-      "command": ["npx", "-y", "caveman-shrink"],
+      "command": ["cmd.exe", "/d", "/c", "C:\\Users\\haris\\.caveman\\bin\\caveman-mcp.exe"],
+      "enabled": true
+    },
+    "rea": {
+      "type": "local",
+      "command": [
+        "cmd.exe",
+        "/d",
+        "/c",
+        "npx",
+        "-y",
+        "rea-agents@6.7.0",
+        "mcp"
+      ],
       "enabled": true
     }
   }

@@ -41,8 +41,8 @@ cursor-color = "#f5e0dc"
 # --- Window / performance ----------------------------------------------------
 # Acrylic is supplied by the theme's [windows] material block; these opacity
 # values control how translucent the terminal layer sits on top of it.
-background-opacity = 0.85
-window-opacity = 0.92
+background-opacity = 0.5
+window-opacity = 0.5
 scrollback-lines = 50000
 session-log-size-mb = 10
 max-fps = 120
