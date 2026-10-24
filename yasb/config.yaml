@@ -65,7 +65,6 @@ bars:
       - lines
       - control_center
       - lines
-      - power_menu
 widgets:
   home:
     type: yasb.home.HomeWidget
@@ -116,6 +115,12 @@ widgets:
         "wallpapers",
         "palette",
         "notifications",
+        # power_menu lives here on purpose: the collapsed bar shows no power
+        # icon, but as a grouper child the widget stays "active", so its
+        # Win+Esc hotkey still registers (unplaced widgets are skipped by
+        # BarManager._collect_keybindings). It is fullscreen-style: Win+Esc
+        # opens the big centred overlay menu from anywhere.
+        "power_menu",
       ]
       collapse_options:
         enabled: true
@@ -261,19 +266,19 @@ widgets:
       label: "<span>\U000F0009</span>"
       uptime: true
       show_user: true
-      menu_style: popup
-      # Win+Esc opens the menu from anywhere: YASB registers this via the
-      # global RegisterHotKey API. Requires the widget to be placed on a bar.
+      # Fullscreen style = big dialog dead-center on a dimmed, blurred
+      # full-screen overlay (.power-menu-overlay covers the screen). This
+      # mode carries the native keyboard transport: Left/Right moves the
+      # selection, Up/Down jump between rows, Enter/Space executes, Esc
+      # closes. Win+Esc opens it from anywhere - YASB registers the hotkey
+      # via the global RegisterHotKey API, so the widget does not have to be
+      # referenced by any bar (it stays out of the bar entirely).
+      menu_style: fullscreen
+      button_row: 3
+      profile_image_size: 96
       keybindings:
         - keys: "win+esc"
           action: "toggle_power_menu"
-      popup:
-        round_corners: true
-        round_corners_type: normal
-        border_color: None
-        alignment: right
-        offset_left: 12
-      profile_image_size: 64
       buttons:
         lock:
         - "\U000F0341"

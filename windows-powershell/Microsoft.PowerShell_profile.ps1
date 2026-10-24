@@ -238,3 +238,32 @@ function signout {
 # Aliases outrank functions in command resolution, so the built-in
 # Start-Sleep alias would shadow the function above unless removed.
 Remove-Item Alias:sleep -Force -ErrorAction SilentlyContinue
+
+# Memory-friendly aliases: logout == signout, restart == reboot (both accept
+# the same delay or `cancel`, so e.g. `logout cancel` and `restart cancel`
+# behave exactly like their canonical verbs).
+Set-Alias logout signout
+Set-Alias restart reboot
+
+function Show-Help {
+    # Lists everything this profile adds (PowerShell resolves names
+    # case-insensitively, so `show-help` reaches this function too).
+@'
+PowerShell 5.1 Profile Help
+===========================
+
+Delayed system actions (duration: plain seconds or 20s / 10m / 2h):
+  shutdown <time>   Schedule forceful shutdown.
+  reboot <time>     Schedule a restart.
+  lock <time>       Lock the workstation after the delay (bare: lock now).
+  sleep <time>      Suspend the system after the delay.
+  signout <time>    Sign out after the delay (bare: signs off now).
+  logout/restart    Same as signout/reboot (alias keywords for memory).
+  <cmd> cancel      Abort: shutdown/reboot cancel -> shutdown /a; the
+                    lock/sleep/signout pair kills its hidden wait worker.
+
+Other:
+  lockmyscreen      Lock the screen immediately.
+  show-help         Show this help.
+'@ | Write-Host
+}
