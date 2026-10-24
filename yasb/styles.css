@@ -3864,14 +3864,42 @@ QSlider::handle:horizontal:hover {
 .yasb-bar .volume-widget .widget-container,
 .yasb-bar .battery-widget .widget-container,
 .yasb-bar .media-widget .widget-container { padding: 0 5px; }
-.yasb-bar .alpha-group .grouper-button,
-.yasb-bar .omega-group .grouper-button { padding: 0 6px; }
 
-/* Expanded grouper rows: single divider line, minimal air */
+/* Grouper lateral spacing: streamlined padding across alpha (stats) and omega (controls) */
+.yasb-bar .alpha-group .grouper-button,
+.yasb-bar .omega-group .grouper-button {
+    padding: 0 3px;
+}
+
+.alpha-group .container,
+.omega-group .container {
+    padding: 0;
+    margin: 0;
+}
+
 .omega-group .container .widget-container,
-.alpha-group .container .widget-container {
-    padding: 0 2px 0 6px;
-    margin-left: 1px;
+.alpha-group .container .widget-container,
+.yasb-bar .alpha-group .container .widget-container,
+.yasb-bar .omega-group .container .widget-container {
+    padding: 0 2px;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.alpha-group .container .widget-container .label,
+.omega-group .container .widget-container .label,
+.alpha-group .container .widget-container .label.alt,
+.omega-group .container .widget-container .label.alt {
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+.alpha-group .container .widget-container .icon,
+.omega-group .container .widget-container .icon {
+    padding-left: 1px;
+    padding-right: 1px;
+    padding-bottom: 1px;
+    margin: 0;
 }
 
 /* Sys-stat icons: fixed 25px across cpu/gpu/memory/disk/traffic */
@@ -3887,18 +3915,20 @@ QSlider::handle:horizontal:hover {
     color: var(--accent);
 }
 
-/* Alpha + systray: extra-tight (below the standard tiers) */
-.yasb-bar .alpha-group .grouper-button { padding: 0 4px; }
-.yasb-bar .alpha-group .container .widget-container {
-    padding: 0 1px 0 4px;
-    margin-left: 0;
-}
 .yasb-bar .systray-widget { margin: 0; }
 .yasb-bar .systray-widget .widget-container { padding: 0 1px; }
 
-/* Stat cluster baseline: icons and labels share one baseline */
-.alpha-group .container .widget-container .icon,
-.alpha-group .container .widget-container .label { padding-bottom: 1px; }
+/* Keybind widget */
+.keybind-widget .widget-container .icon,
+.keybind-widget .widget-container .label {
+    color: var(--sapphire);
+    font-size: 16px;
+    padding: 0 3px;
+}
+.keybind-widget .widget-container:hover .icon,
+.keybind-widget .widget-container:hover .label {
+    color: var(--text);
+}
 
 /* Frames stay Madhubani double */
 

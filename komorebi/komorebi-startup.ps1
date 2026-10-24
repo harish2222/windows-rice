@@ -24,6 +24,16 @@ if (-not (Get-Process -Name yasb -ErrorAction SilentlyContinue)) {
     Start-Process yasb
 }
 
+# 3b. Ensure PowerToys is running
+if (-not (Get-Process -Name PowerToys -ErrorAction SilentlyContinue)) {
+    $powertoys = "$env:USERPROFILE\scoop\apps\powertoys\current\PowerToys.exe"
+    if (Test-Path -LiteralPath $powertoys) {
+        Start-Process -FilePath $powertoys
+    } else {
+        Start-Process "PowerToys.exe"
+    }
+}
+
 if (-not $NoApps) {
     # 4. Workspace 1 (index 0) -> Windows Terminal
     $null = komorebic focus-monitor-workspace 0 0 2>&1

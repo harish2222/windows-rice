@@ -63,9 +63,27 @@ bars:
       - lines
       - omega
       - lines
+      - keybind
+      - lines
       - control_center
       - lines
 widgets:
+  keybind:
+    type: "yasb.custom.CustomWidget"
+    options:
+      label: "<span>\uf11c</span>"
+      label_alt: "Keybindings"
+      class_name: "keybind-widget"
+      tooltip: true
+      tooltip_label: "Keybindings Cheatsheet (Win+K)"
+      exec_options:
+        run_cmd: "echo 1"
+        run_interval: 0
+        run_once: true
+        return_format: "string"
+      callbacks:
+        on_left: "exec silent-run C:\\Users\\haris\\.config\\yasb\\tools\\keybind\\keybind.exe"
+        on_right: "toggle_label"
   home:
     type: yasb.home.HomeWidget
     options:
