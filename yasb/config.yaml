@@ -63,8 +63,6 @@ bars:
       - lines
       - omega
       - lines
-      - keybind
-      - lines
       - control_center
       - lines
 widgets:
@@ -132,6 +130,7 @@ widgets:
         "battery",
         "wallpapers",
         "palette",
+        "keybind",
         "notifications",
         # power_menu lives here on purpose: the collapsed bar shows no power
         # icon, but as a grouper child the widget stays "active", so its
