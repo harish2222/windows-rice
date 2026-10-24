@@ -19,22 +19,98 @@ if (Test-Path 'C:\Users\haris\scoop\apps\carapace\current\carapace.exe') {
     Invoke-Expression (Get-Content -LiteralPath $carapaceCache -Raw)
 }
 
-# Oh-My-Posh prompt — init cached the same way (regenerated when theme/exe change).
-$ompTheme = Join-Path $env:USERPROFILE 'Documents\PowerShell\lambda_new.omp.json'
-if (Test-Path $ompTheme) {
-    $ompCache = Join-Path $env:LOCALAPPDATA 'oh-my-posh\init-windows-powershell-cached.ps1'
-    $ompCacheItem = Get-Item -LiteralPath $ompCache -ErrorAction SilentlyContinue
-    $ompExe = (Get-Command oh-my-posh -ErrorAction SilentlyContinue).Source
-    $ompExeTime = if ($ompExe) { (Get-Item -LiteralPath $ompExe).LastWriteTimeUtc } else { [datetime]::MinValue }
-    $ompThemeTime = (Get-Item -LiteralPath $ompTheme).LastWriteTimeUtc
-    if (-not $ompCacheItem -or $ompCacheItem.LastWriteTimeUtc -lt $ompExeTime -or $ompCacheItem.LastWriteTimeUtc -lt $ompThemeTime) {
-        $null = New-Item -ItemType Directory -Path (Split-Path -Parent $ompCache) -Force
-        oh-my-posh init pwsh --config $ompTheme | Set-Content -LiteralPath $ompCache -Encoding UTF8
-    }
-    Invoke-Expression (Get-Content -LiteralPath $ompCache -Raw)
+# Oh-My-Posh prompt — half-life theme, initialised the simple way.
+$env:POSH_THEME = Join-Path $env:USERPROFILE '.config\oh-my-posh\half-life.omp.json'
+if (Test-Path $env:POSH_THEME) {
+    oh-my-posh init pwsh --config $env:POSH_THEME | Invoke-Expression
 }
 
-function prompt { $marker = if (([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { '#' } else { '$' }; "[C:\Users\haris\.config\yasb] $marker " }
 # Guarded: this file no longer exists (yasb scripts dir removed) — was throwing CommandNotFoundException on EVERY powershell.exe spawn (startup script, GlazeWM volume/brightness keybinds, etc.)
 $yasbThemeShell = "C:\Users\haris\.config\yasb\scripts\yasb-theme-shell.ps1"
 if (Test-Path -LiteralPath $yasbThemeShell) { . $yasbThemeShell }
+
+# ============================================================================
+# DELAYED SYSTEM ACTIONS — shutdown / reboot / lock / sleep
+# Shared duration syntax: plain seconds or e.g., 20s / 10m / 2h.
+# Mirrors the PowerShell 7 profile helpers.
+# ============================================================================
+function lockmyscreen {
+    rundll32.exe user32.dll,LockWorkStation
+}
+
+function ConvertTo-DelaySeconds {
+    param([Parameter(Mandatory)][string]$Time)
+
+    $time = $Time.ToLower()
+    if ($time -match '^(\d+)([smh])$') {
+        $value = [int]$matches[1]
+        switch ($matches[2]) {
+            's' { return $value }
+            'm' { return $value * 60 }
+            'h' { return $value * 3600 }
+        }
+    }
+    if ($time -match '^\d+$') {
+        return [int]$time
+    }
+
+    throw 'Invalid time format. Use plain seconds or e.g., 20s, 10m, 2h.'
+}
+
+function Start-DelayedSystemAction {
+    # Lock and sleep have no native "/t seconds" switch, so a detached hidden
+    # powershell.exe performs the wait (base64 -EncodedCommand keeps quoting
+    # simple). Detached via Start-Process so closing this shell — the way
+    # shutdown.exe schedules survive a closed terminal — does not cancel it.
+    param(
+        [Parameter(Mandatory)][ValidateSet('lock', 'sleep')][string]$Action,
+        [Parameter(Mandatory)][int]$Seconds
+    )
+
+    if ($Seconds -lt 1) {
+        throw 'Delay must be at least 1 second.'
+    }
+
+    $inner = if ($Action -eq 'lock') {
+        'rundll32.exe user32.dll,LockWorkStation'
+    }
+    else {
+        # SetSuspendState(False, True, False): standby, not hibernate.
+        'rundll32.exe powrprof.dll,SetSuspendState 0,1,0'
+    }
+
+    $encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes(
+        "Start-Sleep -Seconds $Seconds; $inner"))
+    Start-Process -FilePath 'powershell.exe' -WindowStyle Hidden `
+        -ArgumentList '-NoProfile', '-EncodedCommand', $encoded
+}
+
+function shutdown {
+    param([Parameter(Mandatory)][string]$Time)
+
+    shutdown.exe /s /f /t (ConvertTo-DelaySeconds $Time)
+}
+
+function reboot {
+    param([Parameter(Mandatory)][string]$Time)
+
+    shutdown.exe /r /f /t (ConvertTo-DelaySeconds $Time)
+}
+
+function lock {
+    param([Parameter(Mandatory)][string]$Time)
+
+    Start-DelayedSystemAction -Action lock -Seconds (ConvertTo-DelaySeconds $Time)
+}
+
+function sleep {
+    # Overrides the built-in Start-Sleep alias: this `sleep` suspends the
+    # system after the delay. Use `Start-Sleep` directly for in-session waits.
+    param([Parameter(Mandatory)][string]$Time)
+
+    Start-DelayedSystemAction -Action sleep -Seconds (ConvertTo-DelaySeconds $Time)
+}
+
+# Aliases outrank functions in command resolution, so the built-in
+# Start-Sleep alias would shadow the function above unless removed.
+Remove-Item Alias:sleep -Force -ErrorAction SilentlyContinue

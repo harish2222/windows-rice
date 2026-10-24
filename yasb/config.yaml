@@ -1,5 +1,6 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/amnweb/yasb/main/schema.json
 # For more information, visit https://github.com/amnweb/yasb/wiki
+# Keep live reload enabled for configuration edits and palette switching.
 watch_stylesheet: true
 watch_config: true
 system_colors: true
@@ -17,7 +18,7 @@ bars:
       align: center
     animation:
       enabled: true
-      duration: 300
+      duration: 250
     # POLICY: keep blur_effect disabled. Enabling it blurs wallpaper into the
     # island gaps (unreserved spaces) and washes out text on light wallpapers.
     # Readability comes from the opaque --glass rail in styles.css instead.
@@ -63,6 +64,8 @@ bars:
       - omega
       - lines
       - control_center
+      - lines
+      - power_menu
 widgets:
   home:
     type: yasb.home.HomeWidget
@@ -204,8 +207,8 @@ widgets:
         offset_left: 0
         circle_size: 170
         circle_thickness: 8
-        circle_work_progress_color: "#B294B8"
-        circle_break_progress_color: "#67A694"
+        circle_work_progress_color: "#B082C4"
+        circle_break_progress_color: "#5CA89B"
       callbacks:
         # `toggle_menu` is YASB's convention for widgets whose popup key is
         # `menu` (wifi/language/disk all use it). Middle keeps the old
@@ -244,7 +247,7 @@ widgets:
   notifications:
     type: yasb.notifications.NotificationsWidget
     options:
-      label: "<span>\udb80\udc9e</span>"
+      label: "<span>\U000F009E</span>"
       label_alt: '{count} notifications'
       hide_empty: true
       tooltip: false
@@ -252,15 +255,18 @@ widgets:
         on_left: toggle_notification
         on_right: do_nothing
         on_middle: do_nothing
-  # ORPHANED (intentional): home menu has power_menu: false today, so this
-  # popup has no trigger; kept for quick re-placement.
   power_menu:
     type: yasb.power_menu.PowerMenuWidget
     options:
-      label: "<span>\udb80\udc09</span>"
+      label: "<span>\U000F0009</span>"
       uptime: true
       show_user: true
       menu_style: popup
+      # Win+Esc opens the menu from anywhere: YASB registers this via the
+      # global RegisterHotKey API. Requires the widget to be placed on a bar.
+      keybindings:
+        - keys: "win+esc"
+          action: "toggle_power_menu"
       popup:
         round_corners: true
         round_corners_type: normal
@@ -270,22 +276,22 @@ widgets:
       profile_image_size: 64
       buttons:
         lock:
-        - "\uDB80\uDF41"
+        - "\U000F0341"
         - Lock
         signout:
-        - "\uDB80\uDF43"
+        - "\U000F0343"
         - Sign out
         sleep:
-        - "\uDB82\uDD04"
+        - "\U000F0904"
         - Sleep
         hibernate:
-        - "\uDB82\uDD01"
+        - "\U000F0901"
         - Hibernate
         restart:
-        - "\uDB81\uDC53"
+        - "\U000F0453"
         - Restart
         shutdown:
-        - "\uDB82\uDD06"
+        - "\U000F0906"
         - Shut Down
         cancel:
         - ''
@@ -319,7 +325,7 @@ widgets:
       class_name: "home-widget"
       exec_options:
         run_cmd: "C:\\Users\\haris\\.config\\yasb\\tools\\theme\\yasb-theme.exe current"
-        run_interval: 10000
+        run_interval: 3000
         return_format: "string"
       callbacks:
         # Rust picker (tools/picker/palette-picker). It reads its own catalog
@@ -338,14 +344,14 @@ widgets:
   komorebi_offline:
     type: "yasb.custom.CustomWidget"
     options:
-      label: "<span>\udb80\uddd9</span>"
+      label: "<span>\U000F01D9</span>"
       label_alt: "komorebi offline"
       class_name: "komorebi-control-widget"
       tooltip: true
       tooltip_label: "komorebi offline - click to start"
       exec_options:
         run_cmd: "komorebic state >nul 2>&1 || echo 1"
-        run_interval: 3000
+        run_interval: 10000
         run_once: false
         return_format: "string"
         hide_empty: true
@@ -403,7 +409,7 @@ widgets:
         bsp: "\uebeb"
         columns: "\uebf7"
         rows: "\uec01"
-        grid: "\udb81\udf58"
+        grid: "\U000F0758"
         scrolling: "\uebf7"
         vertical_stack: "\uebee"
         horizontal_stack: "\uebf0"
@@ -412,8 +418,8 @@ widgets:
         monocle: "\uf06f"
         maximized: "\uf06f"
         floating: "\uf2d2"
-        paused: "\udb83\udf89"
-        tiling: "\udb81\ude40"
+        paused: "\U000F0F89"
+        tiling: "\U000F0640"
       callbacks:
         on_left: 'toggle_layout_menu'
         on_middle: 'next_layout'
@@ -459,7 +465,7 @@ widgets:
   wallpapers:
     type: "yasb.wallpapers.WallpapersWidget"
     options:
-      label: "<span>\udb83\udc8d</span>"
+      label: "<span>\U000F0C8D</span>"
       change_automatically: false
     # Example path to folder with images. Can be a single string or a list of strings.
       image_path:
@@ -545,13 +551,13 @@ widgets:
       media_menu_icons:
         play: "\uf04b"
         pause: "\uf04c"
-        prev_track: "\udb81\udcae"
-        next_track: "\udb81\udcad"
+        prev_track: "\U000F04AE"
+        next_track: "\U000F04AD"
         mute: "\ue994"
         unmute: "\ue74f"
       scrolling_label:
         enabled: true
-        update_interval_ms: 33
+        update_interval_ms: 4
         style: "bounce"  # can be "left", "right", "bounce", "bounce-ease"
         separator: " | "
         label_padding: 0
@@ -583,7 +589,7 @@ widgets:
         offset_top: 6
         offset_left: 0
         show_layout_icon: true
-        layout_icon: "\udb80\udf0c"
+        layout_icon: "\U000F034C"
   # ORPHANED (intentional): defined but not placed on the bar.
   quick_launch:
     type: "yasb.quick_launch.QuickLaunchWidget"
@@ -611,7 +617,7 @@ widgets:
     options:
       label: "<span>\uf2db</span> {info[percent][total]}%"
       label_alt: "<span>\uf2db</span> {info[freq][current]} MHz"
-      update_interval: 2000
+      update_interval: 1000
       hide_decimal: true
       cpu_thresholds:
         low: 25
@@ -931,7 +937,7 @@ widgets:
       sensitivity: 100
       lower_cutoff_freq: 50
       higher_cutoff_freq: 12000
-      framerate: 60
+      framerate: 240
       noise_reduction: 77
       channels: stereo
       mono_option: average
@@ -941,11 +947,11 @@ widgets:
       waveform: 0
       sleep_timer: 5
       hide_empty: true
-      foreground: "#67A694"
+      foreground: "#5CA89B"
       gradient: 1
-      gradient_color_1: "#7AA0BC"
-      gradient_color_2: "#B294B8"
-      gradient_color_3: "#E2A05E"
+      gradient_color_1: "#7E9CC9"
+      gradient_color_2: "#B082C4"
+      gradient_color_3: "#E4935E"
       callbacks:
         on_left: "do_nothing"
         on_middle: "do_nothing"
