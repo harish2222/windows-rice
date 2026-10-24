@@ -1,4 +1,4 @@
-//! 3D Procedural Moon Sphere Renderer with Sun-Directed Illumination.
+﻿//! 3D Procedural Moon Sphere Renderer with Sun-Directed Illumination.
 //!
 //! Renders a realistic 3D lunar sphere featuring:
 //! - Continuous 3D spherical normal mapping and rotation

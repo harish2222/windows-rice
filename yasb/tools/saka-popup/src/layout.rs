@@ -25,7 +25,7 @@
 ///
 /// 496 gives the column 328px — the full caption with 10px to spare, and 51px
 /// clear for the `Phase` row's two date-times (277px measured).
-pub const W: i32 = 496;
+pub const W: i32 = 490;
 
 /// Width of the panel when the values are Telugu.
 ///
@@ -37,11 +37,11 @@ pub const W: i32 = 496;
 /// fallen behind its own content.
 pub const W_INDIC: i32 = 520;
 /// Width in landscape mode (Latin).
-pub const W_LANDSCAPE: i32 = 760;
+pub const W_LANDSCAPE: i32 = 762;
 /// Width in landscape mode (Indic).
 pub const W_LANDSCAPE_INDIC: i32 = 800;
 /// Width in compact glance mode.
-pub const W_COMPACT: i32 = 400;
+pub const W_COMPACT: i32 = 415;
 /// Window corner radius.
 pub const RADIUS: i32 = 20;
 /// Panel edge padding. Scale step 6.
@@ -169,11 +169,11 @@ impl Layout {
     pub fn tile_rect(&self, idx: usize) -> (i32, i32, i32, i32) {
         if self.mode == LayoutMode::Landscape {
             let w = self.w();
-            let gutter = 8;
-            let pad = PAD - 4;
+            let gutter = 10;
+            let pad = PAD;
             let avail = w - pad * 2 - gutter * 3;
             let tile_w = avail / 4;
-            let tile_h = if self.indic { 56 } else { 50 };
+            let tile_h = if self.indic { 58 } else { 54 };
             let x0 = pad + (idx as i32) * (tile_w + gutter);
             let x1 = x0 + tile_w;
             let y0 = self.grid_y;
@@ -184,11 +184,11 @@ impl Layout {
             let col = (idx % 2) as i32;
             let row = (idx / 2) as i32;
             let gutter = 10;
-            let pad = PAD - 4;
+            let pad = PAD;
             let avail = w - pad * 2 - gutter;
             let tile_w = avail / 2;
-            let tile_h = if self.indic { 58 } else { 52 };
-            let row_gap = 8;
+            let tile_h = if self.indic { 66 } else { 60 };
+            let row_gap = 10;
             let x0 = pad + col * (tile_w + gutter);
             let x1 = x0 + tile_w;
             let y0 = self.grid_y + row * (tile_h + row_gap);
@@ -227,40 +227,36 @@ impl Layout {
     fn build(rows: i32, indic: bool) -> Layout {
         let row_h = if indic { ROW_H_INDIC } else { ROW_H };
         let weekday_y = PAD;
-        // The pill is centred on the label's line box, so the two can never
-        // drift apart. It reaches a little above `weekday_y` and ends just
-        // above the date, which is why `date_y` is derived from the pill's
-        // bottom rather than from the label's own y.
-        let weekday_top = weekday_y - 3;
-        let weekday_bottom = weekday_top + WEEKDAY_H + 6;
-        // 11px caps: 14px line.
-        let date_y = weekday_bottom + 2;
-        // 28px display: 36px line.
-        let era_y = date_y + 38;
-        // 13px: 18px line.
-        let era_bottom = era_y + 18;
-        let rule_y = era_bottom + 14;
-        // The moon rides in the same band as the era line, at the right, so the
-        // panel does not spend 76px on a strip that only holds a disc and two
-        // short lines.
-        let moon_y = date_y;
-        let moon_bottom = era_bottom;
-        let card_y = rule_y + 18;
-        let card_bottom = card_y + CARD_PAD * 2 + rows * row_h;
-        let footer_y = card_bottom + 16;
-        let height = footer_y + 18 + PAD;
+        let weekday_top = weekday_y - 2;
+        let weekday_bottom = weekday_top + WEEKDAY_H + 4;
+        let date_y = weekday_bottom + 6;
+        let era_y = date_y + 34;
+        let era_bottom = era_y + 16;
         let mode = LayoutMode::Portrait;
         let w = if indic { W_INDIC } else { W };
-        let timeline_y = era_bottom + 10;
-        let timeline_bottom = timeline_y + 24;
-        let panchang_card_y = card_y;
-        let panchang_card_bottom = card_y + CARD_PAD * 2 + 4 * row_h;
-        let grid_y = panchang_card_bottom + 14;
-        let tile_h = if indic { 58 } else { 52 };
-        let grid_bottom = grid_y + tile_h * 2 + 8;
-        let moon_r = MOON_R;
+
+        let moon_r = 34;
         let moon_cx = w - PAD - moon_r;
+        let moon_y = date_y;
+        let moon_bottom = era_bottom;
         let moon_cy = (moon_y + moon_bottom) / 2;
+
+        let timeline_y = era_bottom + 14;
+        let timeline_bottom = timeline_y + 20;
+        let rule_y = timeline_bottom + 14;
+
+        let panchang_card_y = rule_y + 28;
+        let panchang_card_bottom = panchang_card_y + CARD_PAD * 2 + 4 * row_h;
+        let grid_y = panchang_card_bottom + 28;
+        let tile_h = if indic { 66 } else { 60 };
+        let row_gap = 10;
+        let grid_bottom = grid_y + tile_h * 2 + row_gap;
+
+        let card_y = panchang_card_y;
+        let card_bottom = card_y + CARD_PAD * 2 + rows * row_h;
+
+        let footer_y = grid_bottom + 18;
+        let height = footer_y + 18 + PAD;
         Layout {
             mode,
             weekday_y,
@@ -294,27 +290,30 @@ impl Layout {
         match mode {
             LayoutMode::Portrait => Self::build(rows, indic),
             LayoutMode::Landscape => {
-                let w = if indic { W_LANDSCAPE_INDIC } else { W_LANDSCAPE };
+                let _w = if indic { W_LANDSCAPE_INDIC } else { W_LANDSCAPE };
                 let row_h = if indic { ROW_H_INDIC } else { ROW_H };
                 let weekday_y = PAD;
-                let weekday_top = weekday_y - 3;
-                let weekday_bottom = weekday_top + WEEKDAY_H + 6;
-                let date_y = weekday_bottom + 2;
-                let era_y = date_y + 36;
-                let era_bottom = era_y + 18;
-                let timeline_y = era_bottom + 12;
-                let timeline_bottom = timeline_y + 24;
-                let rule_y = timeline_bottom + 14;
-                let moon_r = 38;
-                let moon_cx = w / 2;
-                let moon_cy = 90;
+                let weekday_top = weekday_y - 2;
+                let weekday_bottom = weekday_top + WEEKDAY_H + 4;
+                let date_y = weekday_bottom + 6;
+                let era_y = date_y + 30;
+                let era_bottom = era_y + 16;
+                let timeline_y = era_bottom + 14;
+                let timeline_bottom = timeline_y + 20;
+
+                let moon_r = 40;
+                let moon_cx = 325;
+                let moon_cy = 76;
                 let moon_y = moon_cy - moon_r;
                 let moon_bottom = moon_cy + moon_r;
-                let panchang_card_y = PAD;
+
+                let panchang_card_y = PAD - 4;
                 let panchang_card_bottom = panchang_card_y + CARD_PAD * 2 + 4 * row_h;
-                let grid_y = panchang_card_bottom.max(rule_y) + 16;
-                let tile_h = if indic { 56 } else { 50 };
+                let rule_y = panchang_card_bottom.max(timeline_bottom) + 12;
+                let grid_y = rule_y + 12;
+                let tile_h = if indic { 58 } else { 54 };
                 let grid_bottom = grid_y + tile_h;
+
                 let card_y = panchang_card_y;
                 let card_bottom = grid_bottom;
                 let footer_y = grid_bottom + 14;
@@ -349,27 +348,29 @@ impl Layout {
             LayoutMode::Compact => {
                 let w = W_COMPACT;
                 let weekday_y = PAD - 4;
-                let weekday_top = weekday_y - 3;
-                let weekday_bottom = weekday_top + WEEKDAY_H + 4;
-                let date_y = weekday_bottom + 2;
-                let era_y = date_y + 32;
+                let weekday_top = weekday_y - 2;
+                let weekday_bottom = weekday_top + WEEKDAY_H + 2;
+                let date_y = weekday_bottom + 4;
+                let era_y = date_y + 24;
                 let era_bottom = era_y + 16;
-                let timeline_y = era_bottom + 10;
-                let timeline_bottom = timeline_y + 22;
-                let rule_y = timeline_bottom + 8;
-                let moon_r = 28;
+
+                let moon_r = 24;
                 let moon_cx = w - PAD - moon_r;
-                let moon_cy = date_y + 16;
+                let moon_cy = 36;
                 let moon_y = moon_cy - moon_r;
                 let moon_bottom = moon_cy + moon_r;
+
+                let timeline_y = era_bottom + 22;
+                let timeline_bottom = timeline_y + 18;
+                let rule_y = timeline_bottom + 8;
                 let panchang_card_y = 0;
                 let panchang_card_bottom = 0;
                 let grid_y = 0;
                 let grid_bottom = 0;
                 let card_y = 0;
                 let card_bottom = 0;
-                let footer_y = timeline_bottom + 12;
-                let height = footer_y + 18 + PAD;
+                let footer_y = rule_y + 22;
+                let height = footer_y + 18 + PAD - 8;
                 Layout {
                     mode,
                     weekday_y,
@@ -445,7 +446,7 @@ impl Layout {
     /// Enlarging the labels is therefore not free in general — it eats the
     /// value column — and `the_shipped_rows_never_need_an_ellipsis` is what
     /// proves the trade still fits the `Next` row's two dates.
-    pub const VALUE_X: i32 = PAD + yasb_chrome::space(30);
+    pub const VALUE_X: i32 = PAD + yasb_chrome::space(28);
 
     /// Gap between a row's value and its right-aligned caption. Scale step 4.
     pub const CAPTION_GAP: i32 = yasb_chrome::space(4);
@@ -530,13 +531,36 @@ impl Layout {
     /// they sit side by side, not stacked — so only the stacked bands are
     /// compared.
     pub fn assert_no_overlap(&self, rows: i32) -> Result<(), String> {
+        if self.mode == LayoutMode::Compact {
+            let stacked = [
+                ("weekday pill", self.weekday_bottom, self.date_y),
+                ("date", self.date_y, self.era_y),
+                ("era", self.era_y, self.era_bottom),
+                ("timeline", self.era_bottom, self.timeline_y),
+                ("rule", self.timeline_bottom, self.rule_y),
+                ("footer", self.rule_y, self.footer_y),
+            ];
+            for pair in stacked.windows(2) {
+                let (an, _, a_bottom) = pair[0];
+                let (bn, b_top, _) = pair[1];
+                if a_bottom > b_top {
+                    return Err(format!("{an} ends at {a_bottom} but {bn} starts at {b_top}"));
+                }
+            }
+            if self.footer_y + 18 > self.height {
+                return Err(format!("footer overflows the compact panel: {}", self.height));
+            }
+            return Ok(());
+        }
+
         let stacked = [
             ("weekday pill", self.weekday_bottom, self.date_y),
             ("date", self.date_y, self.era_y),
             ("era", self.era_y, self.era_bottom),
-            ("rule", self.rule_y, self.rule_y + 1),
-            ("card", self.card_y, self.card_bottom),
-            ("footer", self.footer_y, self.footer_y + 18),
+            ("timeline", self.era_bottom, self.timeline_y),
+            ("rule", self.timeline_bottom, self.rule_y),
+            ("card", self.rule_y, self.panchang_card_y),
+            ("footer", self.grid_bottom, self.footer_y),
         ];
         for pair in stacked.windows(2) {
             let (an, _, a_bottom) = pair[0];
@@ -546,12 +570,12 @@ impl Layout {
             }
         }
         // Every row's content must fit inside the row.
-        for i in 0..rows {
+        for i in 0..rows.min(4) {
             let y = self.row_y(i);
             // The indicator sits under the value's line box. It has to clear
             // the text above it and still end inside the row, or it lands on
             // the next row's label.
-            if y + INDICATOR_Y + INDICATOR_H > y + ROW_H {
+            if y + INDICATOR_Y + INDICATOR_H > y + self.row_h() {
                 return Err(format!("row {i} indicator overflows: {y}"));
             }
         }

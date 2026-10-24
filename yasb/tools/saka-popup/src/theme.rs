@@ -113,6 +113,10 @@ pub struct Theme {
     pub surface_elevated: Rgba,
     /// Solar accent for sunrise / sunset timeline.
     pub solar: Rgba,
+    /// Subtle neutral border (#383D47) specified for Apple widgets.
+    pub subtle_border: Rgba,
+    /// Restrained Apple accent (#B8C8EE) preventing garish red domination.
+    pub apple_accent: Rgba,
     /// The opaque pill the weekday label sits on.
     ///
     /// The one surface in the panel that is *not* allowed to be acrylic. Every
@@ -461,18 +465,20 @@ impl Theme {
             sheen_bottom,
             // The bloom is the accent at low alpha, so a light theme with a
             // pale accent gets a pale glow rather than a colour wash.
-            bloom: 0.10,
+            bloom: 0.08,
             highlight: Rgba { a: 38, ..lighten(text, 0.25) },
-            hairline: Rgba { a: 150, ..border },
+            hairline: Rgba { a: 40, ..lighten(border, 0.1) },
             // A raised card is lighter than the panel on both light and dark
             // themes — that is how macOS does it — and the hairline supplies
             // the edge where the two are too close in luminance to separate.
             // Heavier than it would be on an opaque panel: at 85% bleed this
             // card is what the body text actually sits on, so it has to
             // deliver the contrast the panel used to.
-            card: Rgba { a: 175, ..lighten(bg, 0.09) },
-            surface_elevated: Rgba { a: 195, ..lighten(bg, 0.14) },
+            card: Rgba { a: 215, ..lighten(bg, 0.08) },
+            surface_elevated: Rgba { a: 225, ..lighten(bg, 0.13) },
             solar: col(&["--solar", "--accent-warm"], Rgba::rgb(229, 201, 162)),
+            subtle_border: Rgba::rgb(56, 61, 71),
+            apple_accent: col(&["--accent-apple", "--lavender", "--sapphire"], Rgba::rgb(184, 200, 238)),
             // The weekday scrim. This is the one surface that is not allowed
             // to be acrylic, and the reasoning is worth writing down because
             // an earlier attempt got it backwards.
