@@ -36,6 +36,12 @@ pub const W: i32 = 496;
 /// 277px. So the Indic panel keeps its width — it is the Latin one that had
 /// fallen behind its own content.
 pub const W_INDIC: i32 = 520;
+/// Width in landscape mode (Latin).
+pub const W_LANDSCAPE: i32 = 760;
+/// Width in landscape mode (Indic).
+pub const W_LANDSCAPE_INDIC: i32 = 800;
+/// Width in compact glance mode.
+pub const W_COMPACT: i32 = 400;
 /// Window corner radius.
 pub const RADIUS: i32 = 20;
 /// Panel edge padding. Scale step 6.
@@ -86,9 +92,19 @@ pub const SCRIM_PAD_X: i32 = 11;
 /// The weekday label's line box, which is what the pill is sized around.
 pub const WEEKDAY_H: i32 = 18;
 
+/// Layout presentation mode.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum LayoutMode {
+    #[default]
+    Portrait,
+    Landscape,
+    Compact,
+}
+
 /// Where each band starts and ends, measured from the panel's top.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Layout {
+    pub mode: LayoutMode,
     /// Tracked weekday label (11px caps).
     pub weekday_y: i32,
     /// Top of the weekday's scrim pill.
@@ -116,6 +132,19 @@ pub struct Layout {
     pub height: i32,
     /// Whether the values are drawn in an Indic script.
     pub indic: bool,
+    /// Sunrise / Sunset timeline band.
+    pub timeline_y: i32,
+    pub timeline_bottom: i32,
+    /// Today's Panchang primary card.
+    pub panchang_card_y: i32,
+    pub panchang_card_bottom: i32,
+    /// Moon & Calendar 2x2 / horizontal tile grid.
+    pub grid_y: i32,
+    pub grid_bottom: i32,
+    /// 3D Moon sphere center and radius.
+    pub moon_cx: i32,
+    pub moon_cy: i32,
+    pub moon_r: i32,
 }
 
 impl Layout {
@@ -125,13 +154,56 @@ impl Layout {
     }
 
     /// Geometry for a panel whose values are in a Brahmic script.
+    #[allow(dead_code)]
     pub fn new_indic(rows: i32) -> Layout {
         Self::build(rows, true)
     }
 
+    /// Compute layout for a specific mode.
+    #[allow(dead_code)]
+    pub fn new_mode(mode: LayoutMode, indic: bool) -> Layout {
+        Self::build_mode(mode, 10, indic)
+    }
+
+    /// Geometry for tile `idx` (0..4) in the Moon & Calendar section.
+    pub fn tile_rect(&self, idx: usize) -> (i32, i32, i32, i32) {
+        if self.mode == LayoutMode::Landscape {
+            let w = self.w();
+            let gutter = 8;
+            let pad = PAD - 4;
+            let avail = w - pad * 2 - gutter * 3;
+            let tile_w = avail / 4;
+            let tile_h = if self.indic { 56 } else { 50 };
+            let x0 = pad + (idx as i32) * (tile_w + gutter);
+            let x1 = x0 + tile_w;
+            let y0 = self.grid_y;
+            let y1 = y0 + tile_h;
+            (x0, y0, x1, y1)
+        } else {
+            let w = self.w();
+            let col = (idx % 2) as i32;
+            let row = (idx / 2) as i32;
+            let gutter = 10;
+            let pad = PAD - 4;
+            let avail = w - pad * 2 - gutter;
+            let tile_w = avail / 2;
+            let tile_h = if self.indic { 58 } else { 52 };
+            let row_gap = 8;
+            let x0 = pad + col * (tile_w + gutter);
+            let x1 = x0 + tile_w;
+            let y0 = self.grid_y + row * (tile_h + row_gap);
+            let y1 = y0 + tile_h;
+            (x0, y0, x1, y1)
+        }
+    }
+
     /// Width this layout's panel needs.
     pub fn w(&self) -> i32 {
-        if self.indic { W_INDIC } else { W }
+        match self.mode {
+            LayoutMode::Landscape => if self.indic { W_LANDSCAPE_INDIC } else { W_LANDSCAPE },
+            LayoutMode::Compact => W_COMPACT,
+            LayoutMode::Portrait => if self.indic { W_INDIC } else { W },
+        }
     }
 
     /// Height of one row.
@@ -177,7 +249,20 @@ impl Layout {
         let card_bottom = card_y + CARD_PAD * 2 + rows * row_h;
         let footer_y = card_bottom + 16;
         let height = footer_y + 18 + PAD;
+        let mode = LayoutMode::Portrait;
+        let w = if indic { W_INDIC } else { W };
+        let timeline_y = era_bottom + 10;
+        let timeline_bottom = timeline_y + 24;
+        let panchang_card_y = card_y;
+        let panchang_card_bottom = card_y + CARD_PAD * 2 + 4 * row_h;
+        let grid_y = panchang_card_bottom + 14;
+        let tile_h = if indic { 58 } else { 52 };
+        let grid_bottom = grid_y + tile_h * 2 + 8;
+        let moon_r = MOON_R;
+        let moon_cx = w - PAD - moon_r;
+        let moon_cy = (moon_y + moon_bottom) / 2;
         Layout {
+            mode,
             weekday_y,
             weekday_top,
             weekday_bottom,
@@ -192,8 +277,129 @@ impl Layout {
             footer_y,
             height,
             indic,
+            timeline_y,
+            timeline_bottom,
+            panchang_card_y,
+            panchang_card_bottom,
+            grid_y,
+            grid_bottom,
+            moon_cx,
+            moon_cy,
+            moon_r,
         }
     }
+
+    /// Geometry for a specific presentation mode.
+    pub fn build_mode(mode: LayoutMode, rows: i32, indic: bool) -> Layout {
+        match mode {
+            LayoutMode::Portrait => Self::build(rows, indic),
+            LayoutMode::Landscape => {
+                let w = if indic { W_LANDSCAPE_INDIC } else { W_LANDSCAPE };
+                let row_h = if indic { ROW_H_INDIC } else { ROW_H };
+                let weekday_y = PAD;
+                let weekday_top = weekday_y - 3;
+                let weekday_bottom = weekday_top + WEEKDAY_H + 6;
+                let date_y = weekday_bottom + 2;
+                let era_y = date_y + 36;
+                let era_bottom = era_y + 18;
+                let timeline_y = era_bottom + 12;
+                let timeline_bottom = timeline_y + 24;
+                let rule_y = timeline_bottom + 14;
+                let moon_r = 38;
+                let moon_cx = w / 2;
+                let moon_cy = 90;
+                let moon_y = moon_cy - moon_r;
+                let moon_bottom = moon_cy + moon_r;
+                let panchang_card_y = PAD;
+                let panchang_card_bottom = panchang_card_y + CARD_PAD * 2 + 4 * row_h;
+                let grid_y = panchang_card_bottom.max(rule_y) + 16;
+                let tile_h = if indic { 56 } else { 50 };
+                let grid_bottom = grid_y + tile_h;
+                let card_y = panchang_card_y;
+                let card_bottom = grid_bottom;
+                let footer_y = grid_bottom + 14;
+                let height = footer_y + 18 + PAD;
+                Layout {
+                    mode,
+                    weekday_y,
+                    weekday_top,
+                    weekday_bottom,
+                    date_y,
+                    era_y,
+                    era_bottom,
+                    rule_y,
+                    moon_y,
+                    moon_bottom,
+                    card_y,
+                    card_bottom,
+                    footer_y,
+                    height,
+                    indic,
+                    timeline_y,
+                    timeline_bottom,
+                    panchang_card_y,
+                    panchang_card_bottom,
+                    grid_y,
+                    grid_bottom,
+                    moon_cx,
+                    moon_cy,
+                    moon_r,
+                }
+            }
+            LayoutMode::Compact => {
+                let w = W_COMPACT;
+                let weekday_y = PAD - 4;
+                let weekday_top = weekday_y - 3;
+                let weekday_bottom = weekday_top + WEEKDAY_H + 4;
+                let date_y = weekday_bottom + 2;
+                let era_y = date_y + 32;
+                let era_bottom = era_y + 16;
+                let timeline_y = era_bottom + 10;
+                let timeline_bottom = timeline_y + 22;
+                let rule_y = timeline_bottom + 8;
+                let moon_r = 28;
+                let moon_cx = w - PAD - moon_r;
+                let moon_cy = date_y + 16;
+                let moon_y = moon_cy - moon_r;
+                let moon_bottom = moon_cy + moon_r;
+                let panchang_card_y = 0;
+                let panchang_card_bottom = 0;
+                let grid_y = 0;
+                let grid_bottom = 0;
+                let card_y = 0;
+                let card_bottom = 0;
+                let footer_y = timeline_bottom + 12;
+                let height = footer_y + 18 + PAD;
+                Layout {
+                    mode,
+                    weekday_y,
+                    weekday_top,
+                    weekday_bottom,
+                    date_y,
+                    era_y,
+                    era_bottom,
+                    rule_y,
+                    moon_y,
+                    moon_bottom,
+                    card_y,
+                    card_bottom,
+                    footer_y,
+                    height,
+                    indic,
+                    timeline_y,
+                    timeline_bottom,
+                    panchang_card_y,
+                    panchang_card_bottom,
+                    grid_y,
+                    grid_bottom,
+                    moon_cx,
+                    moon_cy,
+                    moon_r,
+                }
+            }
+        }
+    }
+
 
     /// The weekday scrim pill, given the measured width of the label.
     ///
@@ -799,5 +1005,43 @@ mod tests {
         assert_eq!(cap_w, 0);
         assert_eq!(value_w, W - PAD - Layout::VALUE_X);
         assert!(value_w >= 279, "the Next row's value still does not fit");
+    }
+
+    #[test]
+    fn layout_modes_have_deliberate_proportions() {
+        let p_lat = Layout::new_mode(LayoutMode::Portrait, false);
+        let p_ind = Layout::new_mode(LayoutMode::Portrait, true);
+        let l_lat = Layout::new_mode(LayoutMode::Landscape, false);
+        let l_ind = Layout::new_mode(LayoutMode::Landscape, true);
+        let c_lat = Layout::new_mode(LayoutMode::Compact, false);
+
+        assert_eq!(p_lat.w(), W);
+        assert_eq!(p_ind.w(), W_INDIC);
+        assert_eq!(l_lat.w(), W_LANDSCAPE);
+        assert_eq!(l_ind.w(), W_LANDSCAPE_INDIC);
+        assert_eq!(c_lat.w(), W_COMPACT);
+
+        assert!(l_lat.w() > p_lat.w());
+        assert!(p_lat.w() > c_lat.w());
+        assert!(c_lat.height < p_lat.height);
+    }
+
+    #[test]
+    fn tile_rect_stays_within_bounds_for_all_modes() {
+        for mode in [LayoutMode::Portrait, LayoutMode::Landscape] {
+            for indic in [false, true] {
+                let l = Layout::new_mode(mode, indic);
+                let w = l.w();
+                for i in 0..4 {
+                    let (x0, y0, x1, y1) = l.tile_rect(i);
+                    assert!(x0 >= PAD - 4, "tile {i} left limb out of bounds: {x0}");
+                    assert!(x1 <= w - PAD + 4, "tile {i} right limb out of bounds: {x1} > {w}");
+                    assert!(y0 >= l.grid_y, "tile {i} top out of bounds: {y0}");
+                    assert!(y1 <= l.grid_bottom, "tile {i} bottom out of bounds: {y1} > {}", l.grid_bottom);
+                    assert!(x1 > x0, "tile {i} width is non-positive");
+                    assert!(y1 > y0, "tile {i} height is non-positive");
+                }
+            }
+        }
     }
 }

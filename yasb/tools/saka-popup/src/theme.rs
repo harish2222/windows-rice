@@ -109,6 +109,10 @@ pub struct Theme {
     pub hairline: Rgba,
     /// The raised card the rows sit on.
     pub card: Rgba,
+    /// Elevated tile surface for secondary cards.
+    pub surface_elevated: Rgba,
+    /// Solar accent for sunrise / sunset timeline.
+    pub solar: Rgba,
     /// The opaque pill the weekday label sits on.
     ///
     /// The one surface in the panel that is *not* allowed to be acrylic. Every
@@ -118,7 +122,9 @@ pub struct Theme {
     /// per theme so no one has to add it to 22 blocks.
     pub scrim: Rgba,
     /// Moon glyph: the unlit limb (earthshine) and the lit limb.
+    #[allow(dead_code)]
     pub moon_dim: Rgba,
+    #[allow(dead_code)]
     pub moon_lit: Rgba,
     /// Halo around the moon glyph.
     pub moon_glow: f32,
@@ -465,6 +471,8 @@ impl Theme {
             // card is what the body text actually sits on, so it has to
             // deliver the contrast the panel used to.
             card: Rgba { a: 175, ..lighten(bg, 0.09) },
+            surface_elevated: Rgba { a: 195, ..lighten(bg, 0.14) },
+            solar: col(&["--solar", "--accent-warm"], Rgba::rgb(229, 201, 162)),
             // The weekday scrim. This is the one surface that is not allowed
             // to be acrylic, and the reasoning is worth writing down because
             // an earlier attempt got it backwards.
