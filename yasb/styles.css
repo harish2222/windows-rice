@@ -233,8 +233,8 @@
     --motif: url("C:/Users/haris/.config/yasb/mandala/mandala-peach.png");
     --runner: none; */
 
-    /* Rangalipi Mossfern */
-    /* --acrylic: rgba(20, 20, 25, 0.01);
+    /* Rangalipi Mossfern - active */
+    --acrylic: rgba(20, 20, 25, 0.01);
     --acrylic-hover: rgba(255, 255, 255, 0.05);
     --tile: rgba(255, 255, 255, 0.05);
     --background: #111A11;
@@ -286,7 +286,7 @@
     --accent-soft: rgba(64, 140, 80, 0.50);
     --frame: #408C50;
     --motif: url("C:/Users/haris/.config/yasb/mandala/mandala-ink.png");
-    --runner: none; */
+    --runner: none;
 
     /* Rangalipi Mossfern Light */
     /* --acrylic: rgba(255, 255, 255, 0.80);
@@ -343,8 +343,8 @@
     --motif: url("C:/Users/haris/.config/yasb/mandala/mandala-ink.png");
     --runner: none; */
 
-    /* Rangalipi Wine - active */
-    --acrylic: rgba(20, 20, 25, 0.01);
+    /* Rangalipi Wine */
+    /* --acrylic: rgba(20, 20, 25, 0.01);
     --acrylic-hover: rgba(255, 255, 255, 0.05);
     --tile: rgba(255, 255, 255, 0.05);
     --background: #1D1015;
@@ -397,7 +397,7 @@
     --frame: #A6192E;
     --holiday: #D95D5D;
     --motif: url("C:/Users/haris/.config/yasb/mandala/mandala-rose.png");
-    --runner: none;
+    --runner: none; */
 
     /* Rangalipi Wine Light */
     /* --acrylic: rgba(255, 255, 255, 0.80);
@@ -1249,7 +1249,7 @@
    both modes) keep floating over the wallpaper, every other theme frosts with
    the value its block declares. */
 .yasb-bar {
-    background-color: transparent;
+    background-color: var(--glassfrost);
     border: none;
     padding: 0;
 }
