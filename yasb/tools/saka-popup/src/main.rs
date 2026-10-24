@@ -439,6 +439,21 @@ fn main() {
         return;
     }
 
+    if let Some(pos) = args.iter().position(|a| a == "--render" || a == "--snapshot") {
+        if let Some(out_path) = args.get(pos + 1) {
+            let app = App { theme, panchangam, script, mode, rotation_angle: 0.0, origin: (0, 0) };
+            let l = app.layout();
+            let mut dib = Dib::new(l.w(), l.height);
+            unsafe { render_into_dib(&app, &mut dib) };
+            if let Err(e) = save_dib_bmp(&mut dib, std::path::Path::new(out_path)) {
+                eprintln!("failed to save snapshot {out_path}: {e}");
+                std::process::exit(1);
+            }
+            println!("snapshot saved: {out_path} ({}x{})", l.w(), l.height);
+            return;
+        }
+    }
+
     state::save_state(&state::state_file_path(), &state::AppState { mode, script });
 
     APP.with(|c| *c.borrow_mut() = Some(App { theme, panchangam, script, mode, rotation_angle: 0.0, origin: (0, 0) }));
@@ -565,36 +580,17 @@ unsafe fn measure_tracked(dc: HDC, text: &str, tracking: i32) -> i32 {
     sz.cx
 }
 
-/// Paint the whole panel: shapes into the DIB, then text through GDI on top.
-///
-/// Two passes because GDI's text rendering needs the font selected into the DC,
-/// while the shapes want direct pixel writes. Interleaving them per element
-/// would mean selecting and deselecting fonts dozens of times per frame.
-unsafe fn paint(hwnd: HWND) {
-    let Some(app) = APP.with(|c| c.borrow().clone()) else { return };
-    let mut rc_win = RECT { left: 0, top: 0, right: 0, bottom: 0 };
-    if GetWindowRect(hwnd, &mut rc_win).is_err() {
-        return;
-    }
-    let w = rc_win.right - rc_win.left;
-    let h = rc_win.bottom - rc_win.top;
-    if w <= 0 || h <= 0 {
-        return;
-    }
-
-    let mut dib = Dib::new(w, h);
+/// Paint the whole panel into a DIB: shapes into canvas, then text through GDI.
+unsafe fn render_into_dib(app: &App, dib: &mut Dib) {
+    let w = dib.w;
+    let h = dib.h;
     let t = &app.theme;
     let rows = app.rows();
     let l = app.layout();
-    // Hoisted out of both passes: the shape pass sizes the scrim around this
-    // string and the text pass draws it.
     let weekday = app.script.vara(app.panchangam.vara).to_uppercase();
 
     // ---- shape pass ------------------------------------------------------
     {
-        // Measured before the canvas is taken: `dib.canvas()` borrows the DIB
-        // mutably for the whole block, so the DC needed to size the text has
-        // to be borrowed first and released.
         let weekday_w = {
             let dc = dib.dc();
             let (_, gohu_body) = resolve_saka_family();
@@ -640,11 +636,11 @@ unsafe fn paint(hwnd: HWND) {
                 c.radial_glow(mcx1, mcy, mr * 1.9, t.accent, t.moon_glow * 0.7);
                 c.radial_glow(mcx2, mcy, mr * 1.9, t.accent, t.moon_glow);
 
-                // Top micro-tags above each moon
-                c.round_rect(mcx1 as i32 - 40, 18, mcx1 as i32 + 40, 32, 6, t.surface_elevated);
-                c.round_rect_border(mcx1 as i32 - 40, 18, mcx1 as i32 + 40, 32, 6, 1, t.hairline);
-                c.round_rect(mcx2 as i32 - 40, 18, mcx2 as i32 + 40, 32, 6, t.surface_elevated);
-                c.round_rect_border(mcx2 as i32 - 40, 18, mcx2 as i32 + 40, 32, 6, 1, t.hairline);
+                // Top micro-tags above each moon with ample clearance
+                c.round_rect(mcx1 as i32 - 48, l.moon_y - 20, mcx1 as i32 + 48, l.moon_y - 6, 6, t.surface_elevated);
+                c.round_rect_border(mcx1 as i32 - 48, l.moon_y - 20, mcx1 as i32 + 48, l.moon_y - 6, 6, 1, t.hairline);
+                c.round_rect(mcx2 as i32 - 48, l.moon_y - 20, mcx2 as i32 + 48, l.moon_y - 6, 6, t.surface_elevated);
+                c.round_rect_border(mcx2 as i32 - 48, l.moon_y - 20, mcx2 as i32 + 48, l.moon_y - 6, 6, 1, t.hairline);
 
                 // 1. 3D Rotating Moon
                 moon::draw_3d_moon(
@@ -658,7 +654,7 @@ unsafe fn paint(hwnd: HWND) {
                     t.accent,
                 );
 
-                // 2. Astronomical Sky Phase Moon - shaded exactly as in the night sky beside the rotating moon
+                // 2. Astronomical Sky Phase Moon
                 moon::draw_sky_moon(
                     &mut c,
                     mcx2,
@@ -669,18 +665,18 @@ unsafe fn paint(hwnd: HWND) {
                     t.accent,
                 );
 
-                // Phase badge pill beneath both moons
+                // Phase badge pill beneath both moons with >= 10px downward padding
                 let badge_x0 = mcx1 as i32 - mr as i32 - 4;
                 let badge_x1 = mcx2 as i32 + mr as i32 + 4;
-                let badge_y0 = l.moon_bottom + 4;
-                let badge_y1 = badge_y0 + 20;
+                let badge_y0 = l.moon_bottom + 10;
+                let badge_y1 = badge_y0 + 22;
                 c.round_rect(badge_x0, badge_y0, badge_x1, badge_y1, 8, t.card);
                 c.round_rect_border(badge_x0, badge_y0, badge_x1, badge_y1, 8, 1, t.hairline);
 
                 // Sunrise / Sunset timeline
-                let tx0 = PAD + 72;
-                let tx1 = w - PAD - 72;
-                let ty = l.timeline_y + 10;
+                let tx0 = PAD + 76;
+                let tx1 = w - PAD - 76;
+                let ty = l.timeline_y + 11;
                 c.round_rect(tx0, ty, tx1, ty + 2, 1, t.track);
                 if let (Some(sr), Some(ss)) = (app.panchangam.sunrise_jd, app.panchangam.sunset_jd) {
                     let now = app.panchangam.jd;
@@ -726,11 +722,11 @@ unsafe fn paint(hwnd: HWND) {
                 c.radial_glow(mcx1, mcy, mr * 1.8, t.accent, t.moon_glow * 0.7);
                 c.radial_glow(mcx2, mcy, mr * 1.8, t.accent, t.moon_glow);
 
-                // Top micro-tags
-                c.round_rect(mcx1 as i32 - 38, l.moon_y - 20, mcx1 as i32 + 38, l.moon_y - 6, 6, t.card);
-                c.round_rect_border(mcx1 as i32 - 38, l.moon_y - 20, mcx1 as i32 + 38, l.moon_y - 6, 6, 1, t.hairline);
-                c.round_rect(mcx2 as i32 - 38, l.moon_y - 20, mcx2 as i32 + 38, l.moon_y - 6, 6, t.card);
-                c.round_rect_border(mcx2 as i32 - 38, l.moon_y - 20, mcx2 as i32 + 38, l.moon_y - 6, 6, 1, t.hairline);
+                // Top micro-tags above dual moons
+                c.round_rect(mcx1 as i32 - 48, l.moon_y - 20, mcx1 as i32 + 48, l.moon_y - 6, 6, t.surface_elevated);
+                c.round_rect_border(mcx1 as i32 - 48, l.moon_y - 20, mcx1 as i32 + 48, l.moon_y - 6, 6, 1, t.hairline);
+                c.round_rect(mcx2 as i32 - 48, l.moon_y - 20, mcx2 as i32 + 48, l.moon_y - 6, 6, t.surface_elevated);
+                c.round_rect_border(mcx2 as i32 - 48, l.moon_y - 20, mcx2 as i32 + 48, l.moon_y - 6, 6, 1, t.hairline);
 
                 moon::draw_3d_moon(&mut c, mcx1, mcy, mr, app.panchangam.illum as f32, app.panchangam.waxing, app.rotation_angle, t.accent);
                 moon::draw_sky_moon(&mut c, mcx2, mcy, mr, app.panchangam.illum as f32, app.panchangam.waxing, t.accent);
@@ -738,15 +734,15 @@ unsafe fn paint(hwnd: HWND) {
                 // Phase badge under moons
                 let badge_x0 = mcx1 as i32 - mr as i32 - 4;
                 let badge_x1 = mcx2 as i32 + mr as i32 + 4;
-                let badge_y0 = l.moon_bottom + 6;
-                let badge_y1 = badge_y0 + 20;
+                let badge_y0 = l.moon_bottom + 10;
+                let badge_y1 = badge_y0 + 22;
                 c.round_rect(badge_x0, badge_y0, badge_x1, badge_y1, 8, t.card);
                 c.round_rect_border(badge_x0, badge_y0, badge_x1, badge_y1, 8, 1, t.hairline);
 
                 // Solar timeline on left under moons
-                let tx0 = PAD + 54;
-                let tx1 = 340 - 54;
-                let ty = l.timeline_y + 10;
+                let tx0 = PAD + 56;
+                let tx1 = 370 - 56;
+                let ty = l.timeline_y + 11;
                 c.round_rect(tx0, ty, tx1, ty + 2, 1, t.track);
                 if let (Some(sr), Some(ss)) = (app.panchangam.sunrise_jd, app.panchangam.sunset_jd) {
                     let now = app.panchangam.jd;
@@ -760,12 +756,12 @@ unsafe fn paint(hwnd: HWND) {
                 }
 
                 // Right column: Today's Panchang card
-                let right_card_x0 = 360;
+                let right_card_x0 = 420;
                 let right_card_x1 = w - PAD;
                 c.round_rect(right_card_x0, l.panchang_card_y, right_card_x1, l.panchang_card_bottom, layout::CARD_R, t.card);
                 c.round_rect_border(right_card_x0, l.panchang_card_y, right_card_x1, l.panchang_card_bottom, layout::CARD_R, 1, t.hairline);
 
-                let track_x0 = right_card_x0 + 95;
+                let track_x0 = right_card_x0 + 120;
                 let track_w = right_card_x1 - 16 - track_x0;
                 let th = 2;
                 for i in 0..5 {
@@ -787,17 +783,55 @@ unsafe fn paint(hwnd: HWND) {
                 // Bottom deck: 4 horizontal tiles
                 for idx in 0..4 {
                     let (x0, y0, x1, y1) = l.tile_rect(idx);
-                    c.round_rect(x0, y0, x1, y1, 12, t.surface_elevated);
-                    c.round_rect_border(x0, y0, x1, y1, 12, 1, t.hairline);
+                    c.round_rect(x0, y0, x1, y1, 14, t.surface_elevated);
+                    c.round_rect_border(x0, y0, x1, y1, 14, 1, t.hairline);
                 }
             }
             layout::LayoutMode::Compact => {
-                c.radial_glow(mcx1, mcy, mr * 2.0, t.accent, t.moon_glow);
-                moon::draw_sky_moon(&mut c, mcx1, mcy, mr, app.panchangam.illum as f32, app.panchangam.waxing, t.accent);
+                c.radial_glow(mcx1, mcy, mr * 2.2, t.accent, t.moon_glow);
+                moon::draw_sky_moon(
+                    &mut c,
+                    mcx1,
+                    mcy,
+                    mr,
+                    app.panchangam.illum as f32,
+                    app.panchangam.waxing,
+                    t.accent,
+                );
 
-                let tx0 = PAD + 56;
-                let tx1 = w - PAD - 56;
-                let ty = l.timeline_y + 9;
+                // Moon badge pill beneath moon
+                let badge_x0 = l.sky_moon_cx - 52;
+                let badge_x1 = l.sky_moon_cx + 52;
+                let badge_y0 = l.moon_bottom + 6;
+                let badge_y1 = badge_y0 + 20;
+                c.round_rect(badge_x0, badge_y0, badge_x1, badge_y1, 6, t.surface_elevated);
+                c.round_rect_border(badge_x0, badge_y0, badge_x1, badge_y1, 6, 1, t.hairline);
+
+                // Hairline divider below header
+                c.hline(PAD, w - PAD, l.rule_y, t.hairline);
+
+                // Card 1: Panchang Highlights Card
+                c.round_rect(PAD, l.panchang_card_y, w - PAD, l.panchang_card_bottom, layout::CARD_R, t.card);
+                c.round_rect_border(PAD, l.panchang_card_y, w - PAD, l.panchang_card_bottom, layout::CARD_R, 1, t.hairline);
+
+                // Tithi progress rule
+                let track_x0 = PAD + 16;
+                let track_w = w - PAD * 2 - 32;
+                let bar_y = l.panchang_card_y + 44;
+                c.round_rect(track_x0, bar_y, track_x0 + track_w, bar_y + 2, 1, t.track);
+                let tithi_frac = app.panchangam.tithi.progress;
+                let fw = ((tithi_frac.clamp(0.0, 1.0)) * track_w as f64).round() as i32;
+                if fw > 0 {
+                    c.round_rect(track_x0, bar_y, track_x0 + fw, bar_y + 2, 1, t.accent);
+                }
+
+                // Card 2: Solar Timeline & Cycle Card
+                c.round_rect(PAD, l.timeline_y, w - PAD, l.timeline_bottom, layout::CARD_R, t.card);
+                c.round_rect_border(PAD, l.timeline_y, w - PAD, l.timeline_bottom, layout::CARD_R, 1, t.hairline);
+
+                let tx0 = PAD + 76;
+                let tx1 = w - PAD - 76;
+                let ty = l.timeline_y + 22;
                 c.round_rect(tx0, ty, tx1, ty + 2, 1, t.track);
                 if let (Some(sr), Some(ss)) = (app.panchangam.sunrise_jd, app.panchangam.sunset_jd) {
                     let now = app.panchangam.jd;
@@ -805,11 +839,10 @@ unsafe fn paint(hwnd: HWND) {
                         let frac = ((now - sr) / (ss - sr)).clamp(0.0, 1.0) as f32;
                         let pip_x = tx0 as f32 + frac * (tx1 - tx0) as f32;
                         c.round_rect(tx0, ty, pip_x as i32, ty + 2, 1, t.solar);
-                        c.radial_glow(pip_x, ty as f32 + 1.0, 5.0, t.solar, 0.40);
+                        c.radial_glow(pip_x, ty as f32 + 1.0, 6.0, t.solar, 0.45);
                         c.round_rect((pip_x - 3.0) as i32, ty - 2, (pip_x + 3.0) as i32, ty + 4, 3, t.solar);
                     }
                 }
-                c.hline(PAD, w - PAD, l.rule_y, t.hairline);
             }
         }
     }
@@ -843,11 +876,18 @@ unsafe fn paint(hwnd: HWND) {
         SetTextColor(dc, colorref(t.text));
         let title = format!("{} {} {}", p.day, month_abbr(p.month), p.year);
         let header_text_w = if app.mode == layout::LayoutMode::Portrait {
-            (l.moon_cx - l.moon_r - 12) - PAD
+            (l.moon_cx - l.moon_r - 16) - PAD
+        } else if app.mode == layout::LayoutMode::Landscape {
+            350 - PAD
         } else {
-            320 - PAD
+            (l.sky_moon_cx - l.moon_r - 16) - PAD
         };
-        draw_text(dc, &title, rect(PAD, l.date_y, header_text_w, 36), DT_LEFT | DT_VCENTER);
+        draw_text(
+            dc,
+            &title,
+            rect(PAD, l.date_y, header_text_w, if app.mode == layout::LayoutMode::Compact { 36 } else { 42 }),
+            DT_LEFT | DT_VCENTER,
+        );
 
         // Solar / National Calendar era
         SelectObject(dc, HGDIOBJ(small.0));
@@ -862,16 +902,11 @@ unsafe fn paint(hwnd: HWND) {
         draw_text(
             dc,
             &sub,
-            rect(PAD, l.era_y, header_text_w, 18),
+            rect(PAD, l.era_y, header_text_w, 22),
             DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS,
         );
 
-        // Udaya Tithi and Day Duration
-        let udaya_name = if let Some(ut) = &p.tithi_at_sunrise {
-            format!("{} {}", paksha_at(ut.index, s), tithi_name_at(ut.index, s))
-        } else {
-            format!("{} {}", paksha_at(p.tithi.index, s), tithi_name_at(p.tithi.index, s))
-        };
+        // Udaya Tithi and Day Duration (Portrait and Landscape)
         let day_duration = if let (Some(sr), Some(ss)) = (p.sunrise_jd, p.sunset_jd) {
             let total_mins = ((ss - sr) * 24.0 * 60.0).round() as i64;
             let hrs = total_mins / 60;
@@ -884,17 +919,25 @@ unsafe fn paint(hwnd: HWND) {
         } else {
             "--".into()
         };
-        let udaya_str = if telugu {
-            format!("ఉదయ తిథి: {udaya_name} · దినమానం: {day_duration}")
-        } else {
-            format!("Udaya: {udaya_name} · Day: {day_duration}")
-        };
-        draw_text(
-            dc,
-            &udaya_str,
-            rect(PAD, l.udaya_y, header_text_w, 18),
-            DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS,
-        );
+
+        if app.mode != layout::LayoutMode::Compact {
+            let udaya_name = if let Some(ut) = &p.tithi_at_sunrise {
+                format!("{} {}", paksha_at(ut.index, s), tithi_name_at(ut.index, s))
+            } else {
+                format!("{} {}", paksha_at(p.tithi.index, s), tithi_name_at(p.tithi.index, s))
+            };
+            let udaya_str = if telugu {
+                format!("ఉదయ తిథి: {udaya_name} · దినమానం: {day_duration}")
+            } else {
+                format!("Udaya: {udaya_name} · Day: {day_duration}")
+            };
+            draw_text(
+                dc,
+                &udaya_str,
+                rect(PAD, l.udaya_y, header_text_w, 22),
+                DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS,
+            );
+        }
 
         match app.mode {
             layout::LayoutMode::Portrait => {
@@ -903,8 +946,8 @@ unsafe fn paint(hwnd: HWND) {
                 SetTextColor(dc, colorref(t.accent));
                 let tag1 = if telugu { "3D భ్రమణం" } else { "3D ROTATING" };
                 let tag2 = if telugu { "ఆకాశ దృశ్యం" } else { "SKY VIEW" };
-                draw_text(dc, tag1, rect(l.moon_cx - 40, 18, 80, 14), DT_CENTER | DT_VCENTER);
-                draw_text(dc, tag2, rect(l.sky_moon_cx - 40, 18, 80, 14), DT_CENTER | DT_VCENTER);
+                draw_text(dc, tag1, rect(l.moon_cx - 48, l.moon_y - 20, 96, 14), DT_CENTER | DT_VCENTER);
+                draw_text(dc, tag2, rect(l.sky_moon_cx - 48, l.moon_y - 20, 96, 14), DT_CENTER | DT_VCENTER);
 
                 // Phase summary badge beneath both moons
                 let phase_summary = format!(
@@ -918,7 +961,7 @@ unsafe fn paint(hwnd: HWND) {
                 draw_text(
                     dc,
                     &phase_summary,
-                    rect(badge_x0, l.moon_bottom + 4, badge_x1 - badge_x0, 20),
+                    rect(badge_x0, l.moon_bottom + 10, badge_x1 - badge_x0, 22),
                     DT_CENTER | DT_VCENTER,
                 );
 
@@ -927,13 +970,13 @@ unsafe fn paint(hwnd: HWND) {
                 SetTextColor(dc, colorref(t.solar));
                 let rise_str = format!("☀ {}", p.sunrise_jd.map(|j| p.hhmm(j)).unwrap_or_else(|| "--:--".into()));
                 let set_str = format!("☀ {}", p.sunset_jd.map(|j| p.hhmm(j)).unwrap_or_else(|| "--:--".into()));
-                draw_text(dc, &rise_str, rect(PAD, l.timeline_y + 1, 68, 20), DT_LEFT | DT_VCENTER);
-                draw_text(dc, &set_str, rect(w - PAD - 68, l.timeline_y + 1, 68, 20), DT_RIGHT | DT_VCENTER);
+                draw_text(dc, &rise_str, rect(PAD, l.timeline_y + 2, 70, 22), DT_LEFT | DT_VCENTER);
+                draw_text(dc, &set_str, rect(w - PAD - 70, l.timeline_y + 2, 70, 22), DT_RIGHT | DT_VCENTER);
 
                 // Section 1 Header: TODAY'S PANCHANG
                 SelectObject(dc, HGDIOBJ(section.0));
                 SetTextColor(dc, colorref(t.accent));
-                tracked_text(dc, if telugu { "నేటి పంచాంగం" } else { "TODAY'S PANCHANG" }, PAD, l.rule_y + 8, 1);
+                tracked_text(dc, if telugu { "నేటి పంచాంగం" } else { "TODAY'S PANCHANG" }, PAD, l.rule_y + 12, 1);
 
                 // Rows 0..5 (Tithi, Nakshatra, Yoga, Karana, Vara)
                 for i in 0..5 {
@@ -943,7 +986,7 @@ unsafe fn paint(hwnd: HWND) {
                         SelectObject(dc, HGDIOBJ(label.0));
                         SetTextColor(dc, colorref(t.faint));
                         let caps = r.label.to_uppercase();
-                        tracked_text(dc, &caps, PAD + 16, y + 6, 1);
+                        tracked_text(dc, &caps, PAD + 16, y + 8, 1);
 
                         let value_x = layout::Layout::VALUE_X;
                         SelectObject(dc, HGDIOBJ(body.0));
@@ -959,7 +1002,7 @@ unsafe fn paint(hwnd: HWND) {
                         draw_text(
                             dc,
                             &r.value,
-                            rect(value_x, y + 2, value_w, l.text_h()),
+                            rect(value_x, y + 4, value_w, l.text_h()),
                             DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS,
                         );
 
@@ -970,7 +1013,7 @@ unsafe fn paint(hwnd: HWND) {
                                 draw_text(
                                     dc,
                                     cap,
-                                    rect(w - PAD - cap_w, y + 2, cap_w, l.text_h()),
+                                    rect(w - PAD - 16 - cap_w, y + 4, cap_w, l.text_h()),
                                     DT_LEFT | DT_VCENTER,
                                 );
                             }
@@ -981,7 +1024,7 @@ unsafe fn paint(hwnd: HWND) {
                 // Section 2 Header: MOON & CALENDAR
                 SelectObject(dc, HGDIOBJ(section.0));
                 SetTextColor(dc, colorref(t.accent));
-                tracked_text(dc, if telugu { "చంద్రుడు & క్యాలెండర్" } else { "MOON & CALENDAR" }, PAD, l.panchang_card_bottom + 8, 1);
+                tracked_text(dc, if telugu { "చంద్రుడు & క్యాలెండర్" } else { "MOON & CALENDAR" }, PAD, l.panchang_card_bottom + 14, 1);
 
                 // 2x2 Grid Tile texts
                 paint_tiles(dc, &l, t, p, s, telugu, label, body, small);
@@ -992,8 +1035,8 @@ unsafe fn paint(hwnd: HWND) {
                 SetTextColor(dc, colorref(t.accent));
                 let tag1 = if telugu { "3D భ్రమణం" } else { "3D ROTATING" };
                 let tag2 = if telugu { "ఆకాశ దృశ్యం" } else { "SKY VIEW" };
-                draw_text(dc, tag1, rect(l.moon_cx - 38, l.moon_y - 20, 76, 14), DT_CENTER | DT_VCENTER);
-                draw_text(dc, tag2, rect(l.sky_moon_cx - 38, l.moon_y - 20, 76, 14), DT_CENTER | DT_VCENTER);
+                draw_text(dc, tag1, rect(l.moon_cx - 48, l.moon_y - 20, 96, 14), DT_CENTER | DT_VCENTER);
+                draw_text(dc, tag2, rect(l.sky_moon_cx - 48, l.moon_y - 20, 96, 14), DT_CENTER | DT_VCENTER);
 
                 // Phase summary badge beneath both moons
                 let phase_summary = format!(
@@ -1007,7 +1050,7 @@ unsafe fn paint(hwnd: HWND) {
                 draw_text(
                     dc,
                     &phase_summary,
-                    rect(badge_x0, l.moon_bottom + 6, badge_x1 - badge_x0, 20),
+                    rect(badge_x0, l.moon_bottom + 10, badge_x1 - badge_x0, 22),
                     DT_CENTER | DT_VCENTER,
                 );
 
@@ -1016,15 +1059,15 @@ unsafe fn paint(hwnd: HWND) {
                 SetTextColor(dc, colorref(t.solar));
                 let rise_str = format!("☀ {}", p.sunrise_jd.map(|j| p.hhmm(j)).unwrap_or_else(|| "--:--".into()));
                 let set_str = format!("☀ {}", p.sunset_jd.map(|j| p.hhmm(j)).unwrap_or_else(|| "--:--".into()));
-                draw_text(dc, &rise_str, rect(PAD, l.timeline_y + 1, 50, 20), DT_LEFT | DT_VCENTER);
-                draw_text(dc, &set_str, rect(340 - 50, l.timeline_y + 1, 50, 20), DT_RIGHT | DT_VCENTER);
+                draw_text(dc, &rise_str, rect(PAD, l.timeline_y + 2, 60, 22), DT_LEFT | DT_VCENTER);
+                draw_text(dc, &set_str, rect(370 - 60, l.timeline_y + 2, 60, 22), DT_RIGHT | DT_VCENTER);
 
                 // Right column rows (Today's Panchang, 5 rows)
-                let right_card_x0 = 360;
+                let right_card_x0 = 420;
                 let right_card_x1 = w - PAD;
                 SelectObject(dc, HGDIOBJ(section.0));
                 SetTextColor(dc, colorref(t.accent));
-                tracked_text(dc, if telugu { "నేటి పంచాంగం" } else { "TODAY'S PANCHANG" }, right_card_x0, PAD - 16, 1);
+                tracked_text(dc, if telugu { "నేటి పంచాంగం" } else { "TODAY'S PANCHANG" }, right_card_x0, PAD + 8, 1);
 
                 for i in 0..5 {
                     if let Some(r) = rows.get(i) {
@@ -1032,15 +1075,15 @@ unsafe fn paint(hwnd: HWND) {
                         SelectObject(dc, HGDIOBJ(label.0));
                         SetTextColor(dc, colorref(t.faint));
                         let caps = r.label.to_uppercase();
-                        tracked_text(dc, &caps, right_card_x0 + 14, y + 6, 1);
+                        tracked_text(dc, &caps, right_card_x0 + 16, y + 8, 1);
 
-                        let val_x = right_card_x0 + 95;
+                        let val_x = right_card_x0 + 120;
                         SelectObject(dc, HGDIOBJ(body.0));
                         SetTextColor(dc, colorref(t.text));
                         draw_text(
                             dc,
                             &r.value,
-                            rect(val_x, y + 2, right_card_x1 - val_x - 16, l.text_h()),
+                            rect(val_x, y + 4, right_card_x1 - val_x - 16, l.text_h()),
                             DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS,
                         );
                     }
@@ -1050,34 +1093,100 @@ unsafe fn paint(hwnd: HWND) {
                 paint_tiles(dc, &l, t, p, s, telugu, label, body, small);
             }
             layout::LayoutMode::Compact => {
-                // Tithi and Illumination summary row
-                SelectObject(dc, HGDIOBJ(body.0));
-                SetTextColor(dc, colorref(t.text));
-                let tithi_str = format!(
-                    "{} · {:.0}% {}",
-                    rows.first().map(|r| r.value.as_str()).unwrap_or(""),
+                // Micro-badge below moon
+                let badge_x0 = l.sky_moon_cx - 52;
+                let badge_x1 = l.sky_moon_cx + 52;
+                let badge_y0 = l.moon_bottom + 6;
+                SelectObject(dc, HGDIOBJ(small.0));
+                SetTextColor(dc, colorref(t.accent));
+                let compact_phase_str = format!(
+                    "● {:.0}% {}",
                     p.illum * 100.0,
                     if p.waxing { if telugu { "వృద్ధి" } else { "Waxing" } } else { if telugu { "క్షయ" } else { "Waning" } }
                 );
-                draw_text(dc, &tithi_str, rect(PAD, l.era_bottom + 3, w - PAD * 2 - 50, 18), DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS);
+                draw_text(
+                    dc,
+                    &compact_phase_str,
+                    rect(badge_x0, badge_y0, badge_x1 - badge_x0, 20),
+                    DT_CENTER | DT_VCENTER,
+                );
 
-                // Sunrise / Sunset labels
+                // Card 1 Text (Panchang Highlights)
+                let card_inner_w = w - PAD * 2 - 32;
+                let tithi_row = &rows[0];
+                SelectObject(dc, HGDIOBJ(body.0));
+                SetTextColor(dc, colorref(t.text));
+                let tithi_title = format!("{} · {}", if telugu { "తిథి" } else { "TITHI" }, tithi_row.value);
+                draw_text(
+                    dc,
+                    &tithi_title,
+                    rect(PAD + 16, l.panchang_card_y + 14, card_inner_w - 120, 24),
+                    DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS,
+                );
+
+                if let Some((_, cap)) = &tithi_row.progress {
+                    SelectObject(dc, HGDIOBJ(small.0));
+                    SetTextColor(dc, colorref(t.accent));
+                    draw_text(
+                        dc,
+                        cap,
+                        rect(w - PAD - 16 - 120, l.panchang_card_y + 14, 120, 24),
+                        DT_RIGHT | DT_VCENTER,
+                    );
+                }
+
+                // Line 2: Nakshatra, Yoga & Vara with 12px downward clearance
+                SelectObject(dc, HGDIOBJ(small.0));
+                SetTextColor(dc, colorref(t.subtext));
+                let nak_vara_str = format!(
+                    "{}: {} · {}: {} · {}",
+                    if telugu { "నక్షత్రం" } else { "Nakshatra" },
+                    s.nakshatra(p.nakshatra.index),
+                    if telugu { "యోగం" } else { "Yoga" },
+                    s.yoga(p.yoga.index),
+                    s.vara(p.vara)
+                );
+                draw_text(
+                    dc,
+                    &nak_vara_str,
+                    rect(PAD + 16, l.panchang_card_y + 56, card_inner_w, 22),
+                    DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS,
+                );
+
+                // Card 2 Text (Solar & Cycle)
                 SelectObject(dc, HGDIOBJ(small.0));
                 SetTextColor(dc, colorref(t.solar));
                 let rise_str = format!("☀ {}", p.sunrise_jd.map(|j| p.hhmm(j)).unwrap_or_else(|| "--:--".into()));
                 let set_str = format!("☀ {}", p.sunset_jd.map(|j| p.hhmm(j)).unwrap_or_else(|| "--:--".into()));
-                draw_text(dc, &rise_str, rect(PAD, l.timeline_y, 52, 18), DT_LEFT | DT_VCENTER);
-                draw_text(dc, &set_str, rect(w - PAD - 52, l.timeline_y, 52, 18), DT_RIGHT | DT_VCENTER);
+                draw_text(dc, &rise_str, rect(PAD + 14, l.timeline_y + 12, 60, 22), DT_LEFT | DT_VCENTER);
+                draw_text(dc, &set_str, rect(w - PAD - 14 - 60, l.timeline_y + 12, 60, 22), DT_RIGHT | DT_VCENTER);
 
-                // Highlights row
+                // Center day duration
+                SelectObject(dc, HGDIOBJ(small.0));
+                SetTextColor(dc, colorref(t.faint));
+                let day_dur_str = format!("{}: {}", if telugu { "దినమానం" } else { "Day Duration" }, day_duration);
+                draw_text(
+                    dc,
+                    &day_dur_str,
+                    rect(PAD + 80, l.timeline_y + 12, w - PAD * 2 - 160, 22),
+                    DT_CENTER | DT_VCENTER,
+                );
+
+                // Line 2: Moon phase & Month
                 SelectObject(dc, HGDIOBJ(small.0));
                 SetTextColor(dc, colorref(t.subtext));
-                let high_str = format!(
-                    "Nakshatra: {} · Yoga: {}",
-                    s.nakshatra(p.nakshatra.index),
-                    s.yoga(p.yoga.index)
+                let cycle_str = format!(
+                    "● {} · {} · {}",
+                    p.phase_name_in(s),
+                    s.month(p.amanta_month),
+                    if telugu { format!("పూర్ణిమాంతం: {}", s.month(p.purnimanta_month)) } else { format!("Purnimanta: {}", s.month(p.purnimanta_month)) }
                 );
-                draw_text(dc, &high_str, rect(PAD, l.rule_y + 4, w - PAD * 2, 16), DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS);
+                draw_text(
+                    dc,
+                    &cycle_str,
+                    rect(PAD + 16, l.timeline_y + 46, card_inner_w, 22),
+                    DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS,
+                );
             }
         }
 
@@ -1086,14 +1195,14 @@ unsafe fn paint(hwnd: HWND) {
         SetTextColor(dc, colorref(t.faint));
         draw_text(
             dc,
-            if app.mode == layout::LayoutMode::Compact { "m: Mode" } else { "Tab: English / Telugu · m: Mode" },
-            rect(PAD, l.footer_y, 250, 18),
+            "m: Mode · Tab: English / Telugu",
+            rect(PAD, l.footer_y, 300, 20),
             DT_LEFT | DT_VCENTER,
         );
         draw_text(
             dc,
             "Esc or click to close",
-            rect(w - PAD - 200, l.footer_y, 200, 18),
+            rect(w - PAD - 200, l.footer_y, 200, 20),
             DT_RIGHT | DT_VCENTER,
         );
 
@@ -1103,8 +1212,57 @@ unsafe fn paint(hwnd: HWND) {
         let _ = DeleteObject(HGDIOBJ(label.0));
         let _ = DeleteObject(HGDIOBJ(section.0));
     }
+}
 
+/// Paint the whole panel into the window DC.
+unsafe fn paint(hwnd: HWND) {
+    let Some(app) = APP.with(|c| c.borrow().clone()) else { return };
+    let mut rc_win = RECT { left: 0, top: 0, right: 0, bottom: 0 };
+    if GetWindowRect(hwnd, &mut rc_win).is_err() {
+        return;
+    }
+    let w = rc_win.right - rc_win.left;
+    let h = rc_win.bottom - rc_win.top;
+    if w <= 0 || h <= 0 {
+        return;
+    }
+
+    let mut dib = Dib::new(w, h);
+    render_into_dib(&app, &mut dib);
     blit_to_window(hwnd, &dib);
+}
+
+fn save_dib_bmp(dib: &mut Dib, path: &std::path::Path) -> std::io::Result<()> {
+    use std::io::Write;
+    let w = dib.w;
+    let h = dib.h;
+    let row_bytes = (w * 4) as usize;
+    let image_size = (row_bytes * h as usize) as u32;
+    let file_size = 54 + image_size;
+
+    let mut file = std::fs::File::create(path)?;
+    // BITMAPFILEHEADER (14 bytes)
+    file.write_all(b"BM")?;
+    file.write_all(&file_size.to_le_bytes())?;
+    file.write_all(&0u32.to_le_bytes())?;
+    file.write_all(&54u32.to_le_bytes())?;
+
+    // BITMAPINFOHEADER (40 bytes)
+    file.write_all(&40u32.to_le_bytes())?;
+    file.write_all(&w.to_le_bytes())?;
+    file.write_all(&(-h).to_le_bytes())?; // negative for top-down rows
+    file.write_all(&1u16.to_le_bytes())?;
+    file.write_all(&32u16.to_le_bytes())?;
+    file.write_all(&0u32.to_le_bytes())?;
+    file.write_all(&image_size.to_le_bytes())?;
+    file.write_all(&2835u32.to_le_bytes())?;
+    file.write_all(&2835u32.to_le_bytes())?;
+    file.write_all(&0u32.to_le_bytes())?;
+    file.write_all(&0u32.to_le_bytes())?;
+
+    let pixels = unsafe { dib.pixels() };
+    file.write_all(pixels)?;
+    Ok(())
 }
 
 unsafe fn paint_tiles(
@@ -1135,7 +1293,7 @@ unsafe fn paint_tiles(
             Some(if telugu { format!("ముగింపు: {}", p.day_label_short(p.phase_end_jd)) } else { format!("ends {}", p.day_label_short(p.phase_end_jd)) }),
         ),
         (
-            if telugu { "రాబోయే పర్వాలు" } else { "UPCOMING MOON PHASES" },
+            if telugu { "రాబోయే పర్వాలు" } else { "UPCOMING PHASES" },
             format!("New {} · Full {}", p.day_label_short(p.next_new_moon_jd), p.day_label_short(p.next_full_moon_jd)),
             Some(if telugu { format!("పూర్ణిమాంతం: {}", s.month(p.purnimanta_month)) } else { format!("Purnimanta: {}", s.month(p.purnimanta_month)) }),
         ),
@@ -1144,14 +1302,14 @@ unsafe fn paint_tiles(
     for (idx, (head, val, sub)) in tiles.iter().enumerate() {
         let (x0, y0, x1, y1) = l.tile_rect(idx);
         let tw = x1 - x0;
-        let pad_x = 12;
+        let pad_x = 16;
 
         SelectObject(dc, HGDIOBJ(label.0));
         SetTextColor(dc, colorref(t.subtext));
         draw_text(
             dc,
             head,
-            rect(x0 + pad_x, y0 + 8, tw - pad_x * 2, 14),
+            rect(x0 + pad_x, y0 + 12, tw - pad_x * 2, 16),
             DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS,
         );
 
@@ -1160,18 +1318,18 @@ unsafe fn paint_tiles(
         draw_text(
             dc,
             val,
-            rect(x0 + pad_x, y0 + 26, tw - pad_x * 2, 20),
+            rect(x0 + pad_x, y0 + 38, tw - pad_x * 2, if telugu { 28 } else { 24 }),
             DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS,
         );
 
         if let Some(sub_text) = sub {
-            if y1 - y0 >= 56 {
+            if y1 - y0 >= 60 {
                 SelectObject(dc, HGDIOBJ(small.0));
                 SetTextColor(dc, colorref(t.faint));
                 draw_text(
                     dc,
                     sub_text,
-                    rect(x0 + pad_x, y0 + 48, tw - pad_x * 2, 16),
+                    rect(x0 + pad_x, y0 + 72, tw - pad_x * 2, 20),
                     DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS,
                 );
             }
@@ -1503,7 +1661,7 @@ mod tests {
     #[test]
     fn both_scripts_fit_a_work_area_that_can_just_hold_them() {
         for (name, l) in [("latin", layout::Layout::new(10)), ("indic", layout::Layout::new_indic(10))] {
-            let work_h = 700;
+            let work_h = 1000;
             let y = work_h - l.height;
             assert!(
                 y >= 0,

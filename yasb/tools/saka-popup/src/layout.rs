@@ -13,26 +13,28 @@
 //! have caught the original defect.
 
 /// Width of the panel, Latin.
-pub const W: i32 = 600;
+pub const W: i32 = 660;
 
 /// Width of the panel when the values are Telugu.
-pub const W_INDIC: i32 = 640;
+pub const W_INDIC: i32 = 720;
 /// Width in landscape mode (Latin).
-pub const W_LANDSCAPE: i32 = 880;
+pub const W_LANDSCAPE: i32 = 1040;
 /// Width in landscape mode (Indic).
-pub const W_LANDSCAPE_INDIC: i32 = 920;
+pub const W_LANDSCAPE_INDIC: i32 = 1080;
 /// Width in compact glance mode.
-pub const W_COMPACT: i32 = 480;
+pub const W_COMPACT: i32 = 580;
+/// Width in compact glance mode (Indic).
+pub const W_COMPACT_INDIC: i32 = 620;
 /// Window corner radius.
 pub const RADIUS: i32 = 20;
-/// Panel edge padding. Scale step 6.
+/// Panel edge padding. Scale step 6 (24px).
 pub const PAD: i32 = yasb_chrome::space(6);
 
 /// Height of one row.
-pub const ROW_H: i32 = 36;
+pub const ROW_H: i32 = 50;
 
 /// Row height when the values are Telugu.
-pub const ROW_H_INDIC: i32 = 44;
+pub const ROW_H_INDIC: i32 = 58;
 /// Width of the row card's radius.
 pub const CARD_R: i32 = 16;
 /// Inner padding of the row card. Scale step 3.
@@ -41,17 +43,18 @@ pub const CARD_PAD: i32 = yasb_chrome::space(3);
 pub const MOON_R: i32 = 42;
 /// Radius of the weekday scrim pill. Half its height, so the ends are
 /// semicircular and the label never looks boxed.
-pub const SCRIM_R: i32 = 9;
+pub const SCRIM_R: i32 = 10;
 /// Vertical offset of the progress indicator inside a row, measured from the
-/// row's top. The text line box is 22px, so this puts the rule just under it.
-pub const INDICATOR_Y: i32 = 28;
+/// row's top. The text line box is 24px (Latin) / 30px (Indic) starting at y+4,
+/// so this leaves at least 10px downward padding before the indicator rule.
+pub const INDICATOR_Y: i32 = 38;
 
 /// Offset of the progress rule inside an Indic row.
-pub const INDICATOR_Y_INDIC: i32 = 34;
+pub const INDICATOR_Y_INDIC: i32 = 44;
 /// Thickness of the progress indicator. 2px reads as a rule rather than a bar.
 pub const INDICATOR_H: i32 = 2;
 /// Horizontal padding inside the weekday pill, either side of the text.
-pub const SCRIM_PAD_X: i32 = 11;
+pub const SCRIM_PAD_X: i32 = 12;
 /// The weekday label's line box, which is what the pill is sized around.
 pub const WEEKDAY_H: i32 = 18;
 
@@ -137,11 +140,11 @@ impl Layout {
     pub fn tile_rect(&self, idx: usize) -> (i32, i32, i32, i32) {
         if self.mode == LayoutMode::Landscape {
             let w = self.w();
-            let gutter = 12;
+            let gutter = 14;
             let pad = PAD;
             let avail = w - pad * 2 - gutter * 3;
             let tile_w = avail / 4;
-            let tile_h = if self.indic { 76 } else { 70 };
+            let tile_h = if self.indic { 112 } else { 104 };
             let x0 = pad + (idx as i32) * (tile_w + gutter);
             let x1 = x0 + tile_w;
             let y0 = self.grid_y;
@@ -151,12 +154,12 @@ impl Layout {
             let w = self.w();
             let col = (idx % 2) as i32;
             let row = (idx / 2) as i32;
-            let gutter = 12;
+            let gutter = 14;
             let pad = PAD;
             let avail = w - pad * 2 - gutter;
             let tile_w = avail / 2;
-            let tile_h = if self.indic { 74 } else { 70 };
-            let row_gap = 10;
+            let tile_h = if self.indic { 112 } else { 104 };
+            let row_gap = 12;
             let x0 = pad + col * (tile_w + gutter);
             let x1 = x0 + tile_w;
             let y0 = self.grid_y + row * (tile_h + row_gap);
@@ -169,7 +172,7 @@ impl Layout {
     pub fn w(&self) -> i32 {
         match self.mode {
             LayoutMode::Landscape => if self.indic { W_LANDSCAPE_INDIC } else { W_LANDSCAPE },
-            LayoutMode::Compact => W_COMPACT,
+            LayoutMode::Compact => if self.indic { W_COMPACT_INDIC } else { W_COMPACT },
             LayoutMode::Portrait => if self.indic { W_INDIC } else { W },
         }
     }
@@ -185,49 +188,49 @@ impl Layout {
     }
 
     /// Height of a row's text line box.
-    ///
-    /// Telugu needs a taller box for the same reason it needs a taller row:
-    /// a 22px glyph in a 22px Latin box is centred but still overflows it.
     pub fn text_h(&self) -> i32 {
-        if self.indic { 30 } else { 22 }
+        if self.indic { 30 } else { 24 }
     }
 
     fn build(rows: i32, indic: bool) -> Layout {
         let row_h = if indic { ROW_H_INDIC } else { ROW_H };
         let weekday_y = PAD;
-        let weekday_top = weekday_y - 2;
-        let weekday_bottom = weekday_top + WEEKDAY_H + 4;
-        let date_y = weekday_bottom + 6;
-        let era_y = date_y + 36;
-        let era_bottom = era_y + 16;
-        let udaya_y = era_bottom + 4;
-        let udaya_bottom = udaya_y + 16;
+        let weekday_top = weekday_y - 3;
+        let weekday_bottom = weekday_top + WEEKDAY_H + 6;
+        let date_y = weekday_bottom + 12;
+        let date_h = 42;
+        let era_y = date_y + date_h + 12;
+        let era_bottom = era_y + 22;
+        let udaya_y = era_bottom + 12;
+        let udaya_bottom = udaya_y + 22;
         let mode = LayoutMode::Portrait;
         let w = if indic { W_INDIC } else { W };
 
         let moon_r = MOON_R;
         let sky_moon_cx = w - PAD - moon_r;
         let moon_cx = sky_moon_cx - 96;
-        let moon_cy = 88;
-        let moon_y = date_y;
+        let moon_cy = 100;
+        let moon_y = moon_cy - moon_r;
         let moon_bottom = moon_cy + moon_r;
 
-        let timeline_y = udaya_bottom + 18;
-        let timeline_bottom = timeline_y + 20;
-        let rule_y = timeline_bottom + 10;
+        let badge_bottom = moon_bottom + 10 + 22;
+        let top_content_bottom = udaya_bottom.max(badge_bottom);
+        let timeline_y = top_content_bottom + 16;
+        let timeline_bottom = timeline_y + 24;
+        let rule_y = timeline_bottom + 14;
 
-        let panchang_card_y = rule_y + 26;
+        let panchang_card_y = rule_y + 42;
         let panchang_card_bottom = panchang_card_y + CARD_PAD * 2 + 5 * row_h;
-        let grid_y = panchang_card_bottom + 26;
-        let tile_h = if indic { 74 } else { 70 };
-        let row_gap = 10;
+        let grid_y = panchang_card_bottom + 44;
+        let tile_h = if indic { 112 } else { 104 };
+        let row_gap = 12;
         let grid_bottom = grid_y + tile_h * 2 + row_gap;
 
         let card_y = panchang_card_y;
-        let card_bottom = card_y + CARD_PAD * 2 + rows.max(5) * row_h;
+        let card_bottom = panchang_card_y + CARD_PAD * 2 + rows.max(5) * row_h;
 
-        let footer_y = grid_bottom + 16;
-        let height = footer_y + 18 + PAD;
+        let footer_y = grid_bottom + 18;
+        let height = footer_y + 20 + PAD;
         Layout {
             mode,
             weekday_y,
@@ -267,35 +270,38 @@ impl Layout {
                 let _w = if indic { W_LANDSCAPE_INDIC } else { W_LANDSCAPE };
                 let row_h = if indic { ROW_H_INDIC } else { ROW_H };
                 let weekday_y = PAD;
-                let weekday_top = weekday_y - 2;
-                let weekday_bottom = weekday_top + WEEKDAY_H + 4;
-                let date_y = weekday_bottom + 6;
-                let era_y = date_y + 32;
-                let era_bottom = era_y + 16;
-                let udaya_y = era_bottom + 4;
-                let udaya_bottom = udaya_y + 16;
+                let weekday_top = weekday_y - 3;
+                let weekday_bottom = weekday_top + WEEKDAY_H + 6;
+                let date_y = weekday_bottom + 12;
+                let date_h = 42;
+                let era_y = date_y + date_h + 12;
+                let era_bottom = era_y + 22;
+                let udaya_y = era_bottom + 12;
+                let udaya_bottom = udaya_y + 22;
 
                 let moon_r = 44;
                 let moon_cx = 120;
-                let sky_moon_cx = 230;
-                let moon_cy = 195;
+                let sky_moon_cx = 240;
+                let moon_cy = 250;
                 let moon_y = moon_cy - moon_r;
                 let moon_bottom = moon_cy + moon_r;
 
-                let timeline_y = moon_bottom + 36;
-                let timeline_bottom = timeline_y + 20;
+                let badge_bottom = moon_bottom + 10 + 22;
+                let timeline_y = badge_bottom + 16;
+                let timeline_bottom = timeline_y + 24;
 
-                let panchang_card_y = PAD;
+                let panchang_card_y = PAD + 32;
                 let panchang_card_bottom = panchang_card_y + CARD_PAD * 2 + 5 * row_h;
-                let rule_y = panchang_card_bottom.max(timeline_bottom) + 14;
-                let grid_y = rule_y + 14;
-                let tile_h = if indic { 76 } else { 70 };
+                let deck_bottom = panchang_card_bottom.max(timeline_bottom);
+                let rule_y = deck_bottom + 16;
+                let grid_y = rule_y + 16;
+                let tile_h = if indic { 112 } else { 104 };
                 let grid_bottom = grid_y + tile_h;
 
                 let card_y = panchang_card_y;
                 let card_bottom = grid_bottom;
-                let footer_y = grid_bottom + 16;
-                let height = footer_y + 18 + PAD;
+                let footer_y = grid_bottom + 18;
+                let height = footer_y + 20 + PAD;
                 Layout {
                     mode,
                     weekday_y,
@@ -327,34 +333,37 @@ impl Layout {
                 }
             }
             LayoutMode::Compact => {
-                let w = W_COMPACT;
-                let weekday_y = PAD - 4;
-                let weekday_top = weekday_y - 2;
-                let weekday_bottom = weekday_top + WEEKDAY_H + 2;
-                let date_y = weekday_bottom + 4;
-                let era_y = date_y + 24;
-                let era_bottom = era_y + 16;
+                let w = if indic { W_COMPACT_INDIC } else { W_COMPACT };
+                let weekday_y = PAD;
+                let weekday_top = weekday_y - 3;
+                let weekday_bottom = weekday_top + WEEKDAY_H + 6;
+                let date_y = weekday_bottom + 10;
+                let date_h = 36;
+                let era_y = date_y + date_h + 10;
+                let era_bottom = era_y + 22;
                 let udaya_y = 0;
                 let udaya_bottom = 0;
 
-                let moon_r = 30;
-                let sky_moon_cx = w - PAD - moon_r;
+                let moon_r = 38;
+                let sky_moon_cx = w - PAD - moon_r - 8;
                 let moon_cx = sky_moon_cx;
-                let moon_cy = 40;
+                let moon_cy = 72;
                 let moon_y = moon_cy - moon_r;
                 let moon_bottom = moon_cy + moon_r;
 
-                let timeline_y = era_bottom + 26;
-                let timeline_bottom = timeline_y + 18;
-                let rule_y = timeline_bottom + 8;
-                let panchang_card_y = 0;
-                let panchang_card_bottom = 0;
+                let rule_y = era_bottom + 14;
+                let panchang_card_y = rule_y + 14;
+                let panchang_card_bottom = panchang_card_y + if indic { 96 } else { 88 };
+
+                let timeline_y = panchang_card_bottom + 12;
+                let timeline_bottom = timeline_y + if indic { 84 } else { 78 };
+
                 let grid_y = 0;
                 let grid_bottom = 0;
-                let card_y = 0;
-                let card_bottom = 0;
-                let footer_y = rule_y + 24;
-                let height = footer_y + 18 + PAD;
+                let card_y = panchang_card_y;
+                let card_bottom = timeline_bottom;
+                let footer_y = timeline_bottom + 16;
+                let height = footer_y + 20 + PAD;
                 Layout {
                     mode,
                     weekday_y,
@@ -518,11 +527,12 @@ impl Layout {
         if self.mode == LayoutMode::Compact {
             let stacked = [
                 ("weekday pill", self.weekday_top, self.weekday_bottom),
-                ("date", self.date_y, self.date_y + 24),
+                ("date", self.date_y, self.date_y + 36),
                 ("era", self.era_y, self.era_bottom),
-                ("timeline", self.timeline_y, self.timeline_bottom),
                 ("rule", self.rule_y, self.rule_y + 2),
-                ("footer", self.footer_y, self.footer_y + 18),
+                ("panchang_card", self.panchang_card_y, self.panchang_card_bottom),
+                ("timeline_card", self.timeline_y, self.timeline_bottom),
+                ("footer", self.footer_y, self.footer_y + 20),
             ];
             for pair in stacked.windows(2) {
                 let (an, _, a_bottom) = pair[0];
@@ -531,7 +541,7 @@ impl Layout {
                     return Err(format!("{an} ends at {a_bottom} but {bn} starts at {b_top}"));
                 }
             }
-            if self.footer_y + 18 > self.height {
+            if self.footer_y + 20 + PAD > self.height {
                 return Err(format!("footer overflows the compact panel: {}", self.height));
             }
             return Ok(());
@@ -540,14 +550,14 @@ impl Layout {
         if self.mode == LayoutMode::Landscape {
             let stacked = [
                 ("weekday pill", self.weekday_top, self.weekday_bottom),
-                ("date", self.date_y, self.date_y + 32),
+                ("date", self.date_y, self.date_y + 42),
                 ("era", self.era_y, self.era_bottom),
                 ("udaya", self.udaya_y, self.udaya_bottom),
-                ("moons", self.moon_y, self.moon_bottom),
+                ("moons", self.moon_y - 20, self.moon_bottom),
                 ("timeline", self.timeline_y, self.timeline_bottom),
                 ("rule", self.rule_y, self.rule_y + 2),
                 ("grid", self.grid_y, self.grid_bottom),
-                ("footer", self.footer_y, self.footer_y + 18),
+                ("footer", self.footer_y, self.footer_y + 20),
             ];
             for pair in stacked.windows(2) {
                 let (an, _, a_bottom) = pair[0];
@@ -556,7 +566,7 @@ impl Layout {
                     return Err(format!("{an} ends at {a_bottom} but {bn} starts at {b_top}"));
                 }
             }
-            if self.footer_y + 18 > self.height {
+            if self.footer_y + 20 + PAD > self.height {
                 return Err(format!("footer overflows the landscape panel: {}", self.height));
             }
             return Ok(());
@@ -564,14 +574,14 @@ impl Layout {
 
         let stacked = [
             ("weekday pill", self.weekday_top, self.weekday_bottom),
-            ("date", self.date_y, self.date_y + 36),
+            ("date", self.date_y, self.date_y + 42),
             ("era", self.era_y, self.era_bottom),
             ("udaya", self.udaya_y, self.udaya_bottom),
             ("timeline", self.timeline_y, self.timeline_bottom),
             ("rule", self.rule_y, self.rule_y + 2),
             ("card", self.panchang_card_y, self.panchang_card_bottom),
             ("grid", self.grid_y, self.grid_bottom),
-            ("footer", self.footer_y, self.footer_y + 18),
+            ("footer", self.footer_y, self.footer_y + 20),
         ];
         for pair in stacked.windows(2) {
             let (an, _, a_bottom) = pair[0];
@@ -590,7 +600,7 @@ impl Layout {
                 return Err(format!("row {i} indicator overflows: {y}"));
             }
         }
-        if self.footer_y + 18 + PAD > self.height {
+        if self.footer_y + 20 + PAD > self.height {
             return Err(format!("footer overflows the panel: {}", self.height));
         }
         Ok(())
@@ -638,8 +648,8 @@ mod tests {
     #[test]
     fn the_panel_height_is_exactly_what_the_content_needs() {
         let l = Layout::new(10);
-        assert_eq!(l.height, l.footer_y + 18 + PAD);
-        assert!(l.height > 500 && l.height < 800, "height {}", l.height);
+        assert_eq!(l.height, l.footer_y + 20 + PAD);
+        assert!(l.height > 600 && l.height < 1050, "height {}", l.height);
     }
 
     /// The indicator belongs to the value, so it starts where the value starts and
@@ -916,7 +926,7 @@ mod tests {
     #[test]
     fn the_footer_sits_inside_the_panel() {
         let l = Layout::new(10);
-        let box_bottom = l.footer_y + 18;
+        let box_bottom = l.footer_y + 20;
         assert!(
             box_bottom <= l.height - PAD,
             "footer box ends at {box_bottom}, past the panel's bottom padding (height {})",
