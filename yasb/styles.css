@@ -1254,7 +1254,7 @@
     padding: 0;
 }
 .yasb-bar.adaptive {
-    background-color: var(--glassmist);
+    background-color: var(--glassfrost);
     border: none;
     -qproperty-railheight: 0;
     -qproperty-islandradius: 12;
