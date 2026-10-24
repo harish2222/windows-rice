@@ -119,7 +119,7 @@
     --shade: #0D0D13;
     --accent-soft: rgba(217, 154, 43, 0.55);
     --frame: #D99A2B;
-    --motif: url("C:/Users/haris/.config/yasb/motif-wine.svg");
+    --motif: url("C:/Users/haris/.config/yasb/motif-moss.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-base.svg"); */
 
     /* Rangalipi Ember */
@@ -173,7 +173,7 @@
     --shade: #110B07;
     --accent-soft: rgba(201, 111, 47, 0.55);
     --frame: #C96F2F;
-    --motif: url("C:/Users/haris/.config/yasb/motif-espresso.svg");
+    --motif: url("C:/Users/haris/.config/yasb/motif-ember.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-ember.svg"); */
 
     /* Rangalipi Ember Light */
@@ -181,13 +181,13 @@
     --acrylic-hover: rgba(231, 224, 210, 0.65);
     --background: #E7E0D2;
     --background2: #F5F0E8;
-    --accent: #B45F27;
+    --accent: #9A481A;
     --text: #1A1816;
     --accentText: #FFFFFF;
     --hover: #D9D2C2;
     --mutedBG: #EBE5D8;
-    --border: #B45F27;
-    --redFlash: #BE4234;
+    --border: #9A481A;
+    --redFlash: #B3273C;
     --subtext: #45423C;
     --base: #E7E0D2;
     --mantle: #EBE5D8;
@@ -200,34 +200,34 @@
     --overlay2: #4A463E;
     --subtext0: #67625A;
     --subtext1: #45423C;
-    --lavender: #B57A3A;
-    --blue: #3F7A96;
-    --sapphire: #3A7579;
-    --sky: #4EA88A;
-    --teal: #3F8A70;
-    --green: #6B9439;
-    --yellow: #B45F27;
-    --peach: #C47434;
-    --maroon: #93404A;
-    --red: #BE4234;
-    --mauve: #8A5FA0;
-    --pink: #B56A80;
-    --flamingo: #BE8A64;
-    --rosewater: #C4A483;
+    --lavender: #7E580E;
+    --blue: #25598E;
+    --sapphire: #1E5478;
+    --sky: #176E56;
+    --teal: #14645A;
+    --green: #3F6E24;
+    --yellow: #9A481A;
+    --peach: #9C521F;
+    --maroon: #6E2840;
+    --red: #B3273C;
+    --mauve: #7A3E92;
+    --pink: #9A3E62;
+    --flamingo: #9E562A;
+    --rosewater: #8A563E;
     --text-muted: #45423C;
     --yasb-icon-fg: #1A1816;
-    --glass: rgba(180, 95, 39, 0.45);
-    --glassmenu: rgba(180, 95, 39, 0.5);
-    --glassfrost: rgba(180, 95, 39, 0.4);
-    --glassmist: rgba(180, 95, 39, 0.35);
-    --hairline: rgba(26, 24, 22, 0.14);
-    --text-faint: rgba(26, 24, 22, 0.42);
-    --chip: rgba(180, 95, 39, 0.22);
+    --glass: rgba(154, 72, 26, 0.45);
+    --glassmenu: rgba(154, 72, 26, 0.5);
+    --glassfrost: rgba(154, 72, 26, 0.4);
+    --glassmist: rgba(154, 72, 26, 0.35);
+    --hairline: rgba(26, 24, 22, 0.22);
+    --text-faint: rgba(26, 24, 22, 0.52);
+    --chip: rgba(154, 72, 26, 0.26);
     --glow: #F5F0E8;
     --shade: #EBE5D8;
-    --accent-soft: rgba(180, 95, 39, 0.55);
-    --frame: #8A6240;
-    --motif: url("C:/Users/haris/.config/yasb/motif-paisley.svg");
+    --accent-soft: rgba(154, 72, 26, 0.55);
+    --frame: #6E4428;
+    --motif: url("C:/Users/haris/.config/yasb/motif-matcha.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-ember.svg"); */
 
     /* Rangalipi Mossfern */
@@ -281,7 +281,7 @@
     --shade: #0A0E09;
     --accent-soft: rgba(130, 172, 84, 0.55);
     --frame: #82AC54;
-    --motif: url("C:/Users/haris/.config/yasb/motif-wine.svg");
+    --motif: url("C:/Users/haris/.config/yasb/motif-moss.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-moss.svg"); */
 
     /* Rangalipi Mossfern Light */
@@ -289,13 +289,13 @@
     --acrylic-hover: rgba(231, 224, 210, 0.65);
     --background: #E7E0D2;
     --background2: #F5F0E8;
-    --accent: #5F8A3C;
+    --accent: #3F6E24;
     --text: #1A1816;
     --accentText: #FFFFFF;
     --hover: #D9D2C2;
     --mutedBG: #EBE5D8;
-    --border: #5F8A3C;
-    --redFlash: #B04040;
+    --border: #3F6E24;
+    --redFlash: #B3273C;
     --subtext: #45423C;
     --base: #E7E0D2;
     --mantle: #EBE5D8;
@@ -308,38 +308,38 @@
     --overlay2: #4A463E;
     --subtext0: #67625A;
     --subtext1: #45423C;
-    --lavender: #A87F3E;
-    --blue: #3E8A70;
-    --sapphire: #357A6A;
-    --sky: #4E9A78;
-    --teal: #3E8A6A;
-    --green: #5A8A3A;
-    --yellow: #5F8A3C;
-    --peach: #B57F3E;
-    --maroon: #7A5A44;
-    --red: #B04040;
-    --mauve: #7A7A5A;
-    --pink: #9A8A5A;
-    --flamingo: #A8945E;
-    --rosewater: #B8A078;
+    --lavender: #7A5E1C;
+    --blue: #156858;
+    --sapphire: #125C50;
+    --sky: #176E4E;
+    --teal: #125E48;
+    --green: #3F6E24;
+    --yellow: #4A6A1E;
+    --peach: #8A5A1E;
+    --maroon: #5E4432;
+    --red: #B3273C;
+    --mauve: #5E5E30;
+    --pink: #6E6428;
+    --flamingo: #7A6428;
+    --rosewater: #7A5E32;
     --text-muted: #45423C;
     --yasb-icon-fg: #1A1816;
-    --glass: rgba(95, 138, 60, 0.45);
-    --glassmenu: rgba(95, 138, 60, 0.5);
-    --glassfrost: rgba(95, 138, 60, 0.4);
-    --glassmist: rgba(95, 138, 60, 0.35);
-    --hairline: rgba(26, 24, 22, 0.14);
-    --text-faint: rgba(26, 24, 22, 0.42);
-    --chip: rgba(95, 138, 60, 0.22);
+    --glass: rgba(63, 110, 36, 0.45);
+    --glassmenu: rgba(63, 110, 36, 0.5);
+    --glassfrost: rgba(63, 110, 36, 0.4);
+    --glassmist: rgba(63, 110, 36, 0.35);
+    --hairline: rgba(26, 24, 22, 0.22);
+    --text-faint: rgba(26, 24, 22, 0.52);
+    --chip: rgba(63, 110, 36, 0.26);
     --glow: #F5F0E8;
     --shade: #EBE5D8;
-    --accent-soft: rgba(95, 138, 60, 0.55);
-    --frame: #6B7444;
-    --motif: url("C:/Users/haris/.config/yasb/motif-espresso.svg");
+    --accent-soft: rgba(63, 110, 36, 0.55);
+    --frame: #50642C;
+    --motif: url("C:/Users/haris/.config/yasb/motif-ember.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-moss.svg"); */
 
-    /* Rangalipi Wine - active */
-    --acrylic: rgba(29, 16, 21, 0.01);
+    /* Rangalipi Wine */
+    /* --acrylic: rgba(29, 16, 21, 0.01);
     --acrylic-hover: rgba(29, 16, 21, 0.01);
     --background: #1D1015;
     --background2: #29151D;
@@ -390,21 +390,21 @@
     --accent-soft: rgba(192, 78, 104, 0.55);
     --frame: #C04E68;
     --holiday: #D95D5D;
-    --motif: url("C:/Users/haris/.config/yasb/motif-paisley.svg");
-    --runner: url("C:/Users/haris/.config/yasb/runner-wine.svg");
+    --motif: url("C:/Users/haris/.config/yasb/motif-matcha.svg");
+    --runner: url("C:/Users/haris/.config/yasb/runner-wine.svg"); */
 
     /* Rangalipi Wine Light */
     /* --acrylic: rgba(231, 224, 210, 0.50);
     --acrylic-hover: rgba(231, 224, 210, 0.65);
     --background: #E7E0D2;
     --background2: #F5F0E8;
-    --accent: #A83E58;
+    --accent: #8A2F4A;
     --text: #1A1816;
     --accentText: #FFFFFF;
     --hover: #D9D2C2;
     --mutedBG: #EBE5D8;
-    --border: #A83E58;
-    --redFlash: #B03050;
+    --border: #8A2F4A;
+    --redFlash: #B3273C;
     --subtext: #45423C;
     --base: #E7E0D2;
     --mantle: #EBE5D8;
@@ -417,34 +417,34 @@
     --overlay2: #4A463E;
     --subtext0: #67625A;
     --subtext1: #45423C;
-    --lavender: #9A5A7A;
-    --blue: #4A7A9A;
-    --sapphire: #3A6E80;
-    --sky: #5A9AA8;
-    --teal: #3E8A80;
-    --green: #6B8A4A;
-    --yellow: #A83E58;
-    --peach: #C47A4E;
-    --maroon: #8A3448;
-    --red: #B03050;
-    --mauve: #8A4E80;
-    --pink: #A85A70;
-    --flamingo: #B87A70;
-    --rosewater: #C49A90;
+    --lavender: #8E4470;
+    --blue: #25598E;
+    --sapphire: #1E5478;
+    --sky: #1A6C86;
+    --teal: #15655A;
+    --green: #3F6E28;
+    --yellow: #8A2F4A;
+    --peach: #9C521F;
+    --maroon: #7C2A44;
+    --red: #B3273C;
+    --mauve: #7A3E92;
+    --pink: #A84064;
+    --flamingo: #A64628;
+    --rosewater: #8A4A3E;
     --text-muted: #45423C;
     --yasb-icon-fg: #1A1816;
-    --glass: rgba(168, 62, 88, 0.45);
-    --glassmenu: rgba(168, 62, 88, 0.5);
-    --glassfrost: rgba(168, 62, 88, 0.4);
-    --glassmist: rgba(168, 62, 88, 0.35);
-    --hairline: rgba(26, 24, 22, 0.14);
-    --text-faint: rgba(26, 24, 22, 0.42);
-    --chip: rgba(168, 62, 88, 0.22);
+    --glass: rgba(138, 47, 74, 0.45);
+    --glassmenu: rgba(138, 47, 74, 0.5);
+    --glassfrost: rgba(138, 47, 74, 0.4);
+    --glassmist: rgba(138, 47, 74, 0.35);
+    --hairline: rgba(26, 24, 22, 0.22);
+    --text-faint: rgba(26, 24, 22, 0.52);
+    --chip: rgba(138, 47, 74, 0.26);
     --glow: #F5F0E8;
     --shade: #EBE5D8;
-    --accent-soft: rgba(168, 62, 88, 0.55);
-    --frame: #8A5460;
-    --motif: url("C:/Users/haris/.config/yasb/motif-wine.svg");
+    --accent-soft: rgba(138, 47, 74, 0.55);
+    --frame: #6E4052;
+    --motif: url("C:/Users/haris/.config/yasb/motif-moss.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-wine.svg"); */
 
     /* Rangalipi Dune */
@@ -498,7 +498,7 @@
     --shade: #100C06;
     --accent-soft: rgba(192, 138, 36, 0.55);
     --frame: #C08A24;
-    --motif: url("C:/Users/haris/.config/yasb/motif-espresso.svg");
+    --motif: url("C:/Users/haris/.config/yasb/motif-ember.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-dune.svg"); */
 
     /* Rangalipi Dune Light */
@@ -552,7 +552,7 @@
     --shade: #EBE5D8;
     --accent-soft: rgba(168, 116, 28, 0.55);
     --frame: #8A6E3E;
-    --motif: url("C:/Users/haris/.config/yasb/motif-paisley.svg");
+    --motif: url("C:/Users/haris/.config/yasb/motif-matcha.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-dune.svg"); */
 
     /* Rangalipi Matcha */
@@ -606,7 +606,7 @@
     --shade: #0B0E06;
     --accent-soft: rgba(147, 176, 76, 0.55);
     --frame: #93B04C;
-    --motif: url("C:/Users/haris/.config/yasb/motif-wine.svg");
+    --motif: url("C:/Users/haris/.config/yasb/motif-moss.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-matcha.svg"); */
 
     /* Rangalipi Matcha Light */
@@ -660,7 +660,7 @@
     --shade: #EBE5D8;
     --accent-soft: rgba(122, 148, 60, 0.55);
     --frame: #76794C;
-    --motif: url("C:/Users/haris/.config/yasb/motif-espresso.svg");
+    --motif: url("C:/Users/haris/.config/yasb/motif-ember.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-matcha.svg"); */
 
     /* Rangalipi Espresso */
@@ -714,7 +714,7 @@
     --shade: #0F0A07;
     --accent-soft: rgba(198, 138, 75, 0.55);
     --frame: #C68A4B;
-    --motif: url("C:/Users/haris/.config/yasb/motif-paisley.svg");
+    --motif: url("C:/Users/haris/.config/yasb/motif-matcha.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-espresso.svg"); */
 
     /* Rangalipi Espresso Light */
@@ -768,7 +768,7 @@
     --shade: #EBE5D8;
     --accent-soft: rgba(168, 116, 60, 0.55);
     --frame: #8A6E4E;
-    --motif: url("C:/Users/haris/.config/yasb/motif-wine.svg");
+    --motif: url("C:/Users/haris/.config/yasb/motif-moss.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-espresso.svg"); */
 
     /* Rangalipi Noir */
@@ -822,7 +822,7 @@
     --shade: #0D080A;
     --accent-soft: rgba(206, 65, 82, 0.55);
     --frame: #CE4152;
-    --motif: url("C:/Users/haris/.config/yasb/motif-espresso.svg");
+    --motif: url("C:/Users/haris/.config/yasb/motif-ember.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-noir.svg"); */
 
     /* Rangalipi Noir Light */
@@ -876,7 +876,7 @@
     --shade: #EBE5D8;
     --accent-soft: rgba(174, 53, 70, 0.55);
     --frame: #8A525C;
-    --motif: url("C:/Users/haris/.config/yasb/motif-paisley.svg");
+    --motif: url("C:/Users/haris/.config/yasb/motif-matcha.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-noir.svg"); */
 
     /* Rangalipi Aubergine */
@@ -930,7 +930,7 @@
     --shade: #0D0811;
     --accent-soft: rgba(166, 127, 212, 0.55);
     --frame: #A67FD4;
-    --motif: url("C:/Users/haris/.config/yasb/motif-wine.svg");
+    --motif: url("C:/Users/haris/.config/yasb/motif-moss.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-aubergine.svg"); */
 
     /* Rangalipi Aubergine Light */
@@ -984,11 +984,11 @@
     --shade: #EBE5D8;
     --accent-soft: rgba(138, 99, 184, 0.55);
     --frame: #6E5E8A;
-    --motif: url("C:/Users/haris/.config/yasb/motif-espresso.svg");
+    --motif: url("C:/Users/haris/.config/yasb/motif-ember.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-aubergine.svg"); */
 
-    /* Rangalipi Clay */
-    /* --acrylic: rgba(26, 19, 14, 0.50);
+    /* Rangalipi Clay - active */
+    --acrylic: rgba(26, 19, 14, 0.50);
     --acrylic-hover: rgba(26, 19, 14, 0.65);
     --background: #1A130E;
     --background2: #251A12;
@@ -1038,8 +1038,8 @@
     --shade: #0F0A05;
     --accent-soft: rgba(201, 104, 60, 0.55);
     --frame: #C9683C;
-    --motif: url("C:/Users/haris/.config/yasb/motif-paisley.svg");
-    --runner: url("C:/Users/haris/.config/yasb/runner-clay.svg"); */
+    --motif: url("C:/Users/haris/.config/yasb/motif-matcha.svg");
+    --runner: url("C:/Users/haris/.config/yasb/runner-clay.svg");
 
     /* Rangalipi Clay Light */
     /* --acrylic: rgba(231, 224, 210, 0.50);
@@ -1092,7 +1092,7 @@
     --shade: #EBE5D8;
     --accent-soft: rgba(168, 86, 48, 0.55);
     --frame: #8A5E44;
-    --motif: url("C:/Users/haris/.config/yasb/motif-wine.svg");
+    --motif: url("C:/Users/haris/.config/yasb/motif-moss.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-clay.svg"); */
 
     /* Rangalipi Olive */
@@ -1146,7 +1146,7 @@
     --shade: #0A0B05;
     --accent-soft: rgba(168, 160, 58, 0.55);
     --frame: #A8A03A;
-    --motif: url("C:/Users/haris/.config/yasb/motif-espresso.svg");
+    --motif: url("C:/Users/haris/.config/yasb/motif-ember.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-olive.svg"); */
 
     /* Rangalipi Olive Light */
@@ -1200,7 +1200,7 @@
     --shade: #EBE5D8;
     --accent-soft: rgba(138, 132, 48, 0.55);
     --frame: #74714A;
-    --motif: url("C:/Users/haris/.config/yasb/motif-paisley.svg");
+    --motif: url("C:/Users/haris/.config/yasb/motif-matcha.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-olive.svg"); */
 
     /* Bright-wallpaper theme.
@@ -1256,7 +1256,7 @@
     --shade: #EBE5D8;
     --accent-soft: rgba(179, 122, 26, 0.55);
     --frame: #8A6D3B;
-    --motif: url("C:/Users/haris/.config/yasb/motif-wine.svg");
+    --motif: url("C:/Users/haris/.config/yasb/motif-moss.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-base.svg"); */
 }
 
