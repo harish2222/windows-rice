@@ -219,7 +219,7 @@
     --glass: rgba(154, 72, 26, 0.45);
     --glassmenu: rgba(154, 72, 26, 0.5);
     --glassfrost: rgba(154, 72, 26, 0.4);
-    --glassmist: rgba(245, 231, 219, 0.62);
+    --glassmist: rgba(255, 255, 255, 0.50);
     --hairline: rgba(26, 24, 22, 0.22);
     --text-faint: rgba(26, 24, 22, 0.52);
     --chip: rgba(154, 72, 26, 0.26);
@@ -327,7 +327,7 @@
     --glass: rgba(63, 110, 36, 0.45);
     --glassmenu: rgba(63, 110, 36, 0.5);
     --glassfrost: rgba(63, 110, 36, 0.4);
-    --glassmist: rgba(233, 241, 228, 0.62);
+    --glassmist: rgba(255, 255, 255, 0.50);
     --hairline: rgba(26, 24, 22, 0.22);
     --text-faint: rgba(26, 24, 22, 0.52);
     --chip: rgba(63, 110, 36, 0.26);
@@ -338,8 +338,8 @@
     --motif: url("C:/Users/haris/.config/yasb/motif-dune.svg");
     --runner: url("C:/Users/haris/.config/yasb/runner-moss.svg"); */
 
-    /* Rangalipi Wine - active */
-    --acrylic: rgba(29, 16, 21, 0.01);
+    /* Rangalipi Wine */
+    /* --acrylic: rgba(29, 16, 21, 0.01);
     --acrylic-hover: rgba(29, 16, 21, 0.01);
     --background: #1D1015;
     --background2: #29151D;
@@ -391,10 +391,10 @@
     --frame: #C04E68;
     --holiday: #D95D5D;
     --motif: url("C:/Users/haris/.config/yasb/motif-noir.svg");
-    --runner: url("C:/Users/haris/.config/yasb/runner-wine.svg");
+    --runner: url("C:/Users/haris/.config/yasb/runner-wine.svg"); */
 
-    /* Rangalipi Wine Light */
-    /* --acrylic: rgba(231, 224, 210, 0.50);
+    /* Rangalipi Wine Light - active */
+    --acrylic: rgba(231, 224, 210, 0.50);
     --acrylic-hover: rgba(231, 224, 210, 0.65);
     --background: #E7E0D2;
     --background2: #F5F0E8;
@@ -436,7 +436,7 @@
     --glass: rgba(138, 47, 74, 0.45);
     --glassmenu: rgba(138, 47, 74, 0.5);
     --glassfrost: rgba(138, 47, 74, 0.4);
-    --glassmist: rgba(243, 226, 232, 0.62);
+    --glassmist: rgba(255, 255, 255, 0.50);
     --hairline: rgba(26, 24, 22, 0.22);
     --text-faint: rgba(26, 24, 22, 0.52);
     --chip: rgba(138, 47, 74, 0.26);
@@ -445,7 +445,7 @@
     --accent-soft: rgba(138, 47, 74, 0.55);
     --frame: #A02E52;
     --motif: url("C:/Users/haris/.config/yasb/motif-matcha.svg");
-    --runner: url("C:/Users/haris/.config/yasb/runner-wine.svg"); */
+    --runner: url("C:/Users/haris/.config/yasb/runner-wine.svg");
 
     /* Rangalipi Dune */
     /* --acrylic: rgba(27, 22, 16, 0.50);
