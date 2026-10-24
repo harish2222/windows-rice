@@ -3124,7 +3124,7 @@
     ]
   },
   "Windows Terminal": {
-    "tray_and_multi_window": [
+    "manage": [
       {
         "kind": "Exe",
         "id": "WindowsTerminal.exe",

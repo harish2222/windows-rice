@@ -30,8 +30,7 @@ if (-not $NoApps) {
     Start-Process wt.exe
     Start-Sleep -Milliseconds 1500
 
-    # 5. Workspace 2 (index 1) -> Zen Browser (also its initial-workspace rule),
-    #    maximized for video/fullscreen use
+    # 5. Workspace 2 (index 1) -> Zen Browser (also its initial-workspace rule)
     $null = komorebic focus-monitor-workspace 0 1 2>&1
     $zen = "$env:LOCALAPPDATA\Zen Browser\zen.exe"
     if (-not (Test-Path -LiteralPath $zen)) {
@@ -39,8 +38,6 @@ if (-not $NoApps) {
     }
     Start-Process -FilePath $zen
     Start-Sleep -Seconds 2
-    $null = komorebic focus-monitor-workspace 0 1 2>&1
-    $null = komorebic toggle-maximize 2>&1
 
     # 6. Return to workspace 1
     $null = komorebic focus-monitor-workspace 0 0 2>&1

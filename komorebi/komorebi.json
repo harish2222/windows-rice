@@ -1,10 +1,11 @@
 {
   "$schema": "https://raw.githubusercontent.com/LGUG2Z/komorebi/master/schema.json",
+  "app_specific_configuration_path": "C:\\Users\\haris\\.config\\komorebi\\applications.json",
   "animation": {
-    "style": "EaseInOutCubic",
-    "fps": 240,
     "enabled": true,
-    "duration": 250,
+    "fps": 144,
+    "duration": 200,
+    "style": "EaseOutExpo",
     "ghost_movement": true
   },
   "border": true,
@@ -19,10 +20,10 @@
   "border_offset": 0,
   "border_style": "System",
   "border_width": 2,
-  "cross_monitor_move_behaviour": "Swap",
+  "cross_monitor_move_behaviour": "Insert",
   "default_container_padding": 0,
   "default_workspace_padding": 1,
-  "float_override": false,
+  "float_override": true,
   "floating_layer_behaviour": "Float",
   "float_rule_placement": "Center",
   "floating_layer_placement": "Center",
@@ -48,8 +49,7 @@
   },
   "transparency": false,
   "transparency_alpha": 220,
-  "app_specific_configuration_path": "C:\\Users\\haris\\.config\\komorebi\\applications.json",
-  "unmanaged_window_operation_behaviour": "Op",
+  "unmanaged_window_operation_behaviour": "NoOp",
   "window_container_behaviour": "Create",
   "window_hiding_behaviour": "Cloak",
   "monitors": [
@@ -57,7 +57,24 @@
       "workspaces": [
         {
           "name": "1",
-          "layout": "BSP"
+          "layout": "BSP",
+          "initial_workspace_rules": [
+            {
+              "kind": "Exe",
+              "id": "WindowsTerminal.exe",
+              "matching_strategy": "Equals"
+            },
+            {
+              "kind": "Exe",
+              "id": "otty.exe",
+              "matching_strategy": "Equals"
+            },
+            {
+              "kind": "Exe",
+              "id": "alacritty.exe",
+              "matching_strategy": "Equals"
+            }
+          ]
         },
         {
           "name": "2",
@@ -82,6 +99,11 @@
               "kind": "Exe",
               "id": "msedge.exe",
               "matching_strategy": "Equals"
+            },
+            {
+              "kind": "Exe",
+              "id": "firefox.exe",
+              "matching_strategy": "Equals"
             }
           ]
         },
@@ -97,6 +119,16 @@
             {
               "kind": "Exe",
               "id": "ms-teams.exe",
+              "matching_strategy": "Equals"
+            },
+            {
+              "kind": "Exe",
+              "id": "Slack.exe",
+              "matching_strategy": "Equals"
+            },
+            {
+              "kind": "Exe",
+              "id": "Telegram.exe",
               "matching_strategy": "Equals"
             }
           ]
@@ -155,12 +187,44 @@
               "kind": "Exe",
               "id": "Kodi.exe",
               "matching_strategy": "Equals"
+            },
+            {
+              "kind": "Exe",
+              "id": "Spotify.exe",
+              "matching_strategy": "Equals"
+            },
+            {
+              "kind": "Exe",
+              "id": "SpotiFLAC(1).exe",
+              "matching_strategy": "Equals"
+            },
+            {
+              "kind": "Exe",
+              "id": "SpotiFLAC.exe",
+              "matching_strategy": "Equals"
             }
           ]
         },
         {
           "name": "6",
-          "layout": "BSP"
+          "layout": "BSP",
+          "initial_workspace_rules": [
+            {
+              "kind": "Exe",
+              "id": "Code.exe",
+              "matching_strategy": "Equals"
+            },
+            {
+              "kind": "Exe",
+              "id": "runemacs.exe",
+              "matching_strategy": "Equals"
+            },
+            {
+              "kind": "Exe",
+              "id": "emacs.exe",
+              "matching_strategy": "Equals"
+            }
+          ]
         },
         {
           "name": "7",
@@ -257,7 +321,204 @@
       ]
     }
   ],
+  "manage_rules": [
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "WindowsTerminal.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "otty.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "alacritty.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "zen.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "brave.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "chrome.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "msedge.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "firefox.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "Code.exe"
+    }
+  ],
   "ignore_rules": [
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "PowerToys.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "Microsoft.CmdPal.UI.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "PowerToys.PowerLauncher.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "PowerToys.ColorPickerUI.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "PowerToys.Peek.UI.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "PowerToys.CropAndLock.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "PowerToys.AdvancedPaste.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "PowerToys.PowerAccent.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "PowerToys.FileLocksmithUI.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "PowerToys.QuickAccess.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "PowerToys.AlwaysOnTop.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "PowerToys.FancyZonesEditor.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "PowerToys.Awake.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "Flow.Launcher.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "Wox.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "Raycast.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "CredentialUIBroker.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "AuthHost.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "Taskmgr.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "SnippingTool.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "ScreenSketch.exe"
+    },
+    {
+      "kind": "Class",
+      "matching_strategy": "Equals",
+      "id": "Windows.UI.Core.CoreWindow"
+    },
+    {
+      "kind": "Class",
+      "matching_strategy": "Equals",
+      "id": "ShellExperienceHost.exe"
+    },
+    {
+      "kind": "Class",
+      "matching_strategy": "Equals",
+      "id": "StartMenuExperienceHost.exe"
+    },
+    {
+      "kind": "Class",
+      "matching_strategy": "Equals",
+      "id": "SearchHost.exe"
+    },
+    {
+      "kind": "Class",
+      "matching_strategy": "Equals",
+      "id": "LockApp.exe"
+    },
+    {
+      "kind": "Class",
+      "matching_strategy": "Equals",
+      "id": "#32770"
+    },
+    {
+      "kind": "Class",
+      "matching_strategy": "Equals",
+      "id": "OperationStatusWindow"
+    },
+    {
+      "kind": "Title",
+      "matching_strategy": "Contains",
+      "id": "Picture-in-Picture"
+    },
+    {
+      "kind": "Title",
+      "matching_strategy": "Contains",
+      "id": "Picture in picture"
+    },
     {
       "kind": "Exe",
       "matching_strategy": "Equals",
@@ -267,6 +528,11 @@
       "kind": "Exe",
       "matching_strategy": "Equals",
       "id": "glazewm.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "glazewm-watcher.exe"
     },
     {
       "kind": "Exe",
@@ -318,67 +584,12 @@
     {
       "kind": "Exe",
       "matching_strategy": "Equals",
-      "id": "PowerToys.PowerLauncher.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "Microsoft.CmdPal.UI.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "PowerToys.ColorPickerUI.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "PowerToys.Peek.UI.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "PowerToys.CropAndLock.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "PowerToys.AdvancedPaste.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "PowerToys.PowerAccent.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "PowerToys.FileLocksmithUI.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "Flow.Launcher.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "CredentialUIBroker.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "AuthHost.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
       "id": "CalculatorApp.exe"
     },
     {
       "kind": "Exe",
       "matching_strategy": "Equals",
-      "id": "Photos.exe"
+      "id": "Calculator.exe"
     },
     {
       "kind": "Exe",
@@ -393,32 +604,7 @@
     {
       "kind": "Exe",
       "matching_strategy": "Equals",
-      "id": "PotPlayerMini64.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "PotPlayer64.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "vlc.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "mpv.exe"
-    },
-    {
-      "kind": "Exe",
-      "matching_strategy": "Equals",
-      "id": "Kodi.exe"
-    },
-    {
-      "kind": "Class",
-      "matching_strategy": "Equals",
-      "id": "Windows.UI.Core.CoreWindow"
+      "id": "Photos.exe"
     }
   ]
 }
