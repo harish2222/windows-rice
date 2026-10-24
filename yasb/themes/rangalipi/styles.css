@@ -18,9 +18,9 @@
     --icons-font-fallback: "FiraCode Nerd Font Mono";
     --system-font: "FiraCode Nerd Font Mono";
     --specialFont: "FiraCode Nerd Font Mono";
-    --border-radius: 12px;
-    --border-radius2: 8px;
-    --border-radius3: 14px;
+    --border-radius: 18px;
+    --border-radius2: 10px;
+    --border-radius3: 22px;
     --fontSize: 13px;
     --iconSize: 20px;
     --iconSizeSm: 12px;
@@ -179,8 +179,8 @@
     --runner: none; */
 
     /* Rangalipi Ember Light */
-    /* --acrylic: rgba(255, 255, 255, 0.80);
-    --acrylic-hover: rgba(255, 255, 255, 0.92);
+    /* --acrylic: rgba(255, 255, 255, 0.50);
+    --acrylic-hover: rgba(255, 255, 255, 0.65);
     --tile: rgba(255, 255, 255, 0.45);
     --background: #FFFFFF;
     --background2: #F7F8FA;
@@ -219,9 +219,9 @@
     --rosewater: #8A563E;
     --text-muted: #53565A;
     --yasb-icon-fg: #101820;
-    --glass: rgba(255, 255, 255, 0.62);
-    --glassmenu: rgba(255, 255, 255, 0.78);
-    --glassfrost: rgba(255, 255, 255, 0.55);
+    --glass: rgba(255, 255, 255, 0.50);
+    --glassmenu: rgba(255, 255, 255, 0.50);
+    --glassfrost: rgba(255, 255, 255, 0.50);
     --glassmist: rgba(255, 255, 255, 0.15);
     --hairline: rgba(16, 24, 32, 0.16);
     --text-faint: rgba(16, 24, 32, 0.48);
@@ -289,8 +289,8 @@
     --runner: none; */
 
     /* Rangalipi Mossfern Light */
-    /* --acrylic: rgba(255, 255, 255, 0.80);
-    --acrylic-hover: rgba(255, 255, 255, 0.92);
+    /* --acrylic: rgba(255, 255, 255, 0.50);
+    --acrylic-hover: rgba(255, 255, 255, 0.65);
     --tile: rgba(255, 255, 255, 0.45);
     --background: #FFFFFF;
     --background2: #F7F8FA;
@@ -329,9 +329,9 @@
     --rosewater: #7A5E32;
     --text-muted: #53565A;
     --yasb-icon-fg: #101820;
-    --glass: rgba(255, 255, 255, 0.62);
-    --glassmenu: rgba(255, 255, 255, 0.78);
-    --glassfrost: rgba(255, 255, 255, 0.55);
+    --glass: rgba(255, 255, 255, 0.50);
+    --glassmenu: rgba(255, 255, 255, 0.50);
+    --glassfrost: rgba(255, 255, 255, 0.50);
     --glassmist: rgba(255, 255, 255, 0.15);
     --hairline: rgba(16, 24, 32, 0.16);
     --text-faint: rgba(16, 24, 32, 0.48);
@@ -386,7 +386,7 @@
     --yasb-icon-fg: #F1DFE3;
     --glass: rgba(29, 16, 21, 0.01);
     --glassmenu: rgba(29, 16, 21, 0.50);
-    --glassfrost: rgba(29, 16, 21, 0.01);
+    --glassfrost: rgba(29, 16, 21, 0.40);
     --glassmist: rgba(255, 255, 255, 0.08);
     --hairline: rgba(241, 223, 227, 0.16);
     --text-faint: rgba(241, 223, 227, 0.45);
@@ -400,8 +400,8 @@
     --runner: none;
 
     /* Rangalipi Wine Light */
-    /* --acrylic: rgba(255, 255, 255, 0.80);
-    --acrylic-hover: rgba(255, 255, 255, 0.92);
+    /* --acrylic: rgba(255, 255, 255, 0.50);
+    --acrylic-hover: rgba(255, 255, 255, 0.65);
     --tile: rgba(255, 255, 255, 0.45);
     --background: #FFFFFF;
     --background2: #F7F8FA;
@@ -440,9 +440,9 @@
     --rosewater: #8A4A3E;
     --text-muted: #53565A;
     --yasb-icon-fg: #101820;
-    --glass: rgba(255, 255, 255, 0.62);
-    --glassmenu: rgba(255, 255, 255, 0.78);
-    --glassfrost: rgba(255, 255, 255, 0.55);
+    --glass: rgba(255, 255, 255, 0.50);
+    --glassmenu: rgba(255, 255, 255, 0.50);
+    --glassfrost: rgba(255, 255, 255, 0.50);
     --glassmist: rgba(255, 255, 255, 0.15);
     --hairline: rgba(16, 24, 32, 0.16);
     --text-faint: rgba(16, 24, 32, 0.48);
@@ -510,8 +510,8 @@
     --runner: none; */
 
     /* Rangalipi Dune Light */
-    /* --acrylic: rgba(255, 255, 255, 0.80);
-    --acrylic-hover: rgba(255, 255, 255, 0.92);
+    /* --acrylic: rgba(255, 255, 255, 0.50);
+    --acrylic-hover: rgba(255, 255, 255, 0.65);
     --tile: rgba(255, 255, 255, 0.45);
     --background: #FFFFFF;
     --background2: #F7F8FA;
@@ -550,9 +550,9 @@
     --rosewater: #86523C;
     --text-muted: #53565A;
     --yasb-icon-fg: #101820;
-    --glass: rgba(255, 255, 255, 0.62);
-    --glassmenu: rgba(255, 255, 255, 0.78);
-    --glassfrost: rgba(255, 255, 255, 0.55);
+    --glass: rgba(255, 255, 255, 0.50);
+    --glassmenu: rgba(255, 255, 255, 0.50);
+    --glassfrost: rgba(255, 255, 255, 0.50);
     --glassmist: rgba(255, 255, 255, 0.15);
     --hairline: rgba(16, 24, 32, 0.16);
     --text-faint: rgba(16, 24, 32, 0.48);
@@ -620,8 +620,8 @@
     --runner: none; */
 
     /* Rangalipi Matcha Light */
-    /* --acrylic: rgba(255, 255, 255, 0.80);
-    --acrylic-hover: rgba(255, 255, 255, 0.92);
+    /* --acrylic: rgba(255, 255, 255, 0.50);
+    --acrylic-hover: rgba(255, 255, 255, 0.65);
     --tile: rgba(255, 255, 255, 0.45);
     --background: #FFFFFF;
     --background2: #F7F8FA;
@@ -660,9 +660,9 @@
     --rosewater: #7A5834;
     --text-muted: #53565A;
     --yasb-icon-fg: #101820;
-    --glass: rgba(255, 255, 255, 0.62);
-    --glassmenu: rgba(255, 255, 255, 0.78);
-    --glassfrost: rgba(255, 255, 255, 0.55);
+    --glass: rgba(255, 255, 255, 0.50);
+    --glassmenu: rgba(255, 255, 255, 0.50);
+    --glassfrost: rgba(255, 255, 255, 0.50);
     --glassmist: rgba(255, 255, 255, 0.15);
     --hairline: rgba(16, 24, 32, 0.16);
     --text-faint: rgba(16, 24, 32, 0.48);
@@ -730,8 +730,8 @@
     --runner: none; */
 
     /* Rangalipi Espresso Light */
-    /* --acrylic: rgba(255, 255, 255, 0.80);
-    --acrylic-hover: rgba(255, 255, 255, 0.92);
+    /* --acrylic: rgba(255, 255, 255, 0.50);
+    --acrylic-hover: rgba(255, 255, 255, 0.65);
     --tile: rgba(255, 255, 255, 0.45);
     --background: #FFFFFF;
     --background2: #F7F8FA;
@@ -770,9 +770,9 @@
     --rosewater: #804E38;
     --text-muted: #53565A;
     --yasb-icon-fg: #101820;
-    --glass: rgba(255, 255, 255, 0.62);
-    --glassmenu: rgba(255, 255, 255, 0.78);
-    --glassfrost: rgba(255, 255, 255, 0.55);
+    --glass: rgba(255, 255, 255, 0.50);
+    --glassmenu: rgba(255, 255, 255, 0.50);
+    --glassfrost: rgba(255, 255, 255, 0.50);
     --glassmist: rgba(255, 255, 255, 0.15);
     --hairline: rgba(16, 24, 32, 0.16);
     --text-faint: rgba(16, 24, 32, 0.48);
@@ -840,8 +840,8 @@
     --runner: none; */
 
     /* Rangalipi Noir Light */
-    /* --acrylic: rgba(255, 255, 255, 0.80);
-    --acrylic-hover: rgba(255, 255, 255, 0.92);
+    /* --acrylic: rgba(255, 255, 255, 0.50);
+    --acrylic-hover: rgba(255, 255, 255, 0.65);
     --tile: rgba(255, 255, 255, 0.45);
     --background: #FFFFFF;
     --background2: #F7F8FA;
@@ -880,9 +880,9 @@
     --rosewater: #844438;
     --text-muted: #53565A;
     --yasb-icon-fg: #101820;
-    --glass: rgba(255, 255, 255, 0.62);
-    --glassmenu: rgba(255, 255, 255, 0.78);
-    --glassfrost: rgba(255, 255, 255, 0.55);
+    --glass: rgba(255, 255, 255, 0.50);
+    --glassmenu: rgba(255, 255, 255, 0.50);
+    --glassfrost: rgba(255, 255, 255, 0.50);
     --glassmist: rgba(255, 255, 255, 0.15);
     --hairline: rgba(16, 24, 32, 0.16);
     --text-faint: rgba(16, 24, 32, 0.48);
@@ -950,8 +950,8 @@
     --runner: none; */
 
     /* Rangalipi Aubergine Light */
-    /* --acrylic: rgba(255, 255, 255, 0.80);
-    --acrylic-hover: rgba(255, 255, 255, 0.92);
+    /* --acrylic: rgba(255, 255, 255, 0.50);
+    --acrylic-hover: rgba(255, 255, 255, 0.65);
     --tile: rgba(255, 255, 255, 0.45);
     --background: #FFFFFF;
     --background2: #F7F8FA;
@@ -990,9 +990,9 @@
     --rosewater: #7E4642;
     --text-muted: #53565A;
     --yasb-icon-fg: #101820;
-    --glass: rgba(255, 255, 255, 0.62);
-    --glassmenu: rgba(255, 255, 255, 0.78);
-    --glassfrost: rgba(255, 255, 255, 0.55);
+    --glass: rgba(255, 255, 255, 0.50);
+    --glassmenu: rgba(255, 255, 255, 0.50);
+    --glassfrost: rgba(255, 255, 255, 0.50);
     --glassmist: rgba(255, 255, 255, 0.15);
     --hairline: rgba(16, 24, 32, 0.16);
     --text-faint: rgba(16, 24, 32, 0.48);
@@ -1060,8 +1060,8 @@
     --runner: none; */
 
     /* Rangalipi Clay Light */
-    /* --acrylic: rgba(255, 255, 255, 0.80);
-    --acrylic-hover: rgba(255, 255, 255, 0.92);
+    /* --acrylic: rgba(255, 255, 255, 0.50);
+    --acrylic-hover: rgba(255, 255, 255, 0.65);
     --tile: rgba(255, 255, 255, 0.45);
     --background: #FFFFFF;
     --background2: #F7F8FA;
@@ -1100,9 +1100,9 @@
     --rosewater: #7E4836;
     --text-muted: #53565A;
     --yasb-icon-fg: #101820;
-    --glass: rgba(255, 255, 255, 0.62);
-    --glassmenu: rgba(255, 255, 255, 0.78);
-    --glassfrost: rgba(255, 255, 255, 0.55);
+    --glass: rgba(255, 255, 255, 0.50);
+    --glassmenu: rgba(255, 255, 255, 0.50);
+    --glassfrost: rgba(255, 255, 255, 0.50);
     --glassmist: rgba(255, 255, 255, 0.15);
     --hairline: rgba(16, 24, 32, 0.16);
     --text-faint: rgba(16, 24, 32, 0.48);
@@ -1170,8 +1170,8 @@
     --runner: none; */
 
     /* Rangalipi Olive Light */
-    /* --acrylic: rgba(255, 255, 255, 0.80);
-    --acrylic-hover: rgba(255, 255, 255, 0.92);
+    /* --acrylic: rgba(255, 255, 255, 0.50);
+    --acrylic-hover: rgba(255, 255, 255, 0.65);
     --tile: rgba(255, 255, 255, 0.45);
     --background: #FFFFFF;
     --background2: #F7F8FA;
@@ -1210,9 +1210,9 @@
     --rosewater: #745232;
     --text-muted: #53565A;
     --yasb-icon-fg: #101820;
-    --glass: rgba(255, 255, 255, 0.62);
-    --glassmenu: rgba(255, 255, 255, 0.78);
-    --glassfrost: rgba(255, 255, 255, 0.55);
+    --glass: rgba(255, 255, 255, 0.50);
+    --glassmenu: rgba(255, 255, 255, 0.50);
+    --glassfrost: rgba(255, 255, 255, 0.50);
     --glassmist: rgba(255, 255, 255, 0.15);
     --hairline: rgba(16, 24, 32, 0.16);
     --text-faint: rgba(16, 24, 32, 0.48);
@@ -1254,14 +1254,14 @@
     padding: 0;
 }
 .yasb-bar.adaptive {
-    background-color: var(--glassmist);
+    background-color: var(--glassfrost);
     border: none;
     -qproperty-railheight: 0;
     -qproperty-islandradius: 12;
     -qproperty-grouppadding: 6px;
     -qproperty-islands: true;
     -qproperty-edgeradius: 0;
-    -qproperty-borderwidth: 1;
+    -qproperty-borderwidth: 2;
     -qproperty-bordercolor: var(--frame);
 }
 .container-left,
@@ -1283,7 +1283,7 @@
     font-family: var(--system-font);
     font-weight: var(--fontWeight);
     margin-top: 4px;
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
 }
 
 /* Context Menu */
@@ -1300,7 +1300,7 @@
 }
 .context-menu {
     border-radius: var(--border-radius);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
 }
 .context-menu::right-arrow {
     width: 8px;
@@ -1416,7 +1416,7 @@
     /* ACRYLIC 50% POLICY: frosted panel - native blur enabled for this menu
        (home widget blur: true) plus the 50% themed tint for text contrast. */
     background-color: var(--acrylic);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
     margin-top: 3px;
 }
@@ -1469,7 +1469,7 @@
     /* ACRYLIC 50% - per-theme --acrylic. */
     background-color: var(--acrylic);
     border-radius: var(--border-radius);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     /* UNIFORM: one type system for the whole popup (incl. week label etc.) -
        font props propagate to every child in QSS, same as the bar.
        line-height is set explicitly so vertical rhythm is identical
@@ -1560,7 +1560,7 @@
     margin: 0 3px;
 }
 .saka-widget .label {
-    font-family: var(--system-font);
+    font-family: "GohuFont 11 Nerd Font Mono", "GohuFont 14 Nerd Font Mono", "GohuFont 11 Nerd Font", var(--system-font);
     font-size: var(--fontSize);
     line-height: var(--barLineHeight);
     font-weight: var(--fontWeight);
@@ -1824,7 +1824,7 @@
     background-color: var(--acrylic);
     border-radius: var(--border-radius);
     margin-right: 14px;
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
 }
 .power-menu-compact .profile-info {
     padding: 24px 14px 24px 0px;
@@ -1887,7 +1887,7 @@
     padding: 8px 16px;
     margin: 2px;
     background-color: rgba(29, 16, 21, 0.01);
-    /* border: 3px double var(--border); */
+    /* border: 1px solid var(--hairline); */
     color: var(--background2);
     border-radius: var(--border-radius2);
 }
@@ -1996,7 +1996,7 @@
 .audio-menu {
     /* ACRYLIC 50% - per-theme --acrylic. */
     background-color: var(--acrylic);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     min-width: 300px;
     border-radius: var(--border-radius);
 }
@@ -2066,9 +2066,14 @@
 
 /* Active Windows Title */
 .active-window-widget .icon {
-    padding-right: 4px;
-    padding-bottom: 0;
+    padding: 0 4px;
     color: var(--overlay1);
+}
+.active-window-widget .label {
+    display: none;
+    max-width: 0px;
+    font-size: 0px;
+    color: transparent;
 }
 
 
@@ -2112,12 +2117,24 @@
     padding-right: 8px;
     background-color: transparent;
     border: none;
-    border-bottom: 3px solid var(--accent);
     border-radius: 0;
-    color: var(--accent);
+    color: var(--text);
     font-weight: var(--fontWeight);
     padding-top: 3px;
     padding-bottom: 2px;
+} 
+
+/* Float override completely eliminated */
+.komorebi-workspaces .float-override {
+    max-width: 0px;
+    max-height: 0px;
+    width: 0px;
+    height: 0px;
+    padding: 0px;
+    margin: 0px;
+    border: none;
+    font-size: 1px;
+    color: transparent;
 } 
 
 
@@ -2136,7 +2153,7 @@
     /* ACRYLIC 50% - per-theme --acrylic. */
     background-color: var(--acrylic);
     border-radius: var(--border-radius);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
 }
 .komorebi-layout-menu .menu-item {
     padding: 8px 16px;
@@ -2173,7 +2190,7 @@
     /* ACRYLIC 50% - per-theme --acrylic. */
     background-color: var(--acrylic);
     min-width: 220px;
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
     /* motif watermark under the glass, matching the media popup.
        The 0.4 alpha is baked into motif-*.svg; Qt paints background-image
@@ -2258,7 +2275,7 @@
     background-color: var(--acrylic);
     padding: 4px;
     border-radius: var(--border-radius);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
 }
 .systray-popup .button {
     padding: 10px;
@@ -2362,7 +2379,7 @@
     background-image: var(--motif);
     background-repeat: no-repeat;
     background-position: center;
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
 }
 .media-menu .title,
@@ -2544,7 +2561,7 @@ Example: "Windows Media" becomes "windows-media" */
     /* ACRYLIC 50% - per-theme --acrylic. */
     background-color: var(--acrylic);
     min-width: 300px;
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
 }
 .language-menu .header {
@@ -2612,7 +2629,7 @@ Example: "Windows Media" becomes "windows-media" */
 
 .quick-launch-popup .container {
 	background-color: transparent;
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
 }
 /* Search bar container */
@@ -2676,7 +2693,7 @@ Example: "Windows Media" becomes "windows-media" */
 .quick-launch-popup {
     /* ACRYLIC 50% - per-theme --acrylic. */
     background-color: var(--acrylic);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
     min-width: 480px;
 }
@@ -2747,7 +2764,7 @@ Example: "Windows Media" becomes "windows-media" */
     /* ACRYLIC 50% - per-theme --acrylic. */
     background-color: var(--acrylic);
     min-width: 400px;
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
 }
 
@@ -2798,7 +2815,7 @@ Example: "Windows Media" becomes "windows-media" */
 }
 .cpu-popup .stats .stat-item {
     background-color: rgba(29, 16, 21, 0.01);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
     padding: 8px 12px;
     margin: 8px;
@@ -2844,7 +2861,7 @@ Example: "Windows Media" becomes "windows-media" */
     /* ACRYLIC 50% - per-theme --acrylic. */
     background-color: var(--acrylic);
     min-width: 400px;
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
 }
 
@@ -2895,7 +2912,7 @@ Example: "Windows Media" becomes "windows-media" */
 }
 .memory-popup .stats .stat-item {
     background-color: rgba(29, 16, 21, 0.01);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
     padding: 8px 12px;
     margin: 8px;
@@ -2948,7 +2965,7 @@ Example: "Windows Media" becomes "windows-media" */
     /* ACRYLIC 50% - per-theme --acrylic. */
     background-color: var(--acrylic);
     min-width: 360px;
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
     /* The motif fills the whole popup rather than sitting in one corner: it
        is scaled with `cover` and centred, so it reads as a backdrop behind
@@ -3130,7 +3147,7 @@ QSlider::handle:horizontal:hover {
 .control-center-menu .section.power .plan-name,
 .control-center-menu .section.power .mode-name {
     background: var(--accent);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
     min-height: 36px;
     margin: 0 4px;
@@ -3295,7 +3312,7 @@ QSlider::handle:horizontal:hover {
     /* ACRYLIC 10% (widget-scoped only) - CSS alpha, no blur anywhere. */
     /* ACRYLIC 50% - per-theme --acrylic. */
     background-color: var(--acrylic);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
     min-width: 220px;
 }
@@ -3334,8 +3351,10 @@ QSlider::handle:horizontal:hover {
     padding: 0 4px 2px 4px;
 }
 .komorebi-stack .window .label {
-    font-size: 12px;
-    color: var(--subtext);
+    display: none;
+    max-width: 0px;
+    font-size: 0px;
+    color: transparent;
 }
 .komorebi-stack .window .icon {
     padding: 0;
@@ -3349,8 +3368,10 @@ QSlider::handle:horizontal:hover {
     padding-bottom: 2px;
 }
 .komorebi-stack .window.active .label {
-    color: var(--text);
-    font-weight: var(--fontWeight);
+    display: none;
+    max-width: 0px;
+    font-size: 0px;
+    color: transparent;
 }
 /* Alpha metrics - one tabular Nerd voice: icons + digits share JetBrainsMono
    so live numbers never jitter the bar width. Higher specificity wins. */
@@ -3401,7 +3422,7 @@ QSlider::handle:horizontal:hover {
 .traffic-menu {
     /* ACRYLIC 50% - per-theme --acrylic. */
     background-color: var(--acrylic);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
     min-width: 320px;
 }
@@ -3551,7 +3572,7 @@ QSlider::handle:horizontal:hover {
 .wifi-menu {
     /* ACRYLIC 50% - per-theme --acrylic. */
     background-color: var(--acrylic);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
     min-width: 420px;
     min-height: 340px;
@@ -3629,7 +3650,7 @@ QSlider::handle:horizontal:hover {
 .bluetooth-menu {
     /* ACRYLIC 50% - per-theme --acrylic. */
     background-color: var(--acrylic);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
     min-width: 420px;
     min-height: 340px;
@@ -3697,7 +3718,7 @@ QSlider::handle:horizontal:hover {
 .gpu-popup {
     /* ACRYLIC 50% - per-theme --acrylic. */
     background-color: var(--acrylic);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
     min-width: 400px;
 }
@@ -3755,7 +3776,7 @@ QSlider::handle:horizontal:hover {
 }
 .gpu-popup .stats .stat-item {
     background-color: rgba(29, 16, 21, 0.01);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius2);
     padding: 8px 12px;
     margin: 4px;
@@ -3788,7 +3809,7 @@ QSlider::handle:horizontal:hover {
 .disk-widget .widget-container .label.status-critical { color: var(--red); }
 .disk-group {
     background-color: var(--glass);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
     padding: 10px 12px;
 }
@@ -3803,7 +3824,7 @@ QSlider::handle:horizontal:hover {
 }
 .disk-group-row:hover {
     background-color: var(--acrylic-hover);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
 }
 .disk-group-label {
     font-size: 12px;
@@ -3864,14 +3885,42 @@ QSlider::handle:horizontal:hover {
 .yasb-bar .volume-widget .widget-container,
 .yasb-bar .battery-widget .widget-container,
 .yasb-bar .media-widget .widget-container { padding: 0 5px; }
-.yasb-bar .alpha-group .grouper-button,
-.yasb-bar .omega-group .grouper-button { padding: 0 6px; }
 
-/* Expanded grouper rows: single divider line, minimal air */
+/* Grouper lateral spacing: streamlined padding across alpha (stats) and omega (controls) */
+.yasb-bar .alpha-group .grouper-button,
+.yasb-bar .omega-group .grouper-button {
+    padding: 0 3px;
+}
+
+.alpha-group .container,
+.omega-group .container {
+    padding: 0;
+    margin: 0;
+}
+
 .omega-group .container .widget-container,
-.alpha-group .container .widget-container {
-    padding: 0 2px 0 6px;
-    margin-left: 1px;
+.alpha-group .container .widget-container,
+.yasb-bar .alpha-group .container .widget-container,
+.yasb-bar .omega-group .container .widget-container {
+    padding: 0 2px;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.alpha-group .container .widget-container .label,
+.omega-group .container .widget-container .label,
+.alpha-group .container .widget-container .label.alt,
+.omega-group .container .widget-container .label.alt {
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+.alpha-group .container .widget-container .icon,
+.omega-group .container .widget-container .icon {
+    padding-left: 1px;
+    padding-right: 1px;
+    padding-bottom: 1px;
+    margin: 0;
 }
 
 /* Sys-stat icons: fixed 25px across cpu/gpu/memory/disk/traffic */
@@ -3887,19 +3936,21 @@ QSlider::handle:horizontal:hover {
     color: var(--accent);
 }
 
-/* Alpha + systray: extra-tight (below the standard tiers) */
-.yasb-bar .alpha-group .grouper-button { padding: 0 4px; }
-.yasb-bar .alpha-group .container .widget-container {
-    padding: 0 1px 0 4px;
-    margin-left: 0;
-}
 .yasb-bar .systray-widget { margin: 0; }
 .yasb-bar .systray-widget .widget-container { padding: 0 1px; }
 
-/* Stat cluster baseline: icons and labels share one baseline */
-.alpha-group .container .widget-container .icon,
-.alpha-group .container .widget-container .label { padding-bottom: 1px; }
+/* Keybind widget */
+.keybind-widget .widget-container .icon,
+.keybind-widget .widget-container .label {
+    color: var(--sapphire);
+    font-size: 16px;
+    padding: 0 3px;
+}
+.keybind-widget .widget-container:hover .icon,
+.keybind-widget .widget-container:hover .label {
+    color: var(--text);
+}
 
-/* Frames stay Madhubani double */
+/* Frames follow Apple Widget hairline glass */
 
 

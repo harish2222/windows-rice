@@ -18,9 +18,9 @@
     --icons-font-fallback: "FiraCode Nerd Font Mono";
     --system-font: "FiraCode Nerd Font Mono";
     --specialFont: "FiraCode Nerd Font Mono";
-    --border-radius: 12px;
-    --border-radius2: 8px;
-    --border-radius3: 14px;
+    --border-radius: 18px;
+    --border-radius2: 10px;
+    --border-radius3: 22px;
     --fontSize: 13px;
     --iconSize: 20px;
     --iconSizeSm: 12px;
@@ -1283,7 +1283,7 @@
     font-family: var(--system-font);
     font-weight: var(--fontWeight);
     margin-top: 4px;
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
 }
 
 /* Context Menu */
@@ -1300,7 +1300,7 @@
 }
 .context-menu {
     border-radius: var(--border-radius);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
 }
 .context-menu::right-arrow {
     width: 8px;
@@ -1416,7 +1416,7 @@
     /* ACRYLIC 50% POLICY: frosted panel - native blur enabled for this menu
        (home widget blur: true) plus the 50% themed tint for text contrast. */
     background-color: var(--acrylic);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
     margin-top: 3px;
 }
@@ -1469,7 +1469,7 @@
     /* ACRYLIC 50% - per-theme --acrylic. */
     background-color: var(--acrylic);
     border-radius: var(--border-radius);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     /* UNIFORM: one type system for the whole popup (incl. week label etc.) -
        font props propagate to every child in QSS, same as the bar.
        line-height is set explicitly so vertical rhythm is identical
@@ -1824,7 +1824,7 @@
     background-color: var(--acrylic);
     border-radius: var(--border-radius);
     margin-right: 14px;
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
 }
 .power-menu-compact .profile-info {
     padding: 24px 14px 24px 0px;
@@ -1887,7 +1887,7 @@
     padding: 8px 16px;
     margin: 2px;
     background-color: rgba(29, 16, 21, 0.01);
-    /* border: 3px double var(--border); */
+    /* border: 1px solid var(--hairline); */
     color: var(--background2);
     border-radius: var(--border-radius2);
 }
@@ -1996,7 +1996,7 @@
 .audio-menu {
     /* ACRYLIC 50% - per-theme --acrylic. */
     background-color: var(--acrylic);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     min-width: 300px;
     border-radius: var(--border-radius);
 }
@@ -2153,7 +2153,7 @@
     /* ACRYLIC 50% - per-theme --acrylic. */
     background-color: var(--acrylic);
     border-radius: var(--border-radius);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
 }
 .komorebi-layout-menu .menu-item {
     padding: 8px 16px;
@@ -2190,7 +2190,7 @@
     /* ACRYLIC 50% - per-theme --acrylic. */
     background-color: var(--acrylic);
     min-width: 220px;
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
     /* motif watermark under the glass, matching the media popup.
        The 0.4 alpha is baked into motif-*.svg; Qt paints background-image
@@ -2275,7 +2275,7 @@
     background-color: var(--acrylic);
     padding: 4px;
     border-radius: var(--border-radius);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
 }
 .systray-popup .button {
     padding: 10px;
@@ -2379,7 +2379,7 @@
     background-image: var(--motif);
     background-repeat: no-repeat;
     background-position: center;
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
 }
 .media-menu .title,
@@ -2561,7 +2561,7 @@ Example: "Windows Media" becomes "windows-media" */
     /* ACRYLIC 50% - per-theme --acrylic. */
     background-color: var(--acrylic);
     min-width: 300px;
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
 }
 .language-menu .header {
@@ -2629,7 +2629,7 @@ Example: "Windows Media" becomes "windows-media" */
 
 .quick-launch-popup .container {
 	background-color: transparent;
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
 }
 /* Search bar container */
@@ -2693,7 +2693,7 @@ Example: "Windows Media" becomes "windows-media" */
 .quick-launch-popup {
     /* ACRYLIC 50% - per-theme --acrylic. */
     background-color: var(--acrylic);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
     min-width: 480px;
 }
@@ -2764,7 +2764,7 @@ Example: "Windows Media" becomes "windows-media" */
     /* ACRYLIC 50% - per-theme --acrylic. */
     background-color: var(--acrylic);
     min-width: 400px;
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
 }
 
@@ -2815,7 +2815,7 @@ Example: "Windows Media" becomes "windows-media" */
 }
 .cpu-popup .stats .stat-item {
     background-color: rgba(29, 16, 21, 0.01);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
     padding: 8px 12px;
     margin: 8px;
@@ -2861,7 +2861,7 @@ Example: "Windows Media" becomes "windows-media" */
     /* ACRYLIC 50% - per-theme --acrylic. */
     background-color: var(--acrylic);
     min-width: 400px;
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
 }
 
@@ -2912,7 +2912,7 @@ Example: "Windows Media" becomes "windows-media" */
 }
 .memory-popup .stats .stat-item {
     background-color: rgba(29, 16, 21, 0.01);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
     padding: 8px 12px;
     margin: 8px;
@@ -2965,7 +2965,7 @@ Example: "Windows Media" becomes "windows-media" */
     /* ACRYLIC 50% - per-theme --acrylic. */
     background-color: var(--acrylic);
     min-width: 360px;
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
     /* The motif fills the whole popup rather than sitting in one corner: it
        is scaled with `cover` and centred, so it reads as a backdrop behind
@@ -3147,7 +3147,7 @@ QSlider::handle:horizontal:hover {
 .control-center-menu .section.power .plan-name,
 .control-center-menu .section.power .mode-name {
     background: var(--accent);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
     min-height: 36px;
     margin: 0 4px;
@@ -3312,7 +3312,7 @@ QSlider::handle:horizontal:hover {
     /* ACRYLIC 10% (widget-scoped only) - CSS alpha, no blur anywhere. */
     /* ACRYLIC 50% - per-theme --acrylic. */
     background-color: var(--acrylic);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
     min-width: 220px;
 }
@@ -3422,7 +3422,7 @@ QSlider::handle:horizontal:hover {
 .traffic-menu {
     /* ACRYLIC 50% - per-theme --acrylic. */
     background-color: var(--acrylic);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
     min-width: 320px;
 }
@@ -3572,7 +3572,7 @@ QSlider::handle:horizontal:hover {
 .wifi-menu {
     /* ACRYLIC 50% - per-theme --acrylic. */
     background-color: var(--acrylic);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
     min-width: 420px;
     min-height: 340px;
@@ -3650,7 +3650,7 @@ QSlider::handle:horizontal:hover {
 .bluetooth-menu {
     /* ACRYLIC 50% - per-theme --acrylic. */
     background-color: var(--acrylic);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
     min-width: 420px;
     min-height: 340px;
@@ -3718,7 +3718,7 @@ QSlider::handle:horizontal:hover {
 .gpu-popup {
     /* ACRYLIC 50% - per-theme --acrylic. */
     background-color: var(--acrylic);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
     min-width: 400px;
 }
@@ -3776,7 +3776,7 @@ QSlider::handle:horizontal:hover {
 }
 .gpu-popup .stats .stat-item {
     background-color: rgba(29, 16, 21, 0.01);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius2);
     padding: 8px 12px;
     margin: 4px;
@@ -3809,7 +3809,7 @@ QSlider::handle:horizontal:hover {
 .disk-widget .widget-container .label.status-critical { color: var(--red); }
 .disk-group {
     background-color: var(--glass);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
     border-radius: var(--border-radius);
     padding: 10px 12px;
 }
@@ -3824,7 +3824,7 @@ QSlider::handle:horizontal:hover {
 }
 .disk-group-row:hover {
     background-color: var(--acrylic-hover);
-    border: 3px double var(--border);
+    border: 1px solid var(--hairline);
 }
 .disk-group-label {
     font-size: 12px;
@@ -3951,6 +3951,6 @@ QSlider::handle:horizontal:hover {
     color: var(--text);
 }
 
-/* Frames stay Madhubani double */
+/* Frames follow Apple Widget hairline glass */
 
 
