@@ -2066,9 +2066,14 @@
 
 /* Active Windows Title */
 .active-window-widget .icon {
-    padding-right: 4px;
-    padding-bottom: 0;
+    padding: 0 4px;
     color: var(--overlay1);
+}
+.active-window-widget .label {
+    display: none;
+    max-width: 0px;
+    font-size: 0px;
+    color: transparent;
 }
 
 
@@ -3346,8 +3351,10 @@ QSlider::handle:horizontal:hover {
     padding: 0 4px 2px 4px;
 }
 .komorebi-stack .window .label {
-    font-size: 12px;
-    color: var(--subtext);
+    display: none;
+    max-width: 0px;
+    font-size: 0px;
+    color: transparent;
 }
 .komorebi-stack .window .icon {
     padding: 0;
@@ -3361,8 +3368,10 @@ QSlider::handle:horizontal:hover {
     padding-bottom: 2px;
 }
 .komorebi-stack .window.active .label {
-    color: var(--text);
-    font-weight: var(--fontWeight);
+    display: none;
+    max-width: 0px;
+    font-size: 0px;
+    color: transparent;
 }
 /* Alpha metrics - one tabular Nerd voice: icons + digits share JetBrainsMono
    so live numbers never jitter the bar width. Higher specificity wins. */

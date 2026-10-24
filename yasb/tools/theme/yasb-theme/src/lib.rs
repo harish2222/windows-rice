@@ -814,22 +814,22 @@ fn parse_decls(chunk: &str) -> Vec<(String, String)> {
     out
 }
 
-/// Read whether frosted glass is enabled on the YASB bar.
-pub fn is_frosted(config_path: &Path, _styles_path: &Path) -> bool {
-    if let Ok(content) = fs::read_to_string(config_path) {
-        let mut in_blur = false;
+/// Read whether frosted glass is enabled on the YASB bar islands via CSS.
+pub fn is_frosted(_config_path: &Path, styles_path: &Path) -> bool {
+    if let Ok(content) = fs::read_to_string(styles_path) {
+        let mut in_adaptive = false;
         for line in content.lines() {
             let trimmed = line.trim();
-            if trimmed.starts_with("blur_effect:") {
-                in_blur = true;
+            if trimmed.starts_with(".yasb-bar.adaptive") && trimmed.contains('{') {
+                in_adaptive = true;
                 continue;
             }
-            if in_blur {
-                if trimmed.starts_with("enabled:") {
-                    return trimmed.contains("true");
+            if in_adaptive {
+                if trimmed.starts_with("background-color:") {
+                    return trimmed.contains("var(--glassfrost)");
                 }
-                if !trimmed.is_empty() && !line.starts_with("    ") && !line.starts_with("\t\t") {
-                    in_blur = false;
+                if trimmed == "}" {
+                    in_adaptive = false;
                 }
             }
         }
@@ -837,11 +837,11 @@ pub fn is_frosted(config_path: &Path, _styles_path: &Path) -> bool {
     false
 }
 
-/// Set the frosted glass property bounded strictly to the YASB islands.
+/// Set the frosted glass property bounded strictly to the YASB islands via CSS.
 ///
-/// Keeps `.yasb-bar` transparent so the unreserved space/gaps across the screen
-/// remain 100% transparent. Toggles `.yasb-bar.adaptive` background-color between
-/// `var(--glassfrost)` and `var(--glassmist)`.
+/// Keeps `.yasb-bar` transparent and keeps config.yaml `blur_effect: enabled: false`
+/// so Windows DWM never blurs rectangular unreserved gaps. Frosted glass is driven
+/// strictly via CSS by toggling `.yasb-bar.adaptive` between `var(--glassfrost)` and `var(--glassmist)`.
 pub fn set_frosted(config_path: &Path, styles_path: &Path, enable: bool) -> Result<(), String> {
     // 1. Ensure config.yaml keeps blur_effect disabled so Windows DWM doesn't blur
     // the rectangular window gaps across the whole display.
@@ -863,9 +863,8 @@ pub fn set_frosted(config_path: &Path, styles_path: &Path, enable: bool) -> Resu
             if in_blur {
                 if trimmed.starts_with("enabled:") {
                     let indent = &line[..line.len() - line.trim_start().len()];
-                    let target_val = if enable { "enabled: true" } else { "enabled: false" };
-                    if trimmed != target_val {
-                        *line = format!("{indent}{target_val}");
+                    if trimmed != "enabled: false" {
+                        *line = format!("{indent}enabled: false");
                         changed = true;
                     }
                     break;
