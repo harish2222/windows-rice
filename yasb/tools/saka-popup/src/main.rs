@@ -284,37 +284,54 @@ impl App {
             Row { label: "Vara", value: s.vara(p.vara).to_string(), progress: None },
             Row {
                 label: "Moon",
-                value: p.phase_name_in(s).to_string(),
+                value: if s == Script::Telugu {
+                    if p.waxing { "శుక్ల పక్షం".into() } else { "కృష్ణ పక్షం".into() }
+                } else {
+                    p.phase_name_western().to_string()
+                },
                 progress: Some((
                     p.illum,
                     format!(
                         "{}% · {}",
                         (p.illum * 100.0).round() as u32,
-                        if p.waxing { "waxing" } else { "waning" }
+                        if p.waxing {
+                            if s == Script::Telugu { "వృద్ధి" } else { "waxing" }
+                        } else {
+                            if s == Script::Telugu { "క్షయ" } else { "waning" }
+                        }
                     ),
                 )),
             },
-            // When the phase the row above names is actually in force.
-            //
-            // A phase is a 45-degree sector, not an instant, so it has a start
-            // and an end like the tithi and nakshatra rows above — and until it
-            // had a bracket there was no way to ask the panel *when*. Both ends
-            // are date *and* time because the sector runs about 3.7 days: a date
-            // alone would be two days out at the boundary, a time alone
-            // meaningless across a midnight.
-            //
-            // No caption, for the same reason the `Sun` and `Next` rows have
-            // none: the value already carries both times, and a progress bar
-            // here would duplicate the illumination bar on the `Moon` row.
+            // The current 45° moon sector, displaying the active phase name,
+            // progress through the sector, and the exact date/time it ends.
             Row {
                 label: "Phase",
-                value: format!(
-                    "{} {} · {} {}",
-                    p.day_label_short(p.phase_start_jd),
-                    p.hhmm(p.phase_start_jd),
-                    p.day_label_short(p.phase_end_jd),
-                    p.hhmm(p.phase_end_jd)
-                ),
+                value: p.phase_name_in(s).to_string(),
+                progress: Some((
+                    p.phase_progress(),
+                    if s == Script::Telugu {
+                        format!("{} వరకు", p.day_label_short(p.phase_end_jd))
+                    } else {
+                        format!("ends {}", p.day_label_short(p.phase_end_jd))
+                    },
+                )),
+            },
+            // The next 45° sector that will begin immediately when the current phase ends.
+            Row {
+                label: "Next Phase",
+                value: if s == Script::Telugu {
+                    format!(
+                        "{} · {} నుండి",
+                        s.phase((p.phase_index + 1) % 8),
+                        p.day_label_short(p.phase_end_jd)
+                    )
+                } else {
+                    format!(
+                        "{} · starts {}",
+                        s.phase((p.phase_index + 1) % 8),
+                        p.day_label_short(p.phase_end_jd)
+                    )
+                },
                 progress: None,
             },
             Row {

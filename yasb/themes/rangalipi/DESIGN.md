@@ -1,10 +1,15 @@
 # Apple Widget Design System Specification (DESIGN.md)
 
-This document establishes the Apple Human Interface Guidelines (HIG) and WidgetKit-inspired design principles governing the **YASB status bar**, **native Qt popups**, and all **native Win32/Rust custom widgets** (`keybind`, `palette-picker`, `saka-popup`, and `komorebi-stack`).
+This document establishes the Apple Human Interface Guidelines (HIG) and WidgetKit-inspired design principles governing the **native Win32/Rust custom widgets** (`keybind`, `palette-picker`, and `saka-popup`), while preserving the authentic **Madhubani / Rangalipi rice design** for native YASB Qt bar widgets and popups.
 
 ---
 
-## 1. Core Philosophy: Clarity, Deference, and Depth
+## 1. System Division of Design Responsibility
+
+- **Native YASB Bar & Native Qt Popups**:
+  - Maintain the authentic Rangalipi / Madhubani rice aesthetic: classic double frame borders (`border: 3px double var(--border)`), standard radius hierarchy (`--border-radius: 12px`), CSS-only adaptive island frosted glass, and strictly icon-only active window buttons.
+- **Custom Native Widgets (`keybind`, `palette-picker`, `saka-popup`)**:
+  - Adhere strictly to the Apple Widget System (HIG / WidgetKit): 18px squircles, translucent acrylic materials, 1px hairline rim strokes, clear typography hierarchy, and instant glanceability.
 
 Apple's widget architecture is built on three central tenets:
 - **Glanceability**: Widgets and flyouts are not dense desktop applications. They communicate their primary state in under two seconds.

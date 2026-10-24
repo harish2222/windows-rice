@@ -618,9 +618,9 @@ mod tests {
             DeleteObject, GetDC, HGDIOBJ, ReleaseDC, SelectObject,
         };
 
-        const LABELS: [&str; 11] = [
+        const LABELS: [&str; 12] = [
             "TITHI", "NAKSHATRA", "YOGA", "KARANA", "VARA",
-            "MOON", "PHASE", "AMANTA", "PURNIMANTA", "SUN", "NEXT",
+            "MOON", "PHASE", "NEXT PHASE", "AMANTA", "PURNIMANTA", "SUN", "NEXT",
         ];
         const TRACKING: i32 = 1;
         let avail = Layout::VALUE_X - PAD;
@@ -718,9 +718,10 @@ mod tests {
             ("Asvina", None),
             ("06:07 · 18:03", None),
             ("New 10 Oct · Full 26 Oct", None),
-            // The `Phase` row: two date-times, no caption. `day_label_short`
-            // drops the year, so this length never varies.
-            ("09 Oct 21:04 · 13 Oct 15:30", None),
+            // The `Phase` row: current phase name with its end caption.
+            ("Krishna Panchami", Some("ends 28 Oct")),
+            // The `Next Phase` row: upcoming phase name and start time.
+            ("Krishna Panchami · starts 28 Oct", None),
         ];
 
         unsafe {

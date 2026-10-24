@@ -85,6 +85,20 @@ fn render_panel(p: &saka::Panchang, s: Script) -> String {
         p.illum * 100.0,
         p.phase_name_western()
     ));
+    o.push_str(&format!(
+        "Phase      {:<22} ends {} {}\n",
+        p.phase_name_in(s),
+        p.day_label_short(p.phase_end_jd),
+        p.hhmm(p.phase_end_jd)
+    ));
+
+    o.push_str(&format!(
+        "Next Phase {:<22} starts {} {}\n",
+        s.phase((p.phase_index + 1) % 8),
+        p.day_label_short(p.phase_end_jd),
+        p.hhmm(p.phase_end_jd)
+    ));
+
     o.push_str(&rule);
     o.push('\n');
     o.push_str(&format!(
