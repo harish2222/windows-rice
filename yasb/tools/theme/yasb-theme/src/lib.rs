@@ -814,6 +814,155 @@ fn parse_decls(chunk: &str) -> Vec<(String, String)> {
     out
 }
 
+/// Read whether frosted glass is enabled on the YASB bar.
+pub fn is_frosted(config_path: &Path, _styles_path: &Path) -> bool {
+    if let Ok(content) = fs::read_to_string(config_path) {
+        let mut in_blur = false;
+        for line in content.lines() {
+            let trimmed = line.trim();
+            if trimmed.starts_with("blur_effect:") {
+                in_blur = true;
+                continue;
+            }
+            if in_blur {
+                if trimmed.starts_with("enabled:") {
+                    let val = trimmed.strip_prefix("enabled:").unwrap().trim();
+                    return val.eq_ignore_ascii_case("true");
+                }
+                if !trimmed.is_empty() && !line.starts_with("    ") && !line.starts_with("\t\t") {
+                    in_blur = false;
+                }
+            }
+        }
+    }
+    false
+}
+
+/// Set the frosted glass property on the whole background of the YASB bar.
+///
+/// Updates `config.yaml` (`blur_effect: enabled: true/false`) and
+/// `styles.css` (`.yasb-bar { background-color: var(--glassfrost); }` / `transparent;`).
+pub fn set_frosted(config_path: &Path, styles_path: &Path, enable: bool) -> Result<(), String> {
+    // 1. Rewrite config.yaml: toggle blur_effect: enabled: true/false
+    if config_path.is_file() {
+        let raw = fs::read(config_path).map_err(|e| format!("cannot read config: {e}"))?;
+        let text = String::from_utf8(raw).map_err(|e| format!("UTF-8 error: {e}"))?;
+        let newline = if text.contains("\r\n") { "\r\n" } else { "\n" };
+        let ends_with_newline = text.ends_with('\n');
+        let mut lines: Vec<String> = text.lines().map(str::to_string).collect();
+
+        let mut in_blur = false;
+        let mut changed = false;
+        for line in lines.iter_mut() {
+            let trimmed = line.trim();
+            if trimmed.starts_with("blur_effect:") {
+                in_blur = true;
+                continue;
+            }
+            if in_blur {
+                if trimmed.starts_with("enabled:") {
+                    let indent = &line[..line.len() - line.trim_start().len()];
+                    *line = format!("{indent}enabled: {enable}");
+                    changed = true;
+                    break;
+                }
+                if !trimmed.is_empty() && !line.starts_with("    ") && !line.starts_with("\t\t") {
+                    in_blur = false;
+                }
+            }
+        }
+        if changed {
+            let mut out = lines.join(newline);
+            if ends_with_newline {
+                out.push_str(newline);
+            }
+            write_atomic(config_path, out.as_bytes())?;
+        }
+    }
+
+    // 2. Rewrite styles.css: toggle .yasb-bar background-color
+    if styles_path.is_file() {
+        let raw = fs::read(styles_path).map_err(|e| format!("cannot read styles: {e}"))?;
+        let text = String::from_utf8(raw).map_err(|e| format!("UTF-8 error: {e}"))?;
+        let newline = if text.contains("\r\n") { "\r\n" } else { "\n" };
+        let ends_with_newline = text.ends_with('\n');
+        let mut lines: Vec<String> = text.lines().map(str::to_string).collect();
+
+        let mut in_yasb_bar = false;
+        let mut changed = false;
+        for line in lines.iter_mut() {
+            let trimmed = line.trim();
+            if trimmed == ".yasb-bar {" {
+                in_yasb_bar = true;
+                continue;
+            }
+            if in_yasb_bar {
+                if trimmed.starts_with("background-color:") {
+                    let indent = &line[..line.len() - line.trim_start().len()];
+                    let target_color = if enable { "var(--glassfrost);" } else { "transparent;" };
+                    *line = format!("{indent}background-color: {target_color}");
+                    changed = true;
+                    break;
+                }
+                if trimmed == "}" {
+                    in_yasb_bar = false;
+                }
+            }
+        }
+        if changed {
+            let mut out = lines.join(newline);
+            if ends_with_newline {
+                out.push_str(newline);
+            }
+            write_atomic(styles_path, out.as_bytes())?;
+        }
+    }
+
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        let _ = std::process::Command::new("yasbc")
+            .arg("reload")
+            .creation_flags(0x0800_0000)
+            .spawn();
+    }
+
+    Ok(())
+}
+
+/// Toggle the frosted glass property on the YASB bar. Returns the new state.
+pub fn toggle_frosted(config_path: &Path, styles_path: &Path) -> Result<bool, String> {
+    let current = is_frosted(config_path, styles_path);
+    let new_state = !current;
+    set_frosted(config_path, styles_path, new_state)?;
+    Ok(new_state)
+}
+
+pub fn default_styles_path() -> PathBuf {
+    if let Ok(exe) = std::env::current_exe() {
+        if let Some(dir) = exe.parent() {
+            let next_to_exe = dir.join("styles.css");
+            if next_to_exe.is_file() {
+                return next_to_exe;
+            }
+        }
+    }
+    let home = std::env::var("USERPROFILE").unwrap_or_else(|_| ".".to_string());
+    Path::new(&home).join(".config").join("yasb").join("styles.css")
+}
+
+pub fn default_config_path() -> PathBuf {
+    if let Ok(exe) = std::env::current_exe() {
+        if let Some(dir) = exe.parent() {
+            let next_to_exe = dir.join("config.yaml");
+            if next_to_exe.is_file() {
+                return next_to_exe;
+            }
+        }
+    }
+    let home = std::env::var("USERPROFILE").unwrap_or_else(|_| ".".to_string());
+    Path::new(&home).join(".config").join("yasb").join("config.yaml")
+}
 
 #[cfg(test)]
 #[path = "tests.rs"]

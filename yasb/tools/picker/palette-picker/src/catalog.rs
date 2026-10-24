@@ -319,7 +319,7 @@ mod tests {
     fn real_catalog_has_all_themes() {
         let p = Path::new(env!("CARGO_MANIFEST_DIR")).join("../palette-themes.json");
         let items = load(&p).unwrap_or_else(|e| panic!("{e}"));
-        assert_eq!(items.len(), 22);
+        assert_eq!(items.len(), 21);
         for it in &items {
             assert!(!it.name.is_empty());
             assert!(

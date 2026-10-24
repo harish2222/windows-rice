@@ -42,6 +42,34 @@ pub const GAP: i32 = 10;
 /// column count, so arrow-key movement feels identical across the two.
 pub const STRIDE: i32 = CELL_W + GAP;
 
+/// Two-way frosted glass toggle button dimensions.
+pub const TOGGLE_W: i32 = 180;
+pub const TOGGLE_H: i32 = 56;
+
+/// Bounds of the search box: (x0, y0, x1, y1)
+pub fn search_box(w: i32, pad: i32, search_h: i32) -> (i32, i32, i32, i32) {
+    let x0 = pad;
+    let y0 = pad;
+    let x1 = w - pad - TOGGLE_W - 12;
+    let y1 = pad + search_h;
+    (x0, y0, x1, y1)
+}
+
+/// Bounds of the frosted glass toggle button: (x0, y0, x1, y1)
+pub fn toggle_btn(w: i32, pad: i32, search_h: i32) -> (i32, i32, i32, i32) {
+    let x0 = w - pad - TOGGLE_W;
+    let y0 = pad + (search_h - TOGGLE_H) / 2;
+    let x1 = w - pad;
+    let y1 = y0 + TOGGLE_H;
+    (x0, y0, x1, y1)
+}
+
+/// Hit test for the frosted glass toggle button.
+pub fn hit_toggle(w: i32, pad: i32, search_h: i32, x: i32, y: i32) -> bool {
+    let (x0, y0, x1, y1) = toggle_btn(w, pad, search_h);
+    x >= x0 && x <= x1 && y >= y0 && y <= y1
+}
+
 /// Swatch chips per cell, and their pitch.
 ///
 /// These live here rather than in `main.rs` because the text pass derives the
@@ -475,5 +503,23 @@ fn keyboard_moves_by_a_visual_row() {
         assert!(foot_y + foot_h <= h, "the footer text runs past the panel edge");
         assert!(h - (foot_y + foot_h) == 16, "the panel's bottom padding is gone");
         assert!(h <= 760, "the shipped catalog must not hit the height guard");
+    }
+
+    #[test]
+    fn toggle_button_geometry_and_hit_test() {
+        let w = 1020;
+        let pad = 16;
+        let search_h = 56;
+        let (sx0, _sy0, sx1, _sy1) = search_box(w, pad, search_h);
+        let (tx0, ty0, tx1, ty1) = toggle_btn(w, pad, search_h);
+
+        assert!(sx1 < tx0, "search box and toggle button must not collide");
+        assert_eq!(tx1, w - pad);
+        assert_eq!(tx1 - tx0, TOGGLE_W);
+        assert_eq!(ty1 - ty0, TOGGLE_H);
+
+        assert!(hit_toggle(w, pad, search_h, tx0 + 10, ty0 + 10));
+        assert!(!hit_toggle(w, pad, search_h, sx0 + 10, sy0 + 10));
+        assert!(!hit_toggle(w, pad, search_h, 0, 0));
     }
 }

@@ -109,15 +109,19 @@ struct Snapshot {
     /// 500ms would mean two process spawns a second for a value that cannot
     /// change while the picker is open.
     current: Option<String>,
+    frosted: Option<bool>,
 }
 
 fn take_snapshot(first: bool) -> Snapshot {
+    let styles = styles_path();
+    let config = yasb_theme::default_config_path();
     Snapshot {
         // Re-read every tick so a switch made while the panel is open shows up
         // without reopening it. This is a file read and a CSS parse, which is
         // the second reason to keep it off the UI thread.
-        theme: Theme::load(&styles_path()),
+        theme: Theme::load(&styles),
         current: if first { Some(active_name()) } else { None },
+        frosted: Some(yasb_theme::is_frosted(&config, &styles)),
     }
 }
 
@@ -196,6 +200,12 @@ fn drain_inbox() -> bool {
                 a.current = name;
                 repaint = true;
             }
+            if let Some(f) = s.frosted {
+                if a.frosted != f {
+                    a.frosted = f;
+                    repaint = true;
+                }
+            }
             if a.theme != s.theme {
                 a.theme = s.theme;
                 repaint = true;
@@ -216,6 +226,7 @@ struct App {
     sel: usize,
     theme: Theme,
     hwnd: Option<HWND>,
+    frosted: bool,
 }
 
 impl App {
@@ -398,6 +409,14 @@ unsafe fn paint(hwnd: HWND) {
     let rows = app.rows();
     let origin = app.grid_origin();
     let rects = layout::cell_rects(&rows, origin, w - PAD * 2);
+    let (fx0, fy0, fx1, fy1) = layout::search_box(w, PAD, SEARCH_H);
+    let (tx0, ty0, tx1, ty1) = layout::toggle_btn(w, PAD, SEARCH_H);
+    let sw_w = 146;
+    let sw_h = 24;
+    let sw_x0 = tx0 + (layout::TOGGLE_W - sw_w) / 2;
+    let sw_y0 = ty0 + 26;
+    let sw_x1 = sw_x0 + sw_w;
+    let sw_y1 = sw_y0 + sw_h;
 
     // ---- shape pass ------------------------------------------------------
     {
@@ -422,10 +441,22 @@ unsafe fn paint(hwnd: HWND) {
         c.round_rect_border(1, 1, w - 1, 14, RADIUS, 1, t.highlight);
 
         // The search field: an inset rounded pill.
-        let (fx0, fy0) = (PAD, PAD);
-        let (fx1, fy1) = (w - PAD, PAD + SEARCH_H);
         c.round_rect(fx0, fy0, fx1, fy1, CELL_R + 6, t.field);
         c.round_rect_border(fx0, fy0, fx1, fy1, CELL_R + 6, 1, t.hairline);
+
+        // Frosted glass two-way toggle button
+        c.round_rect(tx0, ty0, tx1, ty1, CELL_R + 6, t.field);
+        c.round_rect_border(tx0, ty0, tx1, ty1, CELL_R + 6, 1, t.hairline);
+
+        c.round_rect(sw_x0, sw_y0, sw_x1, sw_y1, 12, t.bg);
+        c.round_rect_border(sw_x0, sw_y0, sw_x1, sw_y1, 12, 1, t.hairline);
+
+        let half_w = sw_w / 2;
+        if app.frosted {
+            c.round_rect(sw_x0 + 1, sw_y0 + 1, sw_x0 + half_w, sw_y1 - 1, 11, t.accent);
+        } else {
+            c.round_rect(sw_x0 + half_w, sw_y0 + 1, sw_x1 - 1, sw_y1 - 1, 11, t.cell_selected);
+        }
 
         // Magnifier glyph: a ring plus a handle, drawn as geometry rather than
         // an icon font so it matches the panel's stroke weight exactly and
@@ -478,13 +509,43 @@ unsafe fn paint(hwnd: HWND) {
         // a caret to the left of the hint would imply the hint is the value.
         let text_x = PAD + 48;
         let empty = app.query.is_empty();
+        let avail_search = (fx1 - text_x - 12).max(20);
         SelectObject(dc, HGDIOBJ(body.0));
         SetTextColor(dc, colorref(if empty { t.subtext } else { t.text }));
         draw_text(
             dc,
             if empty { "Type a theme name" } else { &app.query },
-            rect(text_x, PAD, w - text_x - PAD, SEARCH_H),
+            rect(text_x, PAD, avail_search, SEARCH_H),
             DT_LEFT | DT_VCENTER,
+        );
+
+        // Frosted glass toggle button text
+        SelectObject(dc, HGDIOBJ(label.0));
+        SetTextColor(dc, colorref(t.subtext));
+        draw_text(
+            dc,
+            "FROSTED GLASS",
+            rect(tx0, ty0 + 6, layout::TOGGLE_W, 16),
+            DT_CENTER | DT_VCENTER,
+        );
+
+        SelectObject(dc, HGDIOBJ(small.0));
+        let half_w = sw_w / 2;
+        // Left half: ON
+        SetTextColor(dc, colorref(if app.frosted { t.bg } else { t.subtext }));
+        draw_text(
+            dc,
+            "ON",
+            rect(sw_x0, sw_y0, half_w, sw_h),
+            DT_CENTER | DT_VCENTER,
+        );
+        // Right half: OFF
+        SetTextColor(dc, colorref(if !app.frosted { t.text } else { t.subtext }));
+        draw_text(
+            dc,
+            "OFF",
+            rect(sw_x0 + half_w, sw_y0, half_w, sw_h),
+            DT_CENTER | DT_VCENTER,
         );
 
         // Section headings, then the cell names.
@@ -619,7 +680,10 @@ fn main() {
         }
     };
     let current = active_name();
-    let theme = Theme::load(&styles_path());
+    let styles = styles_path();
+    let config = yasb_theme::default_config_path();
+    let frosted = yasb_theme::is_frosted(&config, &styles);
+    let theme = Theme::load(&styles);
 
     let mut app = App {
         items,
@@ -629,6 +693,7 @@ fn main() {
         sel: 0,
         theme,
         hwnd: None,
+        frosted,
     };
     app.refilter();
 
@@ -898,6 +963,20 @@ unsafe extern "system" fn wnd_proc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM)
         WM_LBUTTONDOWN => {
             let x = (lp.0 & 0xFFFF) as i16 as i32;
             let y = ((lp.0 >> 16) & 0xFFFF) as i16 as i32;
+
+            if layout::hit_toggle(W, PAD, SEARCH_H, x, y) {
+                let styles = styles_path();
+                let config = yasb_theme::default_config_path();
+                let new_state = yasb_theme::toggle_frosted(&config, &styles).unwrap_or(false);
+                APP.with(|c| {
+                    if let Some(a) = c.borrow_mut().as_mut() {
+                        a.frosted = new_state;
+                    }
+                });
+                paint(hwnd);
+                return LRESULT(0);
+            }
+
             let hit = APP.with(|c| {
                 let a = c.borrow();
                 let a = a.as_ref().unwrap();

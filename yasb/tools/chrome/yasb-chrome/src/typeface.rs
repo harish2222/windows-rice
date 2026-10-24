@@ -40,6 +40,9 @@ use windows::core::PCWSTR;
 
 /// Windows ships Nirmala UI for Brahmic scripts; Telugu text uses it.
 pub const INDIC_FAMILY: &str = "Nirmala UI";
+/// GohuFont bitmap-style font families for crisp ClearType rendering in custom widgets.
+pub const GOHU_FAMILY: &str = "GohuFont 11 Nerd Font Mono";
+pub const GOHU_DISPLAY: &str = "GohuFont 14 Nerd Font Mono";
 /// Used when the bar's family is not installed on this machine.
 pub const FALLBACK_FAMILY: &str = "Segoe UI";
 /// Headings, when the bar's family has no display cut.
@@ -119,7 +122,7 @@ impl Typeface {
 /// which is a few hundred entries on a typical machine. This runs once per
 /// theme load on the worker thread, not per frame, so the cost does not matter;
 /// caching would be more code than the problem deserves.
-fn font_is_installed(family: &str) -> bool {
+pub fn font_is_installed(family: &str) -> bool {
     // The obvious implementation is `EnumFontFamiliesExW` with the face name
     // in a LOGFONTW, and it does not work: that function ignores the requested
     // face and enumerates *every* installed family, so the "is it installed?"
@@ -180,7 +183,7 @@ pub fn ui_font(size: i32, weight: i32, family: &str) -> windows::Win32::Graphics
             1u32, // ANSI_CHARSET
             OUT_DEFAULT_PRECIS.0 as u32,
             windows::Win32::Graphics::Gdi::CLIP_DEFAULT_PRECIS.0 as u32,
-            windows::Win32::Graphics::Gdi::ANTIALIASED_QUALITY.0 as u32,
+            windows::Win32::Graphics::Gdi::CLEARTYPE_QUALITY.0 as u32,
             windows::Win32::Graphics::Gdi::DEFAULT_PITCH.0 as u32,
             PCWSTR(wide.as_ptr()),
         )

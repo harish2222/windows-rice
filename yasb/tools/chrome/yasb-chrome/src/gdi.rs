@@ -306,8 +306,7 @@ pub fn arrow_cursor() -> windows::Win32::UI::WindowsAndMessaging::HCURSOR {
 /// subpixel fringes are composited against whatever was behind the window and
 /// show up as coloured halos on 11-13px caps, which is the worst size for it.
 ///
-/// `ANTIALIASED_QUALITY` is grayscale: smooth, neutral, and correct for a
-/// surface you have already composited yourself.
+/// `CLEARTYPE_QUALITY` provides crisp, subpixel antialiasing for pixel and UI fonts.
 pub fn font(size: i32, weight: i32, family: &str) -> HFONT {
     let wide: Vec<u16> = family.encode_utf16().chain(std::iter::once(0)).collect();
     unsafe {
@@ -316,7 +315,7 @@ pub fn font(size: i32, weight: i32, family: &str) -> HFONT {
             DEFAULT_CHARSET.0 as u32,
             OUT_DEFAULT_PRECIS.0 as u32,
             CLIP_DEFAULT_PRECIS.0 as u32,
-            ANTIALIASED_QUALITY.0 as u32,
+            CLEARTYPE_QUALITY.0 as u32,
             DEFAULT_PITCH.0 as u32,
             windows::core::PCWSTR(wide.as_ptr()),
         )
@@ -497,18 +496,10 @@ mod tests {
         }
     }
 
-    /// [`font`] must ask for grayscale antialiasing, not ClearType.
-    ///
-    /// Checked by reading the `lfQuality` back out of the created `HFONT`
-    /// with `GetObjectW`, which is the only assertion that actually
-    /// discriminates here. An earlier version of this test rendered white text
-    /// onto a flat black memory DC and looked for coloured glyph edges — and it
-    /// passed with ClearType too, because subpixel rendering needs a real LCD
-    /// surface and a memory DC silently falls back to grayscale. A test that
-    /// passes either way is worse than no test, because it looks like
-    /// evidence.
+    /// [`font`] must request ClearType rendering as mandated for crisp,
+    /// sharp glyphs on Windows DWM.
     #[test]
-    fn font_asks_for_greyscale_antialiasing_not_cleartype() {
+    fn font_asks_for_cleartype_rendering() {
         unsafe {
             let f = font(-16, 500, "Segoe UI");
             let mut lf = LOGFONTW::default();
@@ -517,13 +508,9 @@ mod tests {
             assert!(got != 0, "GetObjectW refused the font handle");
             let quality = lf.lfQuality.0;
             assert_eq!(
-                quality, ANTIALIASED_QUALITY.0,
-                "text is being rendered with quality {quality} — ClearType on a \
-                 surface this crate composites by hand puts coloured halos on \
-                 every glyph edge, worst on the 11-13px caps these panels are \
-                 full of"
+                quality, CLEARTYPE_QUALITY.0,
+                "text is being rendered with quality {quality} — ClearType quality required"
             );
-            assert_ne!(quality, CLEARTYPE_QUALITY.0);
         }
     }
 

@@ -36,4 +36,4 @@ pub use gdi::{
 };
 pub use scale::{Type, space};
 pub use singleton::{Action, acquire, notify_window_of_class, raise_window_of_class};
-pub use typeface::{INDIC_FAMILY, Typeface};
+pub use typeface::{GOHU_DISPLAY, GOHU_FAMILY, INDIC_FAMILY, Typeface, font_is_installed};

@@ -64,6 +64,21 @@ use yasb_chrome::gdi::{
 };
 use yasb_chrome::{INDIC_FAMILY, Type};
 
+pub fn resolve_saka_family() -> (&'static str, &'static str) {
+    let candidates = [
+        ("GohuFont 14 Nerd Font Mono", "GohuFont 11 Nerd Font Mono"),
+        ("GohuFont 14 Nerd Font", "GohuFont 11 Nerd Font"),
+        ("GohuFont uni14 Nerd Font Mono", "GohuFont uni11 Nerd Font Mono"),
+        ("GohuFont uni14 Nerd Font", "GohuFont uni11 Nerd Font"),
+    ];
+    for (disp, body) in candidates {
+        if yasb_chrome::font_is_installed(body) {
+            return (disp, body);
+        }
+    }
+    ("GohuFont 14 Nerd Font Mono", "GohuFont 11 Nerd Font Mono")
+}
+
 // Hyderabad / IST: the same defaults the saka CLI uses.
 const LAT: f64 = 17.3850;
 const LON: f64 = 78.4867;
@@ -425,8 +440,9 @@ fn smoke(t: &Theme, p: &Panchang, script: Script) {
     // log, no exit code. Measuring the shipped strings with the same faces
     // and the same `row_split` the paint pass uses is what makes a truncating
     // row fail here instead of on someone's desktop.
+    let (_, gohu_body) = resolve_saka_family();
     let text_family: &str =
-        if script == Script::Telugu { INDIC_FAMILY } else { t.typeface.family.as_str() };
+        if script == Script::Telugu { INDIC_FAMILY } else { gohu_body };
     let mut bad: Vec<String> = Vec::new();
     unsafe {
         let dc = GetDC(None);
@@ -526,7 +542,8 @@ unsafe fn paint(hwnd: HWND) {
         // to be borrowed first and released.
         let weekday_w = {
             let dc = dib.dc();
-            let fam = if app.script == Script::Telugu { INDIC_FAMILY } else { t.typeface.family.as_str() };
+            let (_, gohu_body) = resolve_saka_family();
+            let fam = if app.script == Script::Telugu { INDIC_FAMILY } else { gohu_body };
             let f = font(-11, 600, fam);
             let saved = SelectObject(dc, HGDIOBJ(f.0));
             let width = measure_tracked(dc, &weekday, 2);
@@ -647,10 +664,11 @@ unsafe fn paint(hwnd: HWND) {
         // and the other in a Brahmic one looks broken even when both are
         // individually correct.
         let telugu = app.script == Script::Telugu;
+        let (gohu_disp, gohu_body) = resolve_saka_family();
         let (display_family, text_family) = if telugu {
             (INDIC_FAMILY, INDIC_FAMILY)
         } else {
-            (t.typeface.display.as_str(), t.typeface.family.as_str())
+            (gohu_disp, gohu_body)
         };
         let display = font(Type::Title.gdi(), 600, display_family);
         let body = font(Type::Lead.gdi(), 500, text_family);

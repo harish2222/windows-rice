@@ -386,7 +386,7 @@
     --yasb-icon-fg: #F1DFE3;
     --glass: rgba(29, 16, 21, 0.01);
     --glassmenu: rgba(29, 16, 21, 0.50);
-    --glassfrost: rgba(29, 16, 21, 0.01);
+    --glassfrost: rgba(29, 16, 21, 0.40);
     --glassmist: rgba(255, 255, 255, 0.08);
     --hairline: rgba(241, 223, 227, 0.16);
     --text-faint: rgba(241, 223, 227, 0.45);
@@ -1560,7 +1560,7 @@
     margin: 0 3px;
 }
 .saka-widget .label {
-    font-family: var(--system-font);
+    font-family: "GohuFont 11 Nerd Font Mono", "GohuFont 14 Nerd Font Mono", "GohuFont 11 Nerd Font", var(--system-font);
     font-size: var(--fontSize);
     line-height: var(--barLineHeight);
     font-weight: var(--fontWeight);

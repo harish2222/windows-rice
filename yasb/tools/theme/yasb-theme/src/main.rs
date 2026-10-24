@@ -17,7 +17,10 @@ use std::env;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
-use yasb_theme::{motifs, parse, read_styles, sync_cava_colors, sync_config_colors};
+use yasb_theme::{
+    is_frosted, motifs, parse, read_styles, set_frosted, sync_cava_colors, sync_config_colors,
+    toggle_frosted,
+};
 
 fn main() -> ExitCode {
     match run() {
@@ -151,8 +154,34 @@ fn run() -> Result<(), String> {
             println!("{} motifs from {} themes: {}", names.join(", "), n, found.len());
             Ok(())
         }
+        "frosted" => {
+            let sub = args.get(1).map(String::as_str).unwrap_or("status");
+            match sub {
+                "status" | "get" => {
+                    let on = is_frosted(&config, &styles);
+                    println!("{}", if on { "on" } else { "off" });
+                    Ok(())
+                }
+                "toggle" => {
+                    let new_state = toggle_frosted(&config, &styles)?;
+                    println!("{}", if new_state { "on" } else { "off" });
+                    Ok(())
+                }
+                "on" | "enable" => {
+                    set_frosted(&config, &styles, true)?;
+                    println!("on");
+                    Ok(())
+                }
+                "off" | "disable" => {
+                    set_frosted(&config, &styles, false)?;
+                    println!("off");
+                    Ok(())
+                }
+                _ => Err("usage: yasb-theme frosted <status|toggle|on|off>".to_string()),
+            }
+        }
         other => Err(format!(
-            "unknown command '{other}'; expected list|current|set|next|prev|motif"
+            "unknown command '{other}'; expected list|current|set|next|prev|motif|frosted"
         )),
     }
 }
