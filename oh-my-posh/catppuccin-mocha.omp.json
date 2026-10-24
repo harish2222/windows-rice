@@ -1,0 +1,74 @@
+{
+  "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+  "version": 3,
+  "final_space": true,
+  "blocks": [
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "segments": [
+        {
+          "type": "session",
+          "style": "plain",
+          "foreground": "#cba6f7",
+          "template": " {{ .UserName }} "
+        },
+        {
+          "type": "path",
+          "style": "powerline",
+          "powerline_symbol": "\ue0b0",
+          "foreground": "#1e1e2e",
+          "background": "#89b4fa",
+          "template": " {{ .Path }} ",
+          "properties": {
+            "style": "folder",
+            "folder_separator_icon": "/"
+          }
+        },
+        {
+          "type": "git",
+          "style": "powerline",
+          "powerline_symbol": "\ue0b0",
+          "foreground": "#1e1e2e",
+          "background": "#a6e3a1",
+          "template": " \uf126 {{ .HEAD }}{{ if .Staging.Changed }} \uf046 {{ .Staging.String }}{{ end }}{{ if .Working.Changed }} \uf044 {{ .Working.String }}{{ end }} ",
+          "properties": {
+            "branch_icon": "",
+            "fetch_status": true,
+            "fetch_upstream_icon": true
+          }
+        },
+        {
+          "type": "status",
+          "style": "plain",
+          "foreground": "#f38ba8",
+          "template": "{{ if gt .Code 0 }} \uf00d {{ .Code }} {{ end }}"
+        }
+      ]
+    },
+    {
+      "type": "rprompt",
+      "alignment": "right",
+      "segments": [
+        {
+          "type": "executiontime",
+          "style": "plain",
+          "foreground": "#6c7086",
+          "template": " {{ .FormattedMs }} ",
+          "properties": {
+            "threshold": 500
+          }
+        },
+        {
+          "type": "time",
+          "style": "plain",
+          "foreground": "#94e2d5",
+          "template": " \uf017 {{ .CurrentDate | date .Format }} ",
+          "properties": {
+            "time_format": "15:04:05"
+          }
+        }
+      ]
+    }
+  ]
+}

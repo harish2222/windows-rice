@@ -1,37 +1,98 @@
-# Otty Best Configuration - All Features Enabled
-# Flat TOML key = value pairs (not nested tables)
-# ================================================
+# =============================================================================
+#  Otty 1.6.x configuration - Windows 11
+#  Reference: https://docs.otty.sh/reference/configuration
+#
+#  Only flat, documented keys are used here. Otty silently ignores unknown keys
+#  ("gpu_acceleration", "material", "blur", "line-height" are NOT config keys —
+#  they live inside .ottytheme files).
+#
+#  Frosted glass: the theme `catppuccin-mocha-glass` asks the XAML compositor
+#  for `acrylic-thin` on the window frame and `acrylic` on the chrome columns.
+#  A previous setup put `material = "acrylic"` on the whole window and that
+#  crashed the compositor on this build, so the thin variant is used instead.
+# =============================================================================
 
-# Foreground and Background
-foreground = "#ffffff"
-background = "#202020"
+# --- Theme -------------------------------------------------------------------
+theme = "catppuccin-mocha-glass"
+theme-dark = "catppuccin-mocha-glass"
+auto-theme-dark-mode = false
 
-# Color Palette (16 ANSI colors + 8 bright)
-palette-0 = "#161616"
-palette-1 = "#e04c59"
-palette-2 = "#3fbf3c"
-palette-3 = "#d5a32b"
-palette-4 = "#4c88ff"
-palette-5 = "#be6bd1"
-palette-6 = "#2fc1d3"
-palette-7 = "#c5c5c5"
-palette-8 = "#767676"
-palette-9 = "#ff8a94"
-palette-10 = "#6ce86a"
-palette-11 = "#f9f1a5"
-palette-12 = "#7fb0ff"
-palette-13 = "#e0a0ee"
-palette-14 = "#62e0ec"
-palette-15 = "#f2f2f2"
+# --- Shell -------------------------------------------------------------------
+# `command` is the documented shell key for panes launched without a profile.
+# Windows windows opened from a profile use that profile's `shell` instead
+# (see profiles/18dfa98576390b5000000000.toml -> Nushell).
+command = "nu"
+working-directory = "inherit"
 
-# Selection and Cursor
-selection-background = "#264f78"
-cursor-color = "#60cdff"
+# --- Fonts -------------------------------------------------------------------
+font-family = "CaskaydiaCove Nerd Font Mono"
+font-family-bold = "CaskaydiaCove Nerd Font Mono"
+font-family-italic = "CaskaydiaCove Nerd Font Mono"
+font-family-bold-italic = "CaskaydiaCove Nerd Font Mono"
+font-size = 13
+font-ligatures = "calt"
+windows-text-rendering = "natural"
 
-# Open with app
-open-with-app = "VS Code|C:\\Users\\haris\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
+# --- Cursor ------------------------------------------------------------------
+cursor-style = "block"
+cursor-style-blink = "always_off"
+cursor-color = "#f5e0dc"
 
-# Profile and Language
+# --- Window / performance ----------------------------------------------------
+# Acrylic is supplied by the theme's [windows] material block; these opacity
+# values control how translucent the terminal layer sits on top of it.
+background-opacity = 0.85
+window-opacity = 0.92
+scrollback-lines = 50000
+session-log-size-mb = 10
+max-fps = 120
+freeze-inactive-tab = true
+
+# --- Session behaviour -------------------------------------------------------
+# A clean window each launch; restore is what made startup feel like a hang.
+on-launch = "new_window"
+session-restore-processes = "none"
+session-restore-banner = false
+quit-after-last-window-closed = true
+
+# --- Input, selection & clipboard -------------------------------------------
+mouse-hide-while-typing = true
+copy-on-select = true
+clipboard-paste-protection = true
+
+# --- Shell integration & frecency -------------------------------------------
+shell-integration = true
+omit-otty-prefix = true
+zoxide-enabled = true
+frecency-auto-record = true
+
+# --- App chrome --------------------------------------------------------------
+language = "english"
+auto-hide-tabs-panel = "auto"
+editor-visible-whitespace = true
+# term = "xterm-ghostty" (reset to default)
+
+# --- Catppuccin Mocha palette -------------------------------------------------
+foreground = "#cdd6f4"
+background = "#1e1e2e"
+palette-0 = "#45475a"
+palette-1 = "#f38ba8"
+palette-2 = "#a6e3a1"
+palette-3 = "#f9e2af"
+palette-4 = "#89b4fa"
+palette-5 = "#f5c2e7"
+palette-6 = "#94e2d5"
+palette-7 = "#bac2de"
+palette-8 = "#585b70"
+palette-9 = "#f38ba8"
+palette-10 = "#a6e3a1"
+palette-11 = "#f9e2af"
+palette-12 = "#89b4fa"
+palette-13 = "#f5c2e7"
+palette-14 = "#94e2d5"
+palette-15 = "#a6adc8"
+
+# --- Profiles ----------------------------------------------------------------
 profile = "18dfa98576390b5000000000"
 profile = "18dfa985769e6d9c00000001"
 profile = "18dfa98576ec04e400000002"
@@ -41,47 +102,6 @@ profile = "18dfa98577d5a25c00000005"
 profile = "18dfa9857825984800000006"
 profile = "18dfa985787daa6000000007"
 profile = "18dfa98578d4933400000008"
+profile = "hkdevs-xonsh"
+profile = "hkdevs-pwsh7"
 default-profile = "18dfa98576390b5000000000"
-
-language = "english"
-
-# ================================================
-# Font Configuration - Nerd Font with Ligatures
-# ================================================
-font-family = "JetBrainsMono Nerd Font"
-font-size = 13
-font-feature = "+liga, +calt"
-font-ligatures-alphabet = true
-font-family-fallback = ["Segoe UI Symbol", "Noto Color Emoji"]
-
-# ================================================
-# Text Rendering
-# ================================================
-font-blending = "srgb-over"
-line-height = 1.0
-
-# ================================================
-# Features (flat keys - no nested tables needed)
-# ================================================
-mouse-support = true
-clipboard-support = true
-unicode-emoji = true
-scrollbar = true
-trim-right-spaces = false
-quick-find = true
-
-# ================================================
-# Hardware Acceleration
-# ================================================
-# GPU acceleration is native on Windows (DirectX) - always enabled
-# vsync and render options can be set here if needed
-
-sidebar-width = 140
-
-# ================================================
-# Frost Glass Background
-# ================================================
-background-opacity = 0.85
-background-blur = true
-window-material = "glass"
-panel-material = "vibrancy-regular"

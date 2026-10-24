@@ -19,10 +19,18 @@ if (Test-Path 'C:\Users\haris\scoop\apps\carapace\current\carapace.exe') {
     Invoke-Expression (Get-Content -LiteralPath $carapaceCache -Raw)
 }
 
-# Oh-My-Posh prompt — half-life theme, initialised the simple way.
+# Oh-My-Posh prompt — half-life theme, cached init script.
 $env:POSH_THEME = Join-Path $env:USERPROFILE '.config\oh-my-posh\half-life.omp.json'
 if (Test-Path $env:POSH_THEME) {
-    oh-my-posh init pwsh --config $env:POSH_THEME | Invoke-Expression
+    $poshCacheDir = Join-Path $env:LOCALAPPDATA 'oh-my-posh'
+    $poshCache = Join-Path $poshCacheDir 'init-powershell-half-life.ps1'
+    if (-not (Test-Path $poshCacheDir)) {
+        New-Item -ItemType Directory -Path $poshCacheDir -Force | Out-Null
+    }
+    if (-not (Test-Path $poshCache) -or (Get-Item $env:POSH_THEME).LastWriteTimeUtc -gt (Get-Item $poshCache).LastWriteTimeUtc) {
+        oh-my-posh init powershell --config $env:POSH_THEME | Set-Content -LiteralPath $poshCache -Encoding utf8
+    }
+    . $poshCache
 }
 
 # Guarded: this file no longer exists (yasb scripts dir removed) — was throwing CommandNotFoundException on EVERY powershell.exe spawn (startup script, GlazeWM volume/brightness keybinds, etc.)

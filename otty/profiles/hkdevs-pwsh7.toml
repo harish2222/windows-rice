@@ -1,0 +1,16 @@
+[profile]
+name = "PowerShell 7"
+icon = "builtin:powershell"
+
+[launch]
+shell = 'C:\Program Files\PowerShell\7\pwsh.exe'
+command = ""
+cwd = ""
+env = []
+elevate = false
+shell-integration = true
+
+[appearance]
+theme = "catppuccin-mocha-glass"
+theme-dark = "catppuccin-mocha-glass"
+title-prefix = "pwsh"

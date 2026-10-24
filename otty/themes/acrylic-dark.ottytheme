@@ -86,7 +86,8 @@ radius     = 8
 # window tint while the grid below it sat on #202020 — one flat band across the
 # top that read as a separate titlebar, which is exactly what two columns fixes.
 [windows]
-material = "none"
+# otty-original: windows.material = "none"
+material = "acrylic-thin"
 # The content column's colour, and the reason it reaches the top edge: with no
 # material on the window this is a flat fill, not a tint, and it matches
 # `[terminal].background` so the strip above the grid and the grid itself are
@@ -137,3 +138,5 @@ background = "#FFFFFF0F"
 
 [container]
 background = "#202020"
+# otty-added: container.shadow
+shadow = "0 1.5px 6px rgba(0,0,0,0.18)"

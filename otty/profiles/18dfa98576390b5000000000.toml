@@ -1,9 +1,9 @@
 [profile]
-name = "PowerShell"
+name = "Nushell"
 icon = "terminal"
 
 [launch]
-shell = '"C:\Program Files\PowerShell\7\pwsh.exe"'
+shell = '"C:\Program Files\nu\bin\nu.exe"'
 command = ""
 cwd = ""
 env = []
@@ -11,6 +11,6 @@ elevate = false
 shell-integration = true
 
 [appearance]
-theme = "acrylic-dark"
-theme-dark = "acrylic-dark"
-title-prefix = "acrylic-dark"
+theme = "catppuccin-mocha"
+theme-dark = "catppuccin-mocha"
+title-prefix = "nu"

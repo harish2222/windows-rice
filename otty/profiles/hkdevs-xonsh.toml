@@ -1,0 +1,18 @@
+[profile]
+name = "Xonsh"
+icon = "terminal"
+
+[launch]
+# Python 3.14 is the fast Xonsh runtime (about 1.2 s with this full rc).  It
+# uses the same ~/.xonshrc as every other launcher.
+shell = 'C:\Python314\python.exe'
+command = "-m xonsh"
+cwd = ""
+env = []
+elevate = false
+shell-integration = true
+
+[appearance]
+theme = "catppuccin-mocha-glass"
+theme-dark = "catppuccin-mocha-glass"
+title-prefix = "xonsh"

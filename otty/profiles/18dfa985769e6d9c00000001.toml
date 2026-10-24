@@ -11,6 +11,6 @@ elevate = false
 shell-integration = true
 
 [appearance]
-theme = "april-dark"
-theme-dark = "april-dark"
-title-prefix = "april-dark"
+theme = "catppuccin-mocha"
+theme-dark = "catppuccin-mocha"
+title-prefix = "catppuccin-mocha"

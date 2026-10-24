@@ -7,8 +7,8 @@
         {
           "foreground": "#7E46B6",
           "style": "plain",
-          "template": "{{ .UserName }} ",
-          "type": "session"
+          "template": "hkdevs ",
+          "type": "text"
         },
         {
           "foreground": "#ffffff",
