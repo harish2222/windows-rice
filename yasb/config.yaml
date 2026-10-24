@@ -23,7 +23,7 @@ bars:
     # island gaps (unreserved spaces) and washes out text on light wallpapers.
     # Readability comes from the opaque --glass rail in styles.css instead.
     blur_effect:
-      enabled: true
+      enabled: false
       round_corners: true
     window_flags:
       always_on_top: false

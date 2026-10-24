@@ -474,3 +474,45 @@ fn an_unbalanced_quote_is_left_rather_than_mangled() {
     assert!(!out.contains("#111111"), "{out}");
     fs::remove_file(&cava).ok();
 }
+
+
+#[test]
+fn frosted_glass_toggles_adaptive_islands_and_keeps_bar_transparent() {
+    let css = "
+.yasb-bar {
+    background-color: transparent;
+    border: none;
+}
+.yasb-bar.adaptive {
+    background-color: var(--glassmist);
+    border-radius: 10px;
+}
+";
+    let yaml = "
+bars:
+  main-bar:
+    blur_effect:
+      enabled: false
+";
+    let styles_path = temp("test_frosted_styles.css", css);
+    let config_path = temp("test_frosted_config.yaml", yaml);
+
+    assert!(!is_frosted(&config_path, &styles_path));
+
+    // Turn ON
+    set_frosted(&config_path, &styles_path, true).unwrap();
+    assert!(is_frosted(&config_path, &styles_path));
+    let css_on = fs::read_to_string(&styles_path).unwrap();
+    assert!(css_on.contains("background-color: transparent;"));
+    assert!(css_on.contains("background-color: var(--glassfrost);"));
+
+    // Turn OFF
+    set_frosted(&config_path, &styles_path, false).unwrap();
+    assert!(!is_frosted(&config_path, &styles_path));
+    let css_off = fs::read_to_string(&styles_path).unwrap();
+    assert!(css_off.contains("background-color: transparent;"));
+    assert!(css_off.contains("background-color: var(--glassmist);"));
+
+    fs::remove_file(&styles_path).ok();
+    fs::remove_file(&config_path).ok();
+}

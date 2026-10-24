@@ -510,7 +510,7 @@ fn keyboard_moves_by_a_visual_row() {
         let w = 1020;
         let pad = 16;
         let search_h = 56;
-        let (sx0, _sy0, sx1, _sy1) = search_box(w, pad, search_h);
+        let (sx0, sy0, sx1, _sy1) = search_box(w, pad, search_h);
         let (tx0, ty0, tx1, ty1) = toggle_btn(w, pad, search_h);
 
         assert!(sx1 < tx0, "search box and toggle button must not collide");

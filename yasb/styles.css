@@ -1249,7 +1249,7 @@
    both modes) keep floating over the wallpaper, every other theme frosts with
    the value its block declares. */
 .yasb-bar {
-    background-color: var(--glassfrost);
+    background-color: transparent;
     border: none;
     padding: 0;
 }

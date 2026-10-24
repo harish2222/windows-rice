@@ -814,23 +814,22 @@ fn parse_decls(chunk: &str) -> Vec<(String, String)> {
     out
 }
 
-/// Read whether frosted glass is enabled on the YASB bar.
-pub fn is_frosted(config_path: &Path, _styles_path: &Path) -> bool {
-    if let Ok(content) = fs::read_to_string(config_path) {
-        let mut in_blur = false;
+/// Read whether frosted glass is enabled on the YASB bar islands.
+pub fn is_frosted(_config_path: &Path, styles_path: &Path) -> bool {
+    if let Ok(content) = fs::read_to_string(styles_path) {
+        let mut in_adaptive = false;
         for line in content.lines() {
             let trimmed = line.trim();
-            if trimmed.starts_with("blur_effect:") {
-                in_blur = true;
+            if trimmed.starts_with(".yasb-bar.adaptive") && trimmed.contains('{') {
+                in_adaptive = true;
                 continue;
             }
-            if in_blur {
-                if trimmed.starts_with("enabled:") {
-                    let val = trimmed.strip_prefix("enabled:").unwrap().trim();
-                    return val.eq_ignore_ascii_case("true");
+            if in_adaptive {
+                if trimmed.starts_with("background-color:") {
+                    return trimmed.contains("var(--glassfrost)");
                 }
-                if !trimmed.is_empty() && !line.starts_with("    ") && !line.starts_with("\t\t") {
-                    in_blur = false;
+                if trimmed == "}" {
+                    in_adaptive = false;
                 }
             }
         }
@@ -838,12 +837,14 @@ pub fn is_frosted(config_path: &Path, _styles_path: &Path) -> bool {
     false
 }
 
-/// Set the frosted glass property on the whole background of the YASB bar.
+/// Set the frosted glass property bounded strictly to the YASB islands.
 ///
-/// Updates `config.yaml` (`blur_effect: enabled: true/false`) and
-/// `styles.css` (`.yasb-bar { background-color: var(--glassfrost); }` / `transparent;`).
+/// Keeps `.yasb-bar` transparent so the unreserved space/gaps across the screen
+/// remain 100% transparent. Toggles `.yasb-bar.adaptive` background-color between
+/// `var(--glassfrost)` and `var(--glassmist)`.
 pub fn set_frosted(config_path: &Path, styles_path: &Path, enable: bool) -> Result<(), String> {
-    // 1. Rewrite config.yaml: toggle blur_effect: enabled: true/false
+    // 1. Ensure config.yaml keeps blur_effect disabled so Windows DWM doesn't blur
+    // the rectangular window gaps across the whole display.
     if config_path.is_file() {
         let raw = fs::read(config_path).map_err(|e| format!("cannot read config: {e}"))?;
         let text = String::from_utf8(raw).map_err(|e| format!("UTF-8 error: {e}"))?;
@@ -862,8 +863,10 @@ pub fn set_frosted(config_path: &Path, styles_path: &Path, enable: bool) -> Resu
             if in_blur {
                 if trimmed.starts_with("enabled:") {
                     let indent = &line[..line.len() - line.trim_start().len()];
-                    *line = format!("{indent}enabled: {enable}");
-                    changed = true;
+                    if trimmed != "enabled: false" {
+                        *line = format!("{indent}enabled: false");
+                        changed = true;
+                    }
                     break;
                 }
                 if !trimmed.is_empty() && !line.starts_with("    ") && !line.starts_with("\t\t") {
@@ -880,7 +883,9 @@ pub fn set_frosted(config_path: &Path, styles_path: &Path, enable: bool) -> Resu
         }
     }
 
-    // 2. Rewrite styles.css: toggle .yasb-bar background-color
+    // 2. Rewrite styles.css:
+    // .yasb-bar must stay transparent (bounding frosted glass to islands).
+    // .yasb-bar.adaptive toggles between var(--glassfrost) and var(--glassmist).
     if styles_path.is_file() {
         let raw = fs::read(styles_path).map_err(|e| format!("cannot read styles: {e}"))?;
         let text = String::from_utf8(raw).map_err(|e| format!("UTF-8 error: {e}"))?;
@@ -889,26 +894,48 @@ pub fn set_frosted(config_path: &Path, styles_path: &Path, enable: bool) -> Resu
         let mut lines: Vec<String> = text.lines().map(str::to_string).collect();
 
         let mut in_yasb_bar = false;
+        let mut in_adaptive = false;
         let mut changed = false;
+
         for line in lines.iter_mut() {
-            let trimmed = line.trim();
+            let trimmed = line.trim().to_string();
+            let is_close = trimmed == "}";
             if trimmed == ".yasb-bar {" {
                 in_yasb_bar = true;
                 continue;
             }
             if in_yasb_bar {
                 if trimmed.starts_with("background-color:") {
-                    let indent = &line[..line.len() - line.trim_start().len()];
-                    let target_color = if enable { "var(--glassfrost);" } else { "transparent;" };
-                    *line = format!("{indent}background-color: {target_color}");
-                    changed = true;
-                    break;
+                    let indent_len = line.len() - line.trim_start().len();
+                    let indent = line[..indent_len].to_string();
+                    if !trimmed.contains("transparent") {
+                        *line = format!("{indent}background-color: transparent;");
+                        changed = true;
+                    }
                 }
-                if trimmed == "}" {
+                if is_close {
                     in_yasb_bar = false;
                 }
             }
+
+            if trimmed.starts_with(".yasb-bar.adaptive") && trimmed.contains('{') {
+                in_adaptive = true;
+                continue;
+            }
+            if in_adaptive {
+                if trimmed.starts_with("background-color:") {
+                    let indent_len = line.len() - line.trim_start().len();
+                    let indent = line[..indent_len].to_string();
+                    let target_color = if enable { "var(--glassfrost);" } else { "var(--glassmist);" };
+                    *line = format!("{indent}background-color: {target_color}");
+                    changed = true;
+                }
+                if is_close {
+                    in_adaptive = false;
+                }
+            }
         }
+
         if changed {
             let mut out = lines.join(newline);
             if ends_with_newline {
