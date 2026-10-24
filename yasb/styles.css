@@ -219,7 +219,7 @@
     --glass: rgba(154, 72, 26, 0.45);
     --glassmenu: rgba(154, 72, 26, 0.5);
     --glassfrost: rgba(154, 72, 26, 0.4);
-    --glassmist: rgba(255, 255, 255, 0.50);
+    --glassmist: rgba(255, 255, 255, 0.15);
     --hairline: rgba(26, 24, 22, 0.22);
     --text-faint: rgba(26, 24, 22, 0.52);
     --chip: rgba(154, 72, 26, 0.26);
@@ -327,7 +327,7 @@
     --glass: rgba(63, 110, 36, 0.45);
     --glassmenu: rgba(63, 110, 36, 0.5);
     --glassfrost: rgba(63, 110, 36, 0.4);
-    --glassmist: rgba(255, 255, 255, 0.50);
+    --glassmist: rgba(255, 255, 255, 0.15);
     --hairline: rgba(26, 24, 22, 0.22);
     --text-faint: rgba(26, 24, 22, 0.52);
     --chip: rgba(63, 110, 36, 0.26);
@@ -436,7 +436,7 @@
     --glass: rgba(138, 47, 74, 0.45);
     --glassmenu: rgba(138, 47, 74, 0.5);
     --glassfrost: rgba(138, 47, 74, 0.4);
-    --glassmist: rgba(255, 255, 255, 0.50);
+    --glassmist: rgba(255, 255, 255, 0.15);
     --hairline: rgba(26, 24, 22, 0.22);
     --text-faint: rgba(26, 24, 22, 0.52);
     --chip: rgba(138, 47, 74, 0.26);
