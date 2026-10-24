@@ -814,22 +814,22 @@ fn parse_decls(chunk: &str) -> Vec<(String, String)> {
     out
 }
 
-/// Read whether frosted glass is enabled on the YASB bar islands.
-pub fn is_frosted(_config_path: &Path, styles_path: &Path) -> bool {
-    if let Ok(content) = fs::read_to_string(styles_path) {
-        let mut in_adaptive = false;
+/// Read whether frosted glass is enabled on the YASB bar.
+pub fn is_frosted(config_path: &Path, _styles_path: &Path) -> bool {
+    if let Ok(content) = fs::read_to_string(config_path) {
+        let mut in_blur = false;
         for line in content.lines() {
             let trimmed = line.trim();
-            if trimmed.starts_with(".yasb-bar.adaptive") && trimmed.contains('{') {
-                in_adaptive = true;
+            if trimmed.starts_with("blur_effect:") {
+                in_blur = true;
                 continue;
             }
-            if in_adaptive {
-                if trimmed.starts_with("background-color:") {
-                    return trimmed.contains("var(--glassfrost)");
+            if in_blur {
+                if trimmed.starts_with("enabled:") {
+                    return trimmed.contains("true");
                 }
-                if trimmed == "}" {
-                    in_adaptive = false;
+                if !trimmed.is_empty() && !line.starts_with("    ") && !line.starts_with("\t\t") {
+                    in_blur = false;
                 }
             }
         }
@@ -863,8 +863,9 @@ pub fn set_frosted(config_path: &Path, styles_path: &Path, enable: bool) -> Resu
             if in_blur {
                 if trimmed.starts_with("enabled:") {
                     let indent = &line[..line.len() - line.trim_start().len()];
-                    if trimmed != "enabled: false" {
-                        *line = format!("{indent}enabled: false");
+                    let target_val = if enable { "enabled: true" } else { "enabled: false" };
+                    if trimmed != target_val {
+                        *line = format!("{indent}{target_val}");
                         changed = true;
                     }
                     break;

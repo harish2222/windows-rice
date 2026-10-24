@@ -3126,8 +3126,25 @@
   "Windows Terminal": {
     "manage": [
       {
-        "kind": "Exe",
-        "id": "WindowsTerminal.exe",
+        "kind": "Class",
+        "id": "CASCADIA_HOSTING_WINDOW_CLASS",
+        "matching_strategy": "Equals"
+      }
+    ],
+    "ignore": [
+      {
+        "kind": "Class",
+        "id": "IME",
+        "matching_strategy": "Equals"
+      },
+      {
+        "kind": "Class",
+        "id": "MSCTFIME UI",
+        "matching_strategy": "Equals"
+      },
+      {
+        "kind": "Title",
+        "id": "Default IME",
         "matching_strategy": "Equals"
       }
     ]

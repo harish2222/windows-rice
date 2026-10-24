@@ -1,4 +1,7 @@
 # ===== Never commit: secrets & personal data =====
+freebuff-desktop/
+komorebi/backups/
+yasb/mandala art/
 manicode/
 higgsfield/
 containers/podman/
@@ -27,6 +30,9 @@ yasb/tools/picker/
 node_modules/
 
 # ===== Logs & runtime state =====
+cliamp/*.sock*
+cliamp/*.log*
+cliamp/history.toml
 *.log
 *.log.[0-9]
 *.db

@@ -1,0 +1,37 @@
+# =============================================================================
+#  cliamp UI settings — shared design system
+#
+#  NOTE: this build resolves its config dir HOME-first (appdir.Dir(): HOME,
+#  then APPDATA on Windows), so this is the file cliamp actually reads.
+#  %APPDATA%\cliamp\config.toml is not consulted on this machine.
+#
+#  Only look-and-feel keys live here; playback/provider settings are left at
+#  their defaults so this file cannot change how audio is chosen.
+# =============================================================================
+
+# Built-in theme closest to the shared palette. A custom theme file is
+# installed at themes/apple-music.toml; switch with `t` (theme picker) or
+# `theme = "apple-music"` if this cliamp build lists it.
+theme = "catppuccin"
+
+# Same frame rhythm as the kew layout.
+padding_horizontal = 2
+padding_vertical = 1
+
+# Visualizer height in rows on a terminal of at least 80x24.
+vis_rows = 16
+vis_volume_linked = true
+visualizer = "Bars"
+low_power = false
+
+# Keep the key-binding bar: it is the cliamp equivalent of kew's footer row.
+hide_help_bar = false
+simplified = false
+
+# Initial and basic playlist locations
+initial_directory = "~/Music/"
+sample_rate = 96000
+buffer_ms = 250
+resample_quality = 4
+bit_depth = 32
+

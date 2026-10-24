@@ -179,8 +179,8 @@
     --runner: none; */
 
     /* Rangalipi Ember Light */
-    /* --acrylic: rgba(255, 255, 255, 0.80);
-    --acrylic-hover: rgba(255, 255, 255, 0.92);
+    /* --acrylic: rgba(255, 255, 255, 0.50);
+    --acrylic-hover: rgba(255, 255, 255, 0.65);
     --tile: rgba(255, 255, 255, 0.45);
     --background: #FFFFFF;
     --background2: #F7F8FA;
@@ -219,9 +219,9 @@
     --rosewater: #8A563E;
     --text-muted: #53565A;
     --yasb-icon-fg: #101820;
-    --glass: rgba(255, 255, 255, 0.62);
-    --glassmenu: rgba(255, 255, 255, 0.78);
-    --glassfrost: rgba(255, 255, 255, 0.55);
+    --glass: rgba(255, 255, 255, 0.50);
+    --glassmenu: rgba(255, 255, 255, 0.50);
+    --glassfrost: rgba(255, 255, 255, 0.50);
     --glassmist: rgba(255, 255, 255, 0.15);
     --hairline: rgba(16, 24, 32, 0.16);
     --text-faint: rgba(16, 24, 32, 0.48);
@@ -233,8 +233,8 @@
     --motif: url("C:/Users/haris/.config/yasb/mandala/mandala-peach.png");
     --runner: none; */
 
-    /* Rangalipi Mossfern - active */
-    --acrylic: rgba(20, 20, 25, 0.01);
+    /* Rangalipi Mossfern */
+    /* --acrylic: rgba(20, 20, 25, 0.01);
     --acrylic-hover: rgba(255, 255, 255, 0.05);
     --tile: rgba(255, 255, 255, 0.05);
     --background: #111A11;
@@ -286,11 +286,11 @@
     --accent-soft: rgba(64, 140, 80, 0.50);
     --frame: #408C50;
     --motif: url("C:/Users/haris/.config/yasb/mandala/mandala-ink.png");
-    --runner: none;
+    --runner: none; */
 
     /* Rangalipi Mossfern Light */
-    /* --acrylic: rgba(255, 255, 255, 0.80);
-    --acrylic-hover: rgba(255, 255, 255, 0.92);
+    /* --acrylic: rgba(255, 255, 255, 0.50);
+    --acrylic-hover: rgba(255, 255, 255, 0.65);
     --tile: rgba(255, 255, 255, 0.45);
     --background: #FFFFFF;
     --background2: #F7F8FA;
@@ -329,9 +329,9 @@
     --rosewater: #7A5E32;
     --text-muted: #53565A;
     --yasb-icon-fg: #101820;
-    --glass: rgba(255, 255, 255, 0.62);
-    --glassmenu: rgba(255, 255, 255, 0.78);
-    --glassfrost: rgba(255, 255, 255, 0.55);
+    --glass: rgba(255, 255, 255, 0.50);
+    --glassmenu: rgba(255, 255, 255, 0.50);
+    --glassfrost: rgba(255, 255, 255, 0.50);
     --glassmist: rgba(255, 255, 255, 0.15);
     --hairline: rgba(16, 24, 32, 0.16);
     --text-faint: rgba(16, 24, 32, 0.48);
@@ -343,8 +343,8 @@
     --motif: url("C:/Users/haris/.config/yasb/mandala/mandala-ink.png");
     --runner: none; */
 
-    /* Rangalipi Wine */
-    /* --acrylic: rgba(20, 20, 25, 0.01);
+    /* Rangalipi Wine - active */
+    --acrylic: rgba(20, 20, 25, 0.01);
     --acrylic-hover: rgba(255, 255, 255, 0.05);
     --tile: rgba(255, 255, 255, 0.05);
     --background: #1D1015;
@@ -397,11 +397,11 @@
     --frame: #A6192E;
     --holiday: #D95D5D;
     --motif: url("C:/Users/haris/.config/yasb/mandala/mandala-rose.png");
-    --runner: none; */
+    --runner: none;
 
     /* Rangalipi Wine Light */
-    /* --acrylic: rgba(255, 255, 255, 0.80);
-    --acrylic-hover: rgba(255, 255, 255, 0.92);
+    /* --acrylic: rgba(255, 255, 255, 0.50);
+    --acrylic-hover: rgba(255, 255, 255, 0.65);
     --tile: rgba(255, 255, 255, 0.45);
     --background: #FFFFFF;
     --background2: #F7F8FA;
@@ -440,9 +440,9 @@
     --rosewater: #8A4A3E;
     --text-muted: #53565A;
     --yasb-icon-fg: #101820;
-    --glass: rgba(255, 255, 255, 0.62);
-    --glassmenu: rgba(255, 255, 255, 0.78);
-    --glassfrost: rgba(255, 255, 255, 0.55);
+    --glass: rgba(255, 255, 255, 0.50);
+    --glassmenu: rgba(255, 255, 255, 0.50);
+    --glassfrost: rgba(255, 255, 255, 0.50);
     --glassmist: rgba(255, 255, 255, 0.15);
     --hairline: rgba(16, 24, 32, 0.16);
     --text-faint: rgba(16, 24, 32, 0.48);
@@ -510,8 +510,8 @@
     --runner: none; */
 
     /* Rangalipi Dune Light */
-    /* --acrylic: rgba(255, 255, 255, 0.80);
-    --acrylic-hover: rgba(255, 255, 255, 0.92);
+    /* --acrylic: rgba(255, 255, 255, 0.50);
+    --acrylic-hover: rgba(255, 255, 255, 0.65);
     --tile: rgba(255, 255, 255, 0.45);
     --background: #FFFFFF;
     --background2: #F7F8FA;
@@ -550,9 +550,9 @@
     --rosewater: #86523C;
     --text-muted: #53565A;
     --yasb-icon-fg: #101820;
-    --glass: rgba(255, 255, 255, 0.62);
-    --glassmenu: rgba(255, 255, 255, 0.78);
-    --glassfrost: rgba(255, 255, 255, 0.55);
+    --glass: rgba(255, 255, 255, 0.50);
+    --glassmenu: rgba(255, 255, 255, 0.50);
+    --glassfrost: rgba(255, 255, 255, 0.50);
     --glassmist: rgba(255, 255, 255, 0.15);
     --hairline: rgba(16, 24, 32, 0.16);
     --text-faint: rgba(16, 24, 32, 0.48);
@@ -620,8 +620,8 @@
     --runner: none; */
 
     /* Rangalipi Matcha Light */
-    /* --acrylic: rgba(255, 255, 255, 0.80);
-    --acrylic-hover: rgba(255, 255, 255, 0.92);
+    /* --acrylic: rgba(255, 255, 255, 0.50);
+    --acrylic-hover: rgba(255, 255, 255, 0.65);
     --tile: rgba(255, 255, 255, 0.45);
     --background: #FFFFFF;
     --background2: #F7F8FA;
@@ -660,9 +660,9 @@
     --rosewater: #7A5834;
     --text-muted: #53565A;
     --yasb-icon-fg: #101820;
-    --glass: rgba(255, 255, 255, 0.62);
-    --glassmenu: rgba(255, 255, 255, 0.78);
-    --glassfrost: rgba(255, 255, 255, 0.55);
+    --glass: rgba(255, 255, 255, 0.50);
+    --glassmenu: rgba(255, 255, 255, 0.50);
+    --glassfrost: rgba(255, 255, 255, 0.50);
     --glassmist: rgba(255, 255, 255, 0.15);
     --hairline: rgba(16, 24, 32, 0.16);
     --text-faint: rgba(16, 24, 32, 0.48);
@@ -730,8 +730,8 @@
     --runner: none; */
 
     /* Rangalipi Espresso Light */
-    /* --acrylic: rgba(255, 255, 255, 0.80);
-    --acrylic-hover: rgba(255, 255, 255, 0.92);
+    /* --acrylic: rgba(255, 255, 255, 0.50);
+    --acrylic-hover: rgba(255, 255, 255, 0.65);
     --tile: rgba(255, 255, 255, 0.45);
     --background: #FFFFFF;
     --background2: #F7F8FA;
@@ -770,9 +770,9 @@
     --rosewater: #804E38;
     --text-muted: #53565A;
     --yasb-icon-fg: #101820;
-    --glass: rgba(255, 255, 255, 0.62);
-    --glassmenu: rgba(255, 255, 255, 0.78);
-    --glassfrost: rgba(255, 255, 255, 0.55);
+    --glass: rgba(255, 255, 255, 0.50);
+    --glassmenu: rgba(255, 255, 255, 0.50);
+    --glassfrost: rgba(255, 255, 255, 0.50);
     --glassmist: rgba(255, 255, 255, 0.15);
     --hairline: rgba(16, 24, 32, 0.16);
     --text-faint: rgba(16, 24, 32, 0.48);
@@ -840,8 +840,8 @@
     --runner: none; */
 
     /* Rangalipi Noir Light */
-    /* --acrylic: rgba(255, 255, 255, 0.80);
-    --acrylic-hover: rgba(255, 255, 255, 0.92);
+    /* --acrylic: rgba(255, 255, 255, 0.50);
+    --acrylic-hover: rgba(255, 255, 255, 0.65);
     --tile: rgba(255, 255, 255, 0.45);
     --background: #FFFFFF;
     --background2: #F7F8FA;
@@ -880,9 +880,9 @@
     --rosewater: #844438;
     --text-muted: #53565A;
     --yasb-icon-fg: #101820;
-    --glass: rgba(255, 255, 255, 0.62);
-    --glassmenu: rgba(255, 255, 255, 0.78);
-    --glassfrost: rgba(255, 255, 255, 0.55);
+    --glass: rgba(255, 255, 255, 0.50);
+    --glassmenu: rgba(255, 255, 255, 0.50);
+    --glassfrost: rgba(255, 255, 255, 0.50);
     --glassmist: rgba(255, 255, 255, 0.15);
     --hairline: rgba(16, 24, 32, 0.16);
     --text-faint: rgba(16, 24, 32, 0.48);
@@ -950,8 +950,8 @@
     --runner: none; */
 
     /* Rangalipi Aubergine Light */
-    /* --acrylic: rgba(255, 255, 255, 0.80);
-    --acrylic-hover: rgba(255, 255, 255, 0.92);
+    /* --acrylic: rgba(255, 255, 255, 0.50);
+    --acrylic-hover: rgba(255, 255, 255, 0.65);
     --tile: rgba(255, 255, 255, 0.45);
     --background: #FFFFFF;
     --background2: #F7F8FA;
@@ -990,9 +990,9 @@
     --rosewater: #7E4642;
     --text-muted: #53565A;
     --yasb-icon-fg: #101820;
-    --glass: rgba(255, 255, 255, 0.62);
-    --glassmenu: rgba(255, 255, 255, 0.78);
-    --glassfrost: rgba(255, 255, 255, 0.55);
+    --glass: rgba(255, 255, 255, 0.50);
+    --glassmenu: rgba(255, 255, 255, 0.50);
+    --glassfrost: rgba(255, 255, 255, 0.50);
     --glassmist: rgba(255, 255, 255, 0.15);
     --hairline: rgba(16, 24, 32, 0.16);
     --text-faint: rgba(16, 24, 32, 0.48);
@@ -1060,8 +1060,8 @@
     --runner: none; */
 
     /* Rangalipi Clay Light */
-    /* --acrylic: rgba(255, 255, 255, 0.80);
-    --acrylic-hover: rgba(255, 255, 255, 0.92);
+    /* --acrylic: rgba(255, 255, 255, 0.50);
+    --acrylic-hover: rgba(255, 255, 255, 0.65);
     --tile: rgba(255, 255, 255, 0.45);
     --background: #FFFFFF;
     --background2: #F7F8FA;
@@ -1100,9 +1100,9 @@
     --rosewater: #7E4836;
     --text-muted: #53565A;
     --yasb-icon-fg: #101820;
-    --glass: rgba(255, 255, 255, 0.62);
-    --glassmenu: rgba(255, 255, 255, 0.78);
-    --glassfrost: rgba(255, 255, 255, 0.55);
+    --glass: rgba(255, 255, 255, 0.50);
+    --glassmenu: rgba(255, 255, 255, 0.50);
+    --glassfrost: rgba(255, 255, 255, 0.50);
     --glassmist: rgba(255, 255, 255, 0.15);
     --hairline: rgba(16, 24, 32, 0.16);
     --text-faint: rgba(16, 24, 32, 0.48);
@@ -1170,8 +1170,8 @@
     --runner: none; */
 
     /* Rangalipi Olive Light */
-    /* --acrylic: rgba(255, 255, 255, 0.80);
-    --acrylic-hover: rgba(255, 255, 255, 0.92);
+    /* --acrylic: rgba(255, 255, 255, 0.50);
+    --acrylic-hover: rgba(255, 255, 255, 0.65);
     --tile: rgba(255, 255, 255, 0.45);
     --background: #FFFFFF;
     --background2: #F7F8FA;
@@ -1210,9 +1210,9 @@
     --rosewater: #745232;
     --text-muted: #53565A;
     --yasb-icon-fg: #101820;
-    --glass: rgba(255, 255, 255, 0.62);
-    --glassmenu: rgba(255, 255, 255, 0.78);
-    --glassfrost: rgba(255, 255, 255, 0.55);
+    --glass: rgba(255, 255, 255, 0.50);
+    --glassmenu: rgba(255, 255, 255, 0.50);
+    --glassfrost: rgba(255, 255, 255, 0.50);
     --glassmist: rgba(255, 255, 255, 0.15);
     --hairline: rgba(16, 24, 32, 0.16);
     --text-faint: rgba(16, 24, 32, 0.48);
@@ -1261,7 +1261,7 @@
     -qproperty-grouppadding: 6px;
     -qproperty-islands: true;
     -qproperty-edgeradius: 0;
-    -qproperty-borderwidth: 1;
+    -qproperty-borderwidth: 2;
     -qproperty-bordercolor: var(--frame);
 }
 .container-left,
@@ -2112,12 +2112,24 @@
     padding-right: 8px;
     background-color: transparent;
     border: none;
-    border-bottom: 3px solid var(--accent);
     border-radius: 0;
-    color: var(--accent);
+    color: var(--text);
     font-weight: var(--fontWeight);
     padding-top: 3px;
     padding-bottom: 2px;
+} 
+
+/* Float override completely eliminated */
+.komorebi-workspaces .float-override {
+    max-width: 0px;
+    max-height: 0px;
+    width: 0px;
+    height: 0px;
+    padding: 0px;
+    margin: 0px;
+    border: none;
+    font-size: 1px;
+    color: transparent;
 } 
 
 

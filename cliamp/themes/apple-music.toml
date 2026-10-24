@@ -1,0 +1,19 @@
+# =============================================================================
+#  apple-music.toml — cliamp UI theme for the shared design system
+#
+#  Install: copy to %APPDATA%\cliamp\themes\apple-music.toml, then set
+#           theme = "apple-music" in %APPDATA%\cliamp\config.toml
+#           (or press `t` in cliamp and pick it from the list).
+#
+#  Tokens: charcoal surface, soft-white primary text, muted gray secondary,
+#  one blue accent, and a spectrum ramp that goes blue -> amber -> salmon so
+#  the visualizer matches the kew layout's palette.
+# =============================================================================
+
+bg        = "#121417"   # dark charcoal surface
+accent     = "#8ab4f8"  # blue: title, track name, seek bar, selection
+bright_fg  = "#e6e9ef"  # soft white primary text and time
+fg         = "#8b93a1"  # muted gray: help bar, inactive elements
+green      = "#6fa8dc"  # spectrum low  (cool blue)
+yellow     = "#c98b6b"  # spectrum mid  (amber)
+red        = "#e08573"  # spectrum top  (salmon)

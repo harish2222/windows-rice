@@ -4,9 +4,9 @@
   "animation": {
     "enabled": true,
     "fps": 144,
-    "duration": 200,
+    "duration": 150,
     "style": "EaseOutExpo",
-    "ghost_movement": true
+    "ghost_movement": false
   },
   "border": true,
   "border_colours": {
@@ -323,9 +323,9 @@
   ],
   "manage_rules": [
     {
-      "kind": "Exe",
+      "kind": "Class",
       "matching_strategy": "Equals",
-      "id": "WindowsTerminal.exe"
+      "id": "CASCADIA_HOSTING_WINDOW_CLASS"
     },
     {
       "kind": "Exe",
@@ -369,6 +369,21 @@
     }
   ],
   "ignore_rules": [
+    {
+      "kind": "Class",
+      "matching_strategy": "Equals",
+      "id": "IME"
+    },
+    {
+      "kind": "Class",
+      "matching_strategy": "Equals",
+      "id": "MSCTFIME UI"
+    },
+    {
+      "kind": "Title",
+      "matching_strategy": "Equals",
+      "id": "Default IME"
+    },
     {
       "kind": "Exe",
       "matching_strategy": "Equals",
@@ -433,6 +448,46 @@
       "kind": "Exe",
       "matching_strategy": "Equals",
       "id": "PowerToys.Awake.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "PowerToys.WorkspacesEditor.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "PowerToys.WorkspacesLauncherUI.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "PowerToys.WorkspacesSnapshotTool.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "PowerToys.ZoomIt.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "keybind.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "saka-popup.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "palette-picker.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "komorebi-sync.exe"
     },
     {
       "kind": "Exe",
@@ -605,6 +660,11 @@
       "kind": "Exe",
       "matching_strategy": "Equals",
       "id": "Photos.exe"
+    },
+    {
+      "kind": "Exe",
+      "matching_strategy": "Equals",
+      "id": "ApplicationFrameHost.exe"
     }
   ]
 }

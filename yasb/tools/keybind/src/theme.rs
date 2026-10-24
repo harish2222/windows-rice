@@ -36,6 +36,8 @@ pub struct Theme {
     pub badge_bg: Rgba,
     pub badge_border: Rgba,
     pub field: Rgba,
+    pub scrollbar_track: Rgba,
+    pub scrollbar_thumb: Rgba,
 }
 
 fn mix(a: Rgba, b: Rgba, t: f32) -> Rgba {
@@ -80,19 +82,22 @@ impl Theme {
             text,
             subtext,
             accent,
-            backdrop_opacity: 0.85,
+            // Match palette-picker's luxurious 70% frosted acrylic pane
+            backdrop_opacity: 0.30,
             typeface: yasb_chrome::Typeface::resolve(family),
-            backdrop_blur: 14,
-            sheen_top: Rgba { a: 28, ..lighten(bg, 0.20) },
-            sheen_bottom: Rgba { a: 8, ..darken(bg, 0.15) },
+            backdrop_blur: 12,
+            sheen_top: Rgba { a: 46, ..lighten(bg, 0.55) },
+            sheen_bottom: Rgba { a: 70, ..darken(bg, 0.45) },
             bloom: 0.12,
             highlight: Rgba { a: 38, ..lighten(text, 0.25) },
             hairline: Rgba { a: 150, ..border },
-            row_bg: Rgba { a: 120, ..lighten(bg, 0.05) },
-            row_selected: Rgba { a: 210, ..lighten(bg, 0.14) },
-            badge_bg: Rgba { a: 180, ..darken(bg, 0.18) },
-            badge_border: Rgba { a: 160, ..accent },
+            row_bg: Rgba { a: 175, ..lighten(bg, 0.07) },
+            row_selected: Rgba { a: 215, ..lighten(bg, 0.16) },
+            badge_bg: Rgba { a: 200, ..darken(bg, 0.22) },
+            badge_border: Rgba { a: 140, ..border },
             field: Rgba { a: 200, ..darken(bg, 0.22) },
+            scrollbar_track: Rgba { a: 35, ..darken(bg, 0.30) },
+            scrollbar_thumb: Rgba { a: 180, ..accent },
         }
     }
 
