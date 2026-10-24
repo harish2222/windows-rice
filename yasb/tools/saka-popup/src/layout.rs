@@ -13,77 +13,40 @@
 //! have caught the original defect.
 
 /// Width of the panel, Latin.
-///
-/// Sized from the widest row that carries **both** a value and a caption,
-/// because that is the one [`Layout::row_split`] cannot give full width to,
-/// and a caption narrower than its own text paints as `...`. The worst case is
-/// Tithi: `Krishna Chaturdashi` is 200px at [`yasb_chrome::Type::Lead`], a
-/// `100% · 03:56` caption is 102px, and [`Self::CAPTION_GAP`] is 16 — so the
-/// value column needs 318px. [`Self::VALUE_X`] sits 168px in from the panel
-/// edge, which makes 460 the width that starves it: the column was 292px and
-/// the tithi end time was ellipsised to `...` on every long tithi.
-///
-/// 496 gives the column 328px — the full caption with 10px to spare, and 51px
-/// clear for the `Phase` row's two date-times (277px measured).
-pub const W: i32 = 490;
+pub const W: i32 = 600;
 
 /// Width of the panel when the values are Telugu.
-///
-/// Telugu is drawn in Nirmala UI, and the Indic panel is given more room than
-/// the Latin one so nothing has to be ellipsised to fit. Measured on the live
-/// panel the widest Indic row, Tithi plus its caption, is 176px of the 352px
-/// column; the new `Phase` row is ASCII date-times in both scripts and needs
-/// 277px. So the Indic panel keeps its width — it is the Latin one that had
-/// fallen behind its own content.
-pub const W_INDIC: i32 = 520;
+pub const W_INDIC: i32 = 640;
 /// Width in landscape mode (Latin).
-pub const W_LANDSCAPE: i32 = 762;
+pub const W_LANDSCAPE: i32 = 880;
 /// Width in landscape mode (Indic).
-pub const W_LANDSCAPE_INDIC: i32 = 800;
+pub const W_LANDSCAPE_INDIC: i32 = 920;
 /// Width in compact glance mode.
-pub const W_COMPACT: i32 = 415;
+pub const W_COMPACT: i32 = 480;
 /// Window corner radius.
 pub const RADIUS: i32 = 20;
 /// Panel edge padding. Scale step 6.
 pub const PAD: i32 = yasb_chrome::space(6);
 
 /// Height of one row.
-///
-/// Was 44 with the progress bar on its own line under the text. That spent a
-/// third of the row on a 3px line, which is what made the panel read as sparse
-/// — ten rows of it came to 440px of mostly empty card. The bar now sits
-/// *under the value only*, inside the same line box, so a row is one line of
-/// type plus a 2px rule and nothing else.
-pub const ROW_H: i32 = 34;
+pub const ROW_H: i32 = 36;
 
 /// Row height when the values are Telugu.
-///
-/// Telugu glyphs are 22px tall in the same 16px face that renders Latin
-/// values at 12px: the vowel signs sit above the head and the `cheepuru`
-/// below the baseline. At the Latin row height the descenders reach y+27
-/// while the progress rule is drawn at y+26, so every rule struck through
-/// the bottom of its own value. That is what made the Telugu panel read as
-/// smeared rather than merely tighter.
 pub const ROW_H_INDIC: i32 = 44;
 /// Width of the row card's radius.
 pub const CARD_R: i32 = 16;
 /// Inner padding of the row card. Scale step 3.
 pub const CARD_PAD: i32 = yasb_chrome::space(3);
-/// Radius of the moon glyph. Lives here, not in `main.rs`, because the shape
-/// pass and the text pass both need it and they must not disagree.
-pub const MOON_R: i32 = 30;
+/// Radius of the moon glyphs. Dual large hero spheres.
+pub const MOON_R: i32 = 42;
 /// Radius of the weekday scrim pill. Half its height, so the ends are
 /// semicircular and the label never looks boxed.
 pub const SCRIM_R: i32 = 9;
 /// Vertical offset of the progress indicator inside a row, measured from the
 /// row's top. The text line box is 22px, so this puts the rule just under it.
-pub const INDICATOR_Y: i32 = 26;
+pub const INDICATOR_Y: i32 = 28;
 
 /// Offset of the progress rule inside an Indic row.
-///
-/// Clears a 22px Telugu glyph box that starts 3px below the row's top, with
-/// room to spare. Measured, not guessed: at the Latin offset the rule sat
-/// *inside* the glyphs.
 pub const INDICATOR_Y_INDIC: i32 = 34;
 /// Thickness of the progress indicator. 2px reads as a rule rather than a bar.
 pub const INDICATOR_H: i32 = 2;
@@ -117,6 +80,9 @@ pub struct Layout {
     pub era_y: i32,
     /// Bottom of the era line.
     pub era_bottom: i32,
+    /// Udaya Tithi and Day Length band.
+    pub udaya_y: i32,
+    pub udaya_bottom: i32,
     /// Rule under the header.
     pub rule_y: i32,
     /// Top of the moon glyph's band.
@@ -141,9 +107,11 @@ pub struct Layout {
     /// Moon & Calendar 2x2 / horizontal tile grid.
     pub grid_y: i32,
     pub grid_bottom: i32,
-    /// 3D Moon sphere center and radius.
+    /// 3D Rotating Moon sphere center.
     pub moon_cx: i32,
     pub moon_cy: i32,
+    /// Astronomical Sky Phase Moon center.
+    pub sky_moon_cx: i32,
     pub moon_r: i32,
 }
 
@@ -169,11 +137,11 @@ impl Layout {
     pub fn tile_rect(&self, idx: usize) -> (i32, i32, i32, i32) {
         if self.mode == LayoutMode::Landscape {
             let w = self.w();
-            let gutter = 10;
+            let gutter = 12;
             let pad = PAD;
             let avail = w - pad * 2 - gutter * 3;
             let tile_w = avail / 4;
-            let tile_h = if self.indic { 58 } else { 54 };
+            let tile_h = if self.indic { 76 } else { 70 };
             let x0 = pad + (idx as i32) * (tile_w + gutter);
             let x1 = x0 + tile_w;
             let y0 = self.grid_y;
@@ -183,11 +151,11 @@ impl Layout {
             let w = self.w();
             let col = (idx % 2) as i32;
             let row = (idx / 2) as i32;
-            let gutter = 10;
+            let gutter = 12;
             let pad = PAD;
             let avail = w - pad * 2 - gutter;
             let tile_w = avail / 2;
-            let tile_h = if self.indic { 66 } else { 60 };
+            let tile_h = if self.indic { 74 } else { 70 };
             let row_gap = 10;
             let x0 = pad + col * (tile_w + gutter);
             let x1 = x0 + tile_w;
@@ -230,32 +198,35 @@ impl Layout {
         let weekday_top = weekday_y - 2;
         let weekday_bottom = weekday_top + WEEKDAY_H + 4;
         let date_y = weekday_bottom + 6;
-        let era_y = date_y + 34;
+        let era_y = date_y + 36;
         let era_bottom = era_y + 16;
+        let udaya_y = era_bottom + 4;
+        let udaya_bottom = udaya_y + 16;
         let mode = LayoutMode::Portrait;
         let w = if indic { W_INDIC } else { W };
 
-        let moon_r = 34;
-        let moon_cx = w - PAD - moon_r;
+        let moon_r = MOON_R;
+        let sky_moon_cx = w - PAD - moon_r;
+        let moon_cx = sky_moon_cx - 96;
+        let moon_cy = 88;
         let moon_y = date_y;
-        let moon_bottom = era_bottom;
-        let moon_cy = (moon_y + moon_bottom) / 2;
+        let moon_bottom = moon_cy + moon_r;
 
-        let timeline_y = era_bottom + 14;
+        let timeline_y = udaya_bottom + 18;
         let timeline_bottom = timeline_y + 20;
-        let rule_y = timeline_bottom + 14;
+        let rule_y = timeline_bottom + 10;
 
-        let panchang_card_y = rule_y + 28;
-        let panchang_card_bottom = panchang_card_y + CARD_PAD * 2 + 4 * row_h;
-        let grid_y = panchang_card_bottom + 28;
-        let tile_h = if indic { 66 } else { 60 };
+        let panchang_card_y = rule_y + 26;
+        let panchang_card_bottom = panchang_card_y + CARD_PAD * 2 + 5 * row_h;
+        let grid_y = panchang_card_bottom + 26;
+        let tile_h = if indic { 74 } else { 70 };
         let row_gap = 10;
         let grid_bottom = grid_y + tile_h * 2 + row_gap;
 
         let card_y = panchang_card_y;
-        let card_bottom = card_y + CARD_PAD * 2 + rows * row_h;
+        let card_bottom = card_y + CARD_PAD * 2 + rows.max(5) * row_h;
 
-        let footer_y = grid_bottom + 18;
+        let footer_y = grid_bottom + 16;
         let height = footer_y + 18 + PAD;
         Layout {
             mode,
@@ -265,6 +236,8 @@ impl Layout {
             date_y,
             era_y,
             era_bottom,
+            udaya_y,
+            udaya_bottom,
             rule_y,
             moon_y,
             moon_bottom,
@@ -281,6 +254,7 @@ impl Layout {
             grid_bottom,
             moon_cx,
             moon_cy,
+            sky_moon_cx,
             moon_r,
         }
     }
@@ -296,27 +270,31 @@ impl Layout {
                 let weekday_top = weekday_y - 2;
                 let weekday_bottom = weekday_top + WEEKDAY_H + 4;
                 let date_y = weekday_bottom + 6;
-                let era_y = date_y + 30;
+                let era_y = date_y + 32;
                 let era_bottom = era_y + 16;
-                let timeline_y = era_bottom + 14;
-                let timeline_bottom = timeline_y + 20;
+                let udaya_y = era_bottom + 4;
+                let udaya_bottom = udaya_y + 16;
 
-                let moon_r = 40;
-                let moon_cx = 325;
-                let moon_cy = 76;
+                let moon_r = 44;
+                let moon_cx = 120;
+                let sky_moon_cx = 230;
+                let moon_cy = 195;
                 let moon_y = moon_cy - moon_r;
                 let moon_bottom = moon_cy + moon_r;
 
-                let panchang_card_y = PAD - 4;
-                let panchang_card_bottom = panchang_card_y + CARD_PAD * 2 + 4 * row_h;
-                let rule_y = panchang_card_bottom.max(timeline_bottom) + 12;
-                let grid_y = rule_y + 12;
-                let tile_h = if indic { 58 } else { 54 };
+                let timeline_y = moon_bottom + 36;
+                let timeline_bottom = timeline_y + 20;
+
+                let panchang_card_y = PAD;
+                let panchang_card_bottom = panchang_card_y + CARD_PAD * 2 + 5 * row_h;
+                let rule_y = panchang_card_bottom.max(timeline_bottom) + 14;
+                let grid_y = rule_y + 14;
+                let tile_h = if indic { 76 } else { 70 };
                 let grid_bottom = grid_y + tile_h;
 
                 let card_y = panchang_card_y;
                 let card_bottom = grid_bottom;
-                let footer_y = grid_bottom + 14;
+                let footer_y = grid_bottom + 16;
                 let height = footer_y + 18 + PAD;
                 Layout {
                     mode,
@@ -326,6 +304,8 @@ impl Layout {
                     date_y,
                     era_y,
                     era_bottom,
+                    udaya_y,
+                    udaya_bottom,
                     rule_y,
                     moon_y,
                     moon_bottom,
@@ -342,6 +322,7 @@ impl Layout {
                     grid_bottom,
                     moon_cx,
                     moon_cy,
+                    sky_moon_cx,
                     moon_r,
                 }
             }
@@ -353,14 +334,17 @@ impl Layout {
                 let date_y = weekday_bottom + 4;
                 let era_y = date_y + 24;
                 let era_bottom = era_y + 16;
+                let udaya_y = 0;
+                let udaya_bottom = 0;
 
-                let moon_r = 24;
-                let moon_cx = w - PAD - moon_r;
-                let moon_cy = 36;
+                let moon_r = 30;
+                let sky_moon_cx = w - PAD - moon_r;
+                let moon_cx = sky_moon_cx;
+                let moon_cy = 40;
                 let moon_y = moon_cy - moon_r;
                 let moon_bottom = moon_cy + moon_r;
 
-                let timeline_y = era_bottom + 22;
+                let timeline_y = era_bottom + 26;
                 let timeline_bottom = timeline_y + 18;
                 let rule_y = timeline_bottom + 8;
                 let panchang_card_y = 0;
@@ -369,8 +353,8 @@ impl Layout {
                 let grid_bottom = 0;
                 let card_y = 0;
                 let card_bottom = 0;
-                let footer_y = rule_y + 22;
-                let height = footer_y + 18 + PAD - 8;
+                let footer_y = rule_y + 24;
+                let height = footer_y + 18 + PAD;
                 Layout {
                     mode,
                     weekday_y,
@@ -379,6 +363,8 @@ impl Layout {
                     date_y,
                     era_y,
                     era_bottom,
+                    udaya_y,
+                    udaya_bottom,
                     rule_y,
                     moon_y,
                     moon_bottom,
@@ -395,6 +381,7 @@ impl Layout {
                     grid_bottom,
                     moon_cx,
                     moon_cy,
+                    sky_moon_cx,
                     moon_r,
                 }
             }
@@ -498,16 +485,13 @@ impl Layout {
     /// to hold for Latin and the Indic face is a different width again. The
     /// bound is computed here so the paint pass and the test agree by
     /// construction rather than by coincidence.
+    #[allow(dead_code)]
     pub fn era_right(&self, w: i32) -> i32 {
         self.moon_center_x(w) - MOON_R - 10
     }
 
-    /// Centre x of the moon glyph, flush with the content's right edge.
-    ///
-    /// The glyph carries no caption: the phase name and the illumination are
-    /// already the `Moon` row's value and caption, so repeating them here
-    /// duplicated two facts on one screen — and a centred caption under a disc
-    /// this size does not fit inside the content box anyway.
+    /// Centre x of the rightmost moon glyph (flush with the content's right edge).
+    #[allow(dead_code)]
     pub fn moon_center_x(&self, w: i32) -> i32 {
         w - PAD - MOON_R
     }
@@ -533,12 +517,12 @@ impl Layout {
     pub fn assert_no_overlap(&self, rows: i32) -> Result<(), String> {
         if self.mode == LayoutMode::Compact {
             let stacked = [
-                ("weekday pill", self.weekday_bottom, self.date_y),
-                ("date", self.date_y, self.era_y),
+                ("weekday pill", self.weekday_top, self.weekday_bottom),
+                ("date", self.date_y, self.date_y + 24),
                 ("era", self.era_y, self.era_bottom),
-                ("timeline", self.era_bottom, self.timeline_y),
-                ("rule", self.timeline_bottom, self.rule_y),
-                ("footer", self.rule_y, self.footer_y),
+                ("timeline", self.timeline_y, self.timeline_bottom),
+                ("rule", self.rule_y, self.rule_y + 2),
+                ("footer", self.footer_y, self.footer_y + 18),
             ];
             for pair in stacked.windows(2) {
                 let (an, _, a_bottom) = pair[0];
@@ -553,14 +537,41 @@ impl Layout {
             return Ok(());
         }
 
+        if self.mode == LayoutMode::Landscape {
+            let stacked = [
+                ("weekday pill", self.weekday_top, self.weekday_bottom),
+                ("date", self.date_y, self.date_y + 32),
+                ("era", self.era_y, self.era_bottom),
+                ("udaya", self.udaya_y, self.udaya_bottom),
+                ("moons", self.moon_y, self.moon_bottom),
+                ("timeline", self.timeline_y, self.timeline_bottom),
+                ("rule", self.rule_y, self.rule_y + 2),
+                ("grid", self.grid_y, self.grid_bottom),
+                ("footer", self.footer_y, self.footer_y + 18),
+            ];
+            for pair in stacked.windows(2) {
+                let (an, _, a_bottom) = pair[0];
+                let (bn, b_top, _) = pair[1];
+                if a_bottom > b_top {
+                    return Err(format!("{an} ends at {a_bottom} but {bn} starts at {b_top}"));
+                }
+            }
+            if self.footer_y + 18 > self.height {
+                return Err(format!("footer overflows the landscape panel: {}", self.height));
+            }
+            return Ok(());
+        }
+
         let stacked = [
-            ("weekday pill", self.weekday_bottom, self.date_y),
-            ("date", self.date_y, self.era_y),
+            ("weekday pill", self.weekday_top, self.weekday_bottom),
+            ("date", self.date_y, self.date_y + 36),
             ("era", self.era_y, self.era_bottom),
-            ("timeline", self.era_bottom, self.timeline_y),
-            ("rule", self.timeline_bottom, self.rule_y),
-            ("card", self.rule_y, self.panchang_card_y),
-            ("footer", self.grid_bottom, self.footer_y),
+            ("udaya", self.udaya_y, self.udaya_bottom),
+            ("timeline", self.timeline_y, self.timeline_bottom),
+            ("rule", self.rule_y, self.rule_y + 2),
+            ("card", self.panchang_card_y, self.panchang_card_bottom),
+            ("grid", self.grid_y, self.grid_bottom),
+            ("footer", self.footer_y, self.footer_y + 18),
         ];
         for pair in stacked.windows(2) {
             let (an, _, a_bottom) = pair[0];
@@ -570,12 +581,12 @@ impl Layout {
             }
         }
         // Every row's content must fit inside the row.
-        for i in 0..rows.min(4) {
+        for i in 0..rows.min(5) {
             let y = self.row_y(i);
             // The indicator sits under the value's line box. It has to clear
             // the text above it and still end inside the row, or it lands on
             // the next row's label.
-            if y + INDICATOR_Y + INDICATOR_H > y + self.row_h() {
+            if y + self.indicator_y() + INDICATOR_H > y + self.row_h() {
                 return Err(format!("row {i} indicator overflows: {y}"));
             }
         }
