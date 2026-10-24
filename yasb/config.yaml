@@ -153,6 +153,15 @@ widgets:
         show_week_numbers: true
       callbacks:
         on_left: toggle_calendar
+        on_middle: toggle_timer
+        on_right: toggle_alarm
+      keybindings:
+        - keys: "win+c"
+          action: "toggle_calendar"
+        - keys: "win+shift+a"
+          action: "toggle_alarm"
+        - keys: "win+shift+t"
+          action: "toggle_timer"
   saka:
     type: "yasb.custom.CustomWidget"
     options:

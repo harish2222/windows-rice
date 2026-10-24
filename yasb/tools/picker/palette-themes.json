@@ -2,7 +2,7 @@
   {
     "name": "Rangalipi",
     "colors": [
-      "#d99a2b",
+      "#ffb81c",
       "#6fc3c9",
       "#e07a4f"
     ],
@@ -11,7 +11,7 @@
   {
     "name": "Rangalipi Ember",
     "colors": [
-      "#c96f2f",
+      "#ff4d00",
       "#7fd4bc",
       "#e08a4e"
     ],
@@ -20,7 +20,7 @@
   {
     "name": "Rangalipi Mossfern",
     "colors": [
-      "#82ac54",
+      "#408c50",
       "#8fd8b4",
       "#d8a05e"
     ],
@@ -29,7 +29,7 @@
   {
     "name": "Rangalipi Wine",
     "colors": [
-      "#c04e68",
+      "#a6192e",
       "#8ac9d2",
       "#e4935e"
     ],
@@ -38,7 +38,7 @@
   {
     "name": "Rangalipi Dune",
     "colors": [
-      "#c08a24",
+      "#de7c00",
       "#8ad2bc",
       "#e2a04e"
     ],
@@ -47,7 +47,7 @@
   {
     "name": "Rangalipi Matcha",
     "colors": [
-      "#93b04c",
+      "#78be20",
       "#92d2b0",
       "#d8a25e"
     ],
@@ -56,7 +56,7 @@
   {
     "name": "Rangalipi Espresso",
     "colors": [
-      "#c68a4b",
+      "#a36b2c",
       "#8cc9bc",
       "#e2a05e"
     ],
@@ -65,7 +65,7 @@
   {
     "name": "Rangalipi Noir",
     "colors": [
-      "#ce4152",
+      "#c8102e",
       "#8cc4ce",
       "#e2905e"
     ],
@@ -74,7 +74,7 @@
   {
     "name": "Rangalipi Aubergine",
     "colors": [
-      "#a67fd4",
+      "#9b5fc0",
       "#92c4d8",
       "#e2a070"
     ],
@@ -83,34 +83,25 @@
   {
     "name": "Rangalipi Clay",
     "colors": [
-      "#c9683c",
+      "#b65338",
       "#88c9b8",
-      "#c9683c"
+      "#b65338"
     ],
     "section": "dark"
   },
   {
     "name": "Rangalipi Olive",
     "colors": [
-      "#a8a03a",
+      "#8e8934",
       "#8cccb0",
       "#d4a05e"
     ],
     "section": "dark"
   },
   {
-    "name": "Rangalipi Light",
-    "colors": [
-      "#b37a1a",
-      "#4a8a8f",
-      "#b85a35"
-    ],
-    "section": "light"
-  },
-  {
     "name": "Rangalipi Ember Light",
     "colors": [
-      "#b45f27",
+      "#a9431e",
       "#4ea88a",
       "#c47434"
     ],
@@ -119,7 +110,7 @@
   {
     "name": "Rangalipi Mossfern Light",
     "colors": [
-      "#5f8a3c",
+      "#00693e",
       "#4e9a78",
       "#b57f3e"
     ],
@@ -128,7 +119,7 @@
   {
     "name": "Rangalipi Wine Light",
     "colors": [
-      "#a83e58",
+      "#861f41",
       "#5a9aa8",
       "#c47a4e"
     ],
@@ -137,7 +128,7 @@
   {
     "name": "Rangalipi Dune Light",
     "colors": [
-      "#a8741c",
+      "#b87313",
       "#57a890",
       "#c4883e"
     ],
@@ -146,7 +137,7 @@
   {
     "name": "Rangalipi Matcha Light",
     "colors": [
-      "#7a943c",
+      "#569614",
       "#57aa80",
       "#b8884e"
     ],
@@ -155,7 +146,7 @@
   {
     "name": "Rangalipi Espresso Light",
     "colors": [
-      "#a8743c",
+      "#7a4b1a",
       "#57a890",
       "#c08050"
     ],
@@ -164,7 +155,7 @@
   {
     "name": "Rangalipi Noir Light",
     "colors": [
-      "#ae3546",
+      "#a6192e",
       "#5a9aa8",
       "#c4744e"
     ],
@@ -173,7 +164,7 @@
   {
     "name": "Rangalipi Aubergine Light",
     "colors": [
-      "#8a63b8",
+      "#5c2d91",
       "#5e9ac0",
       "#c08a70"
     ],
@@ -182,7 +173,7 @@
   {
     "name": "Rangalipi Clay Light",
     "colors": [
-      "#a85630",
+      "#963821",
       "#57907e",
       "#b86a3c"
     ],
@@ -191,7 +182,7 @@
   {
     "name": "Rangalipi Olive Light",
     "colors": [
-      "#8a8430",
+      "#4d5320",
       "#57a884",
       "#b88a4e"
     ],
