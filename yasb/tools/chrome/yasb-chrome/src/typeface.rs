@@ -267,12 +267,15 @@ mod tests {
             "Hack Nerd Font",
             "Segoe UI",
         ] {
-            let t = Typeface::resolve(Some(family));
-            assert_eq!(
-                t.family, family,
-                "{family} is installed but did not resolve to itself"
-            );
+            if font_is_installed(family) {
+                let t = Typeface::resolve(Some(family));
+                assert_eq!(
+                    t.family, family,
+                    "{family} is installed but did not resolve to itself"
+                );
+            }
         }
+        assert_eq!(Typeface::resolve(Some("Segoe UI")).family, "Segoe UI");
     }
 
     /// A family GDI cannot supply must not be used, because GDI would quietly
