@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/amnweb/yasb/main/schema.json
+﻿# yaml-language-server: $schema=https://raw.githubusercontent.com/amnweb/yasb/main/schema.json
 # For more information, visit https://github.com/amnweb/yasb/wiki
 # Keep live reload enabled for configuration edits and palette switching.
 watch_stylesheet: true
@@ -80,7 +80,7 @@ widgets:
         run_once: true
         return_format: "string"
       callbacks:
-        on_left: "exec silent-run C:\\Users\\haris\\.config\\yasb\\tools\\keybind\\keybind.exe"
+        on_left: "exec silent-run C:\\\\Users\\\\haris\\.config\\yasb\\tools\\keybind\\keybind.exe"
         on_right: "toggle_label"
   home:
     type: yasb.home.HomeWidget
@@ -101,11 +101,11 @@ widgets:
       - { title: "Winget Update All", command: "winget.exe", args: ["upgrade", "--all", "--include-unknown", "--silent", "--accept-package-agreements", "--accept-source-agreements"], show_window: true }
       - { title: "Scoop Update All", command: "cmd.exe", args: ["/c", "scoop", "update", "*"], show_window: true }
       - { title: "Scoop Cleanup Cache", command: "cmd.exe", args: ["/c", "sudo", "scoop", "cleanup", "-g", "-k", "-a"], show_window: true }
-      - { title: "RAMMap", path: "C:\\Users\\haris\\.config\\RAMMap\\RAMMap.exe" }
+      - { title: "RAMMap", path: "C:\\\\Users\\\\haris\\.config\\RAMMap\\RAMMap.exe" }
       - { separator: true }
       - { title: "Terminal", command: "wt.exe", show_window: true }
       - { title: "Neovim", command: "wt.exe", args: ["nvim"], show_window: true }
-      - { title: "Visual Studio Code", command: "C:\\Users\\haris\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe", show_window: true }
+      - { title: "Visual Studio Code", command: "C:\\\\Users\\\\haris\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe", show_window: true }
       - { title: "Emacs", command: "C:\\PROGRA~1\\Emacs\\emacs-31.1\\bin\\runemacs.exe", show_window: true }
       - { title: "Z Drive", path: "Z:\\" }
       system_menu: true
@@ -183,7 +183,7 @@ widgets:
       label_alt: "<span>\u0950</span> {data}"
       tooltip: false
       exec_options:
-        run_cmd: "C:\\Users\\haris\\.config\\yasb\\tools\\saka\\target\\release\\saka.exe --today"
+        run_cmd: "C:\\\\Users\\\\haris\\.config\\yasb\\tools\\saka\\target\\release\\saka.exe --today"
         run_interval: 600000
         return_format: "string"
       callbacks:
@@ -193,7 +193,7 @@ widgets:
         # it themes itself off the active styles.css block and 1 Hz refreshes.
         # Clicking again closes it: a second launch owns no window of its own,
         # so it posts WM_APP+1 and the open panel destroys itself.
-        on_left: "exec silent-run C:\\Users\\haris\\.config\\yasb\\tools\\saka-popup\\target\\release\\saka-popup.exe"
+        on_left: "exec silent-run C:\\\\Users\\\\haris\\.config\\yasb\\tools\\saka-popup\\target\\release\\saka-popup.exe"
         on_middle: "toggle_label"
   pomodoro:
     type: "yasb.pomodoro.PomodoroWidget"
@@ -351,7 +351,7 @@ widgets:
       label_alt: "{data}"
       class_name: "home-widget"
       exec_options:
-        run_cmd: "C:\\Users\\haris\\.config\\yasb\\tools\\theme\\yasb-theme.exe current"
+        run_cmd: "C:\\\\Users\\\\haris\\.config\\yasb\\tools\\theme\\yasb-theme.exe current"
         run_interval: 3000
         return_format: "string"
       callbacks:
@@ -360,9 +360,9 @@ widgets:
         # paints a rounded acrylic grid. Type to filter, arrows/Enter to apply.
         # It is single-instance: a second chip click raises the open picker
         # rather than stacking another one.
-        on_left: "exec silent-run C:\\Users\\haris\\.config\\yasb\\tools\\picker\\palette-picker\\target\\release\\palette-picker.exe"
+        on_left: "exec silent-run C:\\\\Users\\\\haris\\.config\\yasb\\tools\\picker\\palette-picker\\target\\release\\palette-picker.exe"
         on_middle: "toggle_label"
-        on_right: "exec silent-run C:\\Users\\haris\\.config\\yasb\\tools\\theme\\yasb-theme.exe next"
+        on_right: "exec silent-run C:\\\\Users\\\\haris\\.config\\yasb\\tools\\theme\\yasb-theme.exe next"
   # OFFLINE-ONLY komorebi control (native CustomWidget hide_empty):
   # probes komorebic state every 3s; empty output while online => YASB natively
   # hides the widget; non-empty while offline => it appears with the control

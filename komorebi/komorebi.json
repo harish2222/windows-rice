@@ -1,6 +1,6 @@
-{
+﻿{
   "$schema": "https://raw.githubusercontent.com/LGUG2Z/komorebi/master/schema.json",
-  "app_specific_configuration_path": "C:\\Users\\haris\\.config\\komorebi\\applications.json",
+  "app_specific_configuration_path": "C:\\\\Users\\\\haris\\.config\\komorebi\\applications.json",
   "animation": {
     "enabled": true,
     "fps": 144,

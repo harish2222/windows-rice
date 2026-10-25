@@ -1,51 +1,47 @@
-# setup — one-shot bootstrap & yasb-themes submission pipeline
+# setup — One-Shot Bootstrap & Replication Pipeline
 
-Scripts that either (re)build this whole toolchain from nothing or package
-the bar for the amnweb/yasb-themes gallery.
+Scripts that compile and replicate the entire Rangalipi rice, window manager layers, and companion Win32 tools across any fresh Windows machine.
 
-## yasb-setup.ps1 — replicate this rice
+## yasb-setup.ps1 — Replicate this Rice
 
-Idempotent one-shot setup: installs missing toolchains (Rust via winget,
-PyQt6 + PyInstaller via pip), runs the **cargo test suites** for saka and
-pomodoro, rebuilds every companion binary (theme exe, saka, pomodoro,
-palette picker), presence-checks the font tool (its Python source is
-lost — see `../picker/picker.md`), snapshots the live GlazeWM/Komorebi
-configs from their **authoritative locations**
-(`~/.glzr/glazewm/`, `~/.config/komorebi/`) into `configs\`, verifies
-the whole chain end-to-end (theme round-trip, saka long-form smoke,
-pomodoro tick smoke, `silent-run` on PATH, picker exe boots bundled Qt),
-and installs the `yt` shell helper into the PowerShell profile. Never
-touches `config.yaml` / `styles.css`.
+An idempotent one-shot replicator that:
+1. **Checks Prerequisites**: Validates presence of YASB, Komorebi, GlazeWM, Cava, and Nerd Fonts (`JetBrainsMono-NF`, `FiraCode-NF-Mono`).
+2. **Backs up Live Files**: Safe timestamped backups of existing user configurations in `~/.config/yasb`, `~/.glzr/glazewm`, and `~/.config/komorebi`.
+3. **Installs Toolchains**: Installs Rust toolchain via winget if missing.
+4. **Builds Companion Tools (Pure Rust Workspace)**:
+   Runs `cargo build --workspace --release` across all companion crates with zero Python or Qt runtime dependencies:
+   - `yasb-theme` & `silent-run` (theme manager and zero-flash process launcher)
+   - `palette-picker` (Win32 Apple HIG acrylic palette browser)
+   - `saka` & `saka-popup` (Vedic Panchangam engine and dual-hero moon panel)
+   - `keybind` (Win32 Apple HIG cheatsheet menu)
+   - `pomodoro` (persistent focus timer)
+   - `komorebi-sync` (tiling state synchronizer)
+   - `screen-shot` (layered-window screen capture tool)
+5. **Deploys Binaries & Shims**:
+   Installs `silent-run.exe` to `~/scoop/shims` and `~/.local/bin`, and populates `~/.config/yasb/tools/`.
+6. **Adapts Paths Dynamically**:
+   Inspects the local `$HOME` / `$USERPROFILE` and automatically adapts file paths in `config.yaml`, `styles.css` (for mandala motif URLs), `configs/glazewm/config.yaml`, and `configs/komorebi/komorebi.json` so every callback works out-of-the-box on any user account.
+7. **Deploys Window Manager Layers**:
+   Installs GlazeWM hotkey layer and Komorebi tiling configuration (with clean ignore rules and zero unneeded window rules).
+8. **Verifies the Entire Chain**:
+   - `yasb-theme.exe current` and `yasb-theme.exe list` (asserts all 22 themes)
+   - `saka.exe (Get-Date) --long`
+   - `saka-popup.exe --smoke` (headless double-buffered paint self-test)
+   - `palette-picker.exe --smoke` (headless theme catalog and keyboard self-test)
+   - `pomodoro.exe tick`
+   - `silent-run` command availability.
+9. **Registers Shell Integration**:
+   Appends the `yt` shell helper shortcut to PowerShell `$PROFILE`.
 
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File C:\Users\haris\.config\yasb\tools\setup\yasb-setup.ps1
-```
+## Usage
 
-## export-theme.py — build a submission pack
-
-Reads the live bar files and emits a gallery-compliant pack (single-theme
-`styles.css` with the chosen theme uncommented and all dead blocks gone,
-blank-line-free validated `config.yaml`, gallery README, live bar-only
-preview screenshot, ready-made issue body). Enforces every
-CONTRIBUTING.md rejection rule that can be checked locally.
-
-## build-submission.py — squeeze it under GitHub limits
-
-Takes the pack and assembles the final issue body: compacts the CSS
-one-rule-per-line with an assertion that the *declaration set is
-byte-identical* before/after, strips config comments, revalidates the
-exact submitted bytes against YASB's own bot validators
-(`migrate_config` + `YasbConfig.model_validate`), and asserts the body
-fits GitHub's 65 536-char cap. Live files are never touched.
-
-> Submission flow (never a manual PR): screenshot only via the bar's
-> built-in Take Screenshot, then file the issue with the body these
-> scripts produce.
-
-## Order of operations for a theme submission
+From a clone of this repository:
 
 ```powershell
-python tools\setup\export-theme.py      # 1. pack from live files
-python tools\setup\build-submission.py  # 2. validate + final issue body
-# 3. upload preview, fill image URL, open the issue
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\setup\yasb-setup.ps1
 ```
+
+Once completed:
+1. Restart YASB: `yasb`
+2. Restart GlazeWM & Komorebi: `alt+shift+r`
+3. Launch a new terminal and run: `yt list`

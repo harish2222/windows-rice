@@ -1,16 +1,29 @@
-# Shared window-manager configs
+# Shared Window Manager Configurations
 
-Snapshots of the live configs that run alongside this YASB bar, kept here
-so the whole setup replicates from one folder.
+Configurations that govern window management and keyboard interaction alongside the YASB bar, designed for turnkey replication.
 
-| File | Live location (authoritative) |
-|---|---|
-| `glazewm/config.yaml` | `~\.glzr\glazewm\config.yaml` (hotkey layer only; Komorebi tiles) |
-| `komorebi/komorebi.json` | `~\.config\komorebi\komorebi.json` (tiling engine; animations + Wine border colours) |
-| `komorebi/komorebi.bar.json` | `~\.config\komorebi\komorebi.bar.json` (built-in bar config; the YASB bar is the active one) |
-| `komorebi/applications.json` | `~\.config\komorebi\applications.json` (per-app rules) |
-| `komorebi/komorebi-startup.ps1` | `~\.config\komorebi\komorebi-startup.ps1` (login boot chain) |
+## Architecture
 
-Refresh: run `tools\setup\yasb-setup.ps1` (snapshot step), or copy back to
-restore. The bar itself is `config.yaml` + `styles.css` at this root;
-companion tools live in `tools\` (`theme`, `picker`, `setup`).
+- **GlazeWM (`glazewm/config.yaml`)**:
+  Acts exclusively as the **global hotkey layer** (`Alt`-based navigation, `Win+K` cheatsheet, launcher shortcuts). Commands invoke `komorebic` through `silent-run.exe` with `CREATE_NO_WINDOW` to eliminate console window flashes.
+- **Komorebi (`komorebi/komorebi.json`)**:
+  Acts exclusively as the **tiling engine**. Configured with smooth animations, custom theme-coordinated borders, and clean ignore rules for:
+  - `yasb.exe`
+  - `glazewm.exe`
+  - `saka-popup.exe`
+  - `palette-picker.exe`
+  - `keybind.exe`
+  - `komorebi-sync.exe`
+  All non-essential window rules have been cleanly stripped to avoid tiling conflicts.
+
+## Authoritative Live Locations
+
+| File | Deployed Path | Role |
+|---|---|---|
+| `glazewm/config.yaml` | `~\.glzr\glazewm\config.yaml` | GlazeWM hotkey layer |
+| `komorebi/komorebi.json` | `~\.config\komorebi\komorebi.json` & `~\komorebi.json` | Komorebi tiling engine |
+| `komorebi/komorebi.bar.json` | `~\.config\komorebi\komorebi.bar.json` | Fallback komorebi bar config |
+| `komorebi/applications.json` | `~\.config\komorebi\applications.json` | Application-specific rules |
+| `komorebi/komorebi-startup.ps1` | `~\.config\komorebi\komorebi-startup.ps1` | Window manager startup chain |
+
+Replication and path adaptation are handled automatically by `tools\setup\yasb-setup.ps1`.
