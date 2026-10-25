@@ -25,10 +25,10 @@ command = "nu"
 working-directory = "inherit"
 
 # --- Fonts -------------------------------------------------------------------
-font-family = "CaskaydiaCove Nerd Font Mono"
-font-family-bold = "CaskaydiaCove Nerd Font Mono"
-font-family-italic = "CaskaydiaCove Nerd Font Mono"
-font-family-bold-italic = "CaskaydiaCove Nerd Font Mono"
+font-family = "Agave Nerd Font Mono"
+font-family-bold = "Agave Nerd Font Mono"
+font-family-italic = "Agave Nerd Font Mono"
+font-family-bold-italic = "Agave Nerd Font Mono"
 font-size = 15
 font-ligatures = "calt"
 windows-text-rendering = "natural"
@@ -41,9 +41,10 @@ cursor-color = "#f5e0dc"
 # --- Window / performance ----------------------------------------------------
 # Acrylic is supplied by the theme's [windows] material block; window-opacity is kept
 # at 1.0 so the OS compositor does not create a raw alpha hole over the desktop,
-# while background-opacity at 0.85 gives true frosted glass blur without wallpaper bleed.
-background-opacity = 0.85
+# while background-opacity at 0.92 gives neutral frosted glass blur without wallpaper bleed.
+background-opacity = 0.92
 window-opacity = 1.0
+window-size = "remember"
 scrollback-lines = 50000
 session-log-size-mb = 10
 max-fps = 120

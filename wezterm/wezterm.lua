@@ -4,8 +4,15 @@
 -- =============================================================================
 
 local wezterm = require("wezterm")
+local mux = wezterm.mux
 local act = wezterm.action
 local config = wezterm.config_builder()
+
+-- Maximized Focus on Startup
+wezterm.on("gui-startup", function(cmd)
+	local tab, pane, window = mux.spawn_window(cmd or {})
+	window:gui_window():maximize()
+end)
 
 -- Renderer & Performance
 config.front_end = "OpenGL"
@@ -14,18 +21,18 @@ config.animation_fps = 1
 config.term = "xterm-256color"
 config.prefer_egl = true
 
--- Font (Matching Windows Terminal size 15 semi-bold)
-config.font = wezterm.font("CaskaydiaCove Nerd Font Mono", { weight = "DemiBold" })
+-- Font: Agave Nerd Font Mono
+config.font = wezterm.font("Agave Nerd Font Mono")
 config.font_size = 15.0
 config.cell_width = 1.0
 
--- Cursor (Matching Windows Terminal doubleUnderscore / Otty underline)
+-- Cursor (SteadyUnderline matching Windows Terminal & Otty)
 config.default_cursor_style = "SteadyUnderline"
 config.cursor_blink_rate = 0
 
--- Windows 11 Acrylic Frosted Glass & Opacity
+-- Windows 11 Frosted Glass (Acrylic with 0.90 opacity to eliminate wallpaper tint)
 config.win32_system_backdrop = "Acrylic"
-config.window_background_opacity = 0.85
+config.window_background_opacity = 0.90
 
 -- Window Padding (8px uniform)
 config.window_padding = {
@@ -126,7 +133,7 @@ config.keys = {
 		action = wezterm.action_callback(function(window, _)
 			local overrides = window:get_config_overrides() or {}
 			if overrides.window_background_opacity == 1.0 then
-				overrides.window_background_opacity = 0.85
+				overrides.window_background_opacity = 0.90
 			else
 				overrides.window_background_opacity = 1.0
 			end

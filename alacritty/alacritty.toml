@@ -5,8 +5,8 @@
 # =============================================================================
 
 [window]
-# Frosted glass opacity over desktop
-opacity = 0.85
+startup_mode = "Maximized"
+opacity = 0.95
 decorations = "full"
 dynamic_padding = true
 padding = { x = 8, y = 8 }
@@ -21,10 +21,10 @@ program = "nu"
 args = []
 
 [font]
-normal = { family = "CaskaydiaCove Nerd Font Mono", style = "SemiBold" }
-bold = { family = "CaskaydiaCove Nerd Font Mono", style = "Bold" }
-italic = { family = "CaskaydiaCove Nerd Font Mono", style = "Italic" }
-bold_italic = { family = "CaskaydiaCove Nerd Font Mono", style = "Bold Italic" }
+normal = { family = "Agave Nerd Font Mono", style = "Regular" }
+bold = { family = "Agave Nerd Font Mono", style = "Bold" }
+italic = { family = "Agave Nerd Font Mono", style = "Italic" }
+bold_italic = { family = "Agave Nerd Font Mono", style = "Bold Italic" }
 size = 15.0
 offset = { x = 1, y = 0 }
 

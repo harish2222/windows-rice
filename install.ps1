@@ -180,8 +180,8 @@ switch ($choice) {
             "carapace"                          = "$userProfile\.config\carapace"
             "carapace\specs"                    = "$appData\carapace\specs"
             "shells\powershell"                 = $pwshDest
-            "shells\nushell"                    = "$userProfile\.config\nushell"
-            "shells\xonsh"                      = "$userProfile\.config\xonsh"
+            "shells\nushell"                    = "$appData\nushell"
+            "shells\xonsh"                      = "$appData\xonsh"
         }
 
         foreach ($src in $destMap.Keys) {

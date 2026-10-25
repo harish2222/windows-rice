@@ -38,12 +38,11 @@
             "cursorShape": "doubleUnderscore",
             "font":
             {
-                "face": "CaskaydiaCove Nerd Font Mono",
-                "size": 15,
-                "weight": "semi-bold"
+                "face": "Agave Nerd Font Mono",
+                "size": 15
             },
             "intenseTextStyle": "all",
-            "opacity": 50,
+            "opacity": 88,
             "padding": "8",
             "scrollbarState": "visible",
             "useAcrylic": true
@@ -68,14 +67,14 @@
                 "commandline": "C:\\Users\\haris\\AppData\\Local\\Programs\\kew\\kew.exe",
                 "font":
                 {
-                    "face": "CaskaydiaCove Nerd Font Mono",
-                    "size": 18
+                    "face": "Agave Nerd Font Mono",
+                    "size": 15
                 },
                 "guid": "{bd1c03b2-a9ad-4bf1-9297-1f6f80b2ec71}",
                 "hidden": true,
                 "icon": "C:\\Users\\haris\\AppData\\Local\\Programs\\kew\\kew.ico",
                 "name": "KewMusic",
-                "opacity": 50,
+                "opacity": 88,
                 "padding": "8",
                 "startingDirectory": "C:\\Users\\haris\\Music",
                 "tabColor": "#45475A",
@@ -89,14 +88,13 @@
                 "cursorShape": "doubleUnderscore",
                 "font":
                 {
-                    "face": "GohuFont 11 Nerd Font Mono",
-                    "size": 25,
-                    "weight": "bold"
+                    "face": "Agave Nerd Font Mono",
+                    "size": 15
                 },
                 "guid": "{f3b7f04f-bd45-4d55-8b82-11061bbd7c23}",
                 "hidden": true,
                 "name": "CLIampMusic",
-                "opacity": 50,
+                "opacity": 88,
                 "padding": "8",
                 "startingDirectory": "C:\\Users\\haris\\Music",
                 "tabTitle": "Radio",
@@ -114,14 +112,14 @@
                 "cursorColor": "#A6E3A1",
                 "font":
                 {
-                    "face": "Hurmit Nerd Font Propo",
+                    "face": "Agave Nerd Font Mono",
                     "size": 15
                 },
                 "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
                 "hidden": false,
                 "intenseTextStyle": "bright",
                 "name": "PowerShell",
-                "opacity": 50,
+                "opacity": 88,
                 "padding": "8",
                 "scrollbarState": "visible",
                 "source": "Windows.Terminal.PowershellCore",
@@ -163,7 +161,7 @@
                 "guid": "{47302f9c-1ac4-566c-aa3e-8cf29889d6ab}",
                 "hidden": false,
                 "name": "Nushell",
-                "opacity": 50,
+                "opacity": 88,
                 "padding": "8",
                 "source": "nu",
                 "tabTitle": "NU",
@@ -177,7 +175,9 @@
                 "hidden": false,
                 "icon": "ms-appx:///ProfileIcons/{0caa0dad-35be-5f56-a8ff-afceeeaa6101}.png",
                 "name": "Xonsh",
-                "padding": "8"
+                "opacity": 88,
+                "padding": "8",
+                "useAcrylic": true
             },
             {
                 "commandline": "\"%WINDIR%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\" -ExecutionPolicy ByPass -NoExit -Command & 'C:\\Users\\haris\\anaconda3\\shell\\condabin\\conda-hook.ps1' ; conda activate 'C:\\Users\\haris\\anaconda3' ",

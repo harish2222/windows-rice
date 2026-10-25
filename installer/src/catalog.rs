@@ -245,7 +245,7 @@ pub fn get_catalog() -> Vec<PackageItem> {
             cargo_cmd: Some("cargo install nu"),
             configs: vec![ConfigMapping {
                 source_rel: "shells/nushell",
-                target_pattern: ".config/nushell",
+                target_pattern: "AppData/Roaming/nushell",
                 is_dir: true,
             }],
         },
@@ -261,14 +261,14 @@ pub fn get_catalog() -> Vec<PackageItem> {
             cargo_cmd: None,
             configs: vec![
                 ConfigMapping {
-                    source_rel: "shells/xonsh",
-                    target_pattern: ".config/xonsh",
-                    is_dir: true,
-                },
-                ConfigMapping {
                     source_rel: "shells/xonsh/.xonshrc",
                     target_pattern: ".xonshrc",
                     is_dir: false,
+                },
+                ConfigMapping {
+                    source_rel: "shells/xonsh",
+                    target_pattern: "AppData/Roaming/xonsh",
+                    is_dir: true,
                 },
             ],
         },
