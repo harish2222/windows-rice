@@ -58,14 +58,17 @@ function It {
     $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
     $passed = $false
     $err = $null
+    $oldEap = $ErrorActionPreference
 
     try {
+        $ErrorActionPreference = "Continue"
         & $Test
         $passed = $true
     } catch {
         $passed = $false
         $err = $_
     } finally {
+        $ErrorActionPreference = $oldEap
         $stopwatch.Stop()
     }
 

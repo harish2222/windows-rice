@@ -9,7 +9,7 @@ param(
     [string]$Tier = "All"
 )
 
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Continue"
 $ScriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 Import-Module (Join-Path $ScriptRoot "Common.psm1") -Force
 

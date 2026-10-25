@@ -172,9 +172,10 @@ function window-rice {
         if (Get-Command glazewm -ErrorAction SilentlyContinue) {
             & glazewm command wm-reload-config 2>$null
         }
+        $psExe = if (Get-Command pwsh -ErrorAction SilentlyContinue) { "pwsh" } else { "powershell" }
         $yasbScript = Join-Path $HOME ".config\yasb\tools\setup\yasb-setup.ps1"
         if (Test-Path $yasbScript) {
-            & pwsh -NoProfile -ExecutionPolicy Bypass -File $yasbScript
+            & $psExe -NoProfile -ExecutionPolicy Bypass -File $yasbScript
         }
         Write-Host "Windows Rice environment reloaded!" -ForegroundColor Green
         return
@@ -201,7 +202,8 @@ function window-rice {
     if (Test-Path $targetExe) {
         & $targetExe @passArgs
     } elseif (Test-Path $installPs1) {
-        & pwsh -NoProfile -File $installPs1 @passArgs
+        $psExe = if (Get-Command pwsh -ErrorAction SilentlyContinue) { "pwsh" } else { "powershell" }
+        & $psExe -NoProfile -File $installPs1 @passArgs
     }
 }
 Set-Alias -Name rice -Value window-rice -Force

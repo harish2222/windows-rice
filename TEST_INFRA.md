@@ -51,7 +51,7 @@ Focuses on individual feature contracts in isolation under standard operating co
 Stresses the system under boundary conditions, malformed inputs, and anomalous environments:
 - **R1**: Navigation clamping at list extremes (50+ repeated `PageDown`/`End`/`Down` keypresses), behavior on empty item lists, rapid toggle sequences.
 - **R2**: Non-existent target unlinking (`None == None` canonicalization bug prevention), read-only target files, deeply nested directory structures, unlinking when no backup exists.
-- **R3**: Verifies zero occurrences of generic directory paths (e.g. `kew / kew.ini`) or template placeholders (`<respective file title>`), and verifies case variants in `.gitignore`.
+- **R3**: Verifies zero occurrences of generic directory paths (e.g. `kew / kew.ini`) or template placeholders, and verifies case variants in `.gitignore`.
 - **R4**: Malformed CLI argument parsing, missing argument values (e.g. `--wallpapers` with missing path), invalid flag combinations, PowerShell AST syntax strictness (`${dstPath}:`).
 - **R5**: Log writing to non-existent directories (auto-creation of parent paths), concurrent logging stress, CLI `--verify` behavior when binaries or configs are absent.
 

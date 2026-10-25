@@ -39,6 +39,15 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# Force TLS 1.2 and TLS 1.3 protocol for GitHub and HTTPS connectivity in PowerShell 5.1
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+try {
+    [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls13
+} catch {}
+
+# Resolve PowerShell executable: pwsh (PS 7+) if present, falling back to powershell (PS 5.1)
+$psExe = if (Get-Command pwsh -ErrorAction SilentlyContinue) { "pwsh" } else { "powershell" }
+
 if ($Help) {
     Write-Host @"
 WINDOW-RICE INSTALLER LAUNCHER
@@ -86,32 +95,71 @@ if ($isRemote) {
         }
     } else {
         Write-Host "[Windows Rice] Setting up repository at $targetRepoDir..." -ForegroundColor Cyan
+        $cloned = $false
         if (Get-Command git -ErrorAction SilentlyContinue) {
-            git clone $repoUrl $targetRepoDir
-        } else {
-            Write-Host "[Windows Rice] Git not found. Downloading repository archive..." -ForegroundColor Yellow
+            if (-not (Test-Path $targetRepoDir)) {
+                git clone $repoUrl $targetRepoDir
+                if ($LASTEXITCODE -eq 0 -and (Test-Path (Join-Path $targetRepoDir "install.ps1"))) {
+                    $cloned = $true
+                }
+            } else {
+                # Target exists but is not a git repo (e.g. preexisting ~/.config from Windows/apps)
+                $tempClone = Join-Path $env:TEMP "windows-rice-clone-$([Guid]::NewGuid().ToString('N'))"
+                if (Test-Path $tempClone) { Remove-Item $tempClone -Recurse -Force -ErrorAction SilentlyContinue }
+                Write-Host "[Windows Rice] Cloning repository into $targetRepoDir..." -ForegroundColor Cyan
+                git clone --depth 1 $repoUrl $tempClone
+                if ($LASTEXITCODE -eq 0 -and (Test-Path $tempClone)) {
+                    Copy-Item -Path "$tempClone\*" -Destination $targetRepoDir -Recurse -Force
+                    if (Test-Path (Join-Path $tempClone ".git")) {
+                        Copy-Item -Path (Join-Path $tempClone ".git") -Destination (Join-Path $targetRepoDir ".git") -Recurse -Force
+                    }
+                    Remove-Item $tempClone -Recurse -Force -ErrorAction SilentlyContinue
+                    $cloned = $true
+                }
+            }
+        }
+
+        if (-not $cloned) {
+            Write-Host "[Windows Rice] Downloading repository archive from GitHub..." -ForegroundColor Yellow
             $tempZip = Join-Path $env:TEMP "windows-rice.zip"
             $tempExtract = Join-Path $env:TEMP "windows-rice-extract"
-            if (Test-Path $tempZip) { Remove-Item $tempZip -Force }
-            if (Test-Path $tempExtract) { Remove-Item $tempExtract -Recurse -Force }
+            if (Test-Path $tempZip) { Remove-Item $tempZip -Force -ErrorAction SilentlyContinue }
+            if (Test-Path $tempExtract) { Remove-Item $tempExtract -Recurse -Force -ErrorAction SilentlyContinue }
 
-            Invoke-RestMethod -Uri "https://github.com/harish2222/windows-rice/archive/refs/heads/main.zip" -OutFile $tempZip
-            Expand-Archive -Path $tempZip -DestinationPath $tempExtract -Force
-
-            $extractedFolder = Join-Path $tempExtract "windows-rice-main"
-            if (-not (Test-Path $targetRepoDir)) {
-                New-Item -ItemType Directory -Force -Path $targetRepoDir | Out-Null
+            $zipUrl = "https://github.com/harish2222/windows-rice/archive/refs/heads/main.zip"
+            try {
+                Invoke-WebRequest -Uri $zipUrl -OutFile $tempZip -UseBasicParsing -ErrorAction Stop
+            } catch {
+                try {
+                    $webClient = New-Object System.Net.WebClient
+                    $webClient.DownloadFile($zipUrl, $tempZip)
+                } catch {
+                    Write-Host "[Windows Rice] Failed to download repository archive: $_" -ForegroundColor Red
+                }
             }
-            Copy-Item -Path "$extractedFolder\*" -Destination $targetRepoDir -Recurse -Force
-            Remove-Item $tempZip -Force -ErrorAction SilentlyContinue
-            Remove-Item $tempExtract -Recurse -Force -ErrorAction SilentlyContinue
+
+            if (Test-Path $tempZip) {
+                Expand-Archive -Path $tempZip -DestinationPath $tempExtract -Force
+                $extractedFolder = Join-Path $tempExtract "windows-rice-main"
+                if (-not (Test-Path $targetRepoDir)) {
+                    New-Item -ItemType Directory -Force -Path $targetRepoDir | Out-Null
+                }
+                Copy-Item -Path "$extractedFolder\*" -Destination $targetRepoDir -Recurse -Force
+                Remove-Item $tempZip -Force -ErrorAction SilentlyContinue
+                Remove-Item $tempExtract -Recurse -Force -ErrorAction SilentlyContinue
+            }
         }
     }
 
     # Forward execution to local script inside targetRepoDir
     $localScript = Join-Path $targetRepoDir "install.ps1"
-    & $localScript @PSBoundParameters
-    exit $LASTEXITCODE
+    if (Test-Path $localScript) {
+        & $psExe -NoProfile -ExecutionPolicy Bypass -File $localScript @PSBoundParameters
+        exit $LASTEXITCODE
+    } else {
+        Write-Host "[Windows Rice] Error: Failed to locate $localScript after repository setup." -ForegroundColor Red
+        exit 1
+    }
 }
 
 # -----------------------------------------------------------------------------
@@ -151,9 +199,20 @@ if ($hasCargo -and (Test-Path $manifestPath)) {
     exit $LASTEXITCODE
 }
 
-# 3. Check pre-built binary
+# 3. Check or download pre-built binary
 $prebuiltExe = Join-Path $installerDir "target\release\rice-installer.exe"
+if (-not (Test-Path $prebuiltExe)) {
+    $releaseExeUrl = "https://github.com/harish2222/windows-rice/releases/latest/download/rice-installer.exe"
+    try {
+        $binDir = Split-Path $prebuiltExe -Parent
+        if (-not (Test-Path $binDir)) { New-Item -ItemType Directory -Force -Path $binDir | Out-Null }
+        Invoke-WebRequest -Uri $releaseExeUrl -OutFile $prebuiltExe -UseBasicParsing -ErrorAction Stop
+    } catch {
+        if (Test-Path $prebuiltExe) { Remove-Item $prebuiltExe -Force -ErrorAction SilentlyContinue }
+    }
+}
 if (Test-Path $prebuiltExe) {
+    Write-Host "[Windows Rice] Launching pre-compiled Rust TUI installer..." -ForegroundColor Cyan
     & $prebuiltExe $extraArgs
     exit $LASTEXITCODE
 }
@@ -169,11 +228,54 @@ $choice = Read-Host "Select option [1/2/3]"
 
 switch ($choice) {
     "1" {
-        Write-Host "Bootstrapping Scoop..." -ForegroundColor Green
+        Write-Host "Bootstrapping Scoop & Rust compiler..." -ForegroundColor Green
         Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
-        Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
-        scoop install rust
-        & cargo run --release --manifest-path $manifestPath -- $extraArgs
+
+        $userProfile = $env:USERPROFILE
+        $scoopShim = Join-Path $userProfile "scoop\shims"
+        $cargoBin = Join-Path $userProfile ".cargo\bin"
+        $env:PATH = "$scoopShim;$cargoBin;$env:PATH"
+
+        if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
+            Write-Host "Installing Scoop package manager..." -ForegroundColor Cyan
+            try {
+                Invoke-Expression (Invoke-RestMethod -Uri https://get.scoop.sh -UseBasicParsing)
+            } catch {
+                Write-Host "Scoop installation notice: $_" -ForegroundColor Yellow
+            }
+            $env:PATH = "$scoopShim;$cargoBin;$env:PATH"
+        }
+
+        if (Get-Command scoop -ErrorAction SilentlyContinue) {
+            Write-Host "Installing Git & Rust via Scoop..." -ForegroundColor Cyan
+            if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+                & scoop install git 2>$null
+            }
+            if (-not (Get-Command cargo -ErrorAction SilentlyContinue)) {
+                & scoop install rust
+            }
+            $env:PATH = "$scoopShim;$cargoBin;$env:PATH"
+        }
+
+        if (-not (Get-Command cargo -ErrorAction SilentlyContinue)) {
+            Write-Host "Attempting rustup installer bootstrap..." -ForegroundColor Cyan
+            $rustupInit = Join-Path $env:TEMP "rustup-init.exe"
+            try {
+                Invoke-WebRequest -Uri "https://win.rustup.rs/x86_64" -OutFile $rustupInit -UseBasicParsing -ErrorAction Stop
+                & $rustupInit -y --default-toolchain stable
+                $env:PATH = "$cargoBin;$env:PATH"
+            } catch {
+                Write-Host "Rustup download notice: $_" -ForegroundColor Yellow
+            }
+        }
+
+        if (Get-Command cargo -ErrorAction SilentlyContinue) {
+            Write-Host "Cargo detected! Launching Rust TUI installer..." -ForegroundColor Green
+            & cargo run --release --manifest-path $manifestPath -- $extraArgs
+            exit $LASTEXITCODE
+        } else {
+            Write-Host "[WARN] Cargo is not yet available in current session. Running native config linking fallback..." -ForegroundColor Yellow
+        }
     }
     "2" {
         Write-Host "Running native config linking..." -ForegroundColor Green
@@ -267,7 +369,7 @@ switch ($choice) {
         }
         $yasbScript = Join-Path $ScriptRoot "yasb\tools\setup\yasb-setup.ps1"
         if (Test-Path $yasbScript) {
-            & pwsh -NoProfile -ExecutionPolicy Bypass -File $yasbScript
+            & $psExe -NoProfile -ExecutionPolicy Bypass -File $yasbScript
         }
         Write-Host "[Windows Rice] Environment reloaded successfully!" -ForegroundColor Green
     }

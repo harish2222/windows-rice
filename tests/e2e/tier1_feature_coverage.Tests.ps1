@@ -309,7 +309,7 @@ Describe "R5 - Persistent Diagnostic Logging & System Verification" {
                 $lines = Get-Content $logFile
                 Should-BeGreaterThan $lines.Count 0 "Log file must have lines"
                 $firstLine = $lines[0]
-                Should-Match $firstLine "^\[\d+\]" "Log entries must start with [timestamp]"
+                Should-Match $firstLine "^\[\d{4}-\d{2}-\d{2}T" "Log entries must start with [timestamp]"
             }
         } finally {
             Remove-TestSandbox $sandbox

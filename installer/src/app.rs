@@ -516,7 +516,12 @@ impl App {
             self.add_log("Re-running YASB status bar replication / verification...");
             let res = std::process::Command::new("pwsh")
                 .args(["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", &yasb_setup.to_string_lossy()])
-                .output();
+                .output()
+                .or_else(|_| {
+                    std::process::Command::new("powershell")
+                        .args(["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", &yasb_setup.to_string_lossy()])
+                        .output()
+                });
             match res {
                 Ok(out) if out.status.success() => self.add_log("  [PASS] YASB status bar active and verified."),
                 Ok(out) => {

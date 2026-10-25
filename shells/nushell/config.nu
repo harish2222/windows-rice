@@ -212,8 +212,9 @@ def --env music [...args: string] {
 
     if not (mpd-up) {
         # mpd has no daemon mode on Windows; start it detached in a hidden window.
+        let ps_cmd = if (which pwsh | is-not-empty) { "pwsh" } else { "powershell" }
         try {
-            ^pwsh -NoLogo -NoProfile -Command $"start-process mpd -WorkingDirectory '($music_dir)' -WindowStyle hidden"
+            ^$ps_cmd -NoLogo -NoProfile -Command $"start-process mpd -WorkingDirectory '($music_dir)' -WindowStyle hidden"
         } catch {
             print "failed to launch mpd"
         }
@@ -263,7 +264,8 @@ def --env window-rice [
         try { ^glazewm command wm-reload-config }
         let yasb_setup = ($nu.home-dir | path join ".config" "yasb" "tools" "setup" "yasb-setup.ps1")
         if ($yasb_setup | path exists) {
-            ^pwsh -NoProfile -ExecutionPolicy Bypass -File $yasb_setup
+            let ps_cmd = if (which pwsh | is-not-empty) { "pwsh" } else { "powershell" }
+            ^$ps_cmd -NoProfile -ExecutionPolicy Bypass -File $yasb_setup
         }
         print "Windows Rice environment reloaded!"
         return
@@ -289,7 +291,8 @@ def --env window-rice [
     if ($installer | path exists) {
         ^$installer ...$pass_args
     } else if ($install_ps1 | path exists) {
-        ^pwsh -NoProfile -File $install_ps1 ...$pass_args
+        let ps_cmd = if (which pwsh | is-not-empty) { "pwsh" } else { "powershell" }
+        ^$ps_cmd -NoProfile -File $install_ps1 ...$pass_args
     } else {
         print "rice-installer not found."
     }

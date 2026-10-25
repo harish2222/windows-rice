@@ -949,6 +949,7 @@ def window_rice(args):
     target_exe = _HOME / ".config" / "installer" / "target" / "release" / "rice-installer.exe"
     cargo_toml = _HOME / ".config" / "installer" / "Cargo.toml"
     install_ps1 = _HOME / ".config" / "install.ps1"
+    ps_bin = "pwsh" if _which("pwsh") else "powershell"
 
     if any(a in ("--reload", "-r") for a in args):
         print("Reloading Windows Rice Environment...")
@@ -958,7 +959,7 @@ def window_rice(args):
             subprocess.run(["glazewm", "command", "wm-reload-config"])
         yasb_setup = _HOME / ".config" / "yasb" / "tools" / "setup" / "yasb-setup.ps1"
         if yasb_setup.exists():
-            subprocess.run(["pwsh", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(yasb_setup)])
+            subprocess.run([ps_bin, "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(yasb_setup)])
         print("Windows Rice environment reloaded!")
         return
 
@@ -969,7 +970,7 @@ def window_rice(args):
     if target_exe.exists():
         subprocess.run([str(target_exe), *args])
     elif install_ps1.exists():
-        subprocess.run(["pwsh", "-NoProfile", "-File", str(install_ps1), *args])
+        subprocess.run([ps_bin, "-NoProfile", "-File", str(install_ps1), *args])
     else:
         print("rice-installer not found.")
 

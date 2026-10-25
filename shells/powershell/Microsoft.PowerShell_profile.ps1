@@ -898,7 +898,8 @@ function window-rice {
         $yasbScript = Join-Path $HOME ".config\yasb\tools\setup\yasb-setup.ps1"
         if (Test-Path $yasbScript) {
             Write-Host "  Re-running YASB verification..." -ForegroundColor DarkGray
-            & pwsh -NoProfile -ExecutionPolicy Bypass -File $yasbScript
+            $psExe = if (Test-Command pwsh) { 'pwsh' } else { 'powershell' }
+            & $psExe -NoProfile -ExecutionPolicy Bypass -File $yasbScript
         }
         Write-Host "Windows Rice environment reloaded successfully!" -ForegroundColor Green
         return
@@ -926,7 +927,8 @@ function window-rice {
     if (Test-Path $targetExe) {
         & $targetExe @passArgs
     } elseif (Test-Path $installPs1) {
-        & pwsh -NoProfile -File $installPs1 @passArgs
+        $psExe = if (Test-Command pwsh) { 'pwsh' } else { 'powershell' }
+        & $psExe -NoProfile -File $installPs1 @passArgs
     } else {
         Write-Host "rice-installer executable not found at $targetExe" -ForegroundColor Red
     }

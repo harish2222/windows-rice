@@ -87,7 +87,7 @@ E2E SUITE STATUS: ALL TESTS PASSED [100% VERIFIED]
 ### R3. Functional Purpose-Based Credit Attribution & Cleanliness
 - [x] **Consistent Header Structure**: Every configuration, shader, script, and documentation file contains standard headers (`Author -: HKDEVS`, `Project -: Window-Rice`).
 - [x] **Purpose-Based Titles**: Explicit, functional titles (e.g. `Win32 GDI Device Context and Bitmap Interop Adapter`, `CAVA Linear Frequency Bar Spectrum Shader`, `Kew Catppuccin Mocha Soft Pastel Terminal Theme`).
-- [x] **Zero Placeholder Strings**: Verified 0 occurrences of `<respective file title>` across all tracked repository files.
+- [x] **Zero Placeholder Strings**: Verified 0 occurrences of placeholder template strings across all tracked repository files.
 - [x] **Zero Generic Titles**: Verified 0 occurrences of generic `folder / name` titles across all tracked repository files.
 - [x] **Catalog Exclusions**: Deprecated packages (`rammap`, `configstore`, `freebuff-desktop`, `kilo`, `opencode`, `forgum`, `nvim`, `neovim`) are omitted from active package catalog.
 - [x] **Git Cleanliness**: Deprecated directories (`rammap/`, `RAMMap/`, `configstore/`, `freebuff-desktop/`, `kilo/`, `opencode/`) explicitly ignored in `.gitignore`.
