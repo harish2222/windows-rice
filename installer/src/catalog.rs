@@ -8,6 +8,7 @@ pub enum Category {
     Navigation,
     Media,
     System,
+    Wallpapers,
 }
 
 impl Category {
@@ -19,6 +20,7 @@ impl Category {
             Category::Navigation => "Navigation & Autocomplete",
             Category::Media => "Audio & Visualizers",
             Category::System => "System & Monitoring",
+            Category::Wallpapers => "Wallpapers & Visuals",
         }
     }
 }
@@ -462,6 +464,20 @@ pub fn get_catalog() -> Vec<PackageItem> {
                 target_pattern: ".config/fastfetch",
                 is_dir: true,
             }],
+        },
+
+        // Wallpapers & Visuals
+        PackageItem {
+            id: "wallpapers",
+            name: "8K Wallpaper Collection",
+            category: Category::Wallpapers,
+            description: "1,774 curated 8K/5K wallpapers across Distros, Apple macOS, Minimal Rice & Curated Art (HKDEVS edition)",
+            binaries: &[],
+            scoop_cmd: None,
+            winget_cmd: None,
+            choco_cmd: None,
+            cargo_cmd: None,
+            configs: vec![],
         },
     ]
 }

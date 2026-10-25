@@ -232,3 +232,52 @@ def --env music [...args: string] {
     }
     cd $prev
 }
+
+# --- 7. WINDOWS RICE INTERACTIVE TUI & MANAGER ---
+def --env window-rice [
+    --reload (-r)        # Reload Windows Rice environment (Komorebi, GlazeWM, YASB)
+    --verify (-v)        # Run verification check
+    --update (-u)        # Check updates from git origin
+    --link-all           # Link all configs
+    --install-missing    # Install missing packages
+    --wallpapers (-w)    # Install 8K wallpapers
+    ...args: string      # Additional arguments
+] {
+    let installer = ($nu.home-dir | path join ".config" "installer" "target" "release" "rice-installer.exe")
+    let cargo_toml = ($nu.home-dir | path join ".config" "installer" "Cargo.toml")
+    let install_ps1 = ($nu.home-dir | path join ".config" "install.ps1")
+
+    if $reload {
+        print "Reloading Windows Rice Environment..."
+        try { ^komorebic replace-configuration ($nu.home-dir | path join ".config" "komorebi" "komorebi.json") }
+        try { ^glazewm command wm-reload-config }
+        let yasb_setup = ($nu.home-dir | path join ".config" "yasb" "tools" "setup" "yasb-setup.ps1")
+        if ($yasb_setup | path exists) {
+            ^pwsh -NoProfile -ExecutionPolicy Bypass -File $yasb_setup
+        }
+        print "Windows Rice environment reloaded!"
+        return
+    }
+
+    if not ($installer | path exists) and ($cargo_toml | path exists) and (which cargo | is-not-empty) {
+        print "Building Windows Rice TUI..."
+        ^cargo build --release --manifest-path $cargo_toml --quiet
+    }
+
+    mut pass_args = []
+    if $verify { $pass_args = ($pass_args | append "--verify") }
+    if $update { $pass_args = ($pass_args | append "--update") }
+    if $link_all { $pass_args = ($pass_args | append "--link-all") }
+    if $install_missing { $pass_args = ($pass_args | append "--install-missing") }
+    if $wallpapers { $pass_args = ($pass_args | append "--wallpapers") }
+    if ($args | is-not-empty) { $pass_args = ($pass_args | append $args) }
+
+    if ($installer | path exists) {
+        ^$installer ...$pass_args
+    } else if ($install_ps1 | path exists) {
+        ^pwsh -NoProfile -File $install_ps1 ...$pass_args
+    } else {
+        print "rice-installer not found."
+    }
+}
+alias rice = window-rice

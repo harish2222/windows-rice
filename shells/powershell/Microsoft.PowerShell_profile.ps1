@@ -853,6 +853,66 @@ Remove-Item Alias:sleep -Force -ErrorAction SilentlyContinue
 Set-Alias logout signout
 Set-Alias restart reboot
 
+function window-rice {
+    <#
+    .SYNOPSIS
+        Launches the Windows Rice TUI installer & real-time manager.
+    .DESCRIPTION
+        Detects installed configurations, shows live package states, checks for updates,
+        and provides interactive config management.
+    #>
+    [CmdletBinding()]
+    param(
+        [switch]$Verify,
+        [switch]$LinkAll,
+        [switch]$InstallMissing,
+        [switch]$Reload,
+        [switch]$Update
+    )
+
+    $targetExe = Join-Path $HOME ".config\installer\target\release\rice-installer.exe"
+    $cargoToml = Join-Path $HOME ".config\installer\Cargo.toml"
+    $installPs1 = Join-Path $HOME ".config\install.ps1"
+
+    if ($Reload) {
+        Write-Host "Reloading Windows Rice Environment..." -ForegroundColor Cyan
+        if (Get-Command komorebic -ErrorAction SilentlyContinue) {
+            Write-Host "  Reloading Komorebi..." -ForegroundColor DarkGray
+            & komorebic replace-configuration "$HOME\.config\komorebi\komorebi.json" 2>$null
+        }
+        if (Get-Command glazewm -ErrorAction SilentlyContinue) {
+            Write-Host "  Reloading GlazeWM..." -ForegroundColor DarkGray
+            & glazewm command wm-reload-config 2>$null
+        }
+        $yasbScript = Join-Path $HOME ".config\yasb\tools\setup\yasb-setup.ps1"
+        if (Test-Path $yasbScript) {
+            Write-Host "  Re-running YASB verification..." -ForegroundColor DarkGray
+            & pwsh -NoProfile -ExecutionPolicy Bypass -File $yasbScript
+        }
+        Write-Host "Windows Rice environment reloaded successfully!" -ForegroundColor Green
+        return
+    }
+
+    if (-not (Test-Path $targetExe) -and (Test-Path $cargoToml) -and (Get-Command cargo -ErrorAction SilentlyContinue)) {
+        Write-Host "Building Windows Rice TUI..." -ForegroundColor Cyan
+        & cargo build --release --manifest-path $cargoToml --quiet
+    }
+
+    $passArgs = @()
+    if ($Verify) { $passArgs += "--verify" }
+    if ($LinkAll) { $passArgs += "--link-all" }
+    if ($InstallMissing) { $passArgs += "--install-missing" }
+
+    if (Test-Path $targetExe) {
+        & $targetExe @passArgs
+    } elseif (Test-Path $installPs1) {
+        & pwsh -NoProfile -File $installPs1 @passArgs
+    } else {
+        Write-Host "rice-installer executable not found at $targetExe" -ForegroundColor Red
+    }
+}
+Set-Alias -Name rice -Value window-rice -Force
+
 function Show-Help {
 
 @'

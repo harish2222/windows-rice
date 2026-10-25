@@ -106,7 +106,7 @@ GlazeWM is the hotkey layer; Komorebi does the tiling.
 
 ---
 
-## 🚀 Turnkey TUI Installer & Configurator
+## 🚀 WINDOW-RICE Installer & Real-Time Rice Manager
 
 ### Instant Web One-Liner (iwr / irm)
 Install and run on any Windows system with a single PowerShell command:
@@ -118,11 +118,36 @@ irm https://raw.githubusercontent.com/harish2222/windows-rice/main/install.ps1 |
 # Or using Invoke-WebRequest:
 iwr -useb https://raw.githubusercontent.com/harish2222/windows-rice/main/install.ps1 | iex
 ```
-*The script automatically sets up the repository at `~/.config`, verifies prerequisites, and launches the Rust Ratatui TUI installer.*
+*The script automatically sets up the repository at `~/.config`, verifies prerequisites, and launches the Rust Ratatui TUI installer (**WINDOW-RICE installer**).*
 
-### Local Installation Commands
+### Universal Shell Command (`window-rice` / `rice`)
+Once installed, the `window-rice` function (and `rice` alias) is globally available in **PowerShell 7**, **Nushell**, and **Xonsh**:
+
+```bash
+# Launch interactive TUI at any time:
+window-rice
+rice
+
+# Reload entire environment live:
+window-rice -Reload          # PowerShell
+rice -r                      # Nushell or Xonsh
+
+# Health check & real-time component verification:
+window-rice -Verify          # PowerShell
+rice -v                      # Nushell or Xonsh
+
+# Check git updates against upstream:
+window-rice -Update
+rice -u
+
+# Install curated 8K wallpapers:
+window-rice -Wallpapers
+rice -w
+```
+
+### Local CLI Flags (`.\install.ps1` / `rice-installer.exe`)
 ```powershell
-# Launch the interactive dual-pane TUI installer
+# Launch the interactive dual-pane TUI
 .\install.ps1
 
 # Run non-interactive health check & verification report
@@ -134,15 +159,23 @@ iwr -useb https://raw.githubusercontent.com/harish2222/windows-rice/main/install
 # Install missing packages and link corresponding configs
 .\install.ps1 -InstallMissing
 
-# Bootstrap missing package managers (Scoop, Chocolatey)
+# Bootstrap package managers (Scoop, Chocolatey, UV, Vcpkg)
 .\install.ps1 -Bootstrap
+
+# Reload Komorebi, GlazeWM, and YASB
+.\install.ps1 -Reload
+
+# Install 8K wallpapers (default: Pictures\Wallpapers or custom)
+.\install.ps1 -Wallpapers -WallpaperDir "D:\Wallpapers"
 ```
 
 ### Installer Capabilities
-- **Dual-Pane TUI Layout:** Left pane categorizes Window Managers, Terminals, Shells, Navigation, Media, and Editors with multi-select checkboxes. Right pane displays package metadata, binary locations, target configuration paths, and live execution logs.
+- **Dual-Pane TUI Layout:** Left pane categorizes Window Managers, Terminals, Shells, Navigation, Media, and Wallpapers with multi-select checkboxes. Right pane displays package metadata, binary locations, target configuration paths, and live execution logs.
 - **Automated Package Detection:** Detects installed binaries and package managers across Scoop, Winget, Chocolatey, Cargo, UV, Vcpkg, NPM, and Python.
-- **Smart Linking:** Creates symbolic links (`mklink` / `New-Item -ItemType SymbolicLink`) with automatic fallback to file copy if Windows Developer Mode or elevation is not available.
-- **Verification Engine:** Validates that all 22 binaries and 20 configuration targets are properly deployed and reachable in `PATH`.
+- **Smart Linking:** Creates symbolic links (`New-Item -ItemType SymbolicLink`) with automatic fallback to file copy if Windows Developer Mode or elevation is not available.
+- **Real-Time WM & Status Bar Sync:** Automatically triggers Komorebi configuration reload, GlazeWM keybindings reload, and YASB status bar replication when configs are updated.
+- **Git Upstream Update Detection:** Real-time checking against `origin/main` with live status badges.
+- **Verification Engine:** Validates that all 23 binaries and 20 configuration targets are properly deployed and reachable in `PATH`.
 
 ---
 
@@ -180,15 +213,42 @@ Windows Rice includes **63 custom, syntax-checked Carapace completion specificat
 
 ---
 
-## 🔄 Applying Changes Live
+## 🖼️ 8K Curated Wallpaper Collection (HKDEVS Edition)
+
+Windows Rice includes an ultra-high resolution wallpaper collection containing **1,774 unique, curated 8K & 5K wallpapers** (over 4.2 GB uncompressed), completely organized, deduplicated, and metadata-sanitized (all old legacy references stripped; author, artist, owner, and copyright attributed cleanly to `HKDEVS` with ICC color profiles preserved):
+
+| Category | Count | Description |
+|---|---|---|
+| **Distros** | 1,283 files | Arch, ArcoLinux, BlackArch, CachyOS, Debian, EndeavourOS, Fedora, Garuda, Kali, Manjaro, NixOS, openSUSE, Parrot, PopOS, RedHat, Other |
+| **Minimal Rice** | 306 files | Numbered minimalist wallpapers (`0001.jpg` – `0306.jpg`), stripped of legacy naming |
+| **Curated Art** | 150 files | Abstract, digital art, stylized landscapes, and dark anime themes |
+| **Apple macOS 5K/6K** | 17 files | Ultra-res macOS desert/mountain dynamic captures (Catalina, Mojave, Sierra, etc.) |
+| **Nature & Landscapes** | 12 files | 8K nature panoramas, misty mountains, and dramatic twilight |
+| **Space & Cosmos** | 4 files | High-depth nebula, planetary alignments, and galactic cores |
+| **City & Architecture** | 2 files | Cyberpunk and nocturnal metropolis compositions |
+
+### 📦 Modular 3-Pack Distribution (< 2 GB each for GitHub Releases)
+To comply with GitHub's 2 GB asset limit while preserving pixel-perfect ultra lossless quality:
+- **Pack 1:** `Wallpapers_Pack1_Rice_macOS_Art.7z` (792 MB) — Minimal Rice, macOS 5K/6K, Curated Art, Nature, Space, and City.
+- **Pack 2:** `Wallpapers_Pack2_Distros_Fedora_Arch.7z` (1.86 GB) — Fedora, Arch Linux, ArcoLinux, BlackArch, and CachyOS.
+- **Pack 3:** `Wallpapers_Pack3_Distros_Endeavour_Kali_Debian.7z` (1.52 GB) — EndeavourOS, Garuda, Kali Linux, Debian, Manjaro, NixOS, openSUSE, Parrot, PopOS, RedHat.
+
+Install wallpapers instantly to Windows `Pictures\Wallpapers` (or any custom location) directly from the TUI (`[w]`), via PowerShell (`.\install.ps1 -Wallpapers`), or shell (`window-rice --wallpapers`).
+
+---
+
+## 🔄 Live Environment Synchronization & Reload
+
+No manual individual commands needed! The **WINDOW-RICE installer** and shell function manage the entire live stack:
 
 ```powershell
-# Reload Komorebi configuration
-komorebic replace-configuration ~/.config/komorebi/komorebi.json
-
-# Reload GlazeWM hotkey layer
-glazewm command wm-reload-config
-
-# Re-run replication / verification
-powershell -ExecutionPolicy Bypass -File ~/.config/yasb/tools/setup/yasb-setup.ps1
+# Universal one-shot reload across all shells (PowerShell, Nushell, Xonsh):
+window-rice -Reload
+# Or using the shorthand alias:
+rice -r
 ```
+
+This automatically:
+1. Reloads Komorebi configuration (`komorebic replace-configuration ~/.config/komorebi/komorebi.json`)
+2. Reloads GlazeWM hotkey layer (`glazewm command wm-reload-config`)
+3. Re-runs YASB status bar verification and companion tools replication (`yasb-setup.ps1`)

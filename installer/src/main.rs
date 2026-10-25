@@ -59,15 +59,18 @@ fn find_repo_root() -> PathBuf {
 
 fn print_help() {
     println!(r#"
-WINDOWS RICE - Interactive Installer & Configurator
-===================================================
+WINDOW-RICE INSTALLER - Interactive Setup & Real-Time Rice Manager
+=================================================================
 Usage: rice-installer.exe [OPTIONS]
 
 Options:
-    --verify            Run non-interactive system health check and exit
+    --reload, -r        Reload Komorebi, GlazeWM, and YASB status bar
+    --update, -u        Check git repository upstream status for updates
+    --wallpapers, -w    Install 8K wallpaper collection (default: Pictures\Wallpapers)
+    --verify, -v        Run non-interactive system health check and exit
     --link-all          Link all configuration files (symlink with copy fallback)
     --install-missing   Install missing packages and link corresponding configs
-    --bootstrap         Bootstrap Scoop and Chocolatey if missing
+    --bootstrap         Bootstrap Scoop, Chocolatey, UV, and Vcpkg if missing
     -h, --help          Show this help message
 
 Interactive TUI Controls:
@@ -75,10 +78,13 @@ Interactive TUI Controls:
     [Space]             Toggle selection checkbox
     [a]                 Select all / Deselect all
     [m]                 Select missing / unlinked packages only
-    [l]                 Link configs for selected packages
+    [l]                 Link configs for selected packages (and auto-reload)
     [i]                 Install missing binaries & link configs for selected
+    [r]                 Reload Komorebi, GlazeWM, and YASB
+    [u]                 Check git repository for updates
+    [w]                 Install 8K wallpapers to Pictures\Wallpapers
     [v]                 Run comprehensive verification health check
-    [b]                 Bootstrap Scoop / Chocolatey
+    [b]                 Bootstrap Scoop / Chocolatey / UV / Vcpkg
     [q] or [Esc]        Quit
 "#);
 }
@@ -92,7 +98,35 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
-    if args.iter().any(|a| a == "--verify") {
+    if args.iter().any(|a| a == "--reload" || a == "-r") {
+        let mut app = App::new(repo_root);
+        app.reload_environment();
+        for log in &app.logs {
+            println!("{}", log);
+        }
+        return Ok(());
+    }
+
+    if args.iter().any(|a| a == "--update" || a == "-u") {
+        let mut app = App::new(repo_root);
+        app.check_updates();
+        for log in &app.logs {
+            println!("{}", log);
+        }
+        return Ok(());
+    }
+
+    if let Some(pos) = args.iter().position(|a| a == "--wallpapers" || a == "-w") {
+        let custom_dest = args.get(pos + 1).map(PathBuf::from);
+        let mut app = App::new(repo_root);
+        app.install_wallpapers(custom_dest);
+        for log in &app.logs {
+            println!("{}", log);
+        }
+        return Ok(());
+    }
+
+    if args.iter().any(|a| a == "--verify" || a == "-v") {
         let report = run_verification(&repo_root);
         for line in report.lines {
             println!("{}", line);
@@ -187,6 +221,15 @@ fn run_tui(repo_root: PathBuf) -> Result<()> {
                         KeyCode::Char('b') => {
                             app.bootstrap_package_managers();
                         }
+                        KeyCode::Char('r') => {
+                            app.reload_environment();
+                        }
+                        KeyCode::Char('u') => {
+                            app.check_updates();
+                        }
+                        KeyCode::Char('w') => {
+                            app.install_wallpapers(None);
+                        }
                         _ => {}
                     }
                 }
@@ -198,6 +241,6 @@ fn run_tui(repo_root: PathBuf) -> Result<()> {
     execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
     terminal.show_cursor()?;
 
-    println!("\nRice installer closed cleanly.");
+    println!("\nWINDOW-RICE installer closed cleanly.");
     Ok(())
 }

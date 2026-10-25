@@ -96,7 +96,7 @@ pub fn link_config_mapping(repo_root: &Path, mapping: &ConfigMapping) -> LinkOut
     }
 }
 
-fn copy_recursive(src: &Path, dst: &Path, is_dir: bool) -> Result<()> {
+pub fn copy_recursive(src: &Path, dst: &Path, is_dir: bool) -> Result<()> {
     if src == dst || src.canonicalize().ok() == dst.canonicalize().ok() {
         return Ok(());
     }

@@ -22,6 +22,10 @@ param(
     [switch]$LinkAll,
     [switch]$InstallMissing,
     [switch]$Bootstrap,
+    [switch]$Reload,
+    [switch]$Update,
+    [switch]$Wallpapers,
+    [string]$WallpaperDir,
     [switch]$Help
 )
 
@@ -29,8 +33,8 @@ $ErrorActionPreference = "Stop"
 
 if ($Help) {
     Write-Host @"
-WINDOWS RICE INSTALLER LAUNCHER
-================================
+WINDOW-RICE INSTALLER LAUNCHER
+==============================
 Remote Web One-Liner (iwr / irm):
     irm https://raw.githubusercontent.com/harish2222/windows-rice/main/install.ps1 | iex
     iwr -useb https://raw.githubusercontent.com/harish2222/windows-rice/main/install.ps1 | iex
@@ -39,13 +43,17 @@ Local Usage:
     .\install.ps1 [OPTIONS]
 
 Options:
+    -Reload          Reload Komorebi WM, GlazeWM hotkeys, and YASB status bar
+    -Update          Check repository for upstream updates
+    -Wallpapers      Install 8K wallpapers to default (Pictures\Wallpapers) or -WallpaperDir
+    -WallpaperDir    Custom directory to store wallpapers
     -Verify          Run comprehensive system health check and exit
     -LinkAll         Link all configuration files without prompt
     -InstallMissing  Install missing binaries and link configs
-    -Bootstrap       Bootstrap Scoop and Chocolatey package managers
+    -Bootstrap       Bootstrap Scoop, Chocolatey, UV, and Vcpkg
     -Help            Show this help text
 
-Running without options launches the interactive Rust Ratatui TUI.
+Running without options launches the interactive Rust Ratatui TUI (WINDOW-RICE installer).
 "@
     exit 0
 }
@@ -109,6 +117,12 @@ if ($Verify) { $extraArgs += "--verify" }
 if ($LinkAll) { $extraArgs += "--link-all" }
 if ($InstallMissing) { $extraArgs += "--install-missing" }
 if ($Bootstrap) { $extraArgs += "--bootstrap" }
+if ($Reload) { $extraArgs += "--reload" }
+if ($Update) { $extraArgs += "--update" }
+if ($Wallpapers) {
+    $extraArgs += "--wallpapers"
+    if ($WallpaperDir) { $extraArgs += $WallpaperDir }
+}
 
 $hasCargo = (Get-Command cargo -ErrorAction SilentlyContinue) -ne $null
 
@@ -213,6 +227,19 @@ switch ($choice) {
         }
 
         Write-Host "[Windows Rice] Fallback linking complete!" -ForegroundColor Green
+
+        Write-Host "[Windows Rice] Reloading Komorebi, GlazeWM, and YASB..." -ForegroundColor Cyan
+        if (Get-Command komorebic -ErrorAction SilentlyContinue) {
+            & komorebic replace-configuration "$userProfile\.config\komorebi\komorebi.json" 2>$null
+        }
+        if (Get-Command glazewm -ErrorAction SilentlyContinue) {
+            & glazewm command wm-reload-config 2>$null
+        }
+        $yasbScript = Join-Path $ScriptRoot "yasb\tools\setup\yasb-setup.ps1"
+        if (Test-Path $yasbScript) {
+            & pwsh -NoProfile -ExecutionPolicy Bypass -File $yasbScript
+        }
+        Write-Host "[Windows Rice] Environment reloaded successfully!" -ForegroundColor Green
     }
     default {
         Write-Host "Exiting."

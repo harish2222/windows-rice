@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/amnweb/yasb/main/schema.json
+﻿# yaml-language-server: $schema=https://raw.githubusercontent.com/amnweb/yasb/main/schema.json
 # For more information, visit https://github.com/amnweb/yasb/wiki
 # Keep live reload enabled for configuration edits and palette switching.
 watch_stylesheet: true

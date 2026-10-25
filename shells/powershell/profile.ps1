@@ -140,3 +140,47 @@ if (Test-FastCommand fzf) {
         }
     }
 }
+
+function window-rice {
+    [CmdletBinding()]
+    param(
+        [switch]$Verify,
+        [switch]$LinkAll,
+        [switch]$InstallMissing,
+        [switch]$Reload
+    )
+    $targetExe = Join-Path $HOME ".config\installer\target\release\rice-installer.exe"
+    $installPs1 = Join-Path $HOME ".config\install.ps1"
+    $cargoToml = Join-Path $HOME ".config\installer\Cargo.toml"
+
+    if ($Reload) {
+        if (Get-Command komorebic -ErrorAction SilentlyContinue) {
+            & komorebic replace-configuration "$HOME\.config\komorebi\komorebi.json" 2>$null
+        }
+        if (Get-Command glazewm -ErrorAction SilentlyContinue) {
+            & glazewm command wm-reload-config 2>$null
+        }
+        $yasbScript = Join-Path $HOME ".config\yasb\tools\setup\yasb-setup.ps1"
+        if (Test-Path $yasbScript) {
+            & pwsh -NoProfile -ExecutionPolicy Bypass -File $yasbScript
+        }
+        Write-Host "Windows Rice environment reloaded!" -ForegroundColor Green
+        return
+    }
+
+    if (-not (Test-Path $targetExe) -and (Test-Path $cargoToml) -and (Get-Command cargo -ErrorAction SilentlyContinue)) {
+        & cargo build --release --manifest-path $cargoToml --quiet
+    }
+
+    $passArgs = @()
+    if ($Verify) { $passArgs += "--verify" }
+    if ($LinkAll) { $passArgs += "--link-all" }
+    if ($InstallMissing) { $passArgs += "--install-missing" }
+
+    if (Test-Path $targetExe) {
+        & $targetExe @passArgs
+    } elseif (Test-Path $installPs1) {
+        & pwsh -NoProfile -File $installPs1 @passArgs
+    }
+}
+Set-Alias -Name rice -Value window-rice -Force

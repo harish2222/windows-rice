@@ -1,4 +1,4 @@
-{
+﻿{
   "$schema": "https://raw.githubusercontent.com/LGUG2Z/komorebi/master/schema.json",
   "app_specific_configuration_path": "C:\\\\Users\\\\haris\\.config\\komorebi\\applications.json",
   "animation": {
@@ -23,9 +23,8 @@
   "cross_monitor_move_behaviour": "Insert",
   "default_container_padding": 0,
   "default_workspace_padding": 1,
-  "float_override": false,
-  "floating_layer_behaviour": "Tile",
-  "resize_delta": 40,
+  "float_override": true,
+  "floating_layer_behaviour": "Float",
   "float_rule_placement": "Center",
   "floating_layer_placement": "Center",
   "global_work_area_offset": {

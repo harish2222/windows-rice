@@ -30,9 +30,9 @@ pub fn render(f: &mut Frame, app: &App) {
 
 fn render_header(f: &mut Frame, area: Rect) {
     let header_text = vec![Line::from(vec![
-        Span::styled("  WINDOWS RICE  ", Style::default().fg(Color::Rgb(30, 30, 46)).bg(Color::Rgb(137, 180, 250)).add_modifier(Modifier::BOLD)),
+        Span::styled("  WINDOW-RICE INSTALLER  ", Style::default().fg(Color::Rgb(30, 30, 46)).bg(Color::Rgb(137, 180, 250)).add_modifier(Modifier::BOLD)),
         Span::raw(" "),
-        Span::styled("Interactive Installer & Configurator", Style::default().fg(Color::Rgb(205, 214, 244)).add_modifier(Modifier::BOLD)),
+        Span::styled("Interactive Setup & Real-Time Rice Manager", Style::default().fg(Color::Rgb(205, 214, 244)).add_modifier(Modifier::BOLD)),
         Span::styled(" (Catppuccin Mocha Edition)", Style::default().fg(Color::Rgb(166, 227, 161))),
     ])];
 
@@ -43,7 +43,7 @@ fn render_header(f: &mut Frame, area: Rect) {
 
 fn render_pm_status(f: &mut Frame, app: &App, area: Rect) {
     let pm = &app.pm_status;
-    let pm_spans = vec![
+    let mut pm_spans = vec![
         Span::raw(" PMs: "),
         badge("Scoop", pm.scoop),
         Span::raw(" "),
@@ -60,7 +60,18 @@ fn render_pm_status(f: &mut Frame, app: &App, area: Rect) {
         badge("Python", pm.python),
         Span::raw(" "),
         badge("NPM", pm.npm),
+        Span::raw("  │  "),
     ];
+
+    if let Some(status) = &app.git_update_status {
+        if status.contains("UP-TO-DATE") {
+            pm_spans.push(Span::styled(format!("[REPO: {}]", status), Style::default().fg(Color::Rgb(166, 227, 161)).add_modifier(Modifier::BOLD)));
+        } else {
+            pm_spans.push(Span::styled(format!("[REPO: {}]", status), Style::default().fg(Color::Rgb(249, 226, 175)).add_modifier(Modifier::BOLD)));
+        }
+    } else {
+        pm_spans.push(Span::styled("[REPO: READY]", Style::default().fg(Color::Rgb(148, 226, 213))));
+    }
 
     let p = Paragraph::new(Line::from(pm_spans))
         .block(Block::default().borders(Borders::ALL).border_style(Style::default().fg(Color::Rgb(88, 91, 112))));
@@ -263,13 +274,19 @@ fn render_footer(f: &mut Frame, app: &App, area: Rect) {
         Span::styled("[m] ", Style::default().fg(Color::Rgb(249, 226, 175)).add_modifier(Modifier::BOLD)),
         Span::raw("Missing "),
         Span::styled("[l] ", Style::default().fg(Color::Rgb(148, 226, 213)).add_modifier(Modifier::BOLD)),
-        Span::raw("Link Configs "),
+        Span::raw("Link "),
         Span::styled("[i] ", Style::default().fg(Color::Rgb(166, 227, 161)).add_modifier(Modifier::BOLD)),
-        Span::raw("Install & Link "),
+        Span::raw("Install "),
+        Span::styled("[r] ", Style::default().fg(Color::Rgb(203, 166, 247)).add_modifier(Modifier::BOLD)),
+        Span::raw("Reload WM "),
+        Span::styled("[u] ", Style::default().fg(Color::Rgb(137, 220, 235)).add_modifier(Modifier::BOLD)),
+        Span::raw("Updates "),
+        Span::styled("[w] ", Style::default().fg(Color::Rgb(249, 226, 175)).add_modifier(Modifier::BOLD)),
+        Span::raw("Wallpapers "),
         Span::styled("[v] ", Style::default().fg(Color::Rgb(137, 180, 250)).add_modifier(Modifier::BOLD)),
         Span::raw("Verify "),
         Span::styled("[b] ", Style::default().fg(Color::Rgb(249, 226, 175)).add_modifier(Modifier::BOLD)),
-        Span::raw("Bootstrap "),
+        Span::raw("Boot "),
         Span::styled("[q] ", Style::default().fg(Color::Rgb(243, 139, 168)).add_modifier(Modifier::BOLD)),
         Span::raw("Quit"),
     ];

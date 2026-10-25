@@ -938,3 +938,35 @@ aliases["fh"] = fhistory
 aliases["fgit"] = fgit
 aliases["fgl"] = fgit_log
 aliases["fenv"] = fenv
+
+def window_rice(args):
+    """Windows Rice TUI installer & real-time manager."""
+    target_exe = _HOME / ".config" / "installer" / "target" / "release" / "rice-installer.exe"
+    cargo_toml = _HOME / ".config" / "installer" / "Cargo.toml"
+    install_ps1 = _HOME / ".config" / "install.ps1"
+
+    if any(a in ("--reload", "-r") for a in args):
+        print("Reloading Windows Rice Environment...")
+        if _which("komorebic"):
+            subprocess.run(["komorebic", "replace-configuration", str(_HOME / ".config" / "komorebi" / "komorebi.json")])
+        if _which("glazewm"):
+            subprocess.run(["glazewm", "command", "wm-reload-config"])
+        yasb_setup = _HOME / ".config" / "yasb" / "tools" / "setup" / "yasb-setup.ps1"
+        if yasb_setup.exists():
+            subprocess.run(["pwsh", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(yasb_setup)])
+        print("Windows Rice environment reloaded!")
+        return
+
+    if not target_exe.exists() and cargo_toml.exists() and _which("cargo"):
+        print("Building Windows Rice TUI...")
+        subprocess.run(["cargo", "build", "--release", "--manifest-path", str(cargo_toml), "--quiet"])
+
+    if target_exe.exists():
+        subprocess.run([str(target_exe), *args])
+    elif install_ps1.exists():
+        subprocess.run(["pwsh", "-NoProfile", "-File", str(install_ps1), *args])
+    else:
+        print("rice-installer not found.")
+
+aliases["window-rice"] = window_rice
+aliases["rice"] = window_rice

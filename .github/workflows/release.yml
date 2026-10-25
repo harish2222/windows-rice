@@ -1,0 +1,70 @@
+name: Release Rice Installer
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Release tag name (e.g. v1.0.0)'
+        required: false
+        default: 'v1.0.0'
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    name: Build & Publish Release
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build release binary
+        run: cargo build --release --manifest-path installer/Cargo.toml
+
+      - name: Package installer archive
+        shell: pwsh
+        run: |
+          $releaseDir = "release-package"
+          New-Item -ItemType Directory -Force -Path $releaseDir | Out-Null
+          Copy-Item "installer/target/release/rice-installer.exe" "$releaseDir\rice-installer.exe"
+          Copy-Item "install.ps1" "$releaseDir\install.ps1"
+          Copy-Item "README.md" "$releaseDir\README.md" -ErrorAction SilentlyContinue
+
+          Compress-Archive -Path "$releaseDir\*" -DestinationPath "rice-installer-windows-x64.zip" -Force
+          $sha = (Get-FileHash -Path "rice-installer-windows-x64.zip" -Algorithm SHA256).Hash
+          "$sha  rice-installer-windows-x64.zip" | Out-File -FilePath "SHA256SUMS.txt" -Encoding ascii
+
+          Write-Host "Archive created: rice-installer-windows-x64.zip"
+          Write-Host "SHA256: $sha"
+
+      - name: Determine tag name
+        id: get_tag
+        shell: pwsh
+        run: |
+          $tag = if ($env:GITHUB_REF -like "refs/tags/*") {
+            $env:GITHUB_REF -replace "refs/tags/", ""
+          } else {
+            "${{ github.event.inputs.tag_name }}"
+          }
+          if ([string]::IsNullOrWhiteSpace($tag)) { $tag = "v1.0.0" }
+          "tag=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.get_tag.outputs.tag }}
+          name: "Windows Rice Release ${{ steps.get_tag.outputs.tag }}"
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            rice-installer-windows-x64.zip
+            installer/target/release/rice-installer.exe
+            SHA256SUMS.txt

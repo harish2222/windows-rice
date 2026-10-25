@@ -1,0 +1,151 @@
+name: Windows Rice CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  rust-installer:
+    name: Build & Test Rust TUI Installer
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ windows-latest, ubuntu-latest ]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            installer/target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('installer/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Check Rust installer
+        run: cargo check --manifest-path installer/Cargo.toml
+
+      - name: Run installer unit tests
+        run: cargo test --manifest-path installer/Cargo.toml --verbose
+
+      - name: Build release binary
+        run: cargo build --release --manifest-path installer/Cargo.toml
+
+      - name: Upload installer artifact (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: rice-installer-windows-x64
+          path: installer/target/release/rice-installer.exe
+          if-no-files-found: error
+
+  validate-configs:
+    name: Validate Shell & Terminal Configs
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate PowerShell Profiles AST Syntax
+        shell: pwsh
+        run: |
+          $profiles = @(
+            "install.ps1",
+            "shells/powershell/profile.ps1",
+            "shells/powershell/Microsoft.PowerShell_profile.ps1"
+          )
+          $allPassed = $true
+          foreach ($p in $profiles) {
+            if (Test-Path $p) {
+              $tokens = $null
+              $errors = $null
+              $ast = [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $p), [ref]$tokens, [ref]$errors)
+              if ($errors.Count -gt 0) {
+                Write-Host "::error file=$p::AST Parse errors detected ($($errors.Count))"
+                $errors | ForEach-Object { Write-Host "  Line $($_.Extent.StartLineNumber): $($_.Message)" }
+                $allPassed = $false
+              } else {
+                Write-Host "[PASS] $p - 0 parse errors" -ForegroundColor Green
+              }
+            }
+          }
+          if (-not $allPassed) { exit 1 }
+
+      - name: Validate Carapace Completion Specs
+        shell: pwsh
+        run: |
+          $specs = Get-ChildItem -Path "carapace/specs" -Filter "*.yaml"
+          Write-Host "Validating $($specs.Count) Carapace completion specs..." -ForegroundColor Cyan
+          $failed = 0
+          foreach ($s in $specs) {
+            try {
+              $content = Get-Content $s.FullName -Raw
+              if ([string]::IsNullOrWhiteSpace($content) -or -not ($content -match "name:")) {
+                Write-Host "::error file=$($s.FullName)::Missing name in completion spec"
+                $failed++
+              }
+            } catch {
+              Write-Host "::error file=$($s.FullName)::Failed to read spec: $_"
+              $failed++
+            }
+          }
+          if ($failed -gt 0) {
+            Write-Host "Failed specs count: $failed" -ForegroundColor Red
+            exit 1
+          }
+          Write-Host "All $($specs.Count) Carapace specs validated successfully!" -ForegroundColor Green
+
+      - name: Validate JSON & TOML Configuration Files
+        shell: pwsh
+        run: |
+          # 1. Validate Windows Terminal settings JSON
+          $wtPath = "windows-terminal/settings.json"
+          if (Test-Path $wtPath) {
+            $json = Get-Content $wtPath -Raw | ConvertFrom-Json
+            if ($null -eq $json.profiles) {
+              Write-Host "::error file=$wtPath::Missing profiles in Windows Terminal settings"
+              exit 1
+            }
+            Write-Host "[PASS] $wtPath JSON valid" -ForegroundColor Green
+          }
+
+          # 2. Validate Fastfetch config
+          $ffPath = "fastfetch/config.jsonc"
+          if (Test-Path $ffPath) {
+            Write-Host "[PASS] $ffPath detected" -ForegroundColor Green
+          }
+
+          # 3. Validate Alacritty TOML
+          $alacrittyPath = "alacritty/alacritty.toml"
+          if (Test-Path $alacrittyPath) {
+            $content = Get-Content $alacrittyPath -Raw
+            if (-not ($content -match "\[window\]") -or -not ($content -match "Agave Nerd Font Mono")) {
+              Write-Host "::error file=$alacrittyPath::Missing window or Agave font configuration"
+              exit 1
+            }
+            Write-Host "[PASS] $alacrittyPath valid" -ForegroundColor Green
+          }
+
+          # 4. Validate WezTerm Lua
+          $weztermPath = "wezterm/wezterm.lua"
+          if (Test-Path $weztermPath) {
+            $content = Get-Content $weztermPath -Raw
+            if (-not ($content -match "Agave Nerd Font Mono") -or -not ($content -match "maximize")) {
+              Write-Host "::error file=$weztermPath::Missing Agave font or maximize configuration"
+              exit 1
+            }
+            Write-Host "[PASS] $weztermPath valid" -ForegroundColor Green
+          }

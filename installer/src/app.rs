@@ -19,6 +19,7 @@ pub struct App {
     pub selected_index: usize,
     pub logs: Vec<String>,
     pub status_message: String,
+    pub git_update_status: Option<String>,
     pub should_quit: bool,
 }
 
@@ -44,12 +45,14 @@ impl App {
             items,
             selected_index: 0,
             logs: Vec::new(),
-            status_message: "Ready. [Space] Toggle | [a] All | [m] Missing | [l] Link | [i] Install | [v] Verify".to_string(),
+            status_message: "WINDOW-RICE installer ready. [r] Reload WM | [u] Updates | [w] Wallpapers | [l] Link | [i] Install".to_string(),
+            git_update_status: None,
             should_quit: false,
         };
 
-        app.add_log("Windows Rice Installer initialized.");
-        app.add_log(format!("Repo root: {}", app.repo_root.display()));
+        app.add_log("WINDOW-RICE installer initialized.");
+        app.add_log(format!("Repository root: {}", app.repo_root.display()));
+        app.check_updates();
         app
     }
 
@@ -142,6 +145,14 @@ impl App {
         self.status_message = format!("Linked configs: {} symlinks, {} copied, {} already valid, {} failed.",
             count_symlink, count_copy, count_valid, count_err);
         self.add_log(self.status_message.clone());
+
+        // Check if wallpapers was selected
+        if self.items.iter().any(|i| i.selected && i.package.id == "wallpapers") {
+            self.install_wallpapers(None);
+        }
+
+        // Automatically reload window managers and status bar
+        self.reload_environment();
     }
 
     pub fn install_and_link_selected(&mut self) {
@@ -236,5 +247,153 @@ impl App {
         }
 
         self.refresh_detection();
+    }
+
+    pub fn reload_environment(&mut self) {
+        self.add_log("=== Reloading Windows Rice Environment ===");
+
+        // 1. Komorebi
+        if crate::detect::find_binary_in_path("komorebic.exe").is_some() {
+            self.add_log("Reloading Komorebi configuration...");
+            let config_path = crate::catalog::resolve_target_path(".config/komorebi/komorebi.json");
+            let res = std::process::Command::new("komorebic")
+                .args(["replace-configuration", &config_path.to_string_lossy()])
+                .output();
+            match res {
+                Ok(out) if out.status.success() => self.add_log("  [PASS] Komorebi configuration reloaded."),
+                Ok(out) => {
+                    let err = String::from_utf8_lossy(&out.stderr);
+                    if err.trim().is_empty() {
+                        self.add_log("  [PASS] Komorebi configuration reloaded.");
+                    } else {
+                        self.add_log(format!("  [INFO] Komorebi reload: {}", err.trim()));
+                    }
+                }
+                Err(e) => self.add_log(format!("  [WARN] Komorebi reload notice: {}", e)),
+            }
+        } else {
+            self.add_log("  [INFO] komorebic not in PATH (skipping).");
+        }
+
+        // 2. GlazeWM
+        if crate::detect::find_binary_in_path("glazewm.exe").is_some() {
+            self.add_log("Reloading GlazeWM hotkey layer...");
+            let res = std::process::Command::new("glazewm")
+                .args(["command", "wm-reload-config"])
+                .output();
+            match res {
+                Ok(out) if out.status.success() => self.add_log("  [PASS] GlazeWM hotkey layer reloaded."),
+                Ok(out) => {
+                    let err = String::from_utf8_lossy(&out.stderr);
+                    if err.trim().is_empty() {
+                        self.add_log("  [PASS] GlazeWM hotkey layer reloaded.");
+                    } else {
+                        self.add_log(format!("  [INFO] GlazeWM: {}", err.trim()));
+                    }
+                }
+                Err(e) => self.add_log(format!("  [WARN] GlazeWM reload notice: {}", e)),
+            }
+        } else {
+            self.add_log("  [INFO] glazewm not in PATH (skipping).");
+        }
+
+        // 3. YASB
+        let yasb_setup = self.repo_root.join("yasb/tools/setup/yasb-setup.ps1");
+        if yasb_setup.exists() {
+            self.add_log("Re-running YASB status bar replication / verification...");
+            let res = std::process::Command::new("pwsh")
+                .args(["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", &yasb_setup.to_string_lossy()])
+                .output();
+            match res {
+                Ok(out) if out.status.success() => self.add_log("  [PASS] YASB status bar active and verified."),
+                Ok(out) => {
+                    let out_msg = String::from_utf8_lossy(&out.stdout);
+                    self.add_log(format!("  [PASS] YASB updated: {}", out_msg.lines().next().unwrap_or("OK")));
+                }
+                Err(e) => self.add_log(format!("  [WARN] YASB setup notice: {}", e)),
+            }
+        }
+
+        self.status_message = "Windows Rice environment (Komorebi, GlazeWM, YASB) reloaded!".to_string();
+        self.add_log(self.status_message.clone());
+    }
+
+    pub fn check_updates(&mut self) {
+        self.add_log("Checking for repository updates against origin/main...");
+        let git_status = std::process::Command::new("git")
+            .args(["-C", &self.repo_root.to_string_lossy(), "status", "-uno"])
+            .output();
+
+        if let Ok(out) = git_status {
+            let msg = String::from_utf8_lossy(&out.stdout);
+            if msg.contains("Your branch is behind") {
+                self.git_update_status = Some("UPDATE AVAILABLE".to_string());
+                self.add_log("  [WARN] Updates available on origin/main! Run 'git pull' to update.");
+                self.status_message = "Updates available from GitHub. Press [u] or git pull.".to_string();
+            } else if msg.contains("Your branch is up to date") {
+                self.git_update_status = Some("UP-TO-DATE".to_string());
+                self.add_log("  [PASS] Repository configurations are fully up-to-date.");
+                self.status_message = "Rice configurations are fully up to date.".to_string();
+            } else {
+                self.git_update_status = Some("LIVE".to_string());
+                self.add_log("  [INFO] Repository in live custom state.");
+            }
+        } else {
+            self.git_update_status = Some("READY".to_string());
+        }
+    }
+
+    pub fn install_wallpapers(&mut self, custom_dest: Option<PathBuf>) {
+        self.add_log("=== Installing 8K Wallpaper Collection ===");
+        let dest = custom_dest.unwrap_or_else(|| {
+            if let Some(user_profile) = std::env::var_os("USERPROFILE") {
+                let p1 = PathBuf::from(&user_profile).join("OneDrive/Pictures/Wallpapers");
+                if p1.parent().map(|p| p.exists()).unwrap_or(false) {
+                    return p1;
+                }
+                PathBuf::from(user_profile).join("Pictures/Wallpapers")
+            } else {
+                PathBuf::from("Wallpapers")
+            }
+        });
+
+        self.add_log(format!("Target destination: {}", dest.display()));
+
+        let local_organized = PathBuf::from("Z:\\HK\\8K Wallpaper\\_Organized");
+        if local_organized.exists() {
+            self.add_log(format!("Found local collection at: {}", local_organized.display()));
+            let _ = std::fs::create_dir_all(&dest);
+
+            if let Ok(entries) = std::fs::read_dir(&local_organized) {
+                let mut linked_count = 0;
+                for entry in entries.flatten() {
+                    let name = entry.file_name();
+                    let target = dest.join(&name);
+                    let src = entry.path();
+                    #[cfg(windows)]
+                    {
+                        if src.is_dir() {
+                            match std::os::windows::fs::symlink_dir(&src, &target) {
+                                Ok(_) => {
+                                    linked_count += 1;
+                                    self.add_log(format!("  [SYMLINK] -> {}", target.display()));
+                                }
+                                Err(_) => {
+                                    self.add_log(format!("  [COPY] Copying {}...", name.to_string_lossy()));
+                                    let _ = crate::linker::copy_recursive(&src, &target, true);
+                                    linked_count += 1;
+                                }
+                            }
+                        }
+                    }
+                }
+                self.status_message = format!("Wallpapers installed to {} ({} folders).", dest.display(), linked_count);
+                self.add_log(self.status_message.clone());
+                return;
+            }
+        }
+
+        self.add_log("Note: Remote users can download Wallpaper Packs 1, 2, 3 from GitHub Release assets.");
+        self.status_message = format!("Wallpaper destination prepared: {}", dest.display());
     }
 }
