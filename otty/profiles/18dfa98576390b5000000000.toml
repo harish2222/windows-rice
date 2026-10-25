@@ -11,6 +11,6 @@ elevate = false
 shell-integration = true
 
 [appearance]
-theme = "catppuccin-mocha"
-theme-dark = "catppuccin-mocha"
+theme = "catppuccin-mocha-glass"
+theme-dark = "catppuccin-mocha-glass"
 title-prefix = "nu"

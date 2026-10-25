@@ -30,27 +30,31 @@ radius     = 4
 shadow     = "0 8px 16px rgba(0,0,0,0.28)"
 font-ui    = ["Segoe UI Variable Text", "Segoe UI", "sans-serif"]
 font-mono  = ["CaskaydiaCove Nerd Font Mono", "Cascadia Mono", "Cascadia Code", "Consolas", "monospace"]
-font-size  = 13
+font-size = 15
 
 [panel]
 background = "#181825"
 surface    = "#1E1E2E"
 border     = "#313244"
 
+[window]
+material   = "glass"
+background = "#1E1E2E"
+opacity    = 0.85
+radius     = 8
+
 # ── Windows acrylic ─────────────────────────────────────────────────────────
-# `acrylic-thin` on the window frame and `acrylic` on the chrome columns.
-# The earlier `material = "acrylic"` on the whole window crashed the XAML
-# compositor on this build; the thin variant is what Otty's own Acrylic Dark
-# theme uses and it keeps the terminal grid on an opaque plate.
+# Neutral dark acrylic frosted glass matching Windows Terminal Catppuccin Mocha.
+# Heavy blur with deep #1E1E2E base prevents desktop wallpaper color bleed.
 [windows]
 material = "acrylic-thin"
-color    = "#181825"
-opacity  = 0.5
+color    = "#1E1E2E"
+opacity  = 0.90
 
 [windows.sidebar]
 material = "acrylic"
 color    = "#181825"
-opacity  = 0.8
+opacity  = 0.95
 
 [sidebar]
 border-right = "none"
@@ -80,3 +84,4 @@ background  = "#CDD6F40F"
 [container]
 background = "#1E1E2E"
 shadow     = "0 1.5px 6px rgba(0,0,0,0.18)"
+padding    = 8

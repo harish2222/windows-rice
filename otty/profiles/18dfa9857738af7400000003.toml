@@ -11,6 +11,6 @@ elevate = false
 shell-integration = true
 
 [appearance]
-theme = "ayu-dark"
-theme-dark = "ayu-dark"
+theme = "catppuccin-mocha-glass"
+theme-dark = "catppuccin-mocha-glass"
 title-prefix = "ayu-dark"

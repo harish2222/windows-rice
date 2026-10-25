@@ -1,0 +1,145 @@
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04">
+  <Obj RefId="0">
+    <TN RefId="0">
+      <T>Microsoft.PowerShell.Commands.PSRepositoryItemInfo</T>
+      <T>System.Management.Automation.PSCustomObject</T>
+      <T>System.Object</T>
+    </TN>
+    <MS>
+      <S N="Name">Microsoft.WinGet.CommandNotFound</S>
+      <Version N="Version">1.0.6.0</Version>
+      <S N="Type">Module</S>
+      <S N="Description">Enable suggestions on how to install missing commands via winget</S>
+      <S N="Author">Microsoft Corporation</S>
+      <S N="CompanyName">cazamor</S>
+      <S N="Copyright">Copyright (c) Microsoft Corporation.</S>
+      <DT N="PublishedDate">2025-12-10T23:46:30+05:30</DT>
+      <Obj N="InstalledDate" RefId="1">
+        <DT>2026-09-30T08:06:18.3842048+05:30</DT>
+        <MS>
+          <Obj N="DisplayHint" RefId="2">
+            <TN RefId="1">
+              <T>Microsoft.PowerShell.Commands.DisplayHintType</T>
+              <T>System.Enum</T>
+              <T>System.ValueType</T>
+              <T>System.Object</T>
+            </TN>
+            <ToString>DateTime</ToString>
+            <I32>2</I32>
+          </Obj>
+        </MS>
+      </Obj>
+      <Nil N="UpdatedDate" />
+      <Nil N="LicenseUri" />
+      <URI N="ProjectUri">https://github.com/Microsoft/winget-command-not-found</URI>
+      <Nil N="IconUri" />
+      <Obj N="Tags" RefId="3">
+        <TN RefId="2">
+          <T>System.Object[]</T>
+          <T>System.Array</T>
+          <T>System.Object</T>
+        </TN>
+        <LST>
+          <S>Windows</S>
+          <S>PSModule</S>
+        </LST>
+      </Obj>
+      <Obj N="Includes" RefId="4">
+        <TN RefId="3">
+          <T>System.Collections.Hashtable</T>
+          <T>System.Object</T>
+        </TN>
+        <DCT>
+          <En>
+            <S N="Key">RoleCapability</S>
+            <Obj N="Value" RefId="5">
+              <TNRef RefId="2" />
+              <LST />
+            </Obj>
+          </En>
+          <En>
+            <S N="Key">Command</S>
+            <Ref N="Value" RefId="5" />
+          </En>
+          <En>
+            <S N="Key">DscResource</S>
+            <Ref N="Value" RefId="5" />
+          </En>
+          <En>
+            <S N="Key">Workflow</S>
+            <Ref N="Value" RefId="5" />
+          </En>
+          <En>
+            <S N="Key">Function</S>
+            <Ref N="Value" RefId="5" />
+          </En>
+          <En>
+            <S N="Key">Cmdlet</S>
+            <Ref N="Value" RefId="5" />
+          </En>
+        </DCT>
+      </Obj>
+      <Nil N="PowerShellGetFormatVersion" />
+      <Nil N="ReleaseNotes" />
+      <Obj N="Dependencies" RefId="6">
+        <TNRef RefId="2" />
+        <LST>
+          <Obj RefId="7">
+            <TN RefId="4">
+              <T>System.Collections.Specialized.OrderedDictionary</T>
+              <T>System.Object</T>
+            </TN>
+            <DCT>
+              <En>
+                <S N="Key">Name</S>
+                <S N="Value">Microsoft.WinGet.Client</S>
+              </En>
+              <En>
+                <S N="Key">MinimumVersion</S>
+                <S N="Value">1.11.460</S>
+              </En>
+              <En>
+                <S N="Key">CanonicalId</S>
+                <S N="Value">nuget:Microsoft.WinGet.Client/1.11.460</S>
+              </En>
+            </DCT>
+          </Obj>
+        </LST>
+      </Obj>
+      <S N="RepositorySourceLocation">https://www.powershellgallery.com/api/v2</S>
+      <S N="Repository">PSGallery</S>
+      <S N="PackageManagementProvider">NuGet</S>
+      <Obj N="AdditionalMetadata" RefId="8">
+        <TN RefId="5">
+          <T>System.Management.Automation.PSCustomObject</T>
+          <T>System.Object</T>
+        </TN>
+        <MS>
+          <S N="copyright">Copyright (c) Microsoft Corporation.</S>
+          <S N="description">Enable suggestions on how to install missing commands via winget</S>
+          <S N="requireLicenseAcceptance">False</S>
+          <S N="isLatestVersion">True</S>
+          <S N="isAbsoluteLatestVersion">True</S>
+          <S N="versionDownloadCount">261656</S>
+          <S N="downloadCount">7879442</S>
+          <S N="packageSize">77861</S>
+          <S N="published">10-12-2025 23:46:30 +05:30</S>
+          <S N="created">10-12-2025 23:46:30 +05:30</S>
+          <S N="lastUpdated">30-09-2026 02:20:01 +05:30</S>
+          <S N="tags">Windows PSModule</S>
+          <S N="developmentDependency">False</S>
+          <S N="updated">2026-09-30T02:20:01Z</S>
+          <S N="NormalizedVersion">1.0.6</S>
+          <S N="Authors">Microsoft Corporation</S>
+          <S N="IsPrerelease">false</S>
+          <S N="ItemType">Module</S>
+          <S N="FileList">Microsoft.WinGet.CommandNotFound.nuspec|LICENSE|Microsoft.WinGet.CommandNotFound.dll|Microsoft.WinGet.CommandNotFound.psd1|ValidateOS.psm1|_manifest\spdx_2.2\bsi.cose|_manifest\spdx_2.2\bsi.json|_manifest\spdx_2.2\ESRPClientLogs1210222435933.json|_manifest\spdx_2.2\manifest.cat|_manifest\spdx_2.2\manifest.spdx.cose|_manifest\spdx_2.2\manifest.spdx.json|_manifest\spdx_2.2\manifest.spdx.json.sha256|.signature.p7s</S>
+          <S N="GUID">7936322d-30fe-410f-b681-114fe84a65d4</S>
+          <S N="PowerShellVersion">7.4</S>
+          <S N="CompanyName">Microsoft Corporation</S>
+        </MS>
+      </Obj>
+      <S N="InstalledLocation">C:\Users\haris\OneDrive\Documents\PowerShell\Modules\Microsoft.WinGet.CommandNotFound\1.0.6.0</S>
+    </MS>
+  </Obj>
+</Objs>

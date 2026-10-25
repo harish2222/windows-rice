@@ -1,0 +1,152 @@
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04">
+  <Obj RefId="0">
+    <TN RefId="0">
+      <T>Microsoft.PowerShell.Commands.PSRepositoryItemInfo</T>
+      <T>System.Management.Automation.PSCustomObject</T>
+      <T>System.Object</T>
+    </TN>
+    <MS>
+      <S N="Name">AudioDeviceCmdlets</S>
+      <Version N="Version">3.1.0.2</Version>
+      <S N="Type">Module</S>
+      <S N="Description">AudioDeviceCmdlets is a suite of PowerShell Cmdlets to control audio devices on Windows</S>
+      <S N="Author">Francois Gendron &lt;fg@frgn.ca&gt;</S>
+      <S N="CompanyName">frgnca</S>
+      <S N="Copyright">(c) 2016-2022 Francois Gendron &lt;fg@frgn.ca&gt;</S>
+      <DT N="PublishedDate">2022-05-28T18:44:10+05:30</DT>
+      <Obj N="InstalledDate" RefId="1">
+        <DT>2026-10-15T16:05:10.5733692+05:30</DT>
+        <MS>
+          <Obj N="DisplayHint" RefId="2">
+            <TN RefId="1">
+              <T>Microsoft.PowerShell.Commands.DisplayHintType</T>
+              <T>System.Enum</T>
+              <T>System.ValueType</T>
+              <T>System.Object</T>
+            </TN>
+            <ToString>DateTime</ToString>
+            <I32>2</I32>
+          </Obj>
+        </MS>
+      </Obj>
+      <Nil N="UpdatedDate" />
+      <URI N="LicenseUri">https://github.com/frgnca/AudioDeviceCmdlets/blob/master/LICENSE</URI>
+      <URI N="ProjectUri">https://github.com/frgnca/AudioDeviceCmdlets</URI>
+      <Nil N="IconUri" />
+      <Obj N="Tags" RefId="3">
+        <TN RefId="2">
+          <T>System.Object[]</T>
+          <T>System.Array</T>
+          <T>System.Object</T>
+        </TN>
+        <LST>
+          <S>audio</S>
+          <S>default</S>
+          <S>playback</S>
+          <S>recording</S>
+          <S>communication</S>
+          <S>device</S>
+          <S>session</S>
+          <S>volume</S>
+          <S>mute</S>
+          <S>mixer</S>
+          <S>toggle</S>
+          <S>switch</S>
+          <S>get</S>
+          <S>set</S>
+          <S>PSModule</S>
+        </LST>
+      </Obj>
+      <Obj N="Includes" RefId="4">
+        <TN RefId="3">
+          <T>System.Collections.Hashtable</T>
+          <T>System.Object</T>
+        </TN>
+        <DCT>
+          <En>
+            <S N="Key">Function</S>
+            <Obj N="Value" RefId="5">
+              <TNRef RefId="2" />
+              <LST />
+            </Obj>
+          </En>
+          <En>
+            <S N="Key">Workflow</S>
+            <Ref N="Value" RefId="5" />
+          </En>
+          <En>
+            <S N="Key">Cmdlet</S>
+            <Obj N="Value" RefId="6">
+              <TNRef RefId="2" />
+              <LST>
+                <S>Get-AudioDevice</S>
+                <S>Set-AudioDevice</S>
+                <S>Write-AudioDevice</S>
+              </LST>
+            </Obj>
+          </En>
+          <En>
+            <S N="Key">RoleCapability</S>
+            <Ref N="Value" RefId="5" />
+          </En>
+          <En>
+            <S N="Key">Command</S>
+            <Obj N="Value" RefId="7">
+              <TNRef RefId="2" />
+              <LST>
+                <S>Get-AudioDevice</S>
+                <S>Set-AudioDevice</S>
+                <S>Write-AudioDevice</S>
+              </LST>
+            </Obj>
+          </En>
+          <En>
+            <S N="Key">DscResource</S>
+            <Ref N="Value" RefId="5" />
+          </En>
+        </DCT>
+      </Obj>
+      <Nil N="PowerShellGetFormatVersion" />
+      <S N="ReleaseNotes">Default communication devices can now be controlled separately from default devices</S>
+      <Obj N="Dependencies" RefId="8">
+        <TNRef RefId="2" />
+        <LST />
+      </Obj>
+      <S N="RepositorySourceLocation">https://www.powershellgallery.com/api/v2</S>
+      <S N="Repository">PSGallery</S>
+      <S N="PackageManagementProvider">NuGet</S>
+      <Obj N="AdditionalMetadata" RefId="9">
+        <TN RefId="4">
+          <T>System.Management.Automation.PSCustomObject</T>
+          <T>System.Object</T>
+        </TN>
+        <MS>
+          <S N="copyright">(c) 2016-2022 Francois Gendron &lt;fg@frgn.ca&gt;</S>
+          <S N="description">AudioDeviceCmdlets is a suite of PowerShell Cmdlets to control audio devices on Windows</S>
+          <S N="requireLicenseAcceptance">False</S>
+          <S N="releaseNotes">Default communication devices can now be controlled separately from default devices</S>
+          <S N="isLatestVersion">True</S>
+          <S N="isAbsoluteLatestVersion">True</S>
+          <S N="versionDownloadCount">8712939</S>
+          <S N="downloadCount">10974298</S>
+          <S N="packageSize">21512</S>
+          <S N="published">28-05-2022 18:44:10 +05:30</S>
+          <S N="created">28-05-2022 18:44:10 +05:30</S>
+          <S N="lastUpdated">15-10-2026 10:20:01 +05:30</S>
+          <S N="tags">audio default playback recording communication device session volume mute mixer toggle switch get set PSModule PSCmdlet_Get-AudioDevice PSCommand_Get-AudioDevice PSCmdlet_Set-AudioDevice PSCommand_Set-AudioDevice PSCmdlet_Write-AudioDevice PSCommand_Write-AudioDevice PSIncludes_Cmdlet</S>
+          <S N="developmentDependency">False</S>
+          <S N="updated">2026-10-15T10:20:01Z</S>
+          <S N="NormalizedVersion">3.1.0.2</S>
+          <S N="Authors">Francois Gendron &lt;fg@frgn.ca&gt;</S>
+          <S N="IsPrerelease">false</S>
+          <S N="ItemType">Module</S>
+          <S N="FileList">AudioDeviceCmdlets.nuspec|AudioDeviceCmdlets.psd1|AudioDeviceCmdlets.dll</S>
+          <S N="GUID">7156b1c0-8e86-4d19-8df1-058c15629f36</S>
+          <S N="PowerShellVersion">3.0</S>
+          <S N="CompanyName">frgnca</S>
+        </MS>
+      </Obj>
+      <S N="InstalledLocation">C:\Users\haris\OneDrive\Documents\PowerShell\Modules\AudioDeviceCmdlets\3.1.0.2</S>
+    </MS>
+  </Obj>
+</Objs>

@@ -11,6 +11,6 @@ elevate = false
 shell-integration = true
 
 [appearance]
-theme = "dracula"
-theme-dark = "dracula"
+theme = "catppuccin-mocha-glass"
+theme-dark = "catppuccin-mocha-glass"
 title-prefix = "dracula"

@@ -106,6 +106,52 @@ GlazeWM is the hotkey layer; Komorebi does the tiling.
 
 ---
 
+## 🚀 Turnkey TUI Installer & Configurator
+
+The rice includes an interactive terminal installer written in Rust (`ratatui` + `crossterm`) located in `installer/` and launched via root script `install.ps1`:
+
+```powershell
+# Launch the interactive dual-pane TUI installer
+.\install.ps1
+
+# Run non-interactive health check & verification report
+.\install.ps1 -Verify
+
+# Link all configuration files (Symbolic links with copy fallback)
+.\install.ps1 -LinkAll
+
+# Install missing packages and link corresponding configs
+.\install.ps1 -InstallMissing
+
+# Bootstrap missing package managers (Scoop, Chocolatey)
+.\install.ps1 -Bootstrap
+```
+
+### Installer Capabilities
+- **Dual-Pane TUI Layout:** Left pane categorizes Window Managers, Terminals, Shells, Navigation, Media, and Editors with multi-select checkboxes. Right pane displays package metadata, binary locations, target configuration paths, and live execution logs.
+- **Automated Package Detection:** Detects installed binaries and packages across Scoop, Winget, Chocolatey, Cargo, NPM, and Python.
+- **Smart Linking:** Creates symbolic links (`mklink` / `New-Item -ItemType SymbolicLink`) with automatic fallback to file copy if Windows Developer Mode or elevation is not available.
+- **Verification Engine:** Validates that all 21 binaries and 19 configuration targets are properly deployed and reachable in `PATH`.
+
+---
+
+## 🐚 Unified Multi-Shell Configurations
+
+All three primary shells are unified under `shells/` with complete parity for autocompletions, fuzzy finding, and theme integration:
+
+- **PowerShell 7 (`shells/powershell/`):** Full profile with `carapace`, `zoxide`, `fzf` prompt suggestions, Terminal-Icons, and AudioDeviceCmdlets.
+- **Nushell (`shells/nushell/`):** Custom structured table pipeline with `carapace.nu` integration, `omp.nu` Catppuccin prompt, and completion modules.
+- **Xonsh (`shells/xonsh/`):** Pythonic shell with `rc.xsh`, `init.xsh`, `.xonshrc`, aliases, and unified completions.
+
+---
+
+## ⚡ Carapace Autocompletion Catalog
+
+Windows Rice includes **63 custom, syntax-checked Carapace completion specifications** located in `carapace/specs/` and synced to `%APPDATA%\carapace\specs\`:
+- Supports subcommands, flags, flag values, and help probes for developer tools: `cargo`, `rustc`, `rustup`, `node`, `npm`, `pnpm`, `bun`, `deno`, `zig`, `python`, `pymanager`, `docker`, `podman`, `terraform`, `claude`, `claude-code`, `codex`, `opencode`, `kilocode`, `cline`, `hermes`, `freebuff`, `scoop`, `winget`, `choco`, `yazi`, `zellij`, `fastboot`, `cava`, `kew`, `cliamp`, `mpd`, `komorebi`, `glazewm`, `yasb`, and more.
+
+---
+
 ## 🔄 Applying Changes Live
 
 ```powershell

@@ -9,9 +9,9 @@ opencode/opencode.json
 .android/
 
 # ===== Nested independent git repos (they keep their own history) =====
-emacs/
-nushell/
-powershell/
+/emacs/
+/nushell/
+/powershell/
 
 # ===== Binaries, build output, compiled tool assets =====
 *.exe
@@ -45,6 +45,7 @@ cliamp/history.toml
 !yasb/tools/pomodoro/Cargo.lock
 !yasb/tools/theme/yasb-theme/Cargo.lock
 !yasb/tools/keybind/Cargo.lock
+!installer/Cargo.lock
 # The picker's Python source and PyInstaller artifacts are NOT tracked (they
 # are a superseded fallback and pull in a large binary). The Rust crate IS the
 # tool now, so its sources are tracked; target/ stays ignored via the rule

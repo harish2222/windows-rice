@@ -1,0 +1,13 @@
+# Runtime data — never commit
+history.txt
+history.sqlite3
+history.sqlite3-*
+plugin.msgpackz
+plugin.msgpackz-*
+
+# Backups
+*.bak.*
+*.bak
+
+# Editor
+.vscode/
