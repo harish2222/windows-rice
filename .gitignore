@@ -1,13 +1,18 @@
 # ===== Never commit: secrets & personal data =====
 forgum/
 nvim/
+neovim/
+rammap/
+RAMMap/
+configstore/
 freebuff-desktop/
+kilo/
+opencode/
 komorebi/backups/
 yasb/assets/raw-art/
 manicode/
 higgsfield/
 containers/podman/
-opencode/opencode.json
 .android/
 
 # ===== Nested independent git repos (they keep their own history) =====
@@ -74,6 +79,4 @@ yasb/tools/pomodoro/pomodoro-state.txt
 yasb/saka-state.json
 # Alarm schedule: written by the bar at runtime, and entirely personal (it is
 # the user's own daily routine). Never belongs in a published repo.
-opencode/*
-kilo/*
 yasb/alarms.json

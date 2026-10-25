@@ -538,6 +538,11 @@ mod tests {
             assert_ne!(item.id, "forgum", "Forgum must not be in catalog");
             assert_ne!(item.id, "neovim", "Neovim must not be in catalog");
             assert_ne!(item.id, "nvim", "nvim must not be in catalog");
+            assert_ne!(item.id, "rammap", "rammap must not be in catalog");
+            assert_ne!(item.id, "configstore", "configstore must not be in catalog");
+            assert_ne!(item.id, "freebuff-desktop", "freebuff-desktop must not be in catalog");
+            assert_ne!(item.id, "kilo", "kilo must not be in catalog");
+            assert_ne!(item.id, "opencode", "opencode must not be in catalog");
         }
     }
 
