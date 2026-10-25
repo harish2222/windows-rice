@@ -36,11 +36,26 @@ pub fn all_keybinds() -> Vec<Keybind> {
         Keybind { keys: "Alt + Shift + ,", desc: "Move window to previous monitor", category: "Multi-Monitor", cmd: "komorebic cycle-move-to-monitor previous" },
         Keybind { keys: "Alt + Shift + .", desc: "Move window to next monitor", category: "Multi-Monitor", cmd: "komorebic cycle-move-to-monitor next" },
 
-        // Window State
+        // Window State & Layout Modes
         Keybind { keys: "Alt + F", desc: "Toggle window fullscreen / maximize", category: "Window State", cmd: "komorebic toggle-maximize" },
         Keybind { keys: "Alt + Shift + F", desc: "Toggle monocle layout", category: "Window State", cmd: "komorebic toggle-monocle" },
-        Keybind { keys: "Alt + T", desc: "Toggle window floating / tiling", category: "Window State", cmd: "komorebic toggle-tiling" },
+        Keybind { keys: "Alt + T", desc: "Toggle window floating / tiling", category: "Window State", cmd: "komorebic toggle-float" },
+        Keybind { keys: "Alt + Shift + T", desc: "Toggle workspace tiling mode", category: "Window State", cmd: "komorebic toggle-tiling" },
         Keybind { keys: "Alt + Q", desc: "Close focused window", category: "Window State", cmd: "komorebic close" },
+
+        // Stacking & Layout Modes
+        Keybind { keys: "Alt + X", desc: "Cycle layout modes (BSP, Columns, Rows, Stacks, Grid)", category: "Layout & Stack", cmd: "komorebic cycle-layout next" },
+        Keybind { keys: "Alt + Shift + X", desc: "Cycle previous layout mode", category: "Layout & Stack", cmd: "komorebic cycle-layout previous" },
+        Keybind { keys: "Alt + S", desc: "Toggle window stacking vs dynamic tiling", category: "Layout & Stack", cmd: "komorebic toggle-window-container-behaviour" },
+        Keybind { keys: "Alt + C / Alt + ]", desc: "Cycle stacked windows in container (forward)", category: "Layout & Stack", cmd: "komorebic cycle-stack next" },
+        Keybind { keys: "Alt + Shift + C / Alt + [", desc: "Cycle stacked windows in container (reverse)", category: "Layout & Stack", cmd: "komorebic cycle-stack previous" },
+        Keybind { keys: "Alt + A", desc: "Stack all windows on workspace", category: "Layout & Stack", cmd: "komorebic stack-all" },
+        Keybind { keys: "Alt + Shift + A", desc: "Unstack all windows on workspace", category: "Layout & Stack", cmd: "komorebic unstack-all" },
+
+        // Quick Resize Shortcuts
+        Keybind { keys: "Alt + =", desc: "Quick expand window (both axes)", category: "Resize", cmd: "komorebic resize-axis horizontal-and-vertical increase" },
+        Keybind { keys: "Alt + -", desc: "Quick shrink window (both axes)", category: "Resize", cmd: "komorebic resize-axis horizontal-and-vertical decrease" },
+        Keybind { keys: "Alt + Shift + =", desc: "Equalize window sizes (retile)", category: "Resize", cmd: "komorebic retile" },
 
         // Workspaces (Focus)
         Keybind { keys: "Alt + 1", desc: "Switch to Workspace 1", category: "Workspaces", cmd: "komorebic focus-workspace 0" },
@@ -80,10 +95,12 @@ pub fn all_keybinds() -> Vec<Keybind> {
 
         // Window Resize Mode
         Keybind { keys: "Alt + R", desc: "Enter window resize mode", category: "Resize Mode", cmd: "" },
-        Keybind { keys: "H / Left", desc: "[Resize Mode] Decrease width (left edge)", category: "Resize Mode", cmd: "komorebic resize-edge left decrease" },
-        Keybind { keys: "L / Right", desc: "[Resize Mode] Increase width (right edge)", category: "Resize Mode", cmd: "komorebic resize-edge right increase" },
-        Keybind { keys: "K / Up", desc: "[Resize Mode] Increase height (top edge)", category: "Resize Mode", cmd: "komorebic resize-edge up increase" },
-        Keybind { keys: "J / Down", desc: "[Resize Mode] Decrease height (bottom edge)", category: "Resize Mode", cmd: "komorebic resize-edge down decrease" },
+        Keybind { keys: "H / Left", desc: "[Resize Mode] Decrease width (horizontal axis)", category: "Resize Mode", cmd: "komorebic resize-axis horizontal decrease" },
+        Keybind { keys: "L / Right", desc: "[Resize Mode] Increase width (horizontal axis)", category: "Resize Mode", cmd: "komorebic resize-axis horizontal increase" },
+        Keybind { keys: "K / Up", desc: "[Resize Mode] Increase height (vertical axis)", category: "Resize Mode", cmd: "komorebic resize-axis vertical increase" },
+        Keybind { keys: "J / Down", desc: "[Resize Mode] Decrease height (vertical axis)", category: "Resize Mode", cmd: "komorebic resize-axis vertical decrease" },
+        Keybind { keys: "Shift + H/L/K/J", desc: "[Resize Mode] Micro-adjust individual edge", category: "Resize Mode", cmd: "komorebic resize-edge" },
+        Keybind { keys: "Space", desc: "[Resize Mode] Reset / retile layout", category: "Resize Mode", cmd: "komorebic retile" },
         Keybind { keys: "Esc / Enter / Alt + R", desc: "[Resize Mode] Exit resize mode", category: "Resize Mode", cmd: "" },
 
         // System & Window Management

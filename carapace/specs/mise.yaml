@@ -1,0 +1,62 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: mise
+description: Development environment and package tool manager
+flags:
+  -q, --quiet: Suppress non-error messages
+  -v, --verbose: Show extra output
+  -y, --yes: Answer yes to all confirmation prompts
+  -h, --help: Print help
+commands:
+  - name: use
+    description: Install a tool and add to configuration
+    flags:
+      -g, --global: Set tool globally
+  - name: install
+    aliases: ["i"]
+    description: Install tools in config
+  - name: run
+    aliases: ["r"]
+    description: Run tasks and their dependencies
+  - name: exec
+    aliases: ["x"]
+    description: Run a command with mise's tools and environment
+  - name: ls
+    aliases: ["list"]
+    description: List installed and active tool versions
+  - name: ls-remote
+    aliases: ["list-all"]
+    description: List tool versions available to install
+  - name: current
+    description: Shows current active tool versions
+  - name: doctor
+    aliases: ["dr"]
+    description: Check your mise setup for problems
+  - name: upgrade
+    aliases: ["up"]
+    description: Upgrade outdated tools
+  - name: uninstall
+    description: Remove installed tool versions
+  - name: env
+    aliases: ["e"]
+    description: Print environment for current configuration
+  - name: set
+    description: Set environment variables in mise.toml
+  - name: watch
+    aliases: ["w"]
+    description: Run tasks and rerun them when files change
+  - name: plugins
+    description: Manage plugins
+    commands:
+      - name: install
+        description: Install a plugin
+      - name: ls
+        description: List installed plugins
+      - name: update
+        description: Update plugins
+      - name: uninstall
+        description: Remove a plugin
+  - name: cache
+    description: Manage the mise cache
+    commands:
+      - name: clear
+        description: Clear cache

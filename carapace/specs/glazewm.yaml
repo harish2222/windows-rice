@@ -1,0 +1,47 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: glazewm
+description: Tiling window manager for Windows inspired by i3 and bspwm
+flags:
+  -h, --help: Print help
+  -V, --version: Print version
+commands:
+  - name: start
+    description: Starts the window manager
+  - name: query
+    description: Retrieves and outputs window manager state
+    commands:
+      - name: monitors
+        description: Query monitors
+      - name: workspaces
+        description: Query workspaces
+      - name: windows
+        description: Query windows
+      - name: binding-modes
+        description: Query binding modes
+  - name: command
+    description: Invokes a window manager command
+    commands:
+      - name: focus
+        description: Focus window in direction
+      - name: move
+        description: Move window in direction
+      - name: close
+        description: Close focused window
+      - name: toggle-fullscreen
+        description: Toggle fullscreen
+      - name: toggle-floating
+        description: Toggle floating state
+      - name: toggle-tiling
+        description: Toggle tiling state
+      - name: toggle-tiling-direction
+        description: Toggle tiling direction horizontal/vertical
+      - name: wm-reload-config
+        description: Reload configuration file
+      - name: wm-exit
+        description: Exit GlazeWM
+      - name: wm-toggle-pause
+        description: Toggle pause
+  - name: sub
+    description: Subscribes to WM events
+  - name: unsub
+    description: Unsubscribes from events

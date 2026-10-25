@@ -1,0 +1,122 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: uv
+description: An extremely fast Python package manager
+flags:
+  -q, --quiet: Use quiet output
+  -v, --verbose: Use verbose output
+  -n, --no-cache: Avoid reading from or writing to the cache
+  --color=: Control the use of color in output
+  --offline: Disable network access
+  --directory=: Change to the given directory
+  --project=: Discover a project in the given directory
+  -h, --help: Display help
+  -V, --version: Display version
+commands:
+  - name: run
+    description: Run a command or script
+  - name: init
+    description: Create a new project
+    flags:
+      --app: Create an application project
+      --lib: Create a library project
+      --package: Create a packaged project
+  - name: add
+    description: Add dependencies to the project
+    flags:
+      --dev: Add dependency as development dependency
+      --optional=: Add dependency to optional group
+      --upgrade: Upgrade specified dependencies
+  - name: remove
+    description: Remove dependencies from the project
+  - name: sync
+    description: Update the project's environment
+    flags:
+      --all-extras: Install all optional dependency groups
+      --no-dev: Omit development dependencies
+  - name: lock
+    description: Update the project's lockfile
+    flags:
+      -U, --upgrade: Upgrade all dependencies
+  - name: export
+    description: Export the project's lockfile
+    flags:
+      --format=: Export format (requirements-txt)
+  - name: tree
+    description: Display the project's dependency tree
+  - name: format
+    description: Format Python code in the project
+  - name: check
+    description: Run checks on the project
+  - name: audit
+    description: Audit the project's dependencies
+  - name: tool
+    description: Run and install commands provided by Python packages
+    commands:
+      - name: run
+        description: Run a tool in an isolated environment
+      - name: install
+        description: Install a tool
+      - name: uninstall
+        description: Uninstall a tool
+      - name: list
+        description: List installed tools
+      - name: upgrade
+        description: Upgrade an installed tool
+  - name: python
+    description: Manage Python versions and installations
+    commands:
+      - name: list
+        description: List available Python versions
+      - name: install
+        description: Install a Python version
+      - name: uninstall
+        description: Uninstall a Python version
+      - name: find
+        description: Find a Python installation
+      - name: pin
+        description: Pin the Python version for the current project
+  - name: pip
+    description: Manage Python packages with a pip-compatible interface
+    commands:
+      - name: compile
+        description: Compile requirements
+      - name: install
+        description: Install packages
+        flags:
+          -r, --requirement=: Install from requirements file
+          -e, --editable=: Install in editable mode
+          -U, --upgrade: Upgrade packages
+      - name: uninstall
+        description: Uninstall packages
+      - name: list
+        description: List installed packages
+      - name: show
+        description: Show package information
+      - name: tree
+        description: Show dependency tree
+      - name: freeze
+        description: Output installed packages in requirements format
+      - name: check
+        description: Verify package compatibility
+  - name: venv
+    description: Create a virtual environment
+    flags:
+      -p, --python=: Python interpreter to use
+  - name: build
+    description: Build Python packages into source distributions and wheels
+  - name: publish
+    description: Upload distributions to an index
+  - name: cache
+    description: Manage uv's cache
+    commands:
+      - name: clean
+        description: Clear the cache
+      - name: dir
+        description: Show cache directory path
+      - name: prune
+        description: Prune unused cache entries
+  - name: self
+    description: Manage the uv executable
+    commands:
+      - name: update
+        description: Update uv to latest version

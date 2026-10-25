@@ -1,0 +1,105 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: scoop
+description: A command-line installer for Windows
+flags:
+  -h, --help: Show help
+  -v, --version: Show version
+commands:
+  - name: install
+    description: Install apps
+    flags:
+      -g, --global: Install the app globally
+      -i, --independent: Don't install dependencies automatically
+      -k, --no-cache: Don't use the download cache
+      -s, --skip: Skip hash validation
+      -u, --no-update-scoop: Don't update Scoop before installing
+  - name: uninstall
+    description: Uninstall an app
+    flags:
+      -g, --global: Uninstall globally installed app
+      -p, --purge: Remove all persistent data
+  - name: update
+    description: Update apps, or Scoop itself
+    flags:
+      -a, --all: Update all installed apps
+      -f, --force: Force update
+      -g, --global: Update globally installed apps
+      -i, --independent: Don't install dependencies automatically
+      -k, --no-cache: Don't use the download cache
+      -s, --skip: Skip hash validation
+  - name: list
+    description: List installed apps
+  - name: search
+    description: Search available apps
+  - name: status
+    description: Show status and check for new app versions
+  - name: info
+    description: Display information about an app
+  - name: home
+    description: Open app homepage
+  - name: checkup
+    description: Check for potential problems
+  - name: cat
+    description: Show content of specified manifest
+  - name: cleanup
+    description: Cleanup old versions of apps
+    flags:
+      -a, --all: Cleanup all apps
+      -g, --global: Cleanup global apps
+      -k, --cache: Remove outdated download cache
+  - name: config
+    description: Get or set configuration values
+    commands:
+      - name: rm
+        description: Remove config setting
+  - name: which
+    description: Locate a shim/executable
+  - name: hold
+    description: Hold an app to disable updates
+    flags:
+      -g, --global: Hold globally installed app
+  - name: unhold
+    description: Unhold an app to enable updates
+    flags:
+      -g, --global: Unhold globally installed app
+  - name: bucket
+    description: Manage Scoop buckets
+    commands:
+      - name: add
+        description: Add a bucket
+      - name: list
+        description: List added buckets
+      - name: rm
+        description: Remove a bucket
+      - name: known
+        description: List known buckets
+  - name: cache
+    description: Show or clear the download cache
+    commands:
+      - name: show
+        description: Show download cache
+      - name: rm
+        description: Remove item(s) from download cache
+        flags:
+          -a, --all: Clear all cache
+  - name: alias
+    description: Manage scoop aliases
+    commands:
+      - name: add
+        description: Add an alias
+      - name: list
+        description: List aliases
+      - name: rm
+        description: Remove an alias
+  - name: depends
+    description: List dependencies for an app
+  - name: export
+    description: Export installed apps and buckets
+  - name: import
+    description: Import apps and buckets
+  - name: prefix
+    description: Returns the path to the specified app
+  - name: reset
+    description: Reset an app to resolve conflicts
+  - name: virustotal
+    description: Look for app's hash on virustotal.com

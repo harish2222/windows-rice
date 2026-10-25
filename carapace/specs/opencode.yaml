@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: opencode
+description: OpenCode command line interface
+flags:
+  -c, --continue: Continue the last session
+  -s, --session=: Session ID to continue or create
+  --prompt=: Prompt to use
+  --auto: Auto-approve permissions
+  --standalone: Run with a private server
+  -h, --help: Show help
+  -v, --version: Show version
+commands:
+  - name: run
+    description: Run OpenCode with a message
+  - name: session
+    description: Manage sessions
+  - name: models
+    description: List all available models
+  - name: mcp
+    description: Manage MCP servers
+  - name: plugin
+    description: Manage plugins
+  - name: auth
+    description: Manage integrations and credentials
+  - name: stats
+    description: Show usage statistics
+  - name: serve
+    description: Start the v2 API and web server
+  - name: upgrade
+    aliases: ["update"]
+    description: Upgrade OpenCode

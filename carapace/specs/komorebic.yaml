@@ -1,0 +1,65 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: komorebic
+description: Command-line interface for Komorebi tiling window manager
+flags:
+  -h, --help: Print help
+  -V, --version: Print version
+commands:
+  - name: start
+    description: Start komorebi.exe as a background process
+  - name: stop
+    description: Stop the komorebi.exe process and restore all hidden windows
+  - name: restart
+    description: Restart komorebi.exe
+  - name: focus
+    description: Change focus to the window in the specified direction
+    commands:
+      - name: left
+        description: Focus left window
+      - name: right
+        description: Focus right window
+      - name: up
+        description: Focus up window
+      - name: down
+        description: Focus down window
+  - name: move
+    description: Move the focused window in the specified direction
+    commands:
+      - name: left
+        description: Move window left
+      - name: right
+        description: Move window right
+      - name: up
+        description: Move window up
+      - name: down
+        description: Move window down
+  - name: minimize
+    description: Minimize the focused window
+  - name: close
+    description: Close the focused window
+  - name: state
+    description: Show JSON representation of current window manager state
+  - name: reload-configuration
+    description: Reload configuration file
+  - name: toggle-float
+    description: Toggle floating state for focused window
+  - name: toggle-monocle
+    description: Toggle monocle layout on the focused workspace
+  - name: toggle-maximize
+    description: Toggle maximize on the focused window
+  - name: focus-workspace
+    description: Focus the specified workspace
+  - name: move-to-workspace
+    description: Move the focused window to specified workspace
+  - name: focus-monitor
+    description: Focus the specified monitor
+  - name: move-to-monitor
+    description: Move focused window to specified monitor
+  - name: cycle-layout
+    description: Cycle through available layouts
+  - name: flip-layout
+    description: Flip layout horizontally or vertically
+  - name: check
+    description: Check komorebi configuration for common errors
+  - name: configuration
+    description: Show the path to komorebi.json

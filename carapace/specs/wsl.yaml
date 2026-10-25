@@ -1,0 +1,41 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: wsl
+description: Windows Subsystem for Linux
+flags:
+  -d, --distribution=: Run the specified distribution
+  -u, --user=: Run as the specified user
+  --cd=: Sets the specified directory as current working directory
+  -e, --exec=: Execute command without default shell
+  -s, --set-default=: Set the distribution as default
+  -l, --list: List distributions
+  -t, --terminate=: Terminate the specified distribution
+  --shutdown: Immediately terminate all running distributions
+  --status: Show WSL status
+  -v, --version: Display version information
+  --update: Update the WSL package
+  --install: Install a Linux distribution
+  --unregister=: Unregister a distribution
+  --help: Display help
+commands:
+  - name: --list
+    aliases: ["-l"]
+    description: List distributions
+    flags:
+      -v, --verbose: Show detailed information
+      -q, --quiet: Only show distribution names
+      --running: List only running distributions
+      -o, --online: List available distributions for install
+  - name: --install
+    description: Install a distribution
+    flags:
+      -n, --no-launch: Do not launch distribution after install
+      --web-download: Download directly from the internet
+  - name: --update
+    description: Update WSL
+    flags:
+      --pre-release: Download pre-release version
+      --rollback: Revert to previous version
+  - name: --shutdown
+    description: Immediately terminate all running distributions
+  - name: --status
+    description: Show status of Windows Subsystem for Linux
