@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: yasb\tools\saka\tests / panchang
+// Title -: Astronomical Panchang Calculation Accuracy Test Suite
 // ============================================================================
 // Panchang tests, pinned to Drik Panchang's published day panchangs for
 // Hyderabad (geoname-id 1269843).

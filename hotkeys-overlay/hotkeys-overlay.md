@@ -1,7 +1,7 @@
 <!--
 Author -: HKDEVS
 Project -: Window-Rice
-Title -: hotkeys-overlay / hotkeys-overlay
+Title -: GlazeWM and Windows Rice Hotkeys Overlay Documentation
 -->
 # hotkeys-overlay — Alt+/ cheatsheet for the rice
 

@@ -1,7 +1,7 @@
 # ============================================================================
 # Author -: HKDEVS
 # Project -: Window-Rice
-# Title -: yasb\tools\saka / saka-today
+# Title -: Saka Panchang Daily Ephemeris Fetcher Script
 # ============================================================================
 # saka-today: emits today's Indian national (Saka) calendar date.
 # YASB custom widget calls this; stdout becomes the widget label.

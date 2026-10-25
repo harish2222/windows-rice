@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: Cava Audio Shader (spectrogram.frag)
+// Title -: CAVA Frequency Waterfall Spectrogram Shader
 // ============================================================================
 #version 330
 

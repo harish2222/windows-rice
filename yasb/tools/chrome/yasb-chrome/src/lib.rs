@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: YASB chrome/yasb-chrome Module (lib)
+// Title -: YASB Chrome High-Performance Acrylic Blur Library
 // ============================================================================
 //! Shared window chrome for the YASB bar's popups.
 //!

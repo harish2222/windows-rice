@@ -1,7 +1,7 @@
 :: ============================================================================
 :: Author -: HKDEVS
 :: Project -: Window-Rice
-:: Title -: yasb\tools\theme / yasb-theme-next
+:: Title -: Batch Shortcut to Switch to Next YASB Theme
 :: ============================================================================
 @echo off
 "%~dp0yasb-theme.exe" next

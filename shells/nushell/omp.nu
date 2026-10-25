@@ -1,7 +1,7 @@
 # ============================================================================
 # Author -: HKDEVS
 # Project -: Window-Rice
-# Title -: shells\nushell / omp
+# Title -: Nushell Oh-My-Posh Prompt Theme Initializer
 # ============================================================================
 
 let _omp_executable: string = (echo "C:/Users/haris/scoop/apps/oh-my-posh/current/oh-my-posh.exe")

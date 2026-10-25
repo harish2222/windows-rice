@@ -1,7 +1,7 @@
 # ============================================================================
 # Author -: HKDEVS
 # Project -: Window-Rice
-# Title -: Otty Terminal Profile (18dfa9857738af7400000003)
+# Title -: Otty Terminal Ubuntu WSL2 Linux Environment Profile
 # ============================================================================
 [profile]
 name = "Ubuntu-26.04"

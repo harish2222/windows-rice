@@ -1,7 +1,7 @@
 <!--
 Author -: HKDEVS
 Project -: Window-Rice
-Title -: yasb\tools\picker / picker
+Title -: YASB Palette Picker User Documentation
 -->
 # picker — theme palette picker & font tool
 

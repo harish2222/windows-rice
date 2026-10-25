@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: YASB chrome/yasb-chrome Module (canvas)
+// Title -: Direct2D Hardware Accelerated Surface Canvas Renderer
 // ============================================================================
 //! Pure pixel drawing on a 32-bit BGRA buffer.
 //!

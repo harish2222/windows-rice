@@ -39,7 +39,7 @@ pub fn run_verification(repo_root: &Path) -> VerificationReport {
     let mut linked_configs = 0;
 
     lines.push("\n[Components & Configs]".to_string());
-    lines.push(format!("{:<22} {:<14} {:<18} {:<24}", "Package", "Binary", "Config Status", "Target Location"));
+    lines.push(format!("{:<25} {:<14} {:<18} {:<24}", "Package", "Binary", "Config Status", "Target Location"));
     lines.push("-".repeat(80));
 
     for item in &catalog {
@@ -70,7 +70,7 @@ pub fn run_verification(repo_root: &Path) -> VerificationReport {
             .map(|c| c.target_pattern)
             .unwrap_or("PATH only");
 
-        lines.push(format!("{:<22} {:<14} {:<18} {:<24}", item.name, bin_str, link_str, target_str));
+        lines.push(format!("{:<25} {:<14} {:<18} {:<24}", item.name, bin_str, link_str, target_str));
     }
 
     // 3. Carapace specs count

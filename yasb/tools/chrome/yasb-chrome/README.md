@@ -1,7 +1,7 @@
 <!--
 Author -: HKDEVS
 Project -: Window-Rice
-Title -: Windows Rice Project Documentation & Architecture
+Title -: YASB Chrome Native Win32 Acrylic Panel and GDI Canvas Architecture Guide
 -->
 # yasb-chrome
 

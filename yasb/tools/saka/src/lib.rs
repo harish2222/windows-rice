@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: YASB saka Module (lib)
+// Title -: Hindu Luni-Solar Calendar and Tithi Calculation Library
 // ============================================================================
 //! Rangalipi panchangam — Saka national calendar + full Telugu panchangam.
 //!

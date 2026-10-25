@@ -240,13 +240,18 @@ def --env music [...args: string] {
 
 # --- 7. WINDOWS RICE INTERACTIVE TUI & MANAGER ---
 def --env window-rice [
-    --reload (-r)        # Reload Windows Rice environment (Komorebi, GlazeWM, YASB)
-    --verify (-v)        # Run verification check
-    --update (-u)        # Check updates from git origin
-    --link-all           # Link all configs
-    --install-missing    # Install missing packages
-    --wallpapers (-w)    # Install 8K wallpapers
-    ...args: string      # Additional arguments
+    --reload (-r)                # Reload Windows Rice environment (Komorebi, GlazeWM, YASB)
+    --verify (-v)                # Run verification check
+    --update (-c)                # Check updates from git origin (-c or -u)
+    --check-updates (-u)         # Check updates from git origin
+    --link-all                   # Link all configs
+    --unlink (-x)                # Unlink configs cleanly and restore backups
+    --unlink-all                 # Unlink all configs cleanly without trace and restore backups
+    --install-missing            # Install missing packages
+    --wallpapers (-w)            # Install 8K wallpapers
+    --uninstall-wallpapers       # Uninstall 8K wallpapers
+    --bootstrap (-b)             # Bootstrap Scoop, Choco, UV, Vcpkg
+    ...args: string              # Additional arguments
 ] {
     let installer = ($nu.home-dir | path join ".config" "installer" "target" "release" "rice-installer.exe")
     let cargo_toml = ($nu.home-dir | path join ".config" "installer" "Cargo.toml")
@@ -271,10 +276,14 @@ def --env window-rice [
 
     mut pass_args = []
     if $verify { $pass_args = ($pass_args | append "--verify") }
-    if $update { $pass_args = ($pass_args | append "--update") }
+    if $update or $check_updates { $pass_args = ($pass_args | append "--update") }
     if $link_all { $pass_args = ($pass_args | append "--link-all") }
+    if $unlink { $pass_args = ($pass_args | append "--unlink") }
+    if $unlink_all { $pass_args = ($pass_args | append "--unlink-all") }
     if $install_missing { $pass_args = ($pass_args | append "--install-missing") }
     if $wallpapers { $pass_args = ($pass_args | append "--wallpapers") }
+    if $uninstall_wallpapers { $pass_args = ($pass_args | append "--uninstall-wallpapers") }
+    if $bootstrap { $pass_args = ($pass_args | append "--bootstrap") }
     if ($args | is-not-empty) { $pass_args = ($pass_args | append $args) }
 
     if ($installer | path exists) {

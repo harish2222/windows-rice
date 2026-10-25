@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: yasb\tools\pomodoro\tests / cli
+// Title -: Pomodoro Focus Timer Integration and CLI Test Suite
 // ============================================================================
 // Integration tests for the 55/5 state machine, driven through the CLI
 // exactly like the bar drives it. Every test points POMODORO_STATE at an

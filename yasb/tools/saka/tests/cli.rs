@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: yasb\tools\saka\tests / cli
+// Title -: Saka Panchang CLI Regression and Verification Tests
 // ============================================================================
 // Integration tests: run the built CLI against the official month-start
 // table of the Indian national calendar (Gazette of India / Rashtriya

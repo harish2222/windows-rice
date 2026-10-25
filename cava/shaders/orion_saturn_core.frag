@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: Cava Audio Shader (orion_saturn_core.frag)
+// Title -: CAVA Saturn Planetary Core Audio Spectrum Shader
 // ============================================================================
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2026 rezky_nightky <with.rezky@gmail.com>

@@ -1,7 +1,7 @@
 # ============================================================================
 # Author -: HKDEVS
 # Project -: Window-Rice
-# Title -: shells\nushell\vendor\autoload / oh-my-posh
+# Title -: Nushell Vendor Autoload Oh-My-Posh Prompt Integration
 # ============================================================================
 
 let _omp_executable: string = (echo "C:/Users/haris/scoop/apps/oh-my-posh/current/oh-my-posh.exe")

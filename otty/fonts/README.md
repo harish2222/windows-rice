@@ -1,7 +1,7 @@
 <!--
 Author -: HKDEVS
 Project -: Window-Rice
-Title -: Windows Rice Project Documentation & Architecture
+Title -: Otty Terminal Custom User Font Installation and Registration Guide
 -->
 # Otty — User Fonts
 

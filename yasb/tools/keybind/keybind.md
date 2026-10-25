@@ -1,7 +1,7 @@
 <!--
 Author -: HKDEVS
 Project -: Window-Rice
-Title -: yasb\tools\keybind / keybind
+Title -: YASB Hotkey Overlay and Cheatsheet Documentation
 -->
 # keybind — Keybindings Cheatsheet Menu
 

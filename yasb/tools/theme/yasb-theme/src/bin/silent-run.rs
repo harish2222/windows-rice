@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: YASB theme/yasb-theme Module (bin/silent-run)
+// Title -: Windows Subsystem Silent Background Process Launcher
 // ============================================================================
 //! silent-run — launch a console program with no visible window.
 //!

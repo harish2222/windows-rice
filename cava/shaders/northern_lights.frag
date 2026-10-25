@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: Cava Audio Shader (northern_lights.frag)
+// Title -: CAVA Aurora Borealis Wave Spectrum Audio Shader
 // ============================================================================
 #version 330
 

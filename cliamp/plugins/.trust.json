@@ -1,5 +1,5 @@
 {
-  "$comment": "Author -: HKDEVS | Project -: Window-Rice | Title -: CLIamp Audio Plugin (.trust.json)",
+  "$comment": "Author -: HKDEVS | Project -: Window-Rice | Title -: CLIamp Lua Audio Plugin Security Trust Verification Registry",
   "version": 1,
   "plugins": {
     "cliamp-lastfm": "be73c93d78dda77df6b4a1d8e9f19660cc5e8d18be4aef1edd1e0ad7343d4f30",

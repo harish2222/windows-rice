@@ -1,7 +1,7 @@
 # ============================================================================
 # Author -: HKDEVS
 # Project -: Window-Rice
-# Title -: yasb\tools\picker / palette-picker-build
+# Title -: YASB Palette Picker Build and Packaging Automation Script
 # ============================================================================
 # Rebuilds the Rust palette picker.
 #

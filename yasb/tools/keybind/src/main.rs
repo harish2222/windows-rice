@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: YASB keybind Module (main)
+// Title -: GlazeWM Hotkey Cheatsheet GUI Application Entrypoint
 // ============================================================================
 //! Omarchy-style Keybindings cheatsheet popup with fuzzy search and Apple design.
 //! Built with yasb-chrome and yasb-theme for seamless design integration.

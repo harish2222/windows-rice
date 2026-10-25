@@ -1,7 +1,7 @@
 <!--
 Author -: HKDEVS
 Project -: Window-Rice
-Title -: Windows Rice Project Documentation & Architecture
+Title -: YASB Shared Window Manager Integration and Architecture Guide
 -->
 # Shared Window Manager Configurations
 

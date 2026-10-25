@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: YASB screen-shot Module (main)
+// Title -: High-DPI Multi-Monitor Screen Capture Utility with Crop Overlay
 // ============================================================================
 //! screen-shot — screenshot and diff tool for the YASB bar's popups.
 //!

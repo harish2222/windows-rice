@@ -1,7 +1,7 @@
 # ============================================================================
 # Author -: HKDEVS
 # Project -: Window-Rice
-# Title -: Otty Terminal Profile (18dfa98577864a4000000004)
+# Title -: Otty Terminal Docker Desktop WSL2 Profile
 # ============================================================================
 [profile]
 name = "docker-desktop"

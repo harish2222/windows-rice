@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: YASB chrome/yasb-chrome Module (scale)
+// Title -: High-DPI Display Scaling and Monitor Metric Calculator
 // ============================================================================
 //! One spacing and type scale for every panel.
 //!

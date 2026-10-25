@@ -1,7 +1,7 @@
 <!--
 Author -: HKDEVS
 Project -: Window-Rice
-Title -: yasb\themes\rangalipi / DESIGN
+Title -: YASB Rangalipi Odia Cultural Theme Design Specifications
 -->
 # Apple Widget Design System Specification (DESIGN.md)
 

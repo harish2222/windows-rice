@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: YASB chrome/yasb-chrome Module (typeface)
+// Title -: DirectWrite Custom Font and Typeface Loader
 // ============================================================================
 //! One type scale, shared by every panel, derived from the bar's own font.
 //!

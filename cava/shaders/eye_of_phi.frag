@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: Cava Audio Shader (eye_of_phi.frag)
+// Title -: CAVA Golden Ratio Eye of Phi Harmonic Visualizer Shader
 // ============================================================================
 #version 330
 

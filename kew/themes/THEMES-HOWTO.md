@@ -1,7 +1,7 @@
 <!--
 Author -: HKDEVS
 Project -: Window-Rice
-Title -: kew\themes / THEMES-HOWTO
+Title -: Kew Terminal Music Player Theme Customization Guide
 -->
 ## How to make your own theme or edit an existing one
 

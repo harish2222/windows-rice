@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: YASB saka-popup Module (main)
+// Title -: Saka Indian Calendar Popup Window Application Entrypoint
 // ============================================================================
 //! saka-popup — a frameless, always-on-top panchangam panel for the YASB bar.
 //!

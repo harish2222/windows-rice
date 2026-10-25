@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: YASB theme/yasb-theme Module (motifs)
+// Title -: Built-In Catppuccin, Nord, and Tokyonight Theme Motif Presets
 // ============================================================================
 //! Random motif assignment from the SVG files already on disk.
 //!

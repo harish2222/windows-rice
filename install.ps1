@@ -25,11 +25,14 @@
 param(
     [switch]$Verify,
     [switch]$LinkAll,
+    [switch]$Unlink,
+    [switch]$UnlinkAll,
     [switch]$InstallMissing,
     [switch]$Bootstrap,
     [switch]$Reload,
     [switch]$Update,
     [switch]$Wallpapers,
+    [switch]$UninstallWallpapers,
     [string]$WallpaperDir,
     [switch]$Help
 )
@@ -48,15 +51,17 @@ Local Usage:
     .\install.ps1 [OPTIONS]
 
 Options:
-    -Reload          Reload Komorebi WM, GlazeWM hotkeys, and YASB status bar
-    -Update          Check repository for upstream updates
-    -Wallpapers      Install 8K wallpapers to default (Pictures\Wallpapers) or -WallpaperDir
-    -WallpaperDir    Custom directory to store wallpapers
-    -Verify          Run comprehensive system health check and exit
-    -LinkAll         Link all configuration files without prompt
-    -InstallMissing  Install missing binaries and link configs
-    -Bootstrap       Bootstrap Scoop, Chocolatey, UV, and Vcpkg
-    -Help            Show this help text
+    -Reload               Reload Komorebi WM, GlazeWM hotkeys, and YASB status bar
+    -Update               Check repository for upstream updates
+    -Wallpapers           Install 8K wallpapers to default (Pictures\Wallpapers) or -WallpaperDir
+    -UninstallWallpapers  Remove 8K wallpapers from Pictures\Wallpapers
+    -Verify               Run comprehensive system health check and exit
+    -LinkAll              Link all configuration files without prompt (backs up user configs)
+    -Unlink               Unlink selected/installed configurations cleanly and restore backups
+    -UnlinkAll            Unlink all configurations cleanly without trace and restore backups
+    -InstallMissing       Install missing binaries and link configs
+    -Bootstrap            Bootstrap Scoop, Chocolatey, UV, and Vcpkg
+    -Help                 Show this help text
 
 Running without options launches the interactive Rust Ratatui TUI (WINDOW-RICE installer).
 "@
@@ -120,10 +125,13 @@ $manifestPath = Join-Path $installerDir "Cargo.toml"
 $extraArgs = @()
 if ($Verify) { $extraArgs += "--verify" }
 if ($LinkAll) { $extraArgs += "--link-all" }
+if ($Unlink) { $extraArgs += "--unlink" }
+if ($UnlinkAll) { $extraArgs += "--unlink-all" }
 if ($InstallMissing) { $extraArgs += "--install-missing" }
 if ($Bootstrap) { $extraArgs += "--bootstrap" }
 if ($Reload) { $extraArgs += "--reload" }
 if ($Update) { $extraArgs += "--update" }
+if ($UninstallWallpapers) { $extraArgs += "--uninstall-wallpapers" }
 if ($Wallpapers) {
     $extraArgs += "--wallpapers"
     if ($WallpaperDir) { $extraArgs += $WallpaperDir }
@@ -201,6 +209,23 @@ switch ($choice) {
             "shells\powershell"                 = $pwshDest
             "shells\nushell"                    = "$appData\nushell"
             "shells\xonsh"                      = "$appData\xonsh"
+        }
+
+        if ($Unlink -or $UnlinkAll) {
+            Write-Host "Running native config unlinking (binaries kept)..." -ForegroundColor Yellow
+            foreach ($src in $destMap.Keys) {
+                $dstPath = $destMap[$src]
+                if (Test-Path $dstPath) {
+                    try {
+                        Remove-Item $dstPath -Recurse -Force
+                        Write-Host "  [UNLINKED] $dstPath" -ForegroundColor Green
+                    } catch {
+                        Write-Host "  [WARN] Could not remove ${dstPath}: $_" -ForegroundColor Red
+                    }
+                }
+            }
+            Write-Host "[Windows Rice] Unlinking complete. Clean without trace." -ForegroundColor Green
+            exit 0
         }
 
         foreach ($src in $destMap.Keys) {

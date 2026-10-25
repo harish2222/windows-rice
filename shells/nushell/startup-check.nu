@@ -1,7 +1,7 @@
 # ============================================================================
 # Author -: HKDEVS
 # Project -: Window-Rice
-# Title -: shells\nushell / startup-check
+# Title -: Nushell Diagnostic Environment and Path Verification
 # ============================================================================
 print $"Nu startup time: ($nu.startup-time)"
 print $"All OK!"

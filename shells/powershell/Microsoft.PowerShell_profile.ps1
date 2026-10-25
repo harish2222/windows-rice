@@ -864,15 +864,21 @@ function window-rice {
         Launches the Windows Rice TUI installer & real-time manager.
     .DESCRIPTION
         Detects installed configurations, shows live package states, checks for updates,
-        and provides interactive config management.
+        unlinks/restores backups, and provides interactive config management.
     #>
     [CmdletBinding()]
     param(
-        [switch]$Verify,
+        [Alias('v')][switch]$Verify,
         [switch]$LinkAll,
+        [Alias('x')][switch]$Unlink,
+        [switch]$UnlinkAll,
         [switch]$InstallMissing,
-        [switch]$Reload,
-        [switch]$Update
+        [Alias('r')][switch]$Reload,
+        [Alias('c')][switch]$Update,
+        [Alias('w')][switch]$Wallpapers,
+        [string]$WallpaperDir,
+        [switch]$UninstallWallpapers,
+        [Alias('b')][switch]$Bootstrap
     )
 
     $targetExe = Join-Path $HOME ".config\installer\target\release\rice-installer.exe"
@@ -906,7 +912,16 @@ function window-rice {
     $passArgs = @()
     if ($Verify) { $passArgs += "--verify" }
     if ($LinkAll) { $passArgs += "--link-all" }
+    if ($Unlink) { $passArgs += "--unlink" }
+    if ($UnlinkAll) { $passArgs += "--unlink-all" }
     if ($InstallMissing) { $passArgs += "--install-missing" }
+    if ($Update) { $passArgs += "--update" }
+    if ($Wallpapers -or $WallpaperDir) {
+        $passArgs += "--wallpapers"
+        if ($WallpaperDir) { $passArgs += $WallpaperDir }
+    }
+    if ($UninstallWallpapers) { $passArgs += "--uninstall-wallpapers" }
+    if ($Bootstrap) { $passArgs += "--bootstrap" }
 
     if (Test-Path $targetExe) {
         & $targetExe @passArgs

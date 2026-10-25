@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: YASB picker/palette-picker Module (main)
+// Title -: Palette Picker GUI Application Entrypoint
 // ============================================================================
 //! palette-picker — the bar's graphical theme picker, in Rust.
 //!

@@ -1,7 +1,7 @@
 # ============================================================================
 # Author -: HKDEVS
 # Project -: Window-Rice
-# Title -: shells\nushell\modules / fzf
+# Title -: Nushell Fuzzy Finder Interactive Search Integration
 # ============================================================================
 # ==============================================================================
 # FZF.NU — Interactive Fuzzy Completion, Auto-Suggestions & Helpers for Nushell

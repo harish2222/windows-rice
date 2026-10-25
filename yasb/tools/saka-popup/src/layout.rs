@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: YASB saka-popup Module (layout)
+// Title -: Saka Calendar Dialog Layout and Tithi Phase Renderer
 // ============================================================================
 //! Panel geometry, in one place.
 //!

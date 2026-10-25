@@ -1,5 +1,5 @@
 {
-  "$comment": "Author -: HKDEVS | Project -: Window-Rice | Title -: oh-my-posh / catppuccin-mocha.omp",
+  "$comment": "Author -: HKDEVS | Project -: Window-Rice | Title -: Oh-My-Posh Catppuccin Mocha Prompt Theme Configuration",
   "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
   "version": 3,
   "final_space": true,

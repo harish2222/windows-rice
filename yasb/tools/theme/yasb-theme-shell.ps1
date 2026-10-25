@@ -1,7 +1,7 @@
 # ============================================================================
 # Author -: HKDEVS
 # Project -: Window-Rice
-# Title -: yasb\tools\theme / yasb-theme-shell
+# Title -: PowerShell Wrapper for YASB Theme Management and Hotkey Integration
 # ============================================================================
 # Easy terminal use of the bar theme switcher. Dot-source from a profile:
 #   . "$env:USERPROFILE\.config\yasb\tools\theme\yasb-theme-shell.ps1"

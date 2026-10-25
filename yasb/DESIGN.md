@@ -1,7 +1,7 @@
 <!--
 Author -: HKDEVS
 Project -: Window-Rice
-Title -: yasb / DESIGN
+Title -: YASB Status Bar Architecture and Design Principles
 -->
 # Apple Widget Design System Specification (DESIGN.md)
 

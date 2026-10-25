@@ -1,7 +1,7 @@
 <!--
 Author -: HKDEVS
 Project -: Window-Rice
-Title -: yasb\tools\theme / theme
+Title -: YASB Theme Cycling and Switcher System Guide
 -->
 # theme — the bar's theme-switch engine
 

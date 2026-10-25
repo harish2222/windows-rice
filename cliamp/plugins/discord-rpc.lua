@@ -1,7 +1,7 @@
 -- ============================================================================
 -- Author -: HKDEVS
 -- Project -: Window-Rice
--- Title -: CLIamp Audio Plugin (discord-rpc.lua)
+-- Title -: CLIamp Discord Rich Presence Activity Integration Plugin
 -- ============================================================================
 -- discord-rpc: publishes Cliamp playback state for cliamp-rpcd.
 --

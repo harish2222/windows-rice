@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: YASB saka-popup Module (theme)
+// Title -: Saka Calendar Popup Visual Theme and Color Constants
 // ============================================================================
 //! Theme extraction: read the *active* theme block out of `styles.css` and turn
 //! its CSS custom properties into RGBA colours.

@@ -1,7 +1,7 @@
 # ============================================================================
 # Author -: HKDEVS
 # Project -: Window-Rice
-# Title -: Otty Terminal Profile (18dfa98577d5a25c00000005)
+# Title -: Otty Terminal openSUSE Leap WSL2 Environment Profile
 # ============================================================================
 [profile]
 name = "openSUSE-Leap-16.0"

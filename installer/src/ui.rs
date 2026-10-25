@@ -270,9 +270,9 @@ fn render_logs(f: &mut Frame, app: &App, area: Rect) {
 
 fn render_footer(f: &mut Frame, app: &App, area: Rect) {
     let keys = vec![
-        Span::styled("[↑/↓/j/k] ", Style::default().fg(Color::Rgb(137, 180, 250)).add_modifier(Modifier::BOLD)),
+        Span::styled("[↑/↓/PgUp/PgDn] ", Style::default().fg(Color::Rgb(137, 180, 250)).add_modifier(Modifier::BOLD)),
         Span::raw("Nav "),
-        Span::styled("[Space] ", Style::default().fg(Color::Rgb(166, 227, 161)).add_modifier(Modifier::BOLD)),
+        Span::styled("[Space/Enter] ", Style::default().fg(Color::Rgb(166, 227, 161)).add_modifier(Modifier::BOLD)),
         Span::raw("Toggle "),
         Span::styled("[a] ", Style::default().fg(Color::Rgb(180, 190, 254)).add_modifier(Modifier::BOLD)),
         Span::raw("All "),
@@ -280,11 +280,13 @@ fn render_footer(f: &mut Frame, app: &App, area: Rect) {
         Span::raw("Missing "),
         Span::styled("[l] ", Style::default().fg(Color::Rgb(148, 226, 213)).add_modifier(Modifier::BOLD)),
         Span::raw("Link "),
+        Span::styled("[u/x] ", Style::default().fg(Color::Rgb(243, 139, 168)).add_modifier(Modifier::BOLD)),
+        Span::raw("Unlink/Restore "),
         Span::styled("[i] ", Style::default().fg(Color::Rgb(166, 227, 161)).add_modifier(Modifier::BOLD)),
         Span::raw("Install "),
         Span::styled("[r] ", Style::default().fg(Color::Rgb(203, 166, 247)).add_modifier(Modifier::BOLD)),
         Span::raw("Reload WM "),
-        Span::styled("[u] ", Style::default().fg(Color::Rgb(137, 220, 235)).add_modifier(Modifier::BOLD)),
+        Span::styled("[c] ", Style::default().fg(Color::Rgb(137, 220, 235)).add_modifier(Modifier::BOLD)),
         Span::raw("Updates "),
         Span::styled("[w] ", Style::default().fg(Color::Rgb(249, 226, 175)).add_modifier(Modifier::BOLD)),
         Span::raw("Wallpapers "),

@@ -1,7 +1,7 @@
 # ============================================================================
 # Author -: HKDEVS
 # Project -: Window-Rice
-# Title -: shells\nushell / config-additions
+# Title -: Nushell Custom Aliases, Helpers, and Environment Tweaks
 # ============================================================================
 # ==============================================================================
 # CONFIG-ADDITIONS.NU — Extra integrations, sourced from config.nu §30

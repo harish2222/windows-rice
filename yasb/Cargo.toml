@@ -1,7 +1,7 @@
 # ============================================================================
 # Author -: HKDEVS
 # Project -: Window-Rice
-# Title -: yasb / Cargo
+# Title -: YASB Workspace Root Cargo Manifest
 # ============================================================================
 [workspace]
 members = [

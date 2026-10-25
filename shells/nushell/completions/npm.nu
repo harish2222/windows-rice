@@ -1,7 +1,7 @@
 # ============================================================================
 # Author -: HKDEVS
 # Project -: Window-Rice
-# Title -: shells\nushell\completions / npm
+# Title -: Nushell Node Package Manager Command Completions
 # ============================================================================
 # NPM custom completions for Nushell
 

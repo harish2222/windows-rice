@@ -1,7 +1,7 @@
 # ============================================================================
 # Author -: HKDEVS
 # Project -: Window-Rice
-# Title -: installer / Cargo
+# Title -: WINDOW-RICE TUI Installer Cargo Package Manifest
 # ============================================================================
 [package]
 name = "rice-installer"

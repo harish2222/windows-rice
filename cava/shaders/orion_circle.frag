@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: Cava Audio Shader (orion_circle.frag)
+// Title -: CAVA Circular Radial Soundwave Visualizer Shader
 // ============================================================================
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2026 rezky_nightky <with.rezky@gmail.com>

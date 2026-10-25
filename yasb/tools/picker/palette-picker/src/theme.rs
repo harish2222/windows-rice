@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: YASB picker/palette-picker Module (theme)
+// Title -: Live Theme Application and YASB CSS Generation Engine
 // ============================================================================
 //! Theme colours for the picker window.
 //!

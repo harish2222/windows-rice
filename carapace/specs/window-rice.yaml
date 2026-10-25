@@ -1,0 +1,26 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: WINDOW-RICE Shell Command Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: window-rice
+description: Windows Rice Shell Command - TUI Setup, Status, and Manager
+flags:
+  -r, --reload: Reload Komorebi, GlazeWM, and YASB status bar
+  -c, --update: Check git repository upstream status for updates
+  -u, --check-updates: Check git repository upstream status for updates
+  -w, --wallpapers=: Install 8K wallpaper collection (default Pictures\Wallpapers)
+  --uninstall-wallpapers: Remove 8K wallpapers from Pictures\Wallpapers
+  -v, --verify: Run non-interactive system health check and exit
+  --link-all: Link all configuration files (symlink with copy fallback)
+  -x, --unlink: Unlink selected configs cleanly and restore backups
+  --unlink-selected: Unlink selected configs cleanly and restore backups
+  --unlink-all: Unlink all configs cleanly without trace and restore backups
+  --install-missing: Install missing packages and link corresponding configs
+  -b, --bootstrap: Bootstrap Scoop, Chocolatey, UV, and Vcpkg if missing
+  -h, --help: Show help message
+completion:
+  flag:
+    wallpapers:
+      - $directories

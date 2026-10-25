@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: YASB chrome/yasb-chrome Module (singleton)
+// Title -: Win32 Mutex Singleton Application Instance Guard
 // ============================================================================
 //! One instance of a panel at a time.
 //!

@@ -1,7 +1,7 @@
 # ============================================================================
 # Author -: HKDEVS
 # Project -: Window-Rice
-# Title -: YASB theme/yasb-theme Package Manifest
+# Title -: YASB Theme Switcher Cargo Package Manifest
 # ============================================================================
 [package]
 name = "yasb-theme"

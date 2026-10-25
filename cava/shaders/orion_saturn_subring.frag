@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: Cava Audio Shader (orion_saturn_subring.frag)
+// Title -: CAVA Saturn Planetary Orbital Subring Audio Spectrum Shader
 // ============================================================================
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2026 rezky_nightky <with.rezky@gmail.com>

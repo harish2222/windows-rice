@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: YASB saka-popup Module (state)
+// Title -: Panchang Calendar Date and Festival State Management
 // ============================================================================
 //! Persistent state for saka-popup.
 //!

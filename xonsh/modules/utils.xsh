@@ -1,7 +1,7 @@
 # ============================================================================
 # Author -: HKDEVS
 # Project -: Window-Rice
-# Title -: xonsh\modules / utils
+# Title -: Xonsh Shell Utility Functions and Filesystem Navigation Helpers
 # ============================================================================
 # ============================================================================
 #  xonsh Modules - God Mode Component: Utilities & Functions

@@ -1,7 +1,7 @@
 # ============================================================================
 # Author -: HKDEVS
 # Project -: Window-Rice
-# Title -: shells\nushell\modules / conda
+# Title -: Nushell Conda Virtual Environment Management Module
 # ============================================================================
 # =============================================================================
 #  conda.nu — ZERO-LAG CONDA FOR NUSHELL (KV-snapshot approach)

@@ -1,7 +1,7 @@
 # ============================================================================
 # Author -: HKDEVS
 # Project -: Window-Rice
-# Title -: YASB saka-popup Package Manifest
+# Title -: Saka Indian Calendar Moon Phase Popup Package Manifest
 # ============================================================================
 [package]
 name = "saka-popup"

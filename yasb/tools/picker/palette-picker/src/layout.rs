@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: YASB picker/palette-picker Module (layout)
+// Title -: Interactive Palette Swatch Grid and Selector Layout
 // ============================================================================
 //! Filtering and grid geometry, kept free of Win32 so it can be tested.
 //!

@@ -1,7 +1,7 @@
 # ============================================================================
 # Author -: HKDEVS
 # Project -: Window-Rice
-# Title -: shells\nushell\completions / platformio
+# Title -: Nushell PlatformIO Embedded Systems CLI Completions
 # ============================================================================
 # PlatformIO custom completions for Nushell
 

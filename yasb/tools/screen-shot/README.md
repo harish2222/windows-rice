@@ -1,7 +1,7 @@
 <!--
 Author -: HKDEVS
 Project -: Window-Rice
-Title -: Windows Rice Project Documentation & Architecture
+Title -: YASB Layered Window Screen Capture CLI Documentation
 -->
 # screen-shot
 

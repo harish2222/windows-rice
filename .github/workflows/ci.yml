@@ -46,6 +46,10 @@ jobs:
       - name: Run installer unit tests
         run: cargo test --manifest-path installer/Cargo.toml --verbose
 
+      - name: Run YASB workspace unit tests
+        if: matrix.os == 'windows-latest'
+        run: cargo test --manifest-path yasb/Cargo.toml --verbose
+
       - name: Build release binary
         run: cargo build --release --manifest-path installer/Cargo.toml
 
@@ -70,7 +74,9 @@ jobs:
           $profiles = @(
             "install.ps1",
             "shells/powershell/profile.ps1",
-            "shells/powershell/Microsoft.PowerShell_profile.ps1"
+            "shells/powershell/Microsoft.PowerShell_profile.ps1",
+            "powershell/profile.ps1",
+            "powershell/Microsoft.PowerShell_profile.ps1"
           )
           $allPassed = $true
           foreach ($p in $profiles) {
@@ -92,19 +98,37 @@ jobs:
       - name: Validate Carapace Completion Specs
         shell: pwsh
         run: |
+          if (-not (Get-Command carapace -ErrorAction SilentlyContinue)) {
+            try {
+              $carapaceZip = "$env:TEMP\carapace.zip"
+              Invoke-RestMethod -Uri "https://github.com/carapace-sh/carapace-bin/releases/latest/download/carapace-bin_windows_amd64.zip" -OutFile $carapaceZip -TimeoutSec 10
+              Expand-Archive -Path $carapaceZip -DestinationPath "$env:TEMP\carapace-bin" -Force
+              $env:PATH += ";$env:TEMP\carapace-bin"
+            } catch {
+              Write-Host "Notice: carapace binary not downloaded, falling back to schema check: $_"
+            }
+          }
           $specs = Get-ChildItem -Path "carapace/specs" -Filter "*.yaml"
           Write-Host "Validating $($specs.Count) Carapace completion specs..." -ForegroundColor Cyan
           $failed = 0
           foreach ($s in $specs) {
-            try {
-              $content = Get-Content $s.FullName -Raw
-              if ([string]::IsNullOrWhiteSpace($content) -or -not ($content -match "name:")) {
-                Write-Host "::error file=$($s.FullName)::Missing name in completion spec"
+            if (Get-Command carapace -ErrorAction SilentlyContinue) {
+              $res = carapace --codegen $s.FullName 2>&1
+              if ($LASTEXITCODE -ne 0 -or ($res -match "Error:")) {
+                Write-Host "::error file=$($s.FullName)::$res"
                 $failed++
               }
-            } catch {
-              Write-Host "::error file=$($s.FullName)::Failed to read spec: $_"
-              $failed++
+            } else {
+              try {
+                $content = Get-Content $s.FullName -Raw
+                if ([string]::IsNullOrWhiteSpace($content) -or -not ($content -match "name:")) {
+                  Write-Host "::error file=$($s.FullName)::Missing name in completion spec"
+                  $failed++
+                }
+              } catch {
+                Write-Host "::error file=$($s.FullName)::Failed to read spec: $_"
+                $failed++
+              }
             }
           }
           if ($failed -gt 0) {

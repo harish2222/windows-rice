@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: Cava Audio Shader (winamp_line_style_spectrum.frag)
+// Title -: CAVA Winamp Classic Oscilloscope Line Spectrum Shader
 // ============================================================================
 #version 330
 

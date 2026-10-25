@@ -40,6 +40,11 @@ rzodo/bin/
 yasb/tools/picker/
 *.bak*
 
+# ===== Agent working directories and scratch =====
+.agents/
+agents/
+ORIGINAL_REQUEST.md
+
 # ===== Dependencies =====
 node_modules/
 

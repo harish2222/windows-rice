@@ -1,7 +1,7 @@
 <!--
 Author -: HKDEVS
 Project -: Window-Rice
-Title -: yasb\tools\pomodoro / pomodoro
+Title -: YASB Pomodoro Focus Timer Widget Documentation
 -->
 # pomodoro — 55/5 focus timer for the bar
 

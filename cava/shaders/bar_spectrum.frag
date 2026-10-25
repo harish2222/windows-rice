@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: Cava Audio Shader (bar_spectrum.frag)
+// Title -: CAVA Linear Frequency Bar Spectrum Shader
 // ============================================================================
 #version 330
 

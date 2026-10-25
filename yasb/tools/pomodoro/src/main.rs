@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: YASB pomodoro Module (main)
+// Title -: CLI Pomodoro Timer with Audio Chimes and Task Tracking
 // ============================================================================
 // Rangalipi pomodoro — 55 min work / 5 min break focus timer for the YASB bar.
 //

@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: YASB komorebi-sync Module (main)
+// Title -: Komorebi Named Pipe State Synchronizer for YASB Workspace Bar
 // ============================================================================
 //! Komorebi Workspace Window Count Synchronizer
 //!

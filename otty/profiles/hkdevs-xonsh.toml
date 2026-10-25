@@ -1,7 +1,7 @@
 # ============================================================================
 # Author -: HKDEVS
 # Project -: Window-Rice
-# Title -: Otty Terminal Profile (hkdevs-xonsh)
+# Title -: Otty Terminal Xonsh Pythonic Shell Profile
 # ============================================================================
 [profile]
 name = "Xonsh"

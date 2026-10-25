@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: YASB keybind Module (model)
+// Title -: GlazeWM Hotkey Configuration Parser and Data Model
 // ============================================================================
 //! Data model for the keybindings cheatsheet.
 

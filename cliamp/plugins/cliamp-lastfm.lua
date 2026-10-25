@@ -1,7 +1,7 @@
 -- ============================================================================
 -- Author -: HKDEVS
 -- Project -: Window-Rice
--- Title -: CLIamp Audio Plugin (cliamp-lastfm.lua)
+-- Title -: CLIamp Last.fm Scrobbler and Music Metadata Plugin
 -- ============================================================================
 local p = plugin.register({
     name = "lastfm",

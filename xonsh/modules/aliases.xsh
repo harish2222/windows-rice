@@ -1,7 +1,7 @@
 # ============================================================================
 # Author -: HKDEVS
 # Project -: Window-Rice
-# Title -: xonsh\modules / aliases
+# Title -: Xonsh Shell Ergonomic Command Aliases and Shortcuts
 # ============================================================================
 # ============================================================================
 #  xonsh Modules - God Mode Component: Aliases

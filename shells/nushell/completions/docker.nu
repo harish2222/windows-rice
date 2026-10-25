@@ -1,7 +1,7 @@
 # ============================================================================
 # Author -: HKDEVS
 # Project -: Window-Rice
-# Title -: shells\nushell\completions / docker
+# Title -: Nushell Docker Container Engine Command Completions
 # ============================================================================
 # Docker custom completions for Nushell
 

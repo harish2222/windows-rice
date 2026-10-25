@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: YASB saka-popup Module (moon)
+// Title -: Real-Time Astronomical Moon Illumination Calculator
 // ============================================================================
 //! 3D Procedural Moon Sphere & Astronomical Sky Phase Renderer.
 //!

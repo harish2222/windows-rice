@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: YASB saka Module (main)
+// Title -: Saka Panchang CLI Tool Entrypoint
 // ============================================================================
 // Rangalipi saka — Indian national (Saka) calendar converter and full
 // Telugu panchangam.

@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: YASB keybind Module (theme)
+// Title -: Hotkey Overlay Catppuccin Mocha Color Theme & Fonts
 // ============================================================================
 //! Theme colors for the keybindings cheatsheet.
 

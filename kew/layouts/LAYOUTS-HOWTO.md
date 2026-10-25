@@ -1,7 +1,7 @@
 <!--
 Author -: HKDEVS
 Project -: Window-Rice
-Title -: Kew Music Player Layout (LAYOUTS-HOWTO.md)
+Title -: Kew Terminal Music Player Custom Layout Architecture Guide
 -->
 ## How to make your own kew
 

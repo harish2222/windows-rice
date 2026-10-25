@@ -1,7 +1,7 @@
 # ============================================================================
 # Author -: HKDEVS
 # Project -: Window-Rice
-# Title -: YASB screen-shot Package Manifest
+# Title -: High-DPI Multi-Monitor Screen Capture Package Manifest
 # ============================================================================
 [package]
 name = "screen-shot"

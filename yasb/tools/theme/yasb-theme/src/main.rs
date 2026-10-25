@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: YASB theme/yasb-theme Module (main)
+// Title -: YASB Theme Switcher CLI Tool Entrypoint
 // ============================================================================
 //! yasb-theme — switch the YASB bar color theme from the bar or terminal.
 //!

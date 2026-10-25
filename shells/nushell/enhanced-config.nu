@@ -1,7 +1,7 @@
 # ============================================================================
 # Author -: HKDEVS
 # Project -: Window-Rice
-# Title -: shells\nushell / enhanced-config
+# Title -: Nushell Enhanced Interactive Shell Configuration and Hooks
 # ============================================================================
 # ==============================================================================
 # ENHANCED-CONFIG.NU — Minimal stub

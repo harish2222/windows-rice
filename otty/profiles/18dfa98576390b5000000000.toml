@@ -1,7 +1,7 @@
 # ============================================================================
 # Author -: HKDEVS
 # Project -: Window-Rice
-# Title -: Otty Terminal Profile (18dfa98576390b5000000000)
+# Title -: Otty Terminal Nushell Environment Profile
 # ============================================================================
 [profile]
 name = "Nushell"

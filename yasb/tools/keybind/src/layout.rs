@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: YASB keybind Module (layout)
+// Title -: Visual Keyboard Matrix and Cheatsheet Grid Layout Renderer
 // ============================================================================
 //! Geometry and layout calculation for the keybinds cheatsheet panel.
 

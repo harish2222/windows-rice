@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: Cava Audio Shader (pass_through.vert)
+// Title -: CAVA Direct Pass-Through Vertex Transform Shader
 // ============================================================================
 #version 330
 

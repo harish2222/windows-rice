@@ -1,7 +1,7 @@
 <!--
 Author -: HKDEVS
 Project -: Window-Rice
-Title -: yasb\tools\setup / setup
+Title -: YASB Replication, Turnkey Setup, and Testing Guide
 -->
 # setup — One-Shot Bootstrap & Replication Pipeline
 

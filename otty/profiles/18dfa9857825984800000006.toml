@@ -1,7 +1,7 @@
 # ============================================================================
 # Author -: HKDEVS
 # Project -: Window-Rice
-# Title -: Otty Terminal Profile (18dfa9857825984800000006)
+# Title -: Otty Terminal Podman Machine WSL2 Linux Profile
 # ============================================================================
 [profile]
 name = "podman-machine-default"

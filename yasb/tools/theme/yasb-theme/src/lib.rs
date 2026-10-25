@@ -1,7 +1,7 @@
 // ============================================================================
 // Author -: HKDEVS
 // Project -: Window-Rice
-// Title -: YASB theme/yasb-theme Module (lib)
+// Title -: YASB Theme Parsing, Configuration Writing, and Cycling Library
 // ============================================================================
 //! Stylesheet parsing shared by the theme switcher and the palette picker.
 //!

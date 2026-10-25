@@ -1,7 +1,7 @@
 # ============================================================================
 # Author -: HKDEVS
 # Project -: Window-Rice
-# Title -: shells\nushell\completions / mod
+# Title -: Nushell Shell Completions Aggregator Module
 # ============================================================================
 # ==============================================================================
 # Nushell Completions Module — Custom completions for domain-specific tools

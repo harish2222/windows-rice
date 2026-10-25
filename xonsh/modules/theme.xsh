@@ -1,7 +1,7 @@
 # ============================================================================
 # Author -: HKDEVS
 # Project -: Window-Rice
-# Title -: xonsh\modules / theme
+# Title -: Xonsh Shell Catppuccin Mocha Prompt and Color Theme
 # ============================================================================
 # ============================================================================
 #  xonsh Modules - God Mode Component: Prompt & Theme
