@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: kew
+description: Lightweight terminal music player
+flags:
+  -h, --help: Displays help message and usage details
+  -v, --version: Displays version information
+  --nocover: Hides the album cover art
+  --noui: Completely hides the text user interface (TUI)
+  -q, --quitonstop: Automatically exits player after active playlist finishes
+  -e, --exact: Forces exact case-insensitive match for keywords
+  --path=: Override path to music library directory
+commands:
+  - name: all
+    description: Load and play all songs in library shuffled
+  - name: albums
+    description: Play all albums sequentially in random/shuffled order
+  - name: shuffle
+    description: Shuffle matched playlist before starting playback
+  - name: dir
+    description: Force search target specifically as a directory
+  - name: song
+    description: Force search target specifically as a track
+  - name: list
+    description: Search for and play a specific .m3u playlist
+  - name: play
+    description: Directly play specific file or album folder path
+    completion:
+      positionalany:
+        - $files
+        - $directories
+  - name: theme
+    description: Apply a visual color theme from config directory
+    completion:
+      positional:
+        - ["catppuccin", "nord", "dracula", "gruvbox", "tokyonight", "everforest", "solarized", "monokai"]
+completion:
+  positionalany:
+    - $files
+    - $directories

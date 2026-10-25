@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: whichllm
+description: Query and inspect LLM models, parameters, and embeddings
+flags:
+  --provider=: Specify LLM provider
+  --embedding: Search specifically for embedding models
+  --chat: Search specifically for chat/instruct models
+  --format=: Output format
+  -v, --version: Print version
+  -h, --help: Print help
+completion:
+  flag:
+    provider:
+      - ollama
+      - huggingface
+      - openai
+      - openrouter
+      - groq
+      - mistral
+    format:
+      - table
+      - json
+      - plain
+  positional:
+    - ["qwen3-embedding:8B", "llama3.3:70b", "llama3.1:8b", "deepseek-r1:8b", "deepseek-r1:14b", "phi4:14b", "mistral:7b"]

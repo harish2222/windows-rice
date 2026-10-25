@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: freebuff
+description: Freebuff - Free AI coding assistant
+flags:
+  -v, --version: Print the CLI version
+  --continue?: Continue from previous conversation (optionally specify conversation ID)
+  --cwd=: Set the working directory (default current directory)
+  --trust-agents: Load repository .agents files and mcp.json without asking
+  -h, --help: Show this help message
+completion:
+  flag:
+    cwd:
+      - $directories
+commands:
+  - name: login
+    description: Authenticate with Freebuff

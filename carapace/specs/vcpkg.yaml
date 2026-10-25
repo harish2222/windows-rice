@@ -1,0 +1,99 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: vcpkg
+description: C++ library manager for Windows, Linux, and MacOS
+flags:
+  --triplet=: Specify the target architecture triplet
+  --host-triplet=: Specify the host architecture triplet
+  --vcpkg-root=: Specify the vcpkg root directory
+  --x-install-root=: Specify the installation directory
+  --binarysource=: Binary cache providers
+  --classic: Mode where manifest mode is disabled
+  -v, --version: Display version
+  -h, --help: Display help
+completion:
+  flag:
+    triplet:
+      - x64-windows
+      - x86-windows
+      - x64-windows-static
+      - arm64-windows
+      - x64-linux
+      - x64-osx
+      - arm64-osx
+    host-triplet:
+      - x64-windows
+      - x86-windows
+      - arm64-windows
+    vcpkg-root:
+      - $directories
+commands:
+  - name: install
+    description: Install a package
+    flags:
+      --dry-run: Do not actually build or install
+      --editable: Enable editing sources of ports
+      --head: Install the port using the latest upstream sources
+      --no-downloads: Do not download new sources
+      --only-downloads: Download sources but do not build
+      --recurse: Allow removal of packages as part of installation
+    completion:
+      positionalany:
+        - $files
+  - name: remove
+    description: Uninstall a package
+    flags:
+      --purge: Remove all cached files and packages
+      --recurse: Allow removal of dependent packages
+  - name: search
+    description: Search for packages available to be built
+  - name: list
+    description: List installed libraries
+  - name: update
+    description: List packages that can be upgraded
+  - name: upgrade
+    description: Rebuild all outdated packages
+    flags:
+      --no-dry-run: Actually perform the upgrade
+  - name: integrate
+    description: Integrate vcpkg with machines, projects, or shells
+    commands:
+      - name: install
+        description: Integrate with Visual Studio / MSBuild system-wide
+      - name: remove
+        description: Remove system-wide integration
+      - name: project
+        description: Generate a referencing NuGet package
+      - name: powershell
+        description: Enable powershell tab-completion
+      - name: bash
+        description: Enable bash tab-completion
+      - name: zsh
+        description: Enable zsh tab-completion
+  - name: new
+    description: Creates a new manifest
+    flags:
+      --name=: Application name
+      --version=: Version string
+      --application: Create application manifest instead of library
+  - name: add
+    description: Add dependency to manifest
+    commands:
+      - name: port
+        description: Add port dependency to vcpkg.json
+      - name: artifact
+        description: Add artifact to vcpkg-configuration.json
+  - name: format-manifest
+    description: Pretty-format vcpkg.json
+    flags:
+      --all: Format all manifests in repo
+  - name: hash
+    description: Get a file's SHA512 hash
+    completion:
+      positional:
+        - ["$files"]
+  - name: owns
+    description: Search for the owner of a file in installed packages
+  - name: depend-info
+    description: Display list of dependencies for ports
+  - name: edit
+    description: Edit a port

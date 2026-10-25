@@ -1,0 +1,80 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: kilo
+description: Kilo CLI agentic coding tool
+flags:
+  -c, --continue: Continue last session
+  --cloud-fork: Fetch session from cloud and continue locally
+  --cors=: Additional domains to allow for CORS
+  --fork: Fork session when continuing
+  -h, --help: Show help
+  --hostname=: Hostname to listen on
+  --log-level=: Log level (DEBUG, INFO, WARN, ERROR)
+  --mdns: Enable mDNS service discovery
+  --mdns-domain=: Custom domain name for mDNS service
+  -m, --model=: Model in provider/model format
+  --port=: Port to listen on
+  --print-logs: Print logs to stderr
+  --prompt=: Prompt to use
+  --pure: Run without external plugins
+  -s, --session=: Session id to continue
+  -v, --version: Show version number
+completion:
+  flag:
+    log-level:
+      - DEBUG
+      - INFO
+      - WARN
+      - ERROR
+commands:
+  - name: acp
+    description: Start ACP (Agent Client Protocol) server
+  - name: agent
+    description: Manage agents
+  - name: attach
+    description: Attach to running server
+  - name: auth
+    aliases: ["providers"]
+    description: Manage AI providers and credentials
+  - name: cloud
+    description: Run Cloud Agent tasks
+  - name: config
+    description: Configuration tools
+  - name: daemon
+    description: Manage the local daemon
+  - name: db
+    description: Database tools
+  - name: debug
+    description: Debugging and troubleshooting tools
+  - name: export
+    description: Export session data as JSON
+  - name: github
+    description: Manage GitHub agent
+  - name: import
+    description: Import session data from JSON file or URL
+  - name: mcp
+    description: Manage MCP (Model Context Protocol) servers
+  - name: models
+    description: List all available models
+  - name: plugin
+    aliases: ["plug"]
+    description: Install plugin and update config
+  - name: pr
+    description: Fetch and checkout a GitHub PR branch, then run
+  - name: profile
+    description: Show account profile
+  - name: remote
+    description: Enable remote connection for real-time session relay
+  - name: run
+    description: Run with a message
+  - name: serve
+    description: Starts a headless server
+  - name: session
+    description: Manage sessions
+  - name: stats
+    description: Show token usage and cost statistics
+  - name: uninstall
+    description: Uninstall and remove all related files
+  - name: upgrade
+    description: Upgrade to latest or specific version
+  - name: web
+    description: Start server and open web interface

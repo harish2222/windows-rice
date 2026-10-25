@@ -1,0 +1,97 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: mpc
+description: Command-line client for Music Player Daemon (MPD)
+flags:
+  -v, --verbose: Give verbose output
+  -q, --quiet: Suppress status message
+  -h, --host=: Connect to server on host
+  -P, --password=: Connect using password
+  -p, --port=: Connect to server port
+  -f, --format=: Print status with format
+  -w, --wait: Wait for operation to finish
+commands:
+  - name: play
+    description: Start playing at position
+  - name: pause
+    description: Pause currently playing song
+  - name: toggle
+    description: Toggle Play/Pause
+  - name: stop
+    description: Stop the currently playing playlist
+  - name: next
+    description: Play next song in playlist
+  - name: prev
+    description: Play previous song in playlist
+  - name: current
+    description: Show currently playing song
+  - name: status
+    description: Display status
+  - name: add
+    description: Add a song or directory to the current playlist
+    completion:
+      positionalany:
+        - $files
+  - name: del
+    description: Remove a song from the current playlist
+  - name: clear
+    description: Clear the current playlist
+  - name: crop
+    description: Remove all but the currently playing song
+  - name: shuffle
+    description: Shuffle the current playlist
+  - name: playlist
+    description: Print the current playlist
+  - name: volume
+    description: Set volume or adjust by offset (+/-)
+  - name: repeat
+    description: Toggle repeat mode or set on/off
+    completion:
+      positional:
+        - ["on", "off"]
+  - name: random
+    description: Toggle random mode or set on/off
+    completion:
+      positional:
+        - ["on", "off"]
+  - name: single
+    description: Toggle single mode or set on/off
+    completion:
+      positional:
+        - ["on", "off"]
+  - name: consume
+    description: Toggle consume mode or set on/off
+    completion:
+      positional:
+        - ["on", "off"]
+  - name: update
+    description: Scan music directory for updates
+  - name: search
+    description: Search for a song
+    completion:
+      positional:
+        - ["artist", "album", "title", "track", "name", "genre", "date", "composer", "performer", "comment", "file", "any"]
+  - name: find
+    description: Find a song (exact match)
+    completion:
+      positional:
+        - ["artist", "album", "title", "track", "genre", "file", "any"]
+  - name: ls
+    description: List the contents of directory
+  - name: lsplaylists
+    description: List currently available playlists
+  - name: load
+    description: Load a playlist
+  - name: save
+    description: Save current playlist
+  - name: rm
+    description: Remove a playlist
+  - name: outputs
+    description: Show the current outputs
+  - name: enable
+    description: Enable an output
+  - name: disable
+    description: Disable an output
+  - name: stats
+    description: Display statistics about MPD
+  - name: version
+    description: Report version of MPD

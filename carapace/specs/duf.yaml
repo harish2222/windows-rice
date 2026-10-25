@@ -1,0 +1,65 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: duf
+description: Disk Usage/Free Utility - a better df alternative
+flags:
+  -all: Include pseudo, duplicate, inaccessible file systems
+  -avail-threshold=: Specifies the coloring threshold of avail column
+  -hide=: "Hide specific devices (choices: local, network, fuse, special, loops, binds)"
+  -hide-fs=: Hide specific filesystems
+  -hide-mp=: Hide specific mount points
+  -inodes: List inode information instead of block usage
+  -json: Output all devices in JSON format
+  -only=: "Show only specific devices (choices: local, network, fuse, special, loops, binds)"
+  -only-fs=: Only specific filesystems
+  -only-mp=: Only specific mount points
+  -output=: Output fields to display
+  -sort=: Sort output by field
+  -style=: Style (unicode, ascii)
+  -theme=: Color themes (dark, light, ansi)
+  -usage-threshold=: Specifies coloring threshold of usage bars (e.g. 0.5,0.9)
+  -version: Display version
+  -warnings: Output all warnings to STDERR
+  -width=: Max output width
+completion:
+  flag:
+    hide:
+      - local
+      - network
+      - fuse
+      - special
+      - loops
+      - binds
+    only:
+      - local
+      - network
+      - fuse
+      - special
+      - loops
+      - binds
+    style:
+      - unicode
+      - ascii
+    theme:
+      - dark
+      - light
+      - ansi
+    sort:
+      - mountpoint
+      - size
+      - used
+      - avail
+      - usage
+      - inodes
+      - type
+      - filesystem
+    output:
+      - mountpoint
+      - size
+      - used
+      - avail
+      - usage
+      - inodes
+      - type
+      - filesystem
+  positionalany:
+    - $directories

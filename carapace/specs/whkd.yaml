@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: whkd
+description: Simple hotkey daemon for Windows
+flags:
+  -c, --config=: Path to whkdrc configuration file
+  -h, --help: Print help
+  -V, --version: Print version
+completion:
+  flag:
+    config:
+      - $files

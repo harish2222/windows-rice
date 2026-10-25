@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: ncmpc
+description: Fully featured ncurses client for Music Player Daemon (MPD)
+flags:
+  -c, --colors: Enable colors
+  -C, --no-colors: Disable colors
+  -m, --mouse: Enable mouse support
+  -M, --no-mouse: Disable mouse support
+  -e, --exit: Exit on connection errors
+  -p, --port=: Connect to server on port
+  -h, --host=: Connect to server on host
+  -P, --password=: Connect with password
+  -f, --config=: Read configuration from file
+  -k, --key-file=: Read key bindings from file
+  -V, --version: Display version information
+  -?, --help: Show this help message
+completion:
+  flag:
+    config:
+      - $files
+    key-file:
+      - $files

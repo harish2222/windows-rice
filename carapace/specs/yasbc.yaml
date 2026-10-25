@@ -1,0 +1,47 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: yasbc
+description: Command-line controller for YASB (Yet Another Status Bar)
+flags:
+  -v, --version: Print version
+  -c, --config=: Print or specify config directory path
+  -h, --help: Print help message
+completion:
+  flag:
+    config:
+      - $directories
+commands:
+  - name: start
+    description: Start the YASB application
+  - name: stop
+    description: Stop the YASB application
+  - name: reload
+    description: Reload the YASB application configuration and styles
+  - name: toggle-bar
+    description: Toggle the bar on all or a specific screen
+  - name: show-bar
+    description: Show the bar on all or a specific screen
+  - name: hide-bar
+    description: Hide the bar on all or a specific screen
+  - name: monitor-information
+    description: Show information about connected monitors
+  - name: log
+    description: Tail yasb process logs (cancel with Ctrl-C)
+  - name: config-dir
+    description: Open config directory in file explorer
+  - name: migrate-config
+    description: Find and fix deprecated options in config
+  - name: enable-autostart
+    description: Enable autostart on system boot
+  - name: disable-autostart
+    description: Disable autostart on system boot
+  - name: set-channel
+    description: Switch release channels
+    completion:
+      positional:
+        - ["stable", "preview"]
+  - name: update
+    description: Update the application
+  - name: reset
+    description: Restore default config files and clear cache
+  - name: cloud
+    description: Back up and restore config with YASB Cloud

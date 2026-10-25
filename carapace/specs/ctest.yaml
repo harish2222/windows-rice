@@ -1,0 +1,47 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: ctest
+description: CMake test driver program
+flags:
+  -C, --build-config=: Choose configuration to test
+  -V, --verbose: Enable verbose output from tests
+  -VV, --extra-verbose: Enable more verbose output from tests
+  --debug: Display CMake debug output
+  --output-on-failure: Output anything outputted by the test program if the test should fail
+  -F: Enable fail-over test mode
+  -j, --parallel=: Run the tests in parallel using the given number of jobs
+  -Q, --quiet: Make ctest quiet
+  -O, --output-log=: Output to log file
+  -N, --show-only: Disable actual execution of tests
+  -L, --label-regex=: Run tests with labels matching regular expression
+  -R, --tests-regex=: Run tests matching regular expression
+  -E, --exclude-regex=: Exclude tests matching regular expression
+  -LE, --label-exclude=: Exclude tests with labels matching regular expression
+  -D, --dashboard=: Execute dashboard test
+  -M, --test-model=: Sets the model for a dashboard
+  -T, --test-action=: Sets the dashboard test action to perform
+  --preset=: Specify test preset
+  --list-presets: List available test presets
+  --rerun-failed: Run only the tests that failed previously
+  --repeat=: Repeat tests according to spec (until-fail:N, until-pass:N, after-timeout:N)
+  -v, --version: Print version
+  -h, --help: Print help
+completion:
+  flag:
+    build-config:
+      - Debug
+      - Release
+      - RelWithDebInfo
+      - MinSizeRel
+    test-model:
+      - Experimental
+      - Nightly
+      - Continuous
+    test-action:
+      - Start
+      - Update
+      - Configure
+      - Build
+      - Test
+      - Coverage
+      - MemCheck
+      - Submit

@@ -1,0 +1,135 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: zellij
+description: A terminal workspace with batteries included
+flags:
+  --max-panes=: Maximum panes on screen
+  --data-dir=: Change where zellij looks for plugins
+  -s, --session=: Specify name of a new session
+  -l, --layout=: Name of predefined layout or layout file path
+  --layout-string=: Raw KDL layout string to use directly
+  -n, --new-session-with-layout=: Predefined layout or file to start new session
+  -c, --config=: Path to configuration file
+  --config-dir=: Path to configuration directory
+  -d, --debug: Emit additional debug information
+  -h, --help: Print help
+  -V, --version: Print version
+completion:
+  flag:
+    config:
+      - $files
+    config-dir:
+      - $directories
+    data-dir:
+      - $directories
+    layout:
+      - default
+      - compact
+      - strider
+      - disable-status-bar
+      - $files
+commands:
+  - name: options
+    description: Change the behaviour of zellij
+    flags:
+      --simplified-ui=: Whether to use simplified UI
+      --theme=: Name of the theme
+      --default-mode=: Default operational mode
+      --default-shell=: Default shell executable
+      --copy-command=: Command to execute when copying text
+      --copy-clipboard=: Which clipboard to copy to
+      --mouse-mode=: Enable or disable mouse mode
+    completion:
+      flag:
+        theme:
+          - catppuccin-mocha
+          - catppuccin-latte
+          - dracula
+          - nord
+          - tokyo-night
+        default-mode:
+          - normal
+          - locked
+        mouse-mode:
+          - "true"
+          - "false"
+  - name: setup
+    description: Setup zellij and check its configuration
+    flags:
+      --dump-config: Dump the default configuration
+      --dump-plugins=: Dump built-in plugins to directory
+      --clean: Disable loading configuration from disk
+      --check: Check the current configuration for errors
+  - name: list-sessions
+    aliases: ["ls"]
+    description: List active sessions
+    flags:
+      -n, --no-formatting: Disable formatting
+      -r, --reverse: Reverse order of sessions
+      -s, --short: Only show session names
+  - name: attach
+    aliases: ["a"]
+    description: Attach to a session
+    flags:
+      -c, --create: Create session if it does not exist
+      --index=: Index of session to attach to
+      -f, --force: Force attach to session
+  - name: kill-session
+    aliases: ["k"]
+    description: Kill a specific session
+  - name: delete-session
+    aliases: ["d"]
+    description: Delete a specific session
+    flags:
+      -f, --force: Force delete
+  - name: kill-all-sessions
+    aliases: ["ka"]
+    description: Kill all active sessions
+    flags:
+      -y, --yes: Do not prompt for confirmation
+  - name: delete-all-sessions
+    aliases: ["da"]
+    description: Delete all sessions
+    flags:
+      -y, --yes: Do not prompt for confirmation
+  - name: run
+    aliases: ["r"]
+    description: Run a command in a new pane
+    flags:
+      -d, --direction=: Direction to open pane in
+      -f, --floating: Open pane as floating
+      -i, --in-place: Open pane in place of current pane
+      --name=: Name of the pane
+      -c, --close-on-exit: Close pane when command exits
+    completion:
+      flag:
+        direction:
+          - right
+          - down
+      positionalany:
+        - $files
+  - name: edit
+    aliases: ["e"]
+    description: Edit file with default editor
+    flags:
+      -d, --direction=: Direction to open pane in
+      -f, --floating: Open pane as floating
+      -i, --in-place: Open pane in place of current pane
+      -l, --line-number=: Line number to open at
+    completion:
+      flag:
+        direction:
+          - right
+          - down
+      positional:
+        - ["$files"]
+  - name: action
+    aliases: ["ac"]
+    description: Send actions to a specific session
+    completion:
+      positional:
+        - ["write", "write-chars", "switch-mode", "change-floating-panes-layout", "toggle-floating-panes", "new-pane", "new-tab", "close-pane", "close-tab", "focus-next-pane", "focus-previous-pane"]
+  - name: plugin
+    aliases: ["p"]
+    description: Load a plugin
+  - name: pipe
+    description: Send data to one or more plugins

@@ -1,0 +1,166 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: supabase
+description: Supabase CLI for local development and management
+flags:
+  -h, --help: Show help information
+  -v, --version: Show version information
+  --wizard: Start wizard mode for a command
+  --completions=: Print shell completion script
+  --log-level=: Sets the minimum log level
+  --output-format=: Output format
+  -o, --output=: Output format of status variables
+  --profile=: Use a specific profile for connecting to Supabase API
+  --debug: Output debug logs to stderr
+  --workdir=: Path to directory containing supabase/ folder
+  --experimental: Enable experimental features
+  --yes: Answer yes to all prompts
+completion:
+  flag:
+    log-level:
+      - all
+      - trace
+      - debug
+      - info
+      - warn
+      - error
+      - fatal
+      - none
+    output-format:
+      - text
+      - json
+      - stream-json
+    output:
+      - env
+      - pretty
+      - json
+      - toml
+      - yaml
+      - table
+      - csv
+    workdir:
+      - $directories
+commands:
+  - name: init
+    description: Initialize a local project
+    flags:
+      --use-vscode-settings: Generate VS Code settings
+  - name: start
+    description: Start local Supabase stack
+    flags:
+      -x, --exclude=: Exclude containers from starting
+      --ignore-health-check: Ignore container health check
+  - name: stop
+    description: Stop all local Supabase containers
+    flags:
+      --no-backup: Do not backup postgres database before stopping
+  - name: status
+    description: Show status of local Supabase containers
+    flags:
+      -o, --output=: Output format
+  - name: link
+    description: Link to a Supabase project
+    flags:
+      --project-ref=: Project ref of the remote project you want to link
+  - name: login
+    description: Authenticate using an access token
+    flags:
+      --token=: Access token for Supabase API
+  - name: logout
+    description: Log out and delete access tokens locally
+  - name: db
+    description: Manage databases
+    commands:
+      - name: diff
+        description: Diff database schema against local migrations
+        flags:
+          -f, --file=: File to save migration script
+          --use-migra: Use migra to generate schema diff
+      - name: dump
+        description: Dumps schema and data from remote database
+        flags:
+          -f, --file=: File path to save dumped SQL
+          --data-only: Dump only data
+      - name: push
+        description: Push local migrations to remote database
+      - name: reset
+        description: Resets local database to current migrations
+      - name: lint
+        description: Lint database schema
+      - name: branch
+        description: Manage database branches
+  - name: migration
+    aliases: ["migrations"]
+    description: Manage database migration scripts
+    commands:
+      - name: new
+        description: Create an empty migration script
+      - name: list
+        description: List migration files
+      - name: repair
+        description: Repair migration history table
+      - name: squash
+        description: Squash multiple migration files into one
+      - name: up
+        description: Apply pending migrations
+  - name: functions
+    description: Manage Supabase Edge functions
+    commands:
+      - name: new
+        description: Create a new Edge Function
+      - name: serve
+        description: Serve Edge Functions locally
+        flags:
+          --env-file=: Path to env file
+          --no-verify-jwt: Do not verify JWT tokens
+      - name: deploy
+        description: Deploy Edge Functions to remote project
+        flags:
+          --no-verify-jwt: Do not verify JWT tokens
+      - name: delete
+        description: Delete an Edge Function
+  - name: secrets
+    description: Manage Supabase secrets
+    commands:
+      - name: list
+        description: List all secrets
+      - name: set
+        description: Set secret key-value pairs
+      - name: unset
+        description: Unset secrets
+  - name: storage
+    description: Manage Supabase Storage objects
+    commands:
+      - name: ls
+        description: List storage buckets or objects
+      - name: cp
+        description: Copy storage objects
+      - name: mv
+        description: Move storage objects
+      - name: rm
+        description: Remove storage objects
+  - name: projects
+    description: Manage Supabase projects
+    commands:
+      - name: list
+        description: List projects
+      - name: create
+        description: Create a new project
+      - name: delete
+        description: Delete a project
+  - name: branches
+    description: Manage preview branches
+    commands:
+      - name: list
+        description: List all preview branches
+      - name: create
+        description: Create a preview branch
+      - name: delete
+        description: Delete a preview branch
+  - name: gen
+    description: Run code generation tools
+    commands:
+      - name: types
+        description: Generate TypeScript types from database schema
+        flags:
+          --lang=: Language to generate types for (typescript)
+          --local: Generate types from local database

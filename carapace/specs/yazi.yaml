@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: yazi
+description: Blazing fast terminal file manager written in Rust
+flags:
+  --cwd-file=: Write the cwd on exit to this file
+  --chooser-file=: Write the selected files to this file on open fired
+  --client-id=: Use the specified client ID, must be a globally unique number
+  --local-events=: Report the specified local events to stdout
+  --remote-events=: Report the specified remote events to stdout
+  -V, --version: Print version
+  -h, --help: Print help
+completion:
+  flag:
+    cwd-file:
+      - $files
+    chooser-file:
+      - $files
+  positionalany:
+    - $files
+    - $directories

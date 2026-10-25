@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: termflix
+description: Terminal animation player and visualizer
+flags:
+  -r, --render=: Render mode (braille, half-block, ascii)
+  -c, --color=: Color mode (mono, ansi16, ansi256, true-color)
+  -f, --fps=: Target FPS (1-120)
+  -l, --list?: List available animations and exit
+  --cycle=: Cycle through all animations (seconds per animation)
+  --record=: Record animation to .asciianim file
+  --play=: Play back a recorded .asciianim file
+  --export-gif=: Export recording to GIF (requires --play)
+  -s, --scale=: Scale factor for particle counts (0.5-2.0)
+  --unlimited: Remove FPS cap and render as fast as possible
+  --clean: Hide status bar for pure animation mode
+  --init-config: Generate default config file
+  --show-config: Show config file path and current settings
+  --screensaver: Run in screensaver mode
+  -V, --version: Print version
+  -h, --help: Print help
+completion:
+  flag:
+    render:
+      - braille
+      - half-block
+      - ascii
+    color:
+      - mono
+      - ansi16
+      - ansi256
+      - true-color
+    record:
+      - $files
+    play:
+      - $files
+    export-gif:
+      - $files
+  positional:
+    - ["matrix", "fire", "waves", "pipes", "dna", "cube", "snow", "galaxy", "donut", "starfield", "swarm"]

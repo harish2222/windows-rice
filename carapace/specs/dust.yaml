@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: dust
+description: Like du but more intuitive
+flags:
+  -d, --depth=: Depth to show
+  -T, --threads=: Number of threads to use
+  --config=: Specify a config file to use
+  -n, --number-of-lines=: Display the 'n' largest entries
+  -p, --full-paths: Subdirectories will not have their path shortened
+  -X, --ignore-directory=: Exclude file or directory with this path
+  -L, --dereference-links: Treat symlinks as directories and enter them
+  -x, --limit-filesystem: Only count files on same filesystem
+  -s, --apparent-size: Use file length instead of blocks
+  -r, --reverse: Print tree upside down (biggest highest)
+  -c, --no-colors: Disable color output
+  -C, --force-colors: Force color output
+  --dim: Dim the percent bars
+  -b, --no-percent-bars: Do not display percent bars
+  -B, --bars-on-right: Percent bars moved to right side of screen
+  -z, --min-size=: Minimum size file to include in output
+  -i, --ignore_hidden: Do not display hidden files
+  -t, --file-types: Show file types instead of directories
+  -h, --help: Print help
+  -V, --version: Print version
+completion:
+  flag:
+    config:
+      - $files
+    ignore-directory:
+      - $directories
+  positionalany:
+    - $files
+    - $directories

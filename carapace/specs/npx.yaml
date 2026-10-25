@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: npx
+description: Run a command from a local or remote npm package
+flags:
+  -p, --package=: The package or packages to install for execution
+  -c, --call=: Companion option to execute command string
+  -w, --workspace=: Enable running command in context of configured workspace
+  --workspaces: Run command in context of all configured workspaces
+  --include-workspace-root: Include workspace root when workspaces are enabled
+  -y, --yes: Automatically answer yes to prompts (do not ask for confirmation)
+  --no-install: Do not install package if missing
+  -v, --version: Print npm version
+  -h, --help: Print help
+completion:
+  positionalany:
+    - $files

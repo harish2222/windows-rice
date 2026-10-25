@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: mpd
+description: Music Player Daemon - background music server
+flags:
+  --kill: Kill the currently running mpd session
+  --no-config: Do not read from config
+  --no-daemon: Do not detach from console
+  --stderr: Print messages to stderr
+  -v, --verbose: Verbose logging
+  -V, --version: Print version number
+  -h, --help: Show help options
+completion:
+  positional:
+    - ["$files"]

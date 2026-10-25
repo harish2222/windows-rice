@@ -1,0 +1,76 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: cliamp
+description: Retro terminal music player
+flags:
+  --vol=: Startup volume in dB [-30, +6]
+  --shuffle: Shuffle playback
+  --repeat=: Repeat mode (off, all, one)
+  --mono: Mono output
+  --auto-play: Start playback immediately
+  --simplified: Simplified playback view (no visualizer or playlist)
+  --help-bar: Show the key-binding hint bar
+  --expanded: Start with playlist expanded
+  --provider=: Default provider (cliamp, radio, spotify, soundcloud, youtube)
+  --start-theme=: UI theme name
+  --visualizer=: Visualizer mode
+  --visualizer-60fps: Render visualizer at 60 FPS
+  --eq-preset=: EQ preset name
+  -v, --version: Print version
+  -h, --help: Show help
+completion:
+  flag:
+    repeat:
+      - "off"
+      - "all"
+      - "one"
+    provider:
+      - cliamp
+      - radio
+      - podcast
+      - spotify
+      - soundcloud
+      - youtube
+      - ytmusic
+      - jellyfin
+      - plex
+commands:
+  - name: play
+    description: Resume playback
+  - name: pause
+    description: Pause playback
+  - name: toggle
+    description: Toggle play/pause
+  - name: next
+    description: Next track
+  - name: prev
+    description: Previous track
+  - name: stop
+    description: Stop playback
+  - name: status
+    description: Show current playback state
+  - name: volume
+    description: Adjust volume in dB
+  - name: seek
+    description: Seek by relative offset in seconds
+  - name: load
+    description: Load a playlist into the player
+    completion:
+      positionalany:
+        - $files
+  - name: queue
+    description: Queue a track for playback
+    completion:
+      positionalany:
+        - $files
+  - name: theme
+    description: Set or list UI themes
+  - name: vis
+    description: Set or list visualizer modes
+  - name: shuffle
+    description: Toggle or set shuffle mode
+  - name: repeat
+    description: Set or cycle repeat mode
+  - name: playlist
+    description: Manage local playlists
+  - name: history
+    description: Show recently played tracks

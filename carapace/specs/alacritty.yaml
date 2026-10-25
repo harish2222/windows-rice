@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: alacritty
+description: Fast, cross-platform, OpenGL terminal emulator
+flags:
+  --print-events: Print all events to STDOUT
+  --ref-test: Generates ref test
+  --embed=: X11 window ID to embed Alacritty within
+  --config-file=: Specify alternative configuration file
+  --daemon: Do not spawn an initial window
+  --working-directory=: Start shell in specified working directory
+  --hold: Remain open after child process exit
+  -e, --command=: Command and args to execute (must be last argument)
+  -T, --title=: Defines the window title
+  --class=: Defines window class/app_id
+  -o, --option=: Override configuration file options
+  -h, --help: Print help
+  -V, --version: Print version
+completion:
+  flag:
+    config-file:
+      - $files
+    working-directory:
+      - $directories
+commands:
+  - name: migrate
+    description: Migrate configuration file to latest format

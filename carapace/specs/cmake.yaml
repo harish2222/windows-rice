@@ -1,0 +1,128 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: cmake
+description: Cross-platform open-source build system generator
+flags:
+  -S=: Explicitly specify a source directory
+  -B=: Explicitly specify a build directory
+  -C=: Pre-load a script to populate the cache
+  -D=: Create or update a cmake cache entry (-DVAR=VALUE)
+  -U=: Remove matching entries from CMake cache
+  -G=: Specify a build system generator
+  -T=: Specify toolset name if supported by generator
+  -A=: Specify platform name if supported by generator
+  --toolchain=: Specify toolchain file [CMAKE_TOOLCHAIN_FILE]
+  --install-prefix=: Specify install directory [CMAKE_INSTALL_PREFIX]
+  --preset=: Specify a configure preset
+  --presets-file=: Specify the path to a presets file
+  --list-presets: List available presets
+  --fresh: Configure a fresh build tree removing existing cache file
+  --build=: Build a CMake-generated project binary tree
+  --install=: Install a CMake-generated project binary tree
+  --open=: Open generated project in the associated application
+  -N: View mode only
+  -P=: Process script mode
+  --graphviz=: Generate graphviz of dependencies
+  --system-information: Dump information about this system
+  -v, --version: Print version
+  -h, --help: Print help
+completion:
+  flag:
+    S:
+      - $directories
+    B:
+      - $directories
+    C:
+      - $files
+    P:
+      - $files
+    build:
+      - $directories
+    install:
+      - $directories
+    toolchain:
+      - $files
+    G:
+      - "Ninja"
+      - "Ninja Multi-Config"
+      - "Visual Studio 17 2022"
+      - "Visual Studio 16 2019"
+      - "MinGW Makefiles"
+      - "NMake Makefiles"
+      - "Unix Makefiles"
+    A:
+      - "x64"
+      - "Win32"
+      - "ARM64"
+      - "ARM"
+  positionalany:
+    - $directories
+    - $files
+commands:
+  - name: --build
+    description: Build a CMake-generated project binary tree
+    flags:
+      --target=: Build target instead of default target
+      --config=: For multi-configuration tools choose configuration
+      --clean-first: Build target 'clean' first then build
+      -j, --parallel=: Maximum number of concurrent processes
+      -v, --verbose: Enable verbose output
+    completion:
+      flag:
+        config:
+          - Debug
+          - Release
+          - RelWithDebInfo
+          - MinSizeRel
+      positional:
+        - ["$directories"]
+  - name: --install
+    description: Install a CMake-generated project binary tree
+    flags:
+      --config=: For multi-configuration tools choose configuration
+      --component=: Component-based install
+      --default-directory-permissions=: Permissions for created directories
+      --prefix=: Override the installation prefix
+      --strip: Strip before installing
+      -v, --verbose: Enable verbose output
+    completion:
+      flag:
+        config:
+          - Debug
+          - Release
+          - RelWithDebInfo
+          - MinSizeRel
+        prefix:
+          - $directories
+      positional:
+        - ["$directories"]
+  - name: -E
+    description: CMake command mode
+    commands:
+      - name: copy
+        description: Copy files
+      - name: copy_directory
+        description: Copy directory contents
+      - name: copy_if_different
+        description: Copy files if different
+      - name: echo
+        description: Echo arguments as text
+      - name: env
+        description: Run command with modified environment
+      - name: make_directory
+        description: Create directories
+      - name: md5sum
+        description: Calculate MD5 checksum
+      - name: sha256sum
+        description: Calculate SHA256 checksum
+      - name: remove
+        description: Remove file
+      - name: remove_directory
+        description: Remove directory
+      - name: rename
+        description: Rename file or directory
+      - name: tar
+        description: Tar/untar files
+      - name: time
+        description: Run command and display elapsed time
+      - name: touch
+        description: Touch a file

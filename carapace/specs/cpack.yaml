@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: cpack
+description: CMake packaging tool
+flags:
+  -G=: Specify packaging generator
+  -C=: Specify configuration to package
+  -D=: Set a CPack variable
+  --config=: Specify the config file
+  --preset=: Specify package preset
+  --list-presets: List available package presets
+  -B=: Override package directory
+  -P=: Override package name
+  -R=: Override package version
+  --vendor=: Override package vendor
+  -v, --verbose: Enable verbose output
+  --debug: Enable debug output
+  -V, --trace: Put CPack in trace mode
+  --version: Print version
+  -h, --help: Print help
+completion:
+  flag:
+    G:
+      - "ZIP"
+      - "7Z"
+      - "NSIS"
+      - "WIX"
+      - "TGZ"
+      - "TXZ"
+      - "DEB"
+      - "RPM"
+    C:
+      - Debug
+      - Release
+      - RelWithDebInfo
+      - MinSizeRel
+    config:
+      - $files
+    B:
+      - $directories

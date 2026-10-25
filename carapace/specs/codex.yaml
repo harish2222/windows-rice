@@ -1,0 +1,73 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: codex
+description: OpenAI Codex CLI coding agent
+flags:
+  -c, --config=: Override configuration value (key=value)
+  --enable=: Enable a feature flag
+  --disable=: Disable a feature flag
+  -i, --image=: Image(s) to attach to prompt
+  -m, --model=: Model the agent should use
+  --oss: Use open-source provider
+  --local-provider=: Local provider (lmstudio or ollama)
+  -p, --profile=: Config profile to layer
+  -s, --sandbox=: Sandbox policy to use
+  --approve-for-me: Route approval requests through automatic review
+  --dangerously-bypass-approvals-and-sandbox: Skip confirmation and execute unsandboxed
+  -C, --cd=: Working root directory
+  --worktree: Run in new managed Git worktree
+  --add-dir=: Additional writable directory
+  -a, --ask-for-approval=: Approval policy for commands
+  --search: Enable live web search
+  --no-alt-screen: Disable alternate screen mode
+  --no-daemon: Run without shared background server
+  -V, --version: Print version
+  -h, --help: Print help
+completion:
+  flag:
+    sandbox:
+      - read-only
+      - workspace-write
+      - danger-full-access
+    ask-for-approval:
+      - on-request
+      - never
+    local-provider:
+      - lmstudio
+      - ollama
+    cd:
+      - $directories
+    add-dir:
+      - $directories
+    image:
+      - $files
+commands:
+  - name: exec
+    aliases: ["e"]
+    description: Run Codex non-interactively
+  - name: review
+    description: Run a code review non-interactively
+  - name: resume
+    description: Resume a previous interactive session
+    flags:
+      --last: Continue the most recent session
+  - name: fork
+    description: Fork a previous interactive session
+    flags:
+      --last: Fork the most recent session
+  - name: apply
+    aliases: ["a"]
+    description: Apply the latest diff produced by Codex agent as git apply
+  - name: agents
+    description: Browse all agent sessions on the shared local daemon
+  - name: login
+    description: Manage login authentication
+  - name: logout
+    description: Remove stored authentication credentials
+  - name: mcp
+    description: Manage external MCP servers for Codex
+  - name: plugin
+    description: Manage Codex plugins
+  - name: doctor
+    description: Diagnose local Codex installation and runtime health
+  - name: update
+    description: Update Codex to latest version

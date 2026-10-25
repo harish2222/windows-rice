@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: komorebi
+description: Tiling window manager daemon for Windows
+flags:
+  -f, --ffm: Allow the use of komorebi's custom focus-follows-mouse implementation
+  -a, --await-configuration: Wait for komorebic complete-configuration before processing events
+  -t, --tcp-port=: Start a TCP server on the given port to allow sending SocketMessages
+  -c, --config=: Path to a static configuration JSON file
+  --clean-state: Do not attempt to auto-apply dumped state from previously running instance
+  --log-level=: Level of log output verbosity
+  -h, --help: Print help
+  -V, --version: Print version
+completion:
+  flag:
+    config:
+      - $files
+    log-level:
+      - error
+      - warn
+      - info
+      - debug
+      - trace

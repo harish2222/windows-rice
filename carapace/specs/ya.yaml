@@ -1,0 +1,47 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: ya
+description: Yazi command-line interface companion
+flags:
+  -V, --version: Print version
+  -h, --help: Print help
+commands:
+  - name: emit
+    description: Emit an action to be executed by the current instance
+    completion:
+      positional:
+        - ["reveal", "cd", "select", "toggle", "quit"]
+  - name: emit-to
+    description: Emit an action to be executed by the specified instance
+    flags:
+      -h, --help: Print help
+  - name: exec
+    description: Execute an action on the current instance and print its result
+  - name: pkg
+    description: Manage Yazi packages and plugins
+    commands:
+      - name: add
+        description: Add packages
+        completion:
+          positionalany:
+            - $files
+      - name: delete
+        description: Delete packages
+      - name: install
+        description: Install all packages
+      - name: list
+        description: List all packages
+      - name: upgrade
+        description: Upgrade all packages
+  - name: pub
+    description: Publish a message to the current instance
+  - name: pub-to
+    description: Publish a message to the specified instance
+  - name: sub
+    description: Subscribe to messages from all remote instances
+  - name: cache
+    description: Manage the cache
+    commands:
+      - name: clear
+        description: Clear the cache directory
+  - name: env
+    description: Print environment and configuration information

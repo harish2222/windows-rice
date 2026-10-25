@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: forgum-engine
+description: Low-level ANSI animation and rendering engine for Forgum
+flags:
+  --config=: Path to configuration file
+  --fps=: Target frame rate
+  --benchmark: Run rendering benchmark
+  -h, --help: Print help
+  -V, --version: Print version
+completion:
+  flag:
+    config:
+      - $files

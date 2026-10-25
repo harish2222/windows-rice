@@ -1,0 +1,45 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: ninja
+description: Small build system with a focus on speed
+flags:
+  --version: Print ninja version
+  -v, --verbose: Show all command lines while building
+  --quiet: Don't show progress status, just command output
+  -C=: Change to DIR before doing anything else
+  -f=: Specify input build file [default=build.ninja]
+  -j=: Run N jobs in parallel (0 means infinity)
+  -k=: Keep going until N jobs fail
+  -l=: Do not start new jobs if load average is greater than N
+  -n: Dry run (don't run commands but act like they succeeded)
+  -d=: Enable debugging mode
+  -t=: Run a subtool
+  -w=: Adjust warnings
+completion:
+  flag:
+    C:
+      - $directories
+    f:
+      - $files
+    d:
+      - stats
+      - explain
+      - keepdepfile
+      - keeprsp
+    t:
+      - clean
+      - targets
+      - compdb
+      - commands
+      - graph
+      - query
+      - browse
+      - recompact
+      - restat
+    w:
+      - dupbuild=err
+      - dupbuild=warn
+      - phonycycle=err
+      - phonycycle=warn
+  positionalany:
+    - clean
+    - all

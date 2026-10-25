@@ -1,0 +1,63 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: osv-scanner
+description: Vulnerability scanner using Open Source Vulnerabilities (OSV) database
+flags:
+  -v, --version: Print version
+  -h, --help: Show help
+commands:
+  - name: scan
+    description: Scan projects and container images for vulnerabilities
+    flags:
+      -r, --recursive: Traverse directories recursively
+      --format=: Output format (table, json, markdown, sarif, gh-annotations)
+      --output=: Output file path
+      --offline-vulnerabilities: Run vulnerability matching offline
+      --download-offline-databases: Download databases for offline vulnerability matching
+    completion:
+      flag:
+        format:
+          - table
+          - json
+          - markdown
+          - sarif
+          - gh-annotations
+        output:
+          - $files
+    commands:
+      - name: source
+        description: Scan a source directory
+        flags:
+          -r, --recursive: Traverse directories recursively
+        completion:
+          positionalany:
+            - $directories
+      - name: image
+        description: Scan a container image
+      - name: archive
+        description: Scan an archive file
+        completion:
+          positionalany:
+            - $files
+      - name: lockfile
+        description: Scan specific lockfiles
+        completion:
+          positionalany:
+            - $files
+      - name: sbom
+        description: Scan SBOM files
+        completion:
+          positionalany:
+            - $files
+  - name: fix
+    description: Scan manifest/lockfile and suggest changes for remediation
+    flags:
+      -M, --manifest=: Manifest file path
+      -L, --lockfile=: Lockfile path
+    completion:
+      flag:
+        manifest:
+          - $files
+        lockfile:
+          - $files
+  - name: experimental-mcp
+    description: Run osv-scanner as an MCP service

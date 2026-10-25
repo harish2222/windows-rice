@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: lazydocker
+description: The lazier way to manage everything docker
+flags:
+  -c, --config: Print the current default config
+  -d, --debug: Run in debug mode
+  -f, --file=: Specify alternate compose files
+  -p, --project=: Specify a docker compose project name
+  -h, --help: Displays help
+  --version: Displays program version string
+completion:
+  flag:
+    file:
+      - $files

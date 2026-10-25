@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: clangd
+description: LLVM C/C++ language server
+flags:
+  --background-index: Index project code in the background and persist index on disk
+  --compile-commands-dir=: Specify a path to look for compile_commands.json
+  --completion-style=: Granularity of code completion suggestions
+  --header-insertion=: Include header insertion behavior
+  --header-insertion-decorators: Prepend header insertion indicator to completion labels
+  --query-driver=: Comma-separated list of compiler drivers for system includes
+  --log=: Verbosity of log output
+  --check: Parse one file in isolation and exit
+  --version: Print version
+  -h, --help: Print help
+completion:
+  flag:
+    compile-commands-dir:
+      - $directories
+    completion-style:
+      - detailed
+      - bundled
+    header-insertion:
+      - iwyu
+      - never
+    log:
+      - error
+      - info
+      - verbose
