@@ -496,3 +496,65 @@ pub fn resolve_target_path(pattern: &str) -> PathBuf {
 
     home.join(pattern)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::HashSet;
+
+    #[test]
+    fn test_catalog_no_duplicate_ids() {
+        let catalog = get_catalog();
+        let mut seen = HashSet::new();
+        for item in &catalog {
+            assert!(
+                seen.insert(item.id),
+                "Duplicate package ID found in catalog: {}",
+                item.id
+            );
+        }
+    }
+
+    #[test]
+    fn test_catalog_excludes_removed_items() {
+        let catalog = get_catalog();
+        for item in &catalog {
+            assert_ne!(item.id, "forgum", "Forgum must not be in catalog");
+            assert_ne!(item.id, "neovim", "Neovim must not be in catalog");
+            assert_ne!(item.id, "nvim", "nvim must not be in catalog");
+        }
+    }
+
+    #[test]
+    fn test_catalog_source_paths_exist() {
+        let catalog = get_catalog();
+        let repo_root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .parent()
+            .expect("repo root")
+            .to_path_buf();
+
+        for item in &catalog {
+            for config in &item.configs {
+                let src_path = repo_root.join(config.source_rel);
+                assert!(
+                    src_path.exists(),
+                    "Config source path does not exist for package '{}': {:?}",
+                    item.id,
+                    src_path
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn test_resolve_target_path() {
+        let appdata = resolve_target_path("AppData/Roaming/alacritty/alacritty.toml");
+        assert!(appdata.to_string_lossy().contains("alacritty.toml"));
+
+        let localappdata = resolve_target_path("AppData/Local/Packages/Microsoft.WindowsTerminal/settings.json");
+        assert!(localappdata.to_string_lossy().contains("settings.json"));
+
+        let dotconfig = resolve_target_path(".config/wezterm");
+        assert!(dotconfig.to_string_lossy().contains("wezterm"));
+    }
+}

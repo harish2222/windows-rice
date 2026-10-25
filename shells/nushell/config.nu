@@ -64,9 +64,15 @@ let catppuccin_mocha = {
 
 # --- 2. OH-MY-POSH NATIVE INTEGRATION ---
 # Using the "Instant Prompt" cached method for zero-lag startup.
-# NOTE: `source` requires a parse-time constant path in Nushell, hence `const`.
-const omp_init_file = "C:/Users/haris/.cache/oh-my-posh.nu"
-const zoxide_init_file = "C:/Users/haris/.cache/zoxide-init.nu"
+# NOTE: `source` requires parse-time constant paths in Nushell.
+const cfg_dir = ($nu.default-config-dir)
+const cache_dir = ($nu.home-dir | path join ".cache")
+const omp_init_file = ($cache_dir | path join "oh-my-posh.nu")
+const zoxide_init_file = ($cache_dir | path join "zoxide-init.nu")
+const carapace_file = ($cfg_dir | path join "carapace.nu")
+const fzf_file = ($cfg_dir | path join "modules" "fzf.nu")
+const conda_file = ($cfg_dir | path join "modules" "conda.nu")
+const additions_file = ($cfg_dir | path join "config-additions.nu")
 let omp_config = $env.POSH_THEME
 
 # Regenerate the init script if missing OR if the theme file changed since caching.
@@ -108,7 +114,7 @@ $env.config = {
         isolation: true
     }
 
-    buffer_editor: "nvim"
+    buffer_editor: "notepad"
     footer_mode: "auto"
 
     # Optimized Table Rendering
@@ -183,14 +189,13 @@ $env.config = {
 # --- 4. ZOXIDE & CARAPACE & FZF ---
 # NOTE: source at top level — defs inside try/if blocks are block-scoped and lost.
 source $zoxide_init_file
-source "C:/Users/haris/.config/nushell/carapace.nu"
-source "C:/Users/haris/.config/nushell/modules/fzf.nu"
+source $carapace_file
+source $fzf_file
 
 # --- 5. EXTRA INTEGRATIONS ---
-# Zero-lag conda wrapper + completions, clipboard helpers, and Forgum cow hooks.
-source "C:/Users/haris/.config/nushell/modules/conda.nu"
-source "C:/Users/haris/.config/nushell/config-additions.nu"
-source "C:/Users/haris/.config/nushell/forgum.nu"
+# Zero-lag conda wrapper + completions and clipboard helpers.
+source $conda_file
+source $additions_file
 
 # --- 6. MUSIC — mpd under ~/Music + the ncmpc TUI (same `music` as pwsh/xonsh) ---
 def mpd-up [] {

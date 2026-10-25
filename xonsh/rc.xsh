@@ -58,7 +58,7 @@ $XDG_CACHE_HOME = str(_HOME / ".cache")
 $XDG_DATA_HOME = str(_HOME / ".local" / "share")
 $XDG_STATE_HOME = str(_HOME / ".local" / "state")
 
-$EDITOR = _which("nvim") or _which("vim") or "notepad"
+$EDITOR = _which("code") or _which("notepad") or "notepad"
 $VISUAL = $EDITOR
 $PAGER = "less"
 $LESS = "-RF -i -j.3 -K -M"
@@ -74,8 +74,8 @@ $_ZO_ECHO = "1"
 $_ZO_RESOLVE_SYMLINKS = "1"
 $_ZO_FZF_OPTS = "--height 15 --min-height 10 --reverse --preview-window=right:40% --border"
 $CARAPACE_BRIDGES = "zsh,fish,bash,inshellisense"
-if _which("nvim"):
-    $MANPAGER = "nvim +Man!"
+if _which("bat"):
+    $MANPAGER = "bat -l man -p"
     $MANWIDTH = "999"
 
 $FZF_DEFAULT_OPTS = (
@@ -560,7 +560,7 @@ def profile():
     os.chdir(_HOME / '.config' / 'xonsh')
 
 def ep():
-    subprocess.run([os.environ.get('EDITOR', 'nvim'), str(_HOME / '.xonshrc')])
+    subprocess.run([os.environ.get('EDITOR', 'notepad'), str(_HOME / '.xonshrc')])
 
 def g(*args):
     exe = _which('zoxide')
@@ -883,7 +883,7 @@ def fe(*args):
     preview = "--preview=bat --color=always --line-range :100 {}" if _which("bat") else "--preview=type {}"
     selected = _fzf_pick(files, "-m", "--prompt=Edit❯ ", preview)
     if selected:
-        editor = os.environ.get("EDITOR", "nvim")
+        editor = os.environ.get("EDITOR", "notepad")
         subprocess.run([editor, *selected.splitlines()])
 
 def fkill():

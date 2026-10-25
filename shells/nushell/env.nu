@@ -24,22 +24,17 @@ $env.XDG_CACHE_HOME  = ($env.USERPROFILE | path join ".cache")
 $env.XDG_DATA_HOME   = ($env.USERPROFILE | path join ".local" "share")
 $env.XDG_STATE_HOME  = ($env.USERPROFILE | path join ".local" "state")
 
-# --- 2. FORGUM INTEGRATION ---
-# Zero-lag: the Forgum hooks (forgum / forgum-init defs) are sourced from
-# config.nu via forgum.nu — generated with `forgum init nushell`.
-
-# --- 3. CONDA INTEGRATION (ZERO-LAG) ---
+# --- 2. CONDA INTEGRATION (ZERO-LAG) ---
 # Using the KV-Store approach from nu_scripts to avoid 'conda activate' lag.
-# Zero-lag conda: the module lives at ~/.config/nushell/modules/conda.nu and
-# is sourced from config.nu top level (defs inside env.nu blocks would be
-# block-scoped and lost).
+# Zero-lag conda: the module lives under modules/conda.nu and
+# is sourced from config.nu top level.
 
-# --- 4. OH-MY-POSH THEME PINNING ---
+# --- 3. OH-MY-POSH THEME PINNING ---
 # One theme shared by pwsh, nu and xonsh: half-life, as requested.
 $env.POSH_THEME = ($env.HOME | path join ".config" "oh-my-posh" "half-life.omp.json")
 
-# --- 5. VISUALS & UTILS ---
-$env.EDITOR = "nvim"
+# --- 4. VISUALS & UTILS ---
+$env.EDITOR = "notepad"
 $env.BAT_THEME = "Catppuccin Mocha"
 $env.EZA_ICONS_AUTO = "1"
 

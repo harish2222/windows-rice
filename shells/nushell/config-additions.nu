@@ -11,7 +11,8 @@
 # ==============================================================================
 
 # ── Completions module (nu-complete functions) ──
-source "C:/Users/haris/.config/nushell/completions/mod.nu"
+const completions_mod = ($nu.default-config-dir | path join "completions" "mod.nu")
+source $completions_mod
 
 # ── Clipboard ──
 def clip-copy [text: string] {

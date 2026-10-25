@@ -104,7 +104,6 @@ widgets:
       - { title: "RAMMap", path: "C:\\Users\\haris\\.config\\RAMMap\\RAMMap.exe" }
       - { separator: true }
       - { title: "Terminal", command: "wt.exe", show_window: true }
-      - { title: "Neovim", command: "wt.exe", args: ["nvim"], show_window: true }
       - { title: "Visual Studio Code", command: "C:\\Users\\haris\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe", show_window: true }
       - { title: "Emacs", command: "C:\\PROGRA~1\\Emacs\\emacs-31.1\\bin\\runemacs.exe", show_window: true }
       - { title: "Z Drive", path: "Z:\\" }
