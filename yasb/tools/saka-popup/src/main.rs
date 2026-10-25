@@ -637,10 +637,10 @@ unsafe fn render_into_dib(app: &App, dib: &mut Dib) {
                 c.radial_glow(mcx2, mcy, mr * 1.9, t.accent, t.moon_glow);
 
                 // Top micro-tags above each moon with ample clearance
-                c.round_rect(mcx1 as i32 - 48, l.moon_y - 20, mcx1 as i32 + 48, l.moon_y - 6, 6, t.surface_elevated);
-                c.round_rect_border(mcx1 as i32 - 48, l.moon_y - 20, mcx1 as i32 + 48, l.moon_y - 6, 6, 1, t.hairline);
-                c.round_rect(mcx2 as i32 - 48, l.moon_y - 20, mcx2 as i32 + 48, l.moon_y - 6, 6, t.surface_elevated);
-                c.round_rect_border(mcx2 as i32 - 48, l.moon_y - 20, mcx2 as i32 + 48, l.moon_y - 6, 6, 1, t.hairline);
+                c.round_rect(mcx1 as i32 - 58, l.moon_y - 22, mcx1 as i32 + 58, l.moon_y - 6, 6, t.surface_elevated);
+                c.round_rect_border(mcx1 as i32 - 58, l.moon_y - 22, mcx1 as i32 + 58, l.moon_y - 6, 6, 1, t.hairline);
+                c.round_rect(mcx2 as i32 - 58, l.moon_y - 22, mcx2 as i32 + 58, l.moon_y - 6, 6, t.surface_elevated);
+                c.round_rect_border(mcx2 as i32 - 58, l.moon_y - 22, mcx2 as i32 + 58, l.moon_y - 6, 6, 1, t.hairline);
 
                 // 1. 3D Rotating Moon
                 moon::draw_3d_moon(
@@ -654,7 +654,7 @@ unsafe fn render_into_dib(app: &App, dib: &mut Dib) {
                     t.accent,
                 );
 
-                // 2. Astronomical Sky Phase Moon
+                // 2. Telescopic Astronomical Sky Phase Moon
                 moon::draw_sky_moon(
                     &mut c,
                     mcx2,
@@ -666,17 +666,17 @@ unsafe fn render_into_dib(app: &App, dib: &mut Dib) {
                 );
 
                 // Phase badge pill beneath both moons with >= 10px downward padding
-                let badge_x0 = mcx1 as i32 - mr as i32 - 4;
-                let badge_x1 = mcx2 as i32 + mr as i32 + 4;
+                let badge_x0 = mcx1 as i32 - mr as i32 - 6;
+                let badge_x1 = mcx2 as i32 + mr as i32 + 6;
                 let badge_y0 = l.moon_bottom + 10;
-                let badge_y1 = badge_y0 + 22;
+                let badge_y1 = badge_y0 + 24;
                 c.round_rect(badge_x0, badge_y0, badge_x1, badge_y1, 8, t.card);
                 c.round_rect_border(badge_x0, badge_y0, badge_x1, badge_y1, 8, 1, t.hairline);
 
                 // Sunrise / Sunset timeline
                 let tx0 = PAD + 76;
                 let tx1 = w - PAD - 76;
-                let ty = l.timeline_y + 11;
+                let ty = l.timeline_y + 13;
                 c.round_rect(tx0, ty, tx1, ty + 2, 1, t.track);
                 if let (Some(sr), Some(ss)) = (app.panchangam.sunrise_jd, app.panchangam.sunset_jd) {
                     let now = app.panchangam.jd;
@@ -723,26 +723,26 @@ unsafe fn render_into_dib(app: &App, dib: &mut Dib) {
                 c.radial_glow(mcx2, mcy, mr * 1.8, t.accent, t.moon_glow);
 
                 // Top micro-tags above dual moons
-                c.round_rect(mcx1 as i32 - 48, l.moon_y - 20, mcx1 as i32 + 48, l.moon_y - 6, 6, t.surface_elevated);
-                c.round_rect_border(mcx1 as i32 - 48, l.moon_y - 20, mcx1 as i32 + 48, l.moon_y - 6, 6, 1, t.hairline);
-                c.round_rect(mcx2 as i32 - 48, l.moon_y - 20, mcx2 as i32 + 48, l.moon_y - 6, 6, t.surface_elevated);
-                c.round_rect_border(mcx2 as i32 - 48, l.moon_y - 20, mcx2 as i32 + 48, l.moon_y - 6, 6, 1, t.hairline);
+                c.round_rect(mcx1 as i32 - 58, l.moon_y - 22, mcx1 as i32 + 58, l.moon_y - 6, 6, t.surface_elevated);
+                c.round_rect_border(mcx1 as i32 - 58, l.moon_y - 22, mcx1 as i32 + 58, l.moon_y - 6, 6, 1, t.hairline);
+                c.round_rect(mcx2 as i32 - 58, l.moon_y - 22, mcx2 as i32 + 58, l.moon_y - 6, 6, t.surface_elevated);
+                c.round_rect_border(mcx2 as i32 - 58, l.moon_y - 22, mcx2 as i32 + 58, l.moon_y - 6, 6, 1, t.hairline);
 
                 moon::draw_3d_moon(&mut c, mcx1, mcy, mr, app.panchangam.illum as f32, app.panchangam.waxing, app.rotation_angle, t.accent);
                 moon::draw_sky_moon(&mut c, mcx2, mcy, mr, app.panchangam.illum as f32, app.panchangam.waxing, t.accent);
 
                 // Phase badge under moons
-                let badge_x0 = mcx1 as i32 - mr as i32 - 4;
-                let badge_x1 = mcx2 as i32 + mr as i32 + 4;
+                let badge_x0 = mcx1 as i32 - mr as i32 - 6;
+                let badge_x1 = mcx2 as i32 + mr as i32 + 6;
                 let badge_y0 = l.moon_bottom + 10;
-                let badge_y1 = badge_y0 + 22;
+                let badge_y1 = badge_y0 + 24;
                 c.round_rect(badge_x0, badge_y0, badge_x1, badge_y1, 8, t.card);
                 c.round_rect_border(badge_x0, badge_y0, badge_x1, badge_y1, 8, 1, t.hairline);
 
                 // Solar timeline on left under moons
                 let tx0 = PAD + 56;
-                let tx1 = 370 - 56;
-                let ty = l.timeline_y + 11;
+                let tx1 = 440 - 56;
+                let ty = l.timeline_y + 13;
                 c.round_rect(tx0, ty, tx1, ty + 2, 1, t.track);
                 if let (Some(sr), Some(ss)) = (app.panchangam.sunrise_jd, app.panchangam.sunset_jd) {
                     let now = app.panchangam.jd;
@@ -756,12 +756,12 @@ unsafe fn render_into_dib(app: &App, dib: &mut Dib) {
                 }
 
                 // Right column: Today's Panchang card
-                let right_card_x0 = 420;
+                let right_card_x0 = 470;
                 let right_card_x1 = w - PAD;
                 c.round_rect(right_card_x0, l.panchang_card_y, right_card_x1, l.panchang_card_bottom, layout::CARD_R, t.card);
                 c.round_rect_border(right_card_x0, l.panchang_card_y, right_card_x1, l.panchang_card_bottom, layout::CARD_R, 1, t.hairline);
 
-                let track_x0 = right_card_x0 + 120;
+                let track_x0 = right_card_x0 + 130;
                 let track_w = right_card_x1 - 16 - track_x0;
                 let th = 2;
                 for i in 0..5 {
@@ -800,12 +800,12 @@ unsafe fn render_into_dib(app: &App, dib: &mut Dib) {
                 );
 
                 // Moon badge pill beneath moon
-                let badge_x0 = l.sky_moon_cx - 52;
-                let badge_x1 = l.sky_moon_cx + 52;
-                let badge_y0 = l.moon_bottom + 6;
-                let badge_y1 = badge_y0 + 20;
-                c.round_rect(badge_x0, badge_y0, badge_x1, badge_y1, 6, t.surface_elevated);
-                c.round_rect_border(badge_x0, badge_y0, badge_x1, badge_y1, 6, 1, t.hairline);
+                let badge_x0 = l.sky_moon_cx - 60;
+                let badge_x1 = l.sky_moon_cx + 60;
+                let badge_y0 = l.moon_bottom + 10;
+                let badge_y1 = badge_y0 + 24;
+                c.round_rect(badge_x0, badge_y0, badge_x1, badge_y1, 8, t.surface_elevated);
+                c.round_rect_border(badge_x0, badge_y0, badge_x1, badge_y1, 8, 1, t.hairline);
 
                 // Hairline divider below header
                 c.hline(PAD, w - PAD, l.rule_y, t.hairline);
@@ -817,7 +817,7 @@ unsafe fn render_into_dib(app: &App, dib: &mut Dib) {
                 // Tithi progress rule
                 let track_x0 = PAD + 16;
                 let track_w = w - PAD * 2 - 32;
-                let bar_y = l.panchang_card_y + 44;
+                let bar_y = l.panchang_card_y + 40;
                 c.round_rect(track_x0, bar_y, track_x0 + track_w, bar_y + 2, 1, t.track);
                 let tithi_frac = app.panchangam.tithi.progress;
                 let fw = ((tithi_frac.clamp(0.0, 1.0)) * track_w as f64).round() as i32;
@@ -825,13 +825,36 @@ unsafe fn render_into_dib(app: &App, dib: &mut Dib) {
                     c.round_rect(track_x0, bar_y, track_x0 + fw, bar_y + 2, 1, t.accent);
                 }
 
+                // 4 flex chip backgrounds for Card 1 (Nakshatra, Yoga, Karana, Vara)
+                let chip_gap = 12;
+                let chip_w = (track_w - chip_gap) / 2;
+                let chip_h = 28;
+                let chip_y0 = l.panchang_card_y + 52;
+                let chip_y1 = l.panchang_card_y + 86;
+                for (cx0, cy0) in [
+                    (track_x0, chip_y0),
+                    (track_x0 + chip_w + chip_gap, chip_y0),
+                    (track_x0, chip_y1),
+                    (track_x0 + chip_w + chip_gap, chip_y1),
+                ] {
+                    c.round_rect(cx0, cy0, cx0 + chip_w, cy0 + chip_h, 8, t.surface_elevated);
+                    c.round_rect_border(cx0, cy0, cx0 + chip_w, cy0 + chip_h, 8, 1, t.hairline);
+                }
+
                 // Card 2: Solar Timeline & Cycle Card
                 c.round_rect(PAD, l.timeline_y, w - PAD, l.timeline_bottom, layout::CARD_R, t.card);
                 c.round_rect_border(PAD, l.timeline_y, w - PAD, l.timeline_bottom, layout::CARD_R, 1, t.hairline);
 
+                // Center day duration pill background in Card 2
+                let dur_pill_w = 170;
+                let dur_pill_x0 = (w - dur_pill_w) / 2;
+                c.round_rect(dur_pill_x0, l.timeline_y + 10, dur_pill_x0 + dur_pill_w, l.timeline_y + 32, 6, t.surface_elevated);
+                c.round_rect_border(dur_pill_x0, l.timeline_y + 10, dur_pill_x0 + dur_pill_w, l.timeline_y + 32, 6, 1, t.hairline);
+
+                // Solar track at y = l.timeline_y + 44 (12px clearance below text)
                 let tx0 = PAD + 76;
                 let tx1 = w - PAD - 76;
-                let ty = l.timeline_y + 22;
+                let ty = l.timeline_y + 44;
                 c.round_rect(tx0, ty, tx1, ty + 2, 1, t.track);
                 if let (Some(sr), Some(ss)) = (app.panchangam.sunrise_jd, app.panchangam.sunset_jd) {
                     let now = app.panchangam.jd;
@@ -842,6 +865,19 @@ unsafe fn render_into_dib(app: &App, dib: &mut Dib) {
                         c.radial_glow(pip_x, ty as f32 + 1.0, 6.0, t.solar, 0.45);
                         c.round_rect((pip_x - 3.0) as i32, ty - 2, (pip_x + 3.0) as i32, ty + 4, 3, t.solar);
                     }
+                }
+
+                // 4 flex chip backgrounds for Card 2 lunar cycle
+                let cycle_chip_y0 = l.timeline_y + 56;
+                let cycle_chip_y1 = l.timeline_y + 86;
+                for (cx0, cy0) in [
+                    (track_x0, cycle_chip_y0),
+                    (track_x0 + chip_w + chip_gap, cycle_chip_y0),
+                    (track_x0, cycle_chip_y1),
+                    (track_x0 + chip_w + chip_gap, cycle_chip_y1),
+                ] {
+                    c.round_rect(cx0, cy0, cx0 + chip_w, cy0 + chip_h, 8, t.surface_elevated);
+                    c.round_rect_border(cx0, cy0, cx0 + chip_w, cy0 + chip_h, 8, 1, t.hairline);
                 }
             }
         }
@@ -878,7 +914,7 @@ unsafe fn render_into_dib(app: &App, dib: &mut Dib) {
         let header_text_w = if app.mode == layout::LayoutMode::Portrait {
             (l.moon_cx - l.moon_r - 16) - PAD
         } else if app.mode == layout::LayoutMode::Landscape {
-            350 - PAD
+            440 - PAD
         } else {
             (l.sky_moon_cx - l.moon_r - 16) - PAD
         };
@@ -906,7 +942,7 @@ unsafe fn render_into_dib(app: &App, dib: &mut Dib) {
             DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS,
         );
 
-        // Udaya Tithi and Day Duration (Portrait and Landscape)
+        // Udaya Tithi and Day Duration (Dedicated non-overlapping lines)
         let day_duration = if let (Some(sr), Some(ss)) = (p.sunrise_jd, p.sunset_jd) {
             let total_mins = ((ss - sr) * 24.0 * 60.0).round() as i64;
             let hrs = total_mins / 60;
@@ -920,16 +956,41 @@ unsafe fn render_into_dib(app: &App, dib: &mut Dib) {
             "--".into()
         };
 
+        let udaya_name = if let Some(ut) = &p.tithi_at_sunrise {
+            format!("{} {}", paksha_at(ut.index, s), tithi_name_at(ut.index, s))
+        } else {
+            format!("{} {}", paksha_at(p.tithi.index, s), tithi_name_at(p.tithi.index, s))
+        };
+
         if app.mode != layout::LayoutMode::Compact {
-            let udaya_name = if let Some(ut) = &p.tithi_at_sunrise {
-                format!("{} {}", paksha_at(ut.index, s), tithi_name_at(ut.index, s))
-            } else {
-                format!("{} {}", paksha_at(p.tithi.index, s), tithi_name_at(p.tithi.index, s))
-            };
             let udaya_str = if telugu {
-                format!("ఉదయ తిథి: {udaya_name} · దినమానం: {day_duration}")
+                format!("ఉదయ తిథి: {udaya_name}")
             } else {
-                format!("Udaya: {udaya_name} · Day: {day_duration}")
+                format!("Udaya Tithi: {udaya_name}")
+            };
+            draw_text(
+                dc,
+                &udaya_str,
+                rect(PAD, l.udaya_y, header_text_w, 22),
+                DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS,
+            );
+
+            let day_dur_str = if telugu {
+                format!("దినమానం: {day_duration}")
+            } else {
+                format!("Day Duration: {day_duration}")
+            };
+            draw_text(
+                dc,
+                &day_dur_str,
+                rect(PAD, l.day_duration_y, header_text_w, 22),
+                DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS,
+            );
+        } else {
+            let udaya_str = if telugu {
+                format!("ఉదయ తిథి: {udaya_name}")
+            } else {
+                format!("Udaya Tithi: {udaya_name}")
             };
             draw_text(
                 dc,
@@ -946,8 +1007,8 @@ unsafe fn render_into_dib(app: &App, dib: &mut Dib) {
                 SetTextColor(dc, colorref(t.accent));
                 let tag1 = if telugu { "3D భ్రమణం" } else { "3D ROTATING" };
                 let tag2 = if telugu { "ఆకాశ దృశ్యం" } else { "SKY VIEW" };
-                draw_text(dc, tag1, rect(l.moon_cx - 48, l.moon_y - 20, 96, 14), DT_CENTER | DT_VCENTER);
-                draw_text(dc, tag2, rect(l.sky_moon_cx - 48, l.moon_y - 20, 96, 14), DT_CENTER | DT_VCENTER);
+                draw_text(dc, tag1, rect(l.moon_cx - 58, l.moon_y - 22, 116, 16), DT_CENTER | DT_VCENTER);
+                draw_text(dc, tag2, rect(l.sky_moon_cx - 58, l.moon_y - 22, 116, 16), DT_CENTER | DT_VCENTER);
 
                 // Phase summary badge beneath both moons
                 let phase_summary = format!(
@@ -956,12 +1017,12 @@ unsafe fn render_into_dib(app: &App, dib: &mut Dib) {
                     p.illum * 100.0,
                     if p.waxing { if telugu { "వృద్ధి" } else { "Waxing" } } else { if telugu { "క్షయ" } else { "Waning" } }
                 );
-                let badge_x0 = l.moon_cx - l.moon_r - 4;
-                let badge_x1 = l.sky_moon_cx + l.moon_r + 4;
+                let badge_x0 = l.moon_cx - l.moon_r - 6;
+                let badge_x1 = l.sky_moon_cx + l.moon_r + 6;
                 draw_text(
                     dc,
                     &phase_summary,
-                    rect(badge_x0, l.moon_bottom + 10, badge_x1 - badge_x0, 22),
+                    rect(badge_x0, l.moon_bottom + 10, badge_x1 - badge_x0, 24),
                     DT_CENTER | DT_VCENTER,
                 );
 
@@ -970,8 +1031,8 @@ unsafe fn render_into_dib(app: &App, dib: &mut Dib) {
                 SetTextColor(dc, colorref(t.solar));
                 let rise_str = format!("☀ {}", p.sunrise_jd.map(|j| p.hhmm(j)).unwrap_or_else(|| "--:--".into()));
                 let set_str = format!("☀ {}", p.sunset_jd.map(|j| p.hhmm(j)).unwrap_or_else(|| "--:--".into()));
-                draw_text(dc, &rise_str, rect(PAD, l.timeline_y + 2, 70, 22), DT_LEFT | DT_VCENTER);
-                draw_text(dc, &set_str, rect(w - PAD - 70, l.timeline_y + 2, 70, 22), DT_RIGHT | DT_VCENTER);
+                draw_text(dc, &rise_str, rect(PAD, l.timeline_y + 4, 70, 22), DT_LEFT | DT_VCENTER);
+                draw_text(dc, &set_str, rect(w - PAD - 70, l.timeline_y + 4, 70, 22), DT_RIGHT | DT_VCENTER);
 
                 // Section 1 Header: TODAY'S PANCHANG
                 SelectObject(dc, HGDIOBJ(section.0));
@@ -1035,8 +1096,8 @@ unsafe fn render_into_dib(app: &App, dib: &mut Dib) {
                 SetTextColor(dc, colorref(t.accent));
                 let tag1 = if telugu { "3D భ్రమణం" } else { "3D ROTATING" };
                 let tag2 = if telugu { "ఆకాశ దృశ్యం" } else { "SKY VIEW" };
-                draw_text(dc, tag1, rect(l.moon_cx - 48, l.moon_y - 20, 96, 14), DT_CENTER | DT_VCENTER);
-                draw_text(dc, tag2, rect(l.sky_moon_cx - 48, l.moon_y - 20, 96, 14), DT_CENTER | DT_VCENTER);
+                draw_text(dc, tag1, rect(l.moon_cx - 58, l.moon_y - 22, 116, 16), DT_CENTER | DT_VCENTER);
+                draw_text(dc, tag2, rect(l.sky_moon_cx - 58, l.moon_y - 22, 116, 16), DT_CENTER | DT_VCENTER);
 
                 // Phase summary badge beneath both moons
                 let phase_summary = format!(
@@ -1045,12 +1106,12 @@ unsafe fn render_into_dib(app: &App, dib: &mut Dib) {
                     p.illum * 100.0,
                     if p.waxing { if telugu { "వృద్ధి" } else { "Waxing" } } else { if telugu { "క్షయ" } else { "Waning" } }
                 );
-                let badge_x0 = l.moon_cx - l.moon_r - 4;
-                let badge_x1 = l.sky_moon_cx + l.moon_r + 4;
+                let badge_x0 = l.moon_cx - l.moon_r - 6;
+                let badge_x1 = l.sky_moon_cx + l.moon_r + 6;
                 draw_text(
                     dc,
                     &phase_summary,
-                    rect(badge_x0, l.moon_bottom + 10, badge_x1 - badge_x0, 22),
+                    rect(badge_x0, l.moon_bottom + 10, badge_x1 - badge_x0, 24),
                     DT_CENTER | DT_VCENTER,
                 );
 
@@ -1059,11 +1120,11 @@ unsafe fn render_into_dib(app: &App, dib: &mut Dib) {
                 SetTextColor(dc, colorref(t.solar));
                 let rise_str = format!("☀ {}", p.sunrise_jd.map(|j| p.hhmm(j)).unwrap_or_else(|| "--:--".into()));
                 let set_str = format!("☀ {}", p.sunset_jd.map(|j| p.hhmm(j)).unwrap_or_else(|| "--:--".into()));
-                draw_text(dc, &rise_str, rect(PAD, l.timeline_y + 2, 60, 22), DT_LEFT | DT_VCENTER);
-                draw_text(dc, &set_str, rect(370 - 60, l.timeline_y + 2, 60, 22), DT_RIGHT | DT_VCENTER);
+                draw_text(dc, &rise_str, rect(PAD, l.timeline_y + 4, 60, 22), DT_LEFT | DT_VCENTER);
+                draw_text(dc, &set_str, rect(440 - 60, l.timeline_y + 4, 60, 22), DT_RIGHT | DT_VCENTER);
 
                 // Right column rows (Today's Panchang, 5 rows)
-                let right_card_x0 = 420;
+                let right_card_x0 = 470;
                 let right_card_x1 = w - PAD;
                 SelectObject(dc, HGDIOBJ(section.0));
                 SetTextColor(dc, colorref(t.accent));
@@ -1077,7 +1138,7 @@ unsafe fn render_into_dib(app: &App, dib: &mut Dib) {
                         let caps = r.label.to_uppercase();
                         tracked_text(dc, &caps, right_card_x0 + 16, y + 8, 1);
 
-                        let val_x = right_card_x0 + 120;
+                        let val_x = right_card_x0 + 130;
                         SelectObject(dc, HGDIOBJ(body.0));
                         SetTextColor(dc, colorref(t.text));
                         draw_text(
@@ -1086,6 +1147,17 @@ unsafe fn render_into_dib(app: &App, dib: &mut Dib) {
                             rect(val_x, y + 4, right_card_x1 - val_x - 16, l.text_h()),
                             DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS,
                         );
+
+                        if let Some((_, cap)) = &r.progress {
+                            SelectObject(dc, HGDIOBJ(small.0));
+                            SetTextColor(dc, colorref(t.subtext));
+                            draw_text(
+                                dc,
+                                cap,
+                                rect(right_card_x1 - 16 - 120, y + 4, 120, l.text_h()),
+                                DT_RIGHT | DT_VCENTER,
+                            );
+                        }
                     }
                 }
 
@@ -1094,11 +1166,11 @@ unsafe fn render_into_dib(app: &App, dib: &mut Dib) {
             }
             layout::LayoutMode::Compact => {
                 // Micro-badge below moon
-                let badge_x0 = l.sky_moon_cx - 52;
-                let badge_x1 = l.sky_moon_cx + 52;
-                let badge_y0 = l.moon_bottom + 6;
+                let badge_x0 = l.sky_moon_cx - 60;
+                let badge_x1 = l.sky_moon_cx + 60;
+                let badge_y0 = l.moon_bottom + 10;
                 SelectObject(dc, HGDIOBJ(small.0));
-                SetTextColor(dc, colorref(t.accent));
+                SetTextColor(dc, colorref(t.subtext));
                 let compact_phase_str = format!(
                     "● {:.0}% {}",
                     p.illum * 100.0,
@@ -1107,12 +1179,13 @@ unsafe fn render_into_dib(app: &App, dib: &mut Dib) {
                 draw_text(
                     dc,
                     &compact_phase_str,
-                    rect(badge_x0, badge_y0, badge_x1 - badge_x0, 20),
+                    rect(badge_x0, badge_y0, badge_x1 - badge_x0, 24),
                     DT_CENTER | DT_VCENTER,
                 );
 
-                // Card 1 Text (Panchang Highlights)
-                let card_inner_w = w - PAD * 2 - 32;
+                // Card 1 Text (Panchang Highlights with Responsive Flex Chips)
+                let track_x0 = PAD + 16;
+                let track_w = w - PAD * 2 - 32;
                 let tithi_row = &rows[0];
                 SelectObject(dc, HGDIOBJ(body.0));
                 SetTextColor(dc, colorref(t.text));
@@ -1120,7 +1193,7 @@ unsafe fn render_into_dib(app: &App, dib: &mut Dib) {
                 draw_text(
                     dc,
                     &tithi_title,
-                    rect(PAD + 16, l.panchang_card_y + 14, card_inner_w - 120, 24),
+                    rect(track_x0, l.panchang_card_y + 12, track_w - 140, 24),
                     DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS,
                 );
 
@@ -1130,63 +1203,79 @@ unsafe fn render_into_dib(app: &App, dib: &mut Dib) {
                     draw_text(
                         dc,
                         cap,
-                        rect(w - PAD - 16 - 120, l.panchang_card_y + 14, 120, 24),
+                        rect(track_x0 + track_w - 140, l.panchang_card_y + 12, 140, 24),
                         DT_RIGHT | DT_VCENTER,
                     );
                 }
 
-                // Line 2: Nakshatra, Yoga & Vara with 12px downward clearance
-                SelectObject(dc, HGDIOBJ(small.0));
-                SetTextColor(dc, colorref(t.subtext));
-                let nak_vara_str = format!(
-                    "{}: {} · {}: {} · {}",
-                    if telugu { "నక్షత్రం" } else { "Nakshatra" },
-                    s.nakshatra(p.nakshatra.index),
-                    if telugu { "యోగం" } else { "Yoga" },
-                    s.yoga(p.yoga.index),
-                    s.vara(p.vara)
-                );
-                draw_text(
-                    dc,
-                    &nak_vara_str,
-                    rect(PAD + 16, l.panchang_card_y + 56, card_inner_w, 22),
-                    DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS,
-                );
+                // 4 Responsive Flex Chips in Card 1
+                let chip_gap = 12;
+                let chip_w = (track_w - chip_gap) / 2;
+                let chip_h = 28;
+                let chip_y0 = l.panchang_card_y + 52;
+                let chip_y1 = l.panchang_card_y + 86;
 
-                // Card 2 Text (Solar & Cycle)
+                let card1_chips = [
+                    (track_x0, chip_y0, format!("{}: {} ({})", if telugu { "నక్షత్రం" } else { "Nak" }, s.nakshatra(p.nakshatra.index), bar_caption(&p.nakshatra, p).1)),
+                    (track_x0 + chip_w + chip_gap, chip_y0, format!("{}: {} ({})", if telugu { "యోగం" } else { "Yoga" }, s.yoga(p.yoga.index), bar_caption(&p.yoga, p).1)),
+                    (track_x0, chip_y1, format!("{}: {} ({})", if telugu { "కరణం" } else { "Karana" }, s.karana(p.karana_slot), if p.karana_first_half { if telugu { "1వ సగం" } else { "1st half" } } else { if telugu { "2వ సగం" } else { "2nd half" } })),
+                    (track_x0 + chip_w + chip_gap, chip_y1, if telugu { format!("{}: {} (రవి)", s.vara(p.vara), ["సూర్యుడు", "చంద్రుడు", "కుజుడు", "బుధుడు", "గురుడు", "శుక్రుడు", "శని"][p.vara % 7]) } else { format!("Vara: {} ({})", s.vara(p.vara), ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn"][p.vara % 7]) }),
+                ];
+
+                for (cx0, cy0, text) in card1_chips {
+                    SelectObject(dc, HGDIOBJ(small.0));
+                    SetTextColor(dc, colorref(t.subtext));
+                    draw_text(
+                        dc,
+                        &text,
+                        rect(cx0 + 10, cy0 + 3, chip_w - 20, chip_h - 6),
+                        DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS,
+                    );
+                }
+
+                // Card 2 Text (Solar Timeline & Lunar Cycle)
+                // Row 1: Sunrise & Sunset
                 SelectObject(dc, HGDIOBJ(small.0));
                 SetTextColor(dc, colorref(t.solar));
                 let rise_str = format!("☀ {}", p.sunrise_jd.map(|j| p.hhmm(j)).unwrap_or_else(|| "--:--".into()));
                 let set_str = format!("☀ {}", p.sunset_jd.map(|j| p.hhmm(j)).unwrap_or_else(|| "--:--".into()));
-                draw_text(dc, &rise_str, rect(PAD + 14, l.timeline_y + 12, 60, 22), DT_LEFT | DT_VCENTER);
-                draw_text(dc, &set_str, rect(w - PAD - 14 - 60, l.timeline_y + 12, 60, 22), DT_RIGHT | DT_VCENTER);
+                draw_text(dc, &rise_str, rect(track_x0, l.timeline_y + 10, 80, 22), DT_LEFT | DT_VCENTER);
+                draw_text(dc, &set_str, rect(track_x0 + track_w - 80, l.timeline_y + 10, 80, 22), DT_RIGHT | DT_VCENTER);
 
-                // Center day duration
+                // Row 1 Center: Day duration pill text (100% CLEAR - NEVER TOUCHES THE SOLAR TRACK)
+                let dur_pill_w = 170;
+                let dur_pill_x0 = (w - dur_pill_w) / 2;
                 SelectObject(dc, HGDIOBJ(small.0));
-                SetTextColor(dc, colorref(t.faint));
+                SetTextColor(dc, colorref(t.text));
                 let day_dur_str = format!("{}: {}", if telugu { "దినమానం" } else { "Day Duration" }, day_duration);
                 draw_text(
                     dc,
                     &day_dur_str,
-                    rect(PAD + 80, l.timeline_y + 12, w - PAD * 2 - 160, 22),
+                    rect(dur_pill_x0, l.timeline_y + 10, dur_pill_w, 22),
                     DT_CENTER | DT_VCENTER,
                 );
 
-                // Line 2: Moon phase & Month
-                SelectObject(dc, HGDIOBJ(small.0));
-                SetTextColor(dc, colorref(t.subtext));
-                let cycle_str = format!(
-                    "● {} · {} · {}",
-                    p.phase_name_in(s),
-                    s.month(p.amanta_month),
-                    if telugu { format!("పూర్ణిమాంతం: {}", s.month(p.purnimanta_month)) } else { format!("Purnimanta: {}", s.month(p.purnimanta_month)) }
-                );
-                draw_text(
-                    dc,
-                    &cycle_str,
-                    rect(PAD + 16, l.timeline_y + 46, card_inner_w, 22),
-                    DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS,
-                );
+                // Row 2: 4 Lunar Cycle Chips in Card 2
+                let cycle_chip_y0 = l.timeline_y + 56;
+                let cycle_chip_y1 = l.timeline_y + 86;
+
+                let card2_chips = [
+                    (track_x0, cycle_chip_y0, if telugu { format!("● దశ: {}", p.phase_name_in(s)) } else { format!("● Phase: {}", p.phase_name_in(s)) }),
+                    (track_x0 + chip_w + chip_gap, cycle_chip_y0, if telugu { format!("అమాంతం: {} (దిన {})", s.month(p.amanta_month), p.amanta_tithi_day) } else { format!("Amanta: {} (Day {})", s.month(p.amanta_month), p.amanta_tithi_day) }),
+                    (track_x0, cycle_chip_y1, if telugu { format!("పూర్ణిమాంతం: {}", s.month(p.purnimanta_month)) } else { format!("Purnimanta: {}", s.month(p.purnimanta_month)) }),
+                    (track_x0 + chip_w + chip_gap, cycle_chip_y1, if telugu { format!("ముగింపు: {}", p.day_label_short(p.phase_end_jd)) } else { format!("Ends: {}", p.day_label_short(p.phase_end_jd)) }),
+                ];
+
+                for (cx0, cy0, text) in card2_chips {
+                    SelectObject(dc, HGDIOBJ(small.0));
+                    SetTextColor(dc, colorref(t.subtext));
+                    draw_text(
+                        dc,
+                        &text,
+                        rect(cx0 + 10, cy0 + 3, chip_w - 20, chip_h - 6),
+                        DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS,
+                    );
+                }
             }
         }
 
