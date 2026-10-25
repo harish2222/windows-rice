@@ -465,7 +465,7 @@ impl Layout {
     /// Enlarging the labels is therefore not free in general — it eats the
     /// value column — and `the_shipped_rows_never_need_an_ellipsis` is what
     /// proves the trade still fits the `Next` row's two dates.
-    pub const VALUE_X: i32 = PAD + yasb_chrome::space(28);
+    pub const VALUE_X: i32 = PAD + yasb_chrome::space(30);
 
     /// Gap between a row's value and its right-aligned caption. Scale step 4.
     pub const CAPTION_GAP: i32 = yasb_chrome::space(4);

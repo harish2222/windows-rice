@@ -1,7 +1,7 @@
 ﻿{
   "$comment": "Author -: HKDEVS | Project -: Window-Rice | Title -: Komorebi Window Manager Configuration",
   "$schema": "https://raw.githubusercontent.com/LGUG2Z/komorebi/master/schema.json",
-  "app_specific_configuration_path": "C:\\\\Users\\\\haris\\\\AppData\\\\Local\\\\Temp\\\\rice_test_glaze_84a2baa4df804a09b117cea95c0b70c1\\.config\\komorebi\\applications.json",
+  "app_specific_configuration_path": "C:\\\\Users\\\\haris\\.config\\komorebi\\applications.json",
   "animation": {
     "enabled": true,
     "fps": 144,
