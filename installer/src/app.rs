@@ -6,7 +6,7 @@
 use std::path::PathBuf;
 use std::sync::Mutex;
 use crate::catalog::{get_catalog, PackageItem};
-use crate::detect::{detect_package_managers, inspect_package, ItemInspection, PackageManagerStatus, BinaryStatus};
+use crate::detect::{detect_package_managers, inspect_package, ItemInspection, PackageManagerStatus, BinaryStatus, LinkStatus};
 use crate::linker::{link_config_mapping, LinkOutcome};
 use crate::bootstrap::{bootstrap_scoop, bootstrap_choco, run_package_install};
 use crate::verifier::run_verification;
@@ -368,41 +368,160 @@ impl App {
     }
 
     pub fn install_and_link_selected(&mut self) {
-        self.add_log("--- Starting Installation & Linking ---");
+        self.add_log("--- Starting Sequential Package Installation, Linking & Verification ---");
 
-        let items_to_install: Vec<(String, Option<String>)> = self.items
+        let selected_pkgs: Vec<PackageItem> = self.items
             .iter()
-            .filter(|i| i.selected && matches!(i.inspection.binary_status, BinaryStatus::Missing))
-            .map(|i| {
-                let cmd_opt = if self.pm_status.scoop && i.package.scoop_cmd.is_some() {
-                    i.package.scoop_cmd.map(|s| s.to_string())
-                } else if self.pm_status.winget && i.package.winget_cmd.is_some() {
-                    i.package.winget_cmd.map(|s| s.to_string())
-                } else if self.pm_status.choco && i.package.choco_cmd.is_some() {
-                    i.package.choco_cmd.map(|s| s.to_string())
-                } else if self.pm_status.cargo && i.package.cargo_cmd.is_some() {
-                    i.package.cargo_cmd.map(|s| s.to_string())
-                } else {
-                    i.package.scoop_cmd.or(i.package.winget_cmd).map(|s| s.to_string())
-                };
-                (i.package.name.to_string(), cmd_opt)
-            })
+            .filter(|i| i.selected)
+            .map(|i| i.package.clone())
             .collect();
 
-        for (pkg_name, cmd_opt) in items_to_install {
-            if let Some(cmd) = cmd_opt {
-                self.add_log(format!("Installing {} via: {}", pkg_name, cmd));
-                match run_package_install(&cmd) {
-                    Ok(_) => self.add_log(format!("  [PASS] Installed {}", pkg_name)),
-                    Err(e) => self.add_log(format!("  [FAIL] Error installing {}: {}", pkg_name, e)),
-                }
-            } else {
-                self.add_log(format!("  [SKIP] No automated install command available for {}", pkg_name));
-            }
+        if selected_pkgs.is_empty() {
+            self.add_log("No packages selected for installation.");
+            self.status_message = "No packages selected.".to_string();
+            return;
         }
 
-        // Link configs
-        self.link_selected_configs();
+        let mut total_installed_bin = 0;
+        let mut total_symlinks = 0;
+        let mut total_copies = 0;
+        let mut total_backed_up = 0;
+        let mut total_valid = 0;
+        let mut total_errors = 0;
+
+        for (idx, pkg) in selected_pkgs.iter().enumerate() {
+            self.add_log(format!(
+                "=== [{}/{}] Processing: {} ({}) ===",
+                idx + 1,
+                selected_pkgs.len(),
+                pkg.name,
+                pkg.id
+            ));
+
+            // Step 1: Binary Installation (if missing)
+            let inspection_before = inspect_package(pkg, &self.repo_root);
+            match inspection_before.binary_status {
+                BinaryStatus::Missing => {
+                    let cmd_opt = if self.pm_status.scoop && pkg.scoop_cmd.is_some() {
+                        pkg.scoop_cmd.map(|s| s.to_string())
+                    } else if self.pm_status.winget && pkg.winget_cmd.is_some() {
+                        pkg.winget_cmd.map(|s| s.to_string())
+                    } else if self.pm_status.choco && pkg.choco_cmd.is_some() {
+                        pkg.choco_cmd.map(|s| s.to_string())
+                    } else if self.pm_status.cargo && pkg.cargo_cmd.is_some() {
+                        pkg.cargo_cmd.map(|s| s.to_string())
+                    } else {
+                        pkg.scoop_cmd.or(pkg.winget_cmd).map(|s| s.to_string())
+                    };
+
+                    if let Some(cmd) = cmd_opt {
+                        self.add_log(format!("  [STEP 1: INSTALL] Installing binary for {} via: {}", pkg.name, cmd));
+                        match run_package_install(&cmd) {
+                            Ok(_) => {
+                                total_installed_bin += 1;
+                                self.add_log(format!("  [PASS] Installed binary for {}", pkg.name));
+                            }
+                            Err(e) => {
+                                total_errors += 1;
+                                self.add_log(format!("  [FAIL] Error installing binary for {}: {}", pkg.name, e));
+                            }
+                        }
+                    } else {
+                        self.add_log(format!("  [NOTE] No automated install command available for {}", pkg.name));
+                    }
+                }
+                BinaryStatus::Installed(ref p) => {
+                    self.add_log(format!("  [STEP 1: BINARY] Binary already installed: {}", p.display()));
+                }
+            }
+
+            // Step 2: Connect / Link Configuration
+            if pkg.id == "wallpapers" {
+                self.add_log("  [STEP 2: WALLPAPERS] Installing 8K Wallpapers to Pictures...");
+                self.install_wallpapers(None);
+            } else if !pkg.configs.is_empty() {
+                self.add_log(format!("  [STEP 2: CONFIG] Connecting & linking configurations for {}:", pkg.name));
+                for mapping in &pkg.configs {
+                    match link_config_mapping(&self.repo_root, mapping, &pkg.id) {
+                        LinkOutcome::SymlinkCreated(target) => {
+                            total_symlinks += 1;
+                            self.add_log(format!("    [SYMLINK]  -> Linked to {}", target.display()));
+                        }
+                        LinkOutcome::CopiedFallback(target) => {
+                            total_copies += 1;
+                            self.add_log(format!("    [COPIED]   -> Copied fallback to {}", target.display()));
+                        }
+                        LinkOutcome::BackedUpAndLinked { target, backup } => {
+                            total_backed_up += 1;
+                            total_symlinks += 1;
+                            self.add_log(format!("    [BACKUP]   -> Existing saved to {}", backup.display()));
+                            self.add_log(format!("    [SYMLINK]  -> Linked to {}", target.display()));
+                        }
+                        LinkOutcome::AlreadyValid(target) => {
+                            total_valid += 1;
+                            self.add_log(format!("    [ALREADY]  -> Already valid at {}", target.display()));
+                        }
+                        LinkOutcome::Failed(err) => {
+                            total_errors += 1;
+                            self.add_log(format!("    [ERROR]    -> Failed: {}", err));
+                        }
+                    }
+                }
+            } else {
+                self.add_log("  [STEP 2: CONFIG] No configuration files required.");
+            }
+
+            // Step 3: Test and Verify Package Setup
+            self.add_log(format!("  [STEP 3: VERIFY] Testing installation & configuration for {}:", pkg.name));
+            let inspection_after = inspect_package(pkg, &self.repo_root);
+
+            match &inspection_after.binary_status {
+                BinaryStatus::Installed(p) => {
+                    self.add_log(format!("    [TEST: PASS] Binary verified: {}", p.display()));
+                }
+                BinaryStatus::Missing => {
+                    self.add_log(format!("    [TEST: WARN] Binary not detected in current PATH (may need shell restart)."));
+                }
+            }
+
+            match &inspection_after.link_status {
+                LinkStatus::LinkedSymlink(p) => {
+                    self.add_log(format!("    [TEST: PASS] Config symlink verified: {}", p.display()));
+                }
+                LinkStatus::LinkedCopy(p) => {
+                    self.add_log(format!("    [TEST: PASS] Config copy verified: {}", p.display()));
+                }
+                LinkStatus::NotApplicable => {
+                    self.add_log("    [TEST: PASS] Config check: N/A".to_string());
+                }
+                LinkStatus::NotLinked => {
+                    self.add_log(format!("    [TEST: WARN] One or more configuration files not linked for {}.", pkg.name));
+                }
+            }
+
+            if !inspection_after.is_missing_any {
+                self.add_log(format!("  [RESULT: READY] {} is fully configured and verified.", pkg.name));
+            } else {
+                self.add_log(format!("  [RESULT: PENDING] {} partially configured (see warnings above).", pkg.name));
+            }
+
+            self.add_log(format!("Finished setup for {}. Advancing to next selected option...\n", pkg.name));
+        }
+
+        self.refresh_detection();
+        self.reload_environment();
+
+        self.status_message = format!(
+            "Setup complete for {} package(s): {} binaries installed, {} symlinks ({} backed up), {} copied, {} valid, {} errors.",
+            selected_pkgs.len(),
+            total_installed_bin,
+            total_symlinks,
+            total_backed_up,
+            total_copies,
+            total_valid,
+            total_errors
+        );
+        self.add_log(format!("--- {} ---", self.status_message));
     }
 
     pub fn run_verification_report(&mut self) {
@@ -1291,5 +1410,29 @@ mod tests {
                 assert!(!item.selected, "Non-matching package {} must not be selected", item.package.id);
             }
         }
+    }
+
+    #[test]
+    fn test_sequential_install_and_link_pipeline() {
+        let _env = TestEnv::new("seq_install_link");
+        let repo_root = PathBuf::from(".");
+        let mut app = App::new(repo_root);
+        assert!(app.items.len() >= 2);
+
+        // Select first 2 packages
+        app.select_none();
+        app.items[0].selected = true;
+        app.items[1].selected = true;
+
+        app.install_and_link_selected();
+
+        // Verify sequential progress logs were generated
+        let all_logs = app.logs.join("\n");
+        assert!(all_logs.contains("Starting Sequential Package Installation, Linking & Verification"));
+        assert!(all_logs.contains("=== [1/2] Processing:"));
+        assert!(all_logs.contains("=== [2/2] Processing:"));
+        assert!(all_logs.contains("STEP 3: VERIFY"));
+        assert!(all_logs.contains("Advancing to next selected option"));
+        assert!(all_logs.contains("Setup complete for 2 package(s)"));
     }
 }

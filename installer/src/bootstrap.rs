@@ -31,7 +31,23 @@ pub fn run_package_install(install_cmd: &str) -> Result<String> {
 }
 
 fn run_powershell_command(command: &str) -> Result<String> {
-    let output = Command::new("powershell.exe")
+    let mut cmd = Command::new("powershell.exe");
+
+    // Augment PATH with Scoop shims, Cargo bin, and Local bin if present
+    if let Some(user_profile) = std::env::var_os("USERPROFILE") {
+        let scoop_shims = std::path::PathBuf::from(&user_profile).join("scoop").join("shims");
+        let cargo_bin = std::path::PathBuf::from(&user_profile).join(".cargo").join("bin");
+        let local_bin = std::path::PathBuf::from(&user_profile).join(".local").join("bin");
+        if let Some(current_path) = std::env::var_os("PATH") {
+            let mut paths = vec![scoop_shims, cargo_bin, local_bin];
+            paths.extend(std::env::split_paths(&current_path));
+            if let Ok(new_path) = std::env::join_paths(paths) {
+                cmd.env("PATH", new_path);
+            }
+        }
+    }
+
+    let output = cmd
         .args(&["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", command])
         .output()
         .with_context(|| format!("Failed to execute powershell command: {}", command))?;

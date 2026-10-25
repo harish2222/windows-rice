@@ -27,6 +27,7 @@ param(
     [switch]$LinkAll,
     [switch]$Unlink,
     [switch]$UnlinkAll,
+    [switch]$Install,
     [switch]$InstallMissing,
     [switch]$Bootstrap,
     [switch]$Reload,
@@ -68,7 +69,8 @@ Options:
     -LinkAll              Link all configuration files without prompt (backs up user configs)
     -Unlink               Unlink selected/installed configurations cleanly and restore backups
     -UnlinkAll            Unlink all configurations cleanly without trace and restore backups
-    -InstallMissing       Install missing binaries and link configs
+    -Install              Install missing binaries and link configs (with automated tests)
+    -InstallMissing       Install missing binaries and link configs (alias for -Install)
     -Bootstrap            Bootstrap Scoop, Chocolatey, UV, and Vcpkg
     -Help                 Show this help text
 
@@ -175,7 +177,7 @@ if ($Verify) { $extraArgs += "--verify" }
 if ($LinkAll) { $extraArgs += "--link-all" }
 if ($Unlink) { $extraArgs += "--unlink" }
 if ($UnlinkAll) { $extraArgs += "--unlink-all" }
-if ($InstallMissing) { $extraArgs += "--install-missing" }
+if ($InstallMissing -or $Install) { $extraArgs += "--install-missing" }
 if ($Bootstrap) { $extraArgs += "--bootstrap" }
 if ($Reload) { $extraArgs += "--reload" }
 if ($Update) { $extraArgs += "--update" }
@@ -195,13 +197,28 @@ if (Test-Path $builtExe) {
 
 # 3. Check if pre-compiled release binary is available from GitHub
 if (-not (Test-Path $tempInstaller)) {
-    Write-Host "[Windows Rice] Checking for pre-compiled binary..." -ForegroundColor DarkGray
+    Write-Host "[Windows Rice] Checking for pre-compiled binary from GitHub releases..." -ForegroundColor DarkGray
     $releaseExeUrl = "https://github.com/harish2222/windows-rice/releases/latest/download/rice-installer.exe"
     try {
         Invoke-WebRequest -Uri $releaseExeUrl -OutFile $tempInstaller -UseBasicParsing -ErrorAction Stop
-        Write-Host "[Windows Rice] Pre-compiled rice-installer downloaded successfully." -ForegroundColor Green
     } catch {
-        if (Test-Path $tempInstaller) { Remove-Item $tempInstaller -Force -ErrorAction SilentlyContinue }
+        try {
+            $webClient = New-Object System.Net.WebClient
+            $webClient.DownloadFile($releaseExeUrl, $tempInstaller)
+        } catch {
+            if (Get-Command curl.exe -ErrorAction SilentlyContinue) {
+                try { & curl.exe -sSL $releaseExeUrl -o $tempInstaller } catch {}
+            }
+        }
+    }
+
+    if (Test-Path $tempInstaller) {
+        $fileSize = (Get-Item $tempInstaller).Length
+        if ($fileSize -gt 500000) {
+            Write-Host "[Windows Rice] Pre-compiled rice-installer downloaded successfully ($([math]::Round($fileSize / 1MB, 2)) MB)." -ForegroundColor Green
+        } else {
+            Remove-Item $tempInstaller -Force -ErrorAction SilentlyContinue
+        }
     }
 }
 

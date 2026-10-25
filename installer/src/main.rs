@@ -237,6 +237,33 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if args.iter().any(|a| a == "--install" || a == "--install-selected" || a == "-i") {
+        println!("Installing and linking selected packages (with automated testing)...");
+        let mut app = App::new(repo_root);
+        let explicit_pkgs: Vec<String> = args
+            .iter()
+            .skip(1)
+            .filter(|a| !a.starts_with('-'))
+            .cloned()
+            .collect();
+
+        if explicit_pkgs.is_empty() {
+            app.select_missing_only();
+        } else {
+            for item in &mut app.items {
+                item.selected = explicit_pkgs
+                    .iter()
+                    .any(|p| p.eq_ignore_ascii_case(item.package.id) || p.eq_ignore_ascii_case(item.package.name));
+            }
+        }
+
+        app.install_and_link_selected();
+        for log in &app.logs {
+            println!("{}", log);
+        }
+        return Ok(());
+    }
+
     // Launch interactive TUI
     run_tui(repo_root)?;
     Ok(())
