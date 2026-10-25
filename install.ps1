@@ -97,16 +97,25 @@ if ($isRemote) {
     $releaseExeUrl = "https://github.com/harish2222/windows-rice/releases/download/$Tag/rice-installer.exe"
     $latestExeUrl = "https://github.com/harish2222/windows-rice/releases/latest/download/rice-installer.exe"
 
-    # Step 1: Ensure Scoop is installed
+    # -------------------------------------------------------------------------
+    # Autonomous Prerequisite Resolver (Winget, Scoop, VC++ Runtime, Git)
+    # -------------------------------------------------------------------------
     $scoopShim = Join-Path $env:USERPROFILE "scoop\shims"
     $env:PATH = "$scoopShim;$env:PATH"
-    if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
+
+    $hasWinget = [bool](Get-Command winget -ErrorAction SilentlyContinue)
+    $hasScoop = [bool](Get-Command scoop -ErrorAction SilentlyContinue)
+
+    # Step 1: Bootstrap Scoop if neither Winget nor Scoop is detected
+    if (-not $hasWinget -and -not $hasScoop) {
         Write-Host "[Windows Rice] Step 1/4: Installing Scoop package manager..." -ForegroundColor Cyan
         try {
             Invoke-RestMethod -Uri https://get.scoop.sh -UseBasicParsing | Invoke-Expression
+            $hasScoop = [bool](Get-Command scoop -ErrorAction SilentlyContinue)
         } catch {
             try {
                 Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+                $hasScoop = [bool](Get-Command scoop -ErrorAction SilentlyContinue)
             } catch {
                 Write-Host "[Windows Rice] Scoop setup notice: $_" -ForegroundColor Yellow
             }
@@ -114,18 +123,73 @@ if ($isRemote) {
         $env:PATH = "$scoopShim;$env:PATH"
     }
 
-    # Step 2: Ensure Git is installed via Scoop
+    # Step 2: Autonomous VC++ Runtime check (VCRUNTIME140.dll)
+    $vcRuntimePath = Join-Path $env:SystemRoot "System32\vcruntime140.dll"
+    if (-not (Test-Path $vcRuntimePath)) {
+        Write-Host "[Windows Rice] VCRUNTIME140.dll not found in System32. Installing Visual C++ Runtime..." -ForegroundColor Yellow
+        $vcInstalled = $false
+
+        if ($hasWinget) {
+            try {
+                Write-Host "[Windows Rice] Installing VC++ Redistributable via Winget..." -ForegroundColor DarkGray
+                & winget install --id Microsoft.VCRedist.2015+.x64 --exact --silent --accept-package-agreements --accept-source-agreements
+                if ($LASTEXITCODE -eq 0 -or (Test-Path $vcRuntimePath)) { $vcInstalled = $true }
+            } catch {}
+        }
+
+        if (-not $vcInstalled -and $hasScoop) {
+            try {
+                Write-Host "[Windows Rice] Installing VC++ Redistributable via Scoop..." -ForegroundColor DarkGray
+                & scoop install vcredist2022
+                if ($LASTEXITCODE -eq 0 -or (Test-Path $vcRuntimePath)) { $vcInstalled = $true }
+            } catch {}
+        }
+
+        if (-not $vcInstalled -and (-not (Test-Path $vcRuntimePath))) {
+            try {
+                Write-Host "[Windows Rice] Downloading official VC++ Redistributable from Microsoft..." -ForegroundColor Cyan
+                $vcRedistUrl = "https://aka.ms/vs/17/release/vc_redist.x64.exe"
+                $vcRedistExe = Join-Path $env:TEMP "vc_redist.x64.exe"
+                Invoke-WebRequest -Uri $vcRedistUrl -OutFile $vcRedistExe -UseBasicParsing -ErrorAction Stop
+                Start-Process -FilePath $vcRedistExe -ArgumentList "/passive", "/norestart" -Wait
+                Remove-Item $vcRedistExe -Force -ErrorAction SilentlyContinue
+                Write-Host "[Windows Rice] Visual C++ Redistributable installed successfully." -ForegroundColor Green
+            } catch {
+                Write-Host "[Windows Rice] Notice: Automatic VC++ installation could not complete: $_" -ForegroundColor Yellow
+            }
+        }
+    }
+
+    # Step 3: Ensure Git is installed (try Winget first, then Scoop)
     if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
-        Write-Host "[Windows Rice] Step 2/4: Installing Git via Scoop..." -ForegroundColor Cyan
-        if (Get-Command scoop -ErrorAction SilentlyContinue) {
+        Write-Host "[Windows Rice] Step 2/4: Installing Git automatically..." -ForegroundColor Cyan
+        $gitInstalled = $false
+
+        if ($hasWinget) {
+            try {
+                Write-Host "[Windows Rice] Installing Git via Winget..." -ForegroundColor DarkGray
+                & winget install --id Git.Git -e --source winget --silent --accept-source-agreements --accept-package-agreements
+                if ($LASTEXITCODE -eq 0) { $gitInstalled = $true }
+            } catch {}
+        }
+
+        if (-not $gitInstalled) {
+            if (-not $hasScoop) {
+                try {
+                    Invoke-RestMethod -Uri https://get.scoop.sh -UseBasicParsing | Invoke-Expression
+                } catch {}
+                $env:PATH = "$scoopShim;$env:PATH"
+            }
+            Write-Host "[Windows Rice] Installing Git via Scoop..." -ForegroundColor DarkGray
             & scoop install git
         }
+
         $gitCmd = Join-Path $env:USERPROFILE "scoop\apps\git\current\cmd"
         $gitBin = Join-Path $env:USERPROFILE "scoop\apps\git\current\bin"
         $env:PATH = "$scoopShim;$gitCmd;$gitBin;$env:PATH"
     }
 
-    # Step 3: Clone repository via git clone --branch <tag_name> --depth 1 <repository_url>
+    # Step 4: Clone repository via git clone --branch <tag_name> --depth 1 <repository_url>
     Write-Host "[Windows Rice] Step 3/4: Setting up repository via git clone (branch/tag: $Tag)..." -ForegroundColor Cyan
     $cloned = $false
     if (Get-Command git -ErrorAction SilentlyContinue) {
@@ -396,8 +460,8 @@ if ($binaryToLaunch) {
 # SIG # Begin signature block
 # MIIGKwYJKoZIhvcNAQcCoIIGHDCCBhgCAQExDzANBglghkgBZQMEAgEFADB5Bgor
 # BgEEAYI3AgEEoGswaTA0BgorBgEEAYI3AgEeMCYCAwEAAAQQH8w7YFlLCE63JNLG
-# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCDtkghxXkjoPKLl
-# OVJikN9HoGo0R+8GUqV8JdAEjfOywKCCA24wggNqMIICUqADAgECAhARUGl3tg6h
+# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCAKqV9ekmROvHts
+# YZJ2UqDOR3xM4HzX1O2CDPRhxd3K7KCCA24wggNqMIICUqADAgECAhARUGl3tg6h
 # n0/ys9hv8thvMA0GCSqGSIb3DQEBCwUAME0xHTAbBgNVBAsMFFdpbmRvdy1SaWNl
 # IFNlY3VyaXR5MQ8wDQYDVQQKDAZIS0RFVlMxGzAZBgNVBAMMEkhLREVWUyBXaW5k
 # b3ctUmljZTAeFw0yNjEwMjUxOTQ0MTBaFw0zMTEwMjUxOTU0MDlaME0xHTAbBgNV
@@ -420,11 +484,11 @@ if ($binaryToLaunch) {
 # BkhLREVWUzEbMBkGA1UEAwwSSEtERVZTIFdpbmRvdy1SaWNlAhARUGl3tg6hn0/y
 # s9hv8thvMA0GCWCGSAFlAwQCAQUAoIGEMBgGCisGAQQBgjcCAQwxCjAIoAKAAKEC
 # gAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwG
-# CisGAQQBgjcCARUwLwYJKoZIhvcNAQkEMSIEIBII6kEONmZW3AIBzCn8t+LopvvL
-# jfAH5+ARhyuH4TOGMA0GCSqGSIb3DQEBAQUABIIBACTNwQ5ryLyzCVoBsEB0W8tp
-# Kq9pqT/CPrCFUJnozzmo74qkcKL/qaA0Dy6ZRL61JnOZrQJqzgr5Sx/XJWbSOd27
-# 3ELn/QstRFTRlj0hvv3FDHB1nZ6csq9vkJ9ifzzdS5j3h9vOiNpRAhXsO5Vd4Q2O
-# b6GR4Gl+h9ypfzCXHGKkak7syd8tI0QyS+l44VJR6Zc6VHmQRONECSLhxFhuzjyX
-# 0z1WovVgvrzcxXT/qaDZBTEqepqCMKrk9x2+Lx4BH4xKx1VsuWT0CXLxaTGgbK9F
-# B868TlOlAaD6ORufrWcQezdL3R5Z/UxAKg1T+kVP71nNt84GaHznJAR+69lEErc=
+# CisGAQQBgjcCARUwLwYJKoZIhvcNAQkEMSIEIAgfJoNqq2Wq3Nrw3EY/18TIFZz/
+# SB4gvT/wcXJIZVwLMA0GCSqGSIb3DQEBAQUABIIBABivwCDziqujDnnmst8aTMNe
+# Bs2sQ8AKfJOw7srBNe7il0QJiCrasv2ZOB+8I9WZEjC4zISzOH1fx+N3/V0unXY/
+# I2tqdqfNzC/uGzEKjole/VS85DtQnHboLP79AoA17bK0flFXGmdmiKdO/pFxw/xN
+# MwGx72ZlzZy7ECdtqcJOmuiQa1URHFswfaX6Pe/osF1R6GtjATrCZ1MojAuZNjyE
+# kLz3i2qV0X/8CSanMN/8wtTTd3SHdqNX3LcmACDCrF4iAlVBGcWEOEP+CzJzP54s
+# QQQA4WRcK7sUSGeHAQGCfIWziYzJhA/69LTJMTuBERLsnqdcWA4kEIy8bwYb13w=
 # SIG # End signature block
