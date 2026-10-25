@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: micropython
+description: MicroPython runtime and interactive REPL
+flags:
+  -c=: Run code passed as string
+  -m=: Run library module as a script
+  -i: Inspect interactively after running script
+  -v: Verbose output
+  -O: Apply optimizations
+  -X=: Implementation option (heapsize=..., emit=...)
+  -h, --help: Print help message
+completion:
+  flag:
+    X:
+      - heapsize=4M
+      - heapsize=8M
+      - heapsize=16M
+      - emit=bytecode
+      - emit=native
+      - emit=viper
+  positionalany:
+    - $files

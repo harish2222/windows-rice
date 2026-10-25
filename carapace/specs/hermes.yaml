@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: hermes
+description: Hermes JavaScript engine and runtime
+flags:
+  -b, --bytecode: Execute precompiled Hermes bytecode (.hbc)
+  -c=: Run code passed as string
+  -d: Enable debugging
+  -w: Enable warnings
+  -v, --version: Print Hermes engine version
+  -h, --help: Print help
+completion:
+  positionalany:
+    - $files

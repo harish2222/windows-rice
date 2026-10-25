@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: mpy-cross
+description: MicroPython cross-compiler to convert Python source into .mpy bytecode
+flags:
+  -o=: Output file path for the compiled .mpy bytecode
+  -s=: Source filename to embed inside the compiled bytecode
+  -v: Verbose compilation operations
+  -O: Apply bytecode optimizations (strips assert/docstrings)
+  -c=: Run in compatibility mode for a specific MicroPython release
+  -b=: Output a specific bytecode file format version
+  -X=: Implementation option (emit=bytecode, emit=native, emit=viper)
+  --version: Display version information
+  -h, --help: Display help message
+completion:
+  flag:
+    o:
+      - $files
+    X:
+      - emit=bytecode
+      - emit=native
+      - emit=viper
+      - source-lines
+      - no-source-lines
+  positionalany:
+    - $files

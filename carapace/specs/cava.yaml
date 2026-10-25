@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: cava
+description: Console-based Audio Visualizer for terminal
+flags:
+  -p, --config=: Path to custom config file
+  -v, --version: Print version and exit
+  -h, --help: Show help message and exit
+completion:
+  flag:
+    config:
+      - $files

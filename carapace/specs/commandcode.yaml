@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: commandcode
+description: Command Code - terminal AI coding agent
+flags:
+  -r, --resume?: Resume an existing session by ID or name
+  -c, --continue: Continue the most recent session within the current directory
+  --session=: Resume a session using a transcript path (.jsonl) or unique session ID
+  --fork-session: Branch the session into a new one leaving original untouched
+  --no-session: Run session strictly in-memory without persisting to disk
+  -n, --name=: Assign a custom display name to the session
+  -w, --worktree?: Run session inside an isolated managed Git worktree
+  -t, --trust: Automatically trust project, bypassing initial permission prompt
+  -p, --print?: Run in non-interactive print mode
+  --max-turns=: Cap agentic execution turns (model round-trips)
+  -v, --version: Print version
+  -h, --help: Print help
+completion:
+  flag:
+    session:
+      - $files

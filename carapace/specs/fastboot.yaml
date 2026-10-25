@@ -1,0 +1,67 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: fastboot
+description: Android fastboot flashing utility
+flags:
+  -w: Wipe userdata and cache (and format if supported)
+  -s=: Specify device serial number
+  --slot=: Specify slot name to be used (a, b, all, other)
+  --set-active=: Set the active slot (a, b)
+  --skip-secondary: Will not flash secondary slots in flashall/update
+  --skip-reboot: Will not reboot device after flashall/update
+  --disable-verity: Set disable-verity when flashing vbmeta
+  --disable-verification: Set disable-verification when flashing vbmeta
+  --force: Force flashing even if device/image checks fail
+  -h, --help: Show this help
+completion:
+  flag:
+    slot:
+      - a
+      - b
+      - all
+      - other
+    set-active:
+      - a
+      - b
+commands:
+  - name: devices
+    description: List devices in bootloader
+    flags:
+      -l: Show device paths
+  - name: reboot
+    description: Reboot device
+    completion:
+      positional:
+        - ["bootloader", "recovery", "fastboot"]
+  - name: flash
+    description: Flash given partition with an image
+    completion:
+      positional:
+        - ["boot", "recovery", "system", "vendor", "vendor_boot", "vbmeta", "userdata", "dtbo"]
+        - ["$files"]
+  - name: flashall
+    description: Flash all partitions from $ANDROID_PRODUCT_OUT
+  - name: update
+    description: Flash all partitions from an update.zip package
+    completion:
+      positional:
+        - ["$files"]
+  - name: getvar
+    description: Display given bootloader variable
+    completion:
+      positional:
+        - ["all", "version-bootloader", "version-baseband", "product", "serialno", "secure", "unlocked", "current-slot"]
+  - name: flashing
+    description: Partition lock/unlock controls
+    completion:
+      positional:
+        - ["lock", "unlock", "lock_critical", "unlock_critical", "get_unlock_ability"]
+  - name: erase
+    description: Erase a flash partition
+    completion:
+      positional:
+        - ["boot", "recovery", "system", "vendor", "userdata", "cache"]
+  - name: boot
+    description: Download and boot kernel from RAM
+    completion:
+      positional:
+        - ["$files"]

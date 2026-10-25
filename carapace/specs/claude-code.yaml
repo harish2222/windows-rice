@@ -1,0 +1,6 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: claude-code
+description: Claude Code - agentic coding assistant by Anthropic
+parsing: disabled
+completion:
+  positionalany: ["$carapace.bridge.CarapaceBin([claude])"]

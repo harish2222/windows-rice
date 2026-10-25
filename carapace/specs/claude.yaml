@@ -1,0 +1,159 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: claude
+description: Claude Code - agentic coding assistant by Anthropic
+flags:
+  --add-dir=: Additional directories to allow tool access to
+  --agent=: Agent for the current session
+  --agents=: JSON object or file defining custom agents
+  --allow-dangerously-skip-permissions: Enable bypassing all permission checks as an option
+  --allowed-tools=: Comma or space-separated list of tool names to allow
+  --append-system-prompt=: Append a system prompt to the default system prompt
+  --autocompact=: Auto-compact window size (auto, or 100k-1M tokens)
+  --ax-screen-reader: Render screen-reader friendly output
+  --bg: Start the session in the background and return immediately
+  --background: Start the session in the background and return immediately
+  --bare: Minimal mode (skip hooks, LSP, auto-discovery)
+  --betas=: Beta headers to include in API requests
+  --brief: Enable SendUserMessage tool for agent-to-user communication
+  --chrome: Enable Claude in Chrome integration
+  --cloud?: Create a cloud session or attach to existing by session ID
+  -c, --continue: Continue the most recent conversation in the current directory
+  --dangerously-skip-permissions: Bypass all permission checks
+  -d, --debug?: Enable debug mode with optional category filtering
+  --debug-file=: Write debug logs to a specific file path
+  --desktop: Open in Claude Desktop app instead of the terminal
+  --disable-slash-commands: Disable all skills
+  --disallowed-tools=: Comma or space-separated list of tool names to deny
+  --effort=: Effort level for the current session
+  --environment=: Self-hosted environment ID (ccpool_...)
+  --fallback-model=: Automatic fallback model when default is overloaded
+  --file=: File resources to download at startup (file_id:relative_path)
+  --fork-session: Create a new session ID when resuming
+  --from-pr?: Resume a session linked to a PR
+  --ide: Automatically connect to IDE on startup
+  --input-format=: Input format (text, stream-json)
+  --json-schema=: JSON Schema for structured output validation
+  --max-budget-usd=: Maximum dollar amount to spend on API calls
+  --mcp-config=: Load MCP servers from JSON files or strings
+  --model=: Model for the current session (fable, opus, sonnet)
+  -n, --name=: Set a display name for this session
+  --no-chrome: Disable Claude in Chrome integration
+  --no-session-persistence: Disable session persistence
+  --output-format=: Output format (text, json, stream-json)
+  --permission-mode=: Permission mode to use for the session
+  -p, --print: Print response directly without interactive prompt
+  --resume=: Resume session by ID
+  --settings=: Path to custom settings JSON file
+  --system-prompt=: System prompt to use for the session
+  --teleport?: Resume a teleport session
+  --tmux: Create a tmux session for the worktree
+  --tools=: Specify list of available tools
+  --verbose: Override verbose mode setting
+  -w, --worktree?: Create a new git worktree for this session
+  -v, --version: Output the version number
+  -h, --help: Display help for command
+completion:
+  flag:
+    effort:
+      - low
+      - medium
+      - high
+      - xhigh
+      - max
+    model:
+      - claude-3-7-sonnet-latest
+      - claude-3-5-sonnet-latest
+      - claude-3-5-haiku-latest
+      - sonnet
+      - opus
+      - haiku
+    permission-mode:
+      - default
+      - plan
+      - accept-all
+      - bypass
+    input-format:
+      - text
+      - stream-json
+    output-format:
+      - text
+      - json
+      - stream-json
+    add-dir:
+      - $directories
+    debug-file:
+      - $files
+    settings:
+      - $files
+    mcp-config:
+      - $files
+commands:
+  - name: agents
+    description: Manage background agents
+    flags:
+      -v, --verbose: Show detailed agent stats
+  - name: attach
+    description: Open a background session in this terminal
+  - name: auth
+    description: Manage authentication
+    commands:
+      - name: login
+        description: Log in to Anthropic
+      - name: logout
+        description: Log out and clear saved credentials
+      - name: status
+        description: View authentication status
+  - name: auto-mode
+    description: Inspect or reset auto mode classifier configuration
+  - name: doctor
+    description: Check the health of your Claude Code installation
+  - name: gateway
+    description: Run enterprise auth/telemetry gateway
+  - name: import
+    description: Import config from another AI coding agent into Claude Code
+  - name: install
+    description: Install Claude Code native build
+    completion:
+      positional:
+        - ["stable", "latest"]
+  - name: logs
+    description: Print a background session's recent terminal output
+  - name: mcp
+    description: Configure and manage MCP servers
+    commands:
+      - name: list
+        description: List configured MCP servers
+      - name: add
+        description: Add an MCP server
+      - name: remove
+        description: Remove an MCP server
+  - name: plugin
+    aliases: ["plugins"]
+    description: Manage Claude Code plugins
+    commands:
+      - name: list
+        description: List installed plugins
+      - name: install
+        description: Install a plugin
+      - name: uninstall
+        description: Uninstall a plugin
+      - name: update
+        description: Update plugins
+  - name: purge
+    description: Delete all Claude Code state for a project
+  - name: respawn
+    description: Restart a background session
+    flags:
+      --all: Restart all background sessions
+  - name: rm
+    description: Delete a background session
+  - name: setup-token
+    description: Set up a long-lived authentication token
+  - name: stop
+    aliases: ["kill"]
+    description: Stop a background session
+  - name: ultrareview
+    description: Run a cloud-hosted multi-agent code review
+  - name: update
+    aliases: ["upgrade"]
+    description: Check for updates and install if available

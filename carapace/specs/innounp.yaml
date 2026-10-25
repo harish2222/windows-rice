@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: innounp
+description: Inno Setup Unpacker CLI
+flags:
+  -v: Verbose list of files (with sizes and timestamps)
+  -s: Short list of files (without sizes and timestamps)
+  -x: Extract files from the installation
+  -e: Extract files without paths
+  -t: Test files for integrity
+  -l: Show list of languages supported by the installation
+  -i: Show list of all supported Inno Setup versions
+  -b: Batch (non-interactive) mode
+  -q: Do not indicate progress while extracting
+  -m: Extract internal embedded files
+  -p=: Decrypt installation with password
+  -d=: Extract files into directory
+  -c=: Specifies directory in installation
+  -n: Do not attempt to unpack new versions
+  -f=: Read password from file
+  -a: Extract all copies of duplicate files
+  -y: Assume Yes on all queries
+  -o: No colored console output
+completion:
+  flag:
+    d:
+      - $directories
+    f:
+      - $files
+  positionalany:
+    - $files

@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: pymanager
+description: Python installation manager for Windows
+flags:
+  -v, --verbose: Increased output
+  -vv: Further increased output
+  -q, --quiet: Less output
+  -qq: Even less output
+  -y, --yes: Always accept confirmation prompts
+  --config=: Override configuration with JSON file
+  -h, --help: Show help for commands
+  -?: Show help for commands
+completion:
+  flag:
+    config:
+      - $files
+commands:
+  - name: list
+    description: Show installed Python runtimes, optionally filtering
+  - name: install
+    description: Download new Python runtimes
+    flags:
+      --update: Update existing installs
+    completion:
+      positional:
+        - ["3.14", "3.13", "3.12", "3.11", "3.10"]
+  - name: uninstall
+    description: Remove one or more runtimes from your machine
+    flags:
+      --cleanup: Remove cached and unrecognized files while preserving recognized runtimes
+      --purge: Remove all runtimes
+    completion:
+      positional:
+        - ["3.14", "3.13", "3.12", "3.11", "3.10"]
+  - name: exec
+    description: Launch the default runtime with specified options, installing if needed
+    flags:
+      -V:=: Launch runtime identified by tag
+  - name: help
+    description: Show help for Python installation manager commands

@@ -1,0 +1,81 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: cline
+description: Autonomous AI coding agent CLI
+flags:
+  -p, --plan: Run or start session in Plan mode (reason before acting)
+  -i, --tui: Open interactive Terminal User Interface (TUI)
+  -z, --zen: Dispatch task to background hub and exit immediately
+  -y, --yolo: Skip tool approval prompts and auto-approve actions
+  --auto-approve=: Tool auto-approval configuration
+  --json: Output messages as newline-delimited JSON
+  -m, --model=: Override the model for this specific run
+  -P, --provider=: Override AI provider (anthropic, openai, gemini, openrouter)
+  -k, --key=: Provide an API key for the current run
+  -c, --cwd=: Set working directory for agent execution
+  --thinking=: Set reasoning effort level
+  --compaction=: Context compaction mode
+  -s, --system=: Override default system prompt
+  --id=: Resume an existing session by its unique ID
+  --retries=: Maximum consecutive mistakes/retries permitted
+  -t, --timeout=: Execution task timeout in seconds
+  --acp: Run in Agent Client Protocol (ACP) mode
+  --config=: Custom configuration directory path
+  --data-dir=: Directory path for isolated local state/data
+  -v, --verbose: Show verbose runtime diagnostics
+  -V, --version: Output the current version number
+  -h, --help: Show command help information
+completion:
+  flag:
+    provider:
+      - anthropic
+      - openai
+      - gemini
+      - openrouter
+      - deepseek
+      - ollama
+    thinking:
+      - none
+      - low
+      - medium
+      - high
+      - xhigh
+    compaction:
+      - agentic
+      - basic
+      - "off"
+    cwd:
+      - $directories
+    config:
+      - $directories
+    data-dir:
+      - $directories
+commands:
+  - name: auth
+    description: Authenticate or seed provider credentials
+    flags:
+      -P, --provider=: Provider name
+      --apikey=: API key string
+  - name: config
+    description: Open or display interactive configuration settings
+  - name: history
+    aliases: ["h"]
+    description: List session history or manage saved task sessions
+  - name: mcp
+    description: Manage Model Context Protocol (MCP) servers
+    commands:
+      - name: list
+        description: List configured MCP servers
+      - name: add
+        description: Add an MCP server
+      - name: remove
+        description: Remove an MCP server
+  - name: doctor
+    description: Inspect local CLI health and configuration issues
+  - name: update
+    description: Check for CLI and Kanban updates
+  - name: hub
+    description: Manage the local background hub daemon
+  - name: schedule
+    description: Create and manage scheduled agent runs
+  - name: kanban
+    description: Run the Kanban orchestration app

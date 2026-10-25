@@ -1,0 +1,120 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: vercel
+aliases: ["vc"]
+description: Vercel CLI - deploy and manage web projects and cloud infra
+flags:
+  --cwd=: Current working directory
+  -A, --local-config=: Path to the local vercel.json file
+  -Q, --global-config=: Path to the global .vercel directory
+  -d, --debug: Debug mode
+  --no-color: No color mode
+  --non-interactive: Run without interactive prompts
+  -S, --scope=: Set a custom scope
+  -t, --token=: Login token
+  -v, --version: Output the version number
+  -h, --help: Output usage information
+completion:
+  flag:
+    cwd:
+      - $directories
+    local-config:
+      - $files
+    global-config:
+      - $directories
+commands:
+  - name: deploy
+    description: Performs a deployment (default)
+    flags:
+      --prod: Create a production deployment
+      -e, --env=: Specify environment variable (e.g. -e KEY=value)
+      -b, --build-env=: Specify build environment variable
+      -m, --meta=: Specify metadata
+      --force: Force a new deployment even if existing one exists
+      --prebuilt: Deploy prebuilt outputs from .vercel/output
+  - name: build
+    description: Build the project locally into .vercel/output
+    flags:
+      --prod: Build for production
+  - name: dev
+    description: Start a local development server
+    flags:
+      --listen=: Port or TCP address to listen on
+  - name: env
+    description: Manages the Environment Variables for current Project
+    commands:
+      - name: ls
+        description: List environment variables
+      - name: add
+        description: Add an environment variable
+      - name: rm
+        description: Remove an environment variable
+      - name: pull
+        description: Pull environment variables into .env
+        flags:
+          --environment=: Target environment (production, preview, development)
+  - name: link
+    description: Link local directory to a Vercel Project
+    flags:
+      --project=: Project name
+      --repo: Link repository
+  - name: list
+    aliases: ["ls"]
+    description: Lists deployments
+    flags:
+      --prod: Filter production deployments
+  - name: inspect
+    description: Displays information related to a deployment
+  - name: logs
+    description: Displays the logs for a deployment
+  - name: login
+    description: Logs into your account
+  - name: logout
+    description: Logs out of your account
+  - name: open
+    description: Opens current project in Vercel Dashboard
+  - name: promote
+    description: Promote an existing deployment to current
+  - name: pull
+    description: Pull Project Settings from the cloud
+  - name: redeploy
+    description: Rebuild and deploy a previous deployment
+  - name: rollback
+    description: Quickly revert back to a previous deployment
+  - name: rm
+    aliases: ["remove"]
+    description: Removes a deployment
+  - name: domains
+    description: Manages domain names
+    commands:
+      - name: ls
+        description: List domains
+      - name: add
+        description: Add a domain
+      - name: rm
+        description: Remove a domain
+  - name: dns
+    description: Manages DNS records
+  - name: certs
+    description: Manages SSL certificates
+  - name: projects
+    description: Manages your Projects
+    commands:
+      - name: ls
+        description: List projects
+      - name: add
+        description: Add a project
+      - name: rm
+        description: Remove a project
+  - name: teams
+    description: Manages your teams
+    commands:
+      - name: ls
+        description: List teams
+      - name: switch
+        description: Switch active team
+  - name: whoami
+    description: Shows username of logged in user
+  - name: init
+    description: Initialize an example project
+  - name: upgrade
+    description: Upgrade Vercel CLI to latest version

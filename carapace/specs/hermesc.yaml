@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: hermesc
+description: Hermes Bytecode Compiler for JavaScript and React Native
+flags:
+  -emit-binary: Output binary Hermes bytecode file (.hbc)
+  -out=: Specifies destination path and filename for compiled output bundle
+  -O: Enable standard bytecode optimizations
+  -Og: Optimize for debugging
+  -output-source-map: Generate a source map alongside bytecode file
+  -dump-bytecode: Disassemble and print bytecode instructions
+  -dump-ast: Dump JavaScript Abstract Syntax Tree (AST)
+  -target=: Target environment
+  --version: Print compiler version
+  -h, --help: Print help
+completion:
+  flag:
+    out:
+      - $files
+  positionalany:
+    - $files

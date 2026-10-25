@@ -1,0 +1,125 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: choco
+description: Chocolatey - The package manager for Windows
+flags:
+  -v, --version: Prints out the Chocolatey version
+  -d, --debug: Show debug messaging
+  --verbose: Show verbose messaging
+  -y, --yes: Confirm all prompts automatically
+  -f, --force: Force an action
+  --noop: Dry run without making actual changes
+  -r, --limit-output: Output information in a machine readable format
+  --timeout=: Time in seconds to allow an execution to finish
+  -s, --source=: Source location for packages
+  --log-file=: Path to custom log file
+  -h, --help: Displays top level help information
+  -?: Displays help information
+completion:
+  flag:
+    log-file:
+      - $files
+    source:
+      - $directories
+commands:
+  - name: install
+    description: Install packages using configured sources
+    flags:
+      -y, --yes: Confirm all prompts
+      --version=: Specific version to install
+      --prerelease: Allow prerelease packages
+      --pre: Allow prerelease packages
+      --force: Force re-installation
+      --ignore-dependencies: Ignore dependencies
+      --override-arguments: Override native installer arguments
+      --install-arguments=: Arguments passed directly to native installer
+      --package-parameters=: Parameters passed to Chocolatey package
+  - name: uninstall
+    description: Uninstall a package
+    flags:
+      -y, --yes: Confirm all prompts
+      --version=: Specific version to uninstall
+      --all-versions: Uninstall all versions of the package
+      --remove-dependencies: Uninstall dependencies as well
+  - name: upgrade
+    description: Upgrade packages from various sources
+    flags:
+      -y, --yes: Confirm all prompts
+      --all: Upgrade all installed packages
+      --prerelease: Allow prerelease versions
+      --pre: Allow prerelease versions
+  - name: list
+    description: List local installed packages
+    flags:
+      -l, --local-only: Only search local packages
+      --all-versions: Display all versions
+      --page=: Page number to show
+  - name: search
+    aliases: ["find"]
+    description: Search remote packages
+    flags:
+      --all-versions: Display all versions
+      --exact: Only exact match
+      --prerelease: Include prerelease packages
+      --pre: Include prerelease packages
+      --order-by-popularity: Sort by package downloads
+  - name: info
+    description: Retrieve package information
+  - name: outdated
+    description: Retrieve information about packages that are outdated
+  - name: pin
+    description: Suppress upgrades for a package
+    commands:
+      - name: add
+        description: Add pin to package
+      - name: remove
+        description: Remove pin from package
+      - name: list
+        description: List pinned packages
+  - name: source
+    aliases: ["sources"]
+    description: View and configure default sources
+    commands:
+      - name: list
+        description: List sources
+      - name: add
+        description: Add a source
+      - name: remove
+        description: Remove a source
+      - name: disable
+        description: Disable a source
+      - name: enable
+        description: Enable a source
+  - name: feature
+    aliases: ["features"]
+    description: View and configure choco features
+    commands:
+      - name: list
+        description: List features
+      - name: enable
+        description: Enable a feature
+      - name: disable
+        description: Disable a feature
+  - name: config
+    description: Retrieve and configure config file settings
+    commands:
+      - name: list
+        description: List config settings
+      - name: get
+        description: Get specific config setting
+      - name: set
+        description: Set specific config setting
+      - name: unset
+        description: Unset specific config setting
+  - name: apikey
+    aliases: ["setapikey"]
+    description: Manage API keys for sources
+  - name: export
+    description: Export list of currently installed packages
+    flags:
+      -o, --output-file-path=: Path to export file
+  - name: new
+    description: Create template files for creating a new Chocolatey package
+  - name: pack
+    description: Package nuspec into a nupkg file
+  - name: push
+    description: Push a compiled nupkg to a source
