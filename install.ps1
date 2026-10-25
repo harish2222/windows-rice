@@ -185,196 +185,95 @@ if ($Wallpapers) {
     if ($WallpaperDir) { $extraArgs += $WallpaperDir }
 }
 
-$hasCargo = (Get-Command cargo -ErrorAction SilentlyContinue) -ne $null
+$tempInstaller = Join-Path $env:TEMP "rice-installer.exe"
+$builtExe = Join-Path $installerDir "target\release\rice-installer.exe"
 
-# 2. Check if Cargo is available to compile/run TUI
-if ($hasCargo -and (Test-Path $manifestPath)) {
-    Write-Host "[Windows Rice] Launching Rust TUI installer..." -ForegroundColor Cyan
-    Push-Location $installerDir
-    try {
-        & cargo run --release -- $extraArgs
-    } finally {
-        Pop-Location
-    }
-    exit $LASTEXITCODE
+# 2. If already built in repository, deploy to temp
+if (Test-Path $builtExe) {
+    Copy-Item $builtExe $tempInstaller -Force -ErrorAction SilentlyContinue
 }
 
-# 3. Check or download pre-built binary
-$prebuiltExe = Join-Path $installerDir "target\release\rice-installer.exe"
-if (-not (Test-Path $prebuiltExe)) {
+# 3. Check if pre-compiled release binary is available from GitHub
+if (-not (Test-Path $tempInstaller)) {
+    Write-Host "[Windows Rice] Checking for pre-compiled binary..." -ForegroundColor DarkGray
     $releaseExeUrl = "https://github.com/harish2222/windows-rice/releases/latest/download/rice-installer.exe"
     try {
-        $binDir = Split-Path $prebuiltExe -Parent
-        if (-not (Test-Path $binDir)) { New-Item -ItemType Directory -Force -Path $binDir | Out-Null }
-        Invoke-WebRequest -Uri $releaseExeUrl -OutFile $prebuiltExe -UseBasicParsing -ErrorAction Stop
+        Invoke-WebRequest -Uri $releaseExeUrl -OutFile $tempInstaller -UseBasicParsing -ErrorAction Stop
+        Write-Host "[Windows Rice] Pre-compiled rice-installer downloaded successfully." -ForegroundColor Green
     } catch {
-        if (Test-Path $prebuiltExe) { Remove-Item $prebuiltExe -Force -ErrorAction SilentlyContinue }
+        if (Test-Path $tempInstaller) { Remove-Item $tempInstaller -Force -ErrorAction SilentlyContinue }
     }
 }
-if (Test-Path $prebuiltExe) {
-    Write-Host "[Windows Rice] Launching pre-compiled Rust TUI installer..." -ForegroundColor Cyan
-    & $prebuiltExe $extraArgs
-    exit $LASTEXITCODE
-}
 
-# 4. Fallback: Cargo is missing; offer to bootstrap or install
-Write-Host "[Windows Rice] Rust compiler (cargo) is not detected." -ForegroundColor Yellow
-Write-Host "Would you like to install Scoop & Rust, or run quick native linking?" -ForegroundColor Cyan
-Write-Host "  [1] Bootstrap Scoop and Rust compiler (Recommended for full Ratatui TUI)"
-Write-Host "  [2] Run native PowerShell config linking directly"
-Write-Host "  [3] Exit"
+# 4. If binary is not available, ensure Scoop & Rust are installed, then compile with Cargo
+if (-not (Test-Path $tempInstaller)) {
+    Write-Host "[Windows Rice] Preparing build environment (Scoop & Rust)..." -ForegroundColor Cyan
 
-$choice = Read-Host "Select option [1/2/3]"
+    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+    $userProfile = $env:USERPROFILE
+    $scoopShim = Join-Path $userProfile "scoop\shims"
+    $cargoBin = Join-Path $userProfile ".cargo\bin"
+    $env:PATH = "$scoopShim;$cargoBin;$env:PATH"
 
-switch ($choice) {
-    "1" {
-        Write-Host "Bootstrapping Scoop & Rust compiler..." -ForegroundColor Green
-        Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
-
-        $userProfile = $env:USERPROFILE
-        $scoopShim = Join-Path $userProfile "scoop\shims"
-        $cargoBin = Join-Path $userProfile ".cargo\bin"
-        $env:PATH = "$scoopShim;$cargoBin;$env:PATH"
-
-        if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
-            Write-Host "Installing Scoop package manager..." -ForegroundColor Cyan
-            try {
-                Invoke-Expression (Invoke-RestMethod -Uri https://get.scoop.sh -UseBasicParsing)
-            } catch {
-                Write-Host "Scoop installation notice: $_" -ForegroundColor Yellow
-            }
-            $env:PATH = "$scoopShim;$cargoBin;$env:PATH"
+    # Step A: Install Scoop first if missing
+    if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
+        Write-Host "[Windows Rice] Installing Scoop package manager..." -ForegroundColor Cyan
+        try {
+            Invoke-Expression (Invoke-RestMethod -Uri https://get.scoop.sh -UseBasicParsing)
+        } catch {
+            Write-Host "[Windows Rice] Scoop setup notice: $_" -ForegroundColor Yellow
         }
+        $env:PATH = "$scoopShim;$cargoBin;$env:PATH"
+    }
 
+    # Step B: Install Rust via Scoop
+    if (-not (Get-Command cargo -ErrorAction SilentlyContinue)) {
         if (Get-Command scoop -ErrorAction SilentlyContinue) {
-            Write-Host "Installing Git & Rust via Scoop..." -ForegroundColor Cyan
+            Write-Host "[Windows Rice] Installing Rust toolchain via Scoop..." -ForegroundColor Cyan
             if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
                 & scoop install git 2>$null
             }
-            if (-not (Get-Command cargo -ErrorAction SilentlyContinue)) {
-                & scoop install rust
-            }
+            & scoop install rust
             $env:PATH = "$scoopShim;$cargoBin;$env:PATH"
         }
 
+        # Direct rustup fallback if scoop didn't provide cargo
         if (-not (Get-Command cargo -ErrorAction SilentlyContinue)) {
-            Write-Host "Attempting rustup installer bootstrap..." -ForegroundColor Cyan
+            Write-Host "[Windows Rice] Bootstrapping Rust compiler via rustup..." -ForegroundColor Cyan
             $rustupInit = Join-Path $env:TEMP "rustup-init.exe"
             try {
                 Invoke-WebRequest -Uri "https://win.rustup.rs/x86_64" -OutFile $rustupInit -UseBasicParsing -ErrorAction Stop
                 & $rustupInit -y --default-toolchain stable
                 $env:PATH = "$cargoBin;$env:PATH"
             } catch {
-                Write-Host "Rustup download notice: $_" -ForegroundColor Yellow
+                Write-Host "[Windows Rice] Rustup download notice: $_" -ForegroundColor Yellow
             }
         }
+    }
 
-        if (Get-Command cargo -ErrorAction SilentlyContinue) {
-            Write-Host "Cargo detected! Launching Rust TUI installer..." -ForegroundColor Green
-            & cargo run --release --manifest-path $manifestPath -- $extraArgs
-            exit $LASTEXITCODE
-        } else {
-            Write-Host "[WARN] Cargo is not yet available in current session. Running native config linking fallback..." -ForegroundColor Yellow
+    # Step C: Build the release binary using Rust
+    if (Get-Command cargo -ErrorAction SilentlyContinue -and (Test-Path $manifestPath)) {
+        Write-Host "[Windows Rice] Building WINDOW-RICE installer binary (release mode)..." -ForegroundColor Cyan
+        Push-Location $installerDir
+        try {
+            & cargo build --release
+        } finally {
+            Pop-Location
+        }
+        if (Test-Path $builtExe) {
+            Copy-Item $builtExe $tempInstaller -Force -ErrorAction SilentlyContinue
         }
     }
-    "2" {
-        Write-Host "Running native config linking..." -ForegroundColor Green
-        $userProfile = $env:USERPROFILE
-        $appData = $env:APPDATA
+}
 
-        $pwshDest = if (Test-Path "$userProfile\OneDrive\Documents") {
-            "$userProfile\OneDrive\Documents\PowerShell"
-        } else {
-            "$userProfile\Documents\PowerShell"
-        }
+# 5. Launch the binary in the terminal
+$binaryToLaunch = if (Test-Path $tempInstaller) { $tempInstaller } elseif (Test-Path $builtExe) { $builtExe } else { $null }
 
-        $destMap = @{
-            "glazewm"                           = "$userProfile\.glzr\glazewm"
-            "komorebi"                          = "$userProfile\.config\komorebi"
-            "yasb"                              = "$userProfile\.config\yasb"
-            "hotkeys-overlay"                   = "$userProfile\.config\hotkeys-overlay"
-            "windows-terminal\settings.json"    = "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
-            "otty"                              = "$userProfile\.config\otty"
-            "wezterm"                           = "$userProfile\.config\wezterm"
-            "wezterm\wezterm.lua"               = "$userProfile\.wezterm.lua"
-            "alacritty"                         = "$userProfile\.config\alacritty"
-            "alacritty\alacritty.toml"          = "$appData\alacritty\alacritty.toml"
-            "rio"                               = "$userProfile\.config\rio"
-            "kew"                               = "$appData\kew"
-            "cliamp"                            = "$userProfile\.config\cliamp"
-            "cava"                              = "$userProfile\.config\cava"
-            "mpd"                               = "$userProfile\.config\mpd"
-            "ncmpc"                             = "$userProfile\.ncmpc"
-            "fastfetch"                         = "$userProfile\.config\fastfetch"
-            "carapace"                          = "$userProfile\.config\carapace"
-            "carapace\specs"                    = "$appData\carapace\specs"
-            "shells\powershell"                 = $pwshDest
-            "shells\nushell"                    = "$appData\nushell"
-            "shells\xonsh"                      = "$appData\xonsh"
-        }
-
-        if ($Unlink -or $UnlinkAll) {
-            Write-Host "Running native config unlinking (binaries kept)..." -ForegroundColor Yellow
-            foreach ($src in $destMap.Keys) {
-                $dstPath = $destMap[$src]
-                if (Test-Path $dstPath) {
-                    try {
-                        Remove-Item $dstPath -Recurse -Force
-                        Write-Host "  [UNLINKED] $dstPath" -ForegroundColor Green
-                    } catch {
-                        Write-Host "  [WARN] Could not remove ${dstPath}: $_" -ForegroundColor Red
-                    }
-                }
-            }
-            Write-Host "[Windows Rice] Unlinking complete. Clean without trace." -ForegroundColor Green
-            exit 0
-        }
-
-        foreach ($src in $destMap.Keys) {
-            $srcPath = Join-Path $ScriptRoot $src
-            $dstPath = $destMap[$src]
-            if (Test-Path $srcPath) {
-                # Skip if src and dst point to the same directory
-                if ((Resolve-Path $srcPath -ErrorAction SilentlyContinue).Path -eq (Resolve-Path $dstPath -ErrorAction SilentlyContinue).Path) {
-                    Write-Host "  [IN-PLACE] $src -> already in $dstPath" -ForegroundColor DarkGray
-                    continue
-                }
-                $dstParent = Split-Path $dstPath -Parent
-                if (-not (Test-Path $dstParent)) { New-Item -ItemType Directory -Force -Path $dstParent | Out-Null }
-                try {
-                    New-Item -ItemType SymbolicLink -Path $dstPath -Target $srcPath -Force -ErrorAction Stop | Out-Null
-                    Write-Host "  [SYMLINK]  $src -> $dstPath" -ForegroundColor Green
-                } catch {
-                    Copy-Item -Path $srcPath -Destination $dstPath -Recurse -Force
-                    Write-Host "  [COPIED]   $src -> $dstPath" -ForegroundColor Cyan
-                }
-            }
-        }
-
-        # Also copy .xonshrc to home if present
-        $xonshrc = Join-Path $ScriptRoot "shells\xonsh\.xonshrc"
-        if (Test-Path $xonshrc) {
-            Copy-Item $xonshrc "$userProfile\.xonshrc" -Force
-            Write-Host "  [COPIED]   shells\xonsh\.xonshrc -> $userProfile\.xonshrc" -ForegroundColor Cyan
-        }
-
-        Write-Host "[Windows Rice] Fallback linking complete!" -ForegroundColor Green
-
-        Write-Host "[Windows Rice] Reloading Komorebi, GlazeWM, and YASB..." -ForegroundColor Cyan
-        if (Get-Command komorebic -ErrorAction SilentlyContinue) {
-            & komorebic replace-configuration "$userProfile\.config\komorebi\komorebi.json" 2>$null
-        }
-        if (Get-Command glazewm -ErrorAction SilentlyContinue) {
-            & glazewm command wm-reload-config 2>$null
-        }
-        $yasbScript = Join-Path $ScriptRoot "yasb\tools\setup\yasb-setup.ps1"
-        if (Test-Path $yasbScript) {
-            & $psExe -NoProfile -ExecutionPolicy Bypass -File $yasbScript
-        }
-        Write-Host "[Windows Rice] Environment reloaded successfully!" -ForegroundColor Green
-    }
-    default {
-        Write-Host "Exiting."
-        exit 0
-    }
+if ($binaryToLaunch) {
+    Write-Host "[Windows Rice] Launching WINDOW-RICE Ratatui TUI installer..." -ForegroundColor Green
+    & $binaryToLaunch $extraArgs
+    exit $LASTEXITCODE
+} else {
+    Write-Host "[Windows Rice] Error: Failed to acquire or build rice-installer.exe binary." -ForegroundColor Red
+    exit 1
 }
