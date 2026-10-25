@@ -128,10 +128,15 @@ iwr -useb https://raw.githubusercontent.com/harish2222/windows-rice/main/install
 > **Why `-useb` is required with `iwr` / `wget` on Windows PowerShell 5.1:**
 > In Windows PowerShell 5.1, `wget` and `iwr` are aliases for `Invoke-WebRequest`. By default in PS 5.1, `Invoke-WebRequest` attempts to use the legacy Internet Explorer DOM parsing engine unless `-UseBasicParsing` (`-useb`) is specified. Because Internet Explorer is deprecated in modern Windows, omitting `-useb` produces an `Internet Explorer engine is not available` error. `irm` (`Invoke-RestMethod`) bypasses the IE engine natively and works cleanly out of the box.
 
-### How the Turnkey Bootstrap Works
-1. **Pre-Compiled Binary Download:** Automatically downloads the official, Authenticode-signed `rice-installer.exe` binary from GitHub Releases directly to `$env:TEMP\rice-installer.exe`.
-2. **Repository Placement:** Deploys or clones the full rice repository into `~/.config` so all config sources and assets are instantly accessible.
-3. **Instant TUI Launch:** Immediately executes `rice-installer.exe` in your terminal without requiring compilation or prerequisites.
+### How the Turnkey Bootstrap Works (Clean Sandbox & System)
+1. **Scoop Setup:** Installs the Scoop package manager if not already present on the system.
+2. **Git Installation:** Automatically installs Git via Scoop (`scoop install git`) to ensure git commands and tools are immediately available in `$env:PATH`.
+3. **Repository Clone via Tag:** Clones the repository using:
+   ```bash
+   git clone --branch v1.0.0 --depth 1 https://github.com/harish2222/windows-rice.git ~/.config
+   ```
+   *(If `~/.config` already contains preexisting files, it cleanly clones and merges without overwriting user data).*
+4. **Binary Acquisition & Instant TUI Launch:** Fetches the official, Authenticode-signed `rice-installer.exe` binary from GitHub Releases directly to `$env:TEMP\rice-installer.exe` and launches the Ratatui TUI installer in your terminal. All subsequent package installation, config linking, and verification is handled interactively inside the TUI.
 
 ---
 

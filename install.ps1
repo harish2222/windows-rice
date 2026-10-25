@@ -23,6 +23,7 @@
 
 [CmdletBinding()]
 param(
+    [string]$Tag = "v1.0.0",
     [switch]$Verify,
     [switch]$LinkAll,
     [switch]$Unlink,
@@ -93,47 +94,64 @@ if ($isRemote) {
     Write-Host "[Windows Rice] Remote execution detected (iwr / irm)." -ForegroundColor Cyan
     $repoUrl = "https://github.com/harish2222/windows-rice.git"
     $tempInstaller = Join-Path $env:TEMP "rice-installer.exe"
-    $releaseExeUrl = "https://github.com/harish2222/windows-rice/releases/latest/download/rice-installer.exe"
+    $releaseExeUrl = "https://github.com/harish2222/windows-rice/releases/download/$Tag/rice-installer.exe"
+    $latestExeUrl = "https://github.com/harish2222/windows-rice/releases/latest/download/rice-installer.exe"
 
-    # Step A: Download pre-compiled release binary directly to TEMP
-    if (-not (Test-Path $tempInstaller) -or ((Get-Item $tempInstaller).Length -lt 500000)) {
-        Write-Host "[Windows Rice] Downloading pre-compiled installer binary from GitHub releases..." -ForegroundColor Cyan
+    # Step 1: Ensure Scoop is installed
+    $scoopShim = Join-Path $env:USERPROFILE "scoop\shims"
+    $env:PATH = "$scoopShim;$env:PATH"
+    if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
+        Write-Host "[Windows Rice] Step 1/4: Installing Scoop package manager..." -ForegroundColor Cyan
         try {
-            Invoke-WebRequest -Uri $releaseExeUrl -OutFile $tempInstaller -UseBasicParsing -ErrorAction Stop
+            Invoke-RestMethod -Uri https://get.scoop.sh -UseBasicParsing | Invoke-Expression
         } catch {
             try {
-                $webClient = New-Object System.Net.WebClient
-                $webClient.DownloadFile($releaseExeUrl, $tempInstaller)
+                Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
             } catch {
-                if (Get-Command curl.exe -ErrorAction SilentlyContinue) {
-                    try { & curl.exe -sSL $releaseExeUrl -o $tempInstaller } catch {}
-                }
+                Write-Host "[Windows Rice] Scoop setup notice: $_" -ForegroundColor Yellow
             }
         }
+        $env:PATH = "$scoopShim;$env:PATH"
     }
 
-    # Step B: Ensure configuration repository exists at targetRepoDir
-    if (Test-Path (Join-Path $targetRepoDir ".git")) {
-        Write-Host "[Windows Rice] Repository already exists at $targetRepoDir." -ForegroundColor Green
-        if (Get-Command git -ErrorAction SilentlyContinue) {
-            Write-Host "[Windows Rice] Pulling latest changes..." -ForegroundColor DarkGray
-            try { git -C $targetRepoDir pull --quiet origin main } catch {}
+    # Step 2: Ensure Git is installed via Scoop
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "[Windows Rice] Step 2/4: Installing Git via Scoop..." -ForegroundColor Cyan
+        if (Get-Command scoop -ErrorAction SilentlyContinue) {
+            & scoop install git
         }
-    } else {
-        Write-Host "[Windows Rice] Setting up repository at $targetRepoDir..." -ForegroundColor Cyan
-        $cloned = $false
-        if (Get-Command git -ErrorAction SilentlyContinue) {
-            if (-not (Test-Path $targetRepoDir)) {
-                git clone $repoUrl $targetRepoDir
-                if ($LASTEXITCODE -eq 0 -and (Test-Path (Join-Path $targetRepoDir "install.ps1"))) {
-                    $cloned = $true
+        $gitCmd = Join-Path $env:USERPROFILE "scoop\apps\git\current\cmd"
+        $gitBin = Join-Path $env:USERPROFILE "scoop\apps\git\current\bin"
+        $env:PATH = "$scoopShim;$gitCmd;$gitBin;$env:PATH"
+    }
+
+    # Step 3: Clone repository via git clone --branch <tag_name> --depth 1 <repository_url>
+    Write-Host "[Windows Rice] Step 3/4: Setting up repository via git clone (branch/tag: $Tag)..." -ForegroundColor Cyan
+    $cloned = $false
+    if (Get-Command git -ErrorAction SilentlyContinue) {
+        if (-not (Test-Path $targetRepoDir)) {
+            Write-Host "[Windows Rice] Running: git clone --branch $Tag --depth 1 $repoUrl $targetRepoDir" -ForegroundColor DarkGray
+            git clone --branch $Tag --depth 1 $repoUrl $targetRepoDir
+            if ($LASTEXITCODE -eq 0 -and (Test-Path (Join-Path $targetRepoDir "install.ps1"))) {
+                $cloned = $true
+            }
+        } else {
+            # Target directory already exists (e.g. existing ~/.config in Windows Sandbox or local user)
+            if (Test-Path (Join-Path $targetRepoDir ".git")) {
+                Write-Host "[Windows Rice] Repository already exists at $targetRepoDir. Updating..." -ForegroundColor DarkGray
+                try {
+                    git -C $targetRepoDir fetch --depth 1 origin $Tag
+                    git -C $targetRepoDir checkout $Tag
+                } catch {
+                    try { git -C $targetRepoDir pull --quiet origin main } catch {}
                 }
+                $cloned = $true
             } else {
-                # Target exists but is not a git repo (e.g. preexisting ~/.config from Windows/apps)
+                # Target exists but is not a git repo: clone into temp and merge into targetRepoDir
                 $tempClone = Join-Path $env:TEMP "windows-rice-clone-$([Guid]::NewGuid().ToString('N'))"
                 if (Test-Path $tempClone) { Remove-Item $tempClone -Recurse -Force -ErrorAction SilentlyContinue }
-                Write-Host "[Windows Rice] Cloning repository into $targetRepoDir..." -ForegroundColor Cyan
-                git clone --depth 1 $repoUrl $tempClone
+                Write-Host "[Windows Rice] Running: git clone --branch $Tag --depth 1 $repoUrl $tempClone" -ForegroundColor DarkGray
+                git clone --branch $Tag --depth 1 $repoUrl $tempClone
                 if ($LASTEXITCODE -eq 0 -and (Test-Path $tempClone)) {
                     Copy-Item -Path "$tempClone\*" -Destination $targetRepoDir -Recurse -Force
                     if (Test-Path (Join-Path $tempClone ".git")) {
@@ -144,41 +162,69 @@ if ($isRemote) {
                 }
             }
         }
+    }
 
-        if (-not $cloned) {
-            Write-Host "[Windows Rice] Downloading repository archive from GitHub..." -ForegroundColor Yellow
-            $tempZip = Join-Path $env:TEMP "windows-rice.zip"
-            $tempExtract = Join-Path $env:TEMP "windows-rice-extract"
-            if (Test-Path $tempZip) { Remove-Item $tempZip -Force -ErrorAction SilentlyContinue }
-            if (Test-Path $tempExtract) { Remove-Item $tempExtract -Recurse -Force -ErrorAction SilentlyContinue }
+    # Fallback archive download if git clone encountered network issue
+    if (-not $cloned -and (-not (Test-Path (Join-Path $targetRepoDir "install.ps1")))) {
+        Write-Host "[Windows Rice] Downloading repository archive from GitHub..." -ForegroundColor Yellow
+        $tempZip = Join-Path $env:TEMP "windows-rice.zip"
+        $tempExtract = Join-Path $env:TEMP "windows-rice-extract"
+        if (Test-Path $tempZip) { Remove-Item $tempZip -Force -ErrorAction SilentlyContinue }
+        if (Test-Path $tempExtract) { Remove-Item $tempExtract -Recurse -Force -ErrorAction SilentlyContinue }
 
-            $zipUrl = "https://github.com/harish2222/windows-rice/archive/refs/heads/main.zip"
+        $zipUrl = "https://github.com/harish2222/windows-rice/archive/refs/tags/$Tag.zip"
+        try {
+            Invoke-WebRequest -Uri $zipUrl -OutFile $tempZip -UseBasicParsing -ErrorAction Stop
+        } catch {
             try {
+                $zipUrl = "https://github.com/harish2222/windows-rice/archive/refs/heads/main.zip"
                 Invoke-WebRequest -Uri $zipUrl -OutFile $tempZip -UseBasicParsing -ErrorAction Stop
+            } catch {}
+        }
+
+        if (Test-Path $tempZip) {
+            Expand-Archive -Path $tempZip -DestinationPath $tempExtract -Force
+            $extractedFolder = Get-ChildItem -Path $tempExtract -Directory | Select-Object -First 1
+            if (-not (Test-Path $targetRepoDir)) {
+                New-Item -ItemType Directory -Force -Path $targetRepoDir | Out-Null
+            }
+            if ($extractedFolder) {
+                Copy-Item -Path "$($extractedFolder.FullName)\*" -Destination $targetRepoDir -Recurse -Force
+            }
+            Remove-Item $tempZip -Force -ErrorAction SilentlyContinue
+            Remove-Item $tempExtract -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+
+    # Step 4: Ensure pre-compiled binary is downloaded and ready in TEMP
+    if (-not (Test-Path $tempInstaller) -or ((Get-Item $tempInstaller).Length -lt 500000)) {
+        Write-Host "[Windows Rice] Step 4/4: Downloading pre-compiled installer binary ($Tag)..." -ForegroundColor Cyan
+        try {
+            Invoke-WebRequest -Uri $releaseExeUrl -OutFile $tempInstaller -UseBasicParsing -ErrorAction Stop
+        } catch {
+            try {
+                Invoke-WebRequest -Uri $latestExeUrl -OutFile $tempInstaller -UseBasicParsing -ErrorAction Stop
             } catch {
                 try {
                     $webClient = New-Object System.Net.WebClient
-                    $webClient.DownloadFile($zipUrl, $tempZip)
+                    $webClient.DownloadFile($latestExeUrl, $tempInstaller)
                 } catch {
-                    Write-Host "[Windows Rice] Failed to download repository archive: $_" -ForegroundColor Red
+                    if (Get-Command curl.exe -ErrorAction SilentlyContinue) {
+                        try { & curl.exe -sSL $latestExeUrl -o $tempInstaller } catch {}
+                    }
                 }
-            }
-
-            if (Test-Path $tempZip) {
-                Expand-Archive -Path $tempZip -DestinationPath $tempExtract -Force
-                $extractedFolder = Join-Path $tempExtract "windows-rice-main"
-                if (-not (Test-Path $targetRepoDir)) {
-                    New-Item -ItemType Directory -Force -Path $targetRepoDir | Out-Null
-                }
-                Copy-Item -Path "$extractedFolder\*" -Destination $targetRepoDir -Recurse -Force
-                Remove-Item $tempZip -Force -ErrorAction SilentlyContinue
-                Remove-Item $tempExtract -Recurse -Force -ErrorAction SilentlyContinue
             }
         }
     }
 
-    # Step C: Launch pre-compiled binary directly if available
+    # Step 5: Launch TUI installer immediately
     if (Test-Path $tempInstaller -and ((Get-Item $tempInstaller).Length -ge 500000)) {
+        # Copy to repository as well if present
+        $repoBuilt = Join-Path $targetRepoDir "installer\target\release\rice-installer.exe"
+        $repoBuiltDir = Split-Path $repoBuilt -Parent
+        if (-not (Test-Path $repoBuiltDir)) { New-Item -ItemType Directory -Force -Path $repoBuiltDir | Out-Null }
+        Copy-Item $tempInstaller $repoBuilt -Force -ErrorAction SilentlyContinue
+
         $extraArgs = @()
         if ($Verify) { $extraArgs += "--verify" }
         if ($LinkAll) { $extraArgs += "--link-all" }
@@ -344,8 +390,8 @@ if ($binaryToLaunch) {
 # SIG # Begin signature block
 # MIIGKwYJKoZIhvcNAQcCoIIGHDCCBhgCAQExDzANBglghkgBZQMEAgEFADB5Bgor
 # BgEEAYI3AgEEoGswaTA0BgorBgEEAYI3AgEeMCYCAwEAAAQQH8w7YFlLCE63JNLG
-# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCB9/Ox5gCMQqzUB
-# wV4PhZWQWghHKiFPnd1SXr8Ss3nEXaCCA24wggNqMIICUqADAgECAhARUGl3tg6h
+# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCAVboY4EXmhMUt0
+# o8eykFqm6QtvCVWrRf3qZLrNYryBVKCCA24wggNqMIICUqADAgECAhARUGl3tg6h
 # n0/ys9hv8thvMA0GCSqGSIb3DQEBCwUAME0xHTAbBgNVBAsMFFdpbmRvdy1SaWNl
 # IFNlY3VyaXR5MQ8wDQYDVQQKDAZIS0RFVlMxGzAZBgNVBAMMEkhLREVWUyBXaW5k
 # b3ctUmljZTAeFw0yNjEwMjUxOTQ0MTBaFw0zMTEwMjUxOTU0MDlaME0xHTAbBgNV
@@ -368,11 +414,11 @@ if ($binaryToLaunch) {
 # BkhLREVWUzEbMBkGA1UEAwwSSEtERVZTIFdpbmRvdy1SaWNlAhARUGl3tg6hn0/y
 # s9hv8thvMA0GCWCGSAFlAwQCAQUAoIGEMBgGCisGAQQBgjcCAQwxCjAIoAKAAKEC
 # gAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwG
-# CisGAQQBgjcCARUwLwYJKoZIhvcNAQkEMSIEIJw/CU213+IS+Q//KlYoOqMK5WsS
-# HUEZvsU5gFvStyvuMA0GCSqGSIb3DQEBAQUABIIBAFxUg9UnNbGbCWueRUrbF2hM
-# Ifk+BReXzOaIfVIs7n/f2RlEabniJasTdjmI36oLimDoHETBpsIhCdoQR5mYzccB
-# 7+/7rZ20zmFhRbd8lpbcErk0B+qSPMJqGY5bKjKCcTKrut/v3ZDCf+9JAOWZMRG7
-# e1R6SZBtWlnHSVihjzZ6aoBVSoXiyKkzzpqmsAsuWCQZ5biL4T91TpKx5OsAy76I
-# YIwrjQV4na6LZ4Xu5AeIPLlXQ42yE+1zCa/3ccQdPS6hz++NZnCoxVEoSesYixiF
-# KghwMTddT8iKKgA2oHHCWh7kAKfe8bJS7K6wvRa95U0Ze6j2cSjyqFx+K52aNl8=
+# CisGAQQBgjcCARUwLwYJKoZIhvcNAQkEMSIEIORDFVbB/TaitcwbgsyuhvumP00O
+# d6RTJggQFeBPNfG4MA0GCSqGSIb3DQEBAQUABIIBAGZflQKAJ6o3pbVwgtJI5Kcy
+# Klamic1+0QrXkMsVzidKU5ELu3HFcp2Gv1KZD7YFWgYQESkA/q/9DgOzIzaaMprK
+# XbkTsFvKIMLh7MyDhAi2W8P32lumjvH2hiVn6UrkMm2MqJyr38ggjIAbyHXpMNhR
+# i/z+E+Z1qXIGHtlpchq+lhkW9MXHJuDCbiBmdVG+HfR9fe961nY44NzCA0BfwR9D
+# QZKL4+NouBnukUqgdEDMhCokUn5ldhCbPD0gM16XWsdDYYLEBPk9ZV1fbkSO/523
+# SABqvhgXd2X0VA3A63SgrY6iuuItZ/HZp7EYoynx53MW+FAW3mRUQRCihKw0TNs=
 # SIG # End signature block
