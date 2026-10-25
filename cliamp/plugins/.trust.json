@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "plugins": {
+    "cliamp-lastfm": "be73c93d78dda77df6b4a1d8e9f19660cc5e8d18be4aef1edd1e0ad7343d4f30",
+    "discord-rpc": "379e57b0028e563cb0e4b9d66ac45bd9eb9961b335b233c5d3d4be127975846f"
+  }
+}

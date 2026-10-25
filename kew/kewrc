@@ -1,0 +1,178 @@
+# kew Settings - God Mode Edition (Ultimate Feature & Binding Set)
+
+[miscellaneous]
+# Path to music library.
+path=~/Music
+
+# Enable artist database for clickable links.
+useArtistsDb=1
+
+# Allow desktop notification on track change.
+allowNotifications=1
+
+# Remove leading numbers from track file names.
+stripTrackNumbers=1
+
+# Visual Beauty Strategy: Frameless and Focused.
+hideLogo=0
+hideHelp=0
+hideFooter=0
+
+# Hide track time line from track view.
+hideTimeStatus=0
+simpleTimeStatus=1
+
+# Hide cover shown on the left when a song is playing.
+hideSideCover=0
+
+# Show only top level folders.
+collapseTopLevel=0
+
+# Resume last playing song when starting kew (Industry standard).
+autoResume=0
+
+# Toggle animated song title.
+titleDelay=1
+
+# Exits after playing the whole playlist.
+quitOnStop=0
+
+# Whether clearing the playlist also removes the currently playing song.
+clearListClearsAll=1
+
+# Glimmering text disabled for a high-end, steady aesthetic.
+hideGlimmeringText=1
+
+# Replay gain check first: 0=track, 1=album, 2=disabled, 3=auto.
+replayGainCheckFirst=3
+
+# Save Repeat and Shuffle Settings.
+saveRepeatShuffleSettings=1
+repeatState=0
+shuffleEnabled=0
+
+# Set the window title to the title of the currently playing track.
+trackTitleAsWindowTitle=1
+
+[colors]
+# Use the selected Catppuccin Mocha theme instead of album-derived colors.
+theme=catpuccin
+colorMode=0
+
+[crossfade]
+# Gapless, seamless professional transitions.
+alwaysCrossfade=1
+fadeEnterSongMs=0
+fadeQuickMs=3000
+fadeMediumMs=5000
+fadeSlowMs=10000
+
+[track cover]
+coverEnabled=1
+coverAnsi=0
+# High-fidelity Sixel rendering.
+coverStyle=sixels
+
+[mouse]
+mouseEnabled=1
+
+[discord]
+# Full social presence.
+discordRPCEnabled=1
+
+[chroma]
+chromaPath=
+chromaDevice=Headphones (Chu2 DSP)
+
+[visualizer]
+# Vibrant, thin-bar modern aesthetic.
+visualizerColorType=4
+visualizerHeight=6
+visualizerBrailleMode=1
+visualizerBarWidth=1
+
+[progress bar]
+# Smooth continuous "Pill" style.
+progressBarElapsedEvenChar=━
+progressBarElapsedOddChar=━
+progressBarApproachingEvenChar=━
+progressBarApproachingOddChar=━
+progressBarCurrentEvenChar=┃
+progressBarCurrentOddChar=┃
+
+[key bindings]
+# ==============================================================================
+# THE ULTIMATE BINDING SET
+# ==============================================================================
+
+# --- ESSENTIAL PLAYBACK ---
+bind = Space, playPause
+bind = p, playPause
+bind = Left Arrow, prevSong
+bind = Right Arrow, nextSong
+bind = h, prevSong
+bind = l, nextSong
+bind = a, seekBack
+bind = d, seekForward
+bind = +, volUp, +5%
+bind = =, volUp, +5%
+bind = -, volDown, -5%
+
+# --- NAVIGATION & VIEWS ---
+bind = Tab, nextView
+bind = Shift+Tab, prevView
+bind = F2, showPlaylist
+bind = F3, showLibrary
+bind = F4, showTrack
+bind = F5, showSearch
+bind = F6, showHelp
+bind = k, scrollUp
+bind = j, scrollDown
+bind = Up Arrow, scrollUp
+bind = Down Arrow, scrollDown
+bind = PgUp, prevPage
+bind = PgDn, nextPage
+
+# --- FEATURE TOGGLES ---
+bind = v, toggleVisualizer
+bind = Ctrl+v, toggleVisualizer
+bind = z, toggleCrossfade
+bind = r, toggleRepeat
+bind = s, shuffle
+bind = i, cycleColorMode
+bind = t, cycleThemes
+bind = c, cycleVisualization
+bind = b, toggleAscii
+bind = n, toggleNotifications
+bind = m, showLyricsPage
+bind = Ctrl+l, showLyricsPage
+
+# --- LIBRARY & PLAYLIST MANAGEMENT ---
+bind = Enter, enqueue
+bind = Ctrl+g, enqueueAndPlay
+bind = Alt+Enter, enqueueAndPlay
+bind = Backspace, clearPlaylist
+bind = Del, remove
+bind = ., addToFavorites_playlist
+bind = u, updateLibrary
+bind = o, sortLibrary
+bind = f, moveSongUp
+bind = g, moveSongDown
+bind = x, exportPlaylist
+
+# --- CROSSFADE PRECISION ---
+bind = Shift+d, crossfadequick
+bind = Shift+f, crossfademedium
+bind = Shift+g, crossfadeslow
+
+# --- SYSTEM ---
+bind = Shift+s, stop
+bind = q, quit
+bind = Esc, quit
+
+# --- MOUSE INTERACTION ---
+bind = mouseLeft, enqueue
+bind = mouseMiddle, enqueueAndPlay
+bind = mouseRight, playPause
+bind = mouseWheelUp, scrollUp
+bind = mouseWheelDown, scrollDown

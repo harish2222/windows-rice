@@ -1,0 +1,70 @@
+# =============================================================================
+#  apple-music.theme  —  fixed-colour variant of the same design system
+#
+#  Album-color mode (kewrc colorMode=3) derives accents from the cover art.
+#  Use this theme instead when you want a stable, non-reactive palette:
+#
+#      [colors]
+#      theme=apple-music
+#
+#  or press `i` in kew until "Text colour" / theme mode cycles to it.
+#
+#  Tokens: charcoal-neutral structure, soft white primary, muted gray
+#  secondary, one blue accent, warm salmon reserved for warnings/highlights.
+# =============================================================================
+
+name=Apple Music Dark
+
+# --- Core tokens ------------------------------------------------------------
+accent=#89b4fa
+text=#eceff4
+textDim=#a7acb6
+textMuted=#6b7280
+
+# --- General ----------------------------------------------------------------
+logo=#89b4fa
+header=#89b4fa
+footer=#6b7280
+help=#a7acb6
+link=#89b4fa
+nowplaying=#f2f4f8
+playbackstatus=#6b7280
+
+# --- Playlist ---------------------------------------------------------------
+playlist.rownum=#6b7280
+playlist.title=#eceff4
+playlist.playing=#89b4fa
+
+# --- Track view -------------------------------------------------------------
+trackview.title=#eceff4
+trackview.artist=#a7acb6
+trackview.album=#8b93a1
+trackview.year=#6b7280
+trackview.time=#6b7280
+trackview.visualizer=#89b4fa
+trackview.lyrics=#a7acb6
+
+# --- Library ----------------------------------------------------------------
+library.artist=#89b4fa
+library.album=#8b93a1
+library.track=#eceff4
+library.enqueued=#89b4fa
+library.playing=#89b4fa
+
+# --- Search -----------------------------------------------------------------
+search.label=#89b4fa
+search.query=#eceff4
+search.result=#eceff4
+search.enqueued=#a7acb6
+search.playing=#89b4fa
+
+# --- Progress ---------------------------------------------------------------
+progress.filled=#89b4fa
+progress.empty=#2a2c31
+progress.elapsed=#eceff4
+
+# --- Status -----------------------------------------------------------------
+status.info=#eceff4
+status.warning=#e8c07c
+status.error=#e78284
+status.success=#a3be8c

@@ -108,8 +108,19 @@ GlazeWM is the hotkey layer; Komorebi does the tiling.
 
 ## 🚀 Turnkey TUI Installer & Configurator
 
-The rice includes an interactive terminal installer written in Rust (`ratatui` + `crossterm`) located in `installer/` and launched via root script `install.ps1`:
+### Instant Web One-Liner (iwr / irm)
+Install and run on any Windows system with a single PowerShell command:
 
+```powershell
+# Web one-liner using Invoke-RestMethod:
+irm https://raw.githubusercontent.com/harish2222/windows-rice/main/install.ps1 | iex
+
+# Or using Invoke-WebRequest:
+iwr -useb https://raw.githubusercontent.com/harish2222/windows-rice/main/install.ps1 | iex
+```
+*The script automatically sets up the repository at `~/.config`, verifies prerequisites, and launches the Rust Ratatui TUI installer.*
+
+### Local Installation Commands
 ```powershell
 # Launch the interactive dual-pane TUI installer
 .\install.ps1
@@ -131,7 +142,24 @@ The rice includes an interactive terminal installer written in Rust (`ratatui` +
 - **Dual-Pane TUI Layout:** Left pane categorizes Window Managers, Terminals, Shells, Navigation, Media, and Editors with multi-select checkboxes. Right pane displays package metadata, binary locations, target configuration paths, and live execution logs.
 - **Automated Package Detection:** Detects installed binaries and packages across Scoop, Winget, Chocolatey, Cargo, NPM, and Python.
 - **Smart Linking:** Creates symbolic links (`mklink` / `New-Item -ItemType SymbolicLink`) with automatic fallback to file copy if Windows Developer Mode or elevation is not available.
-- **Verification Engine:** Validates that all 21 binaries and 19 configuration targets are properly deployed and reachable in `PATH`.
+- **Verification Engine:** Validates that all 22 binaries and 20 configuration targets are properly deployed and reachable in `PATH`.
+
+---
+
+## 🎵 Terminal Audio & Media Ecosystem
+
+The rice contains fine-tuned configurations for the premier terminal media players:
+
+- **Kew Music Player (`kew/`):**
+  - **Layouts (`kew/layouts/`):** Custom Apple Music-inspired 3-column layout (`current.layout`) balancing 36% Sixel artwork, 32% now-playing details, and 32% synced lyrics alongside full-width audio visualizer and pill progress bar. Also includes alternate compact layout (`alt.layout`).
+  - **Themes (`kew/themes/`):** 28 curated themes including Catppuccin Mocha (`catpuccin.theme`), Apple Music, Tokyo Night, Nord, Gruvbox, and Synthwave.
+  - **Features:** Gapless playback, crossfade, Discord Rich Presence, and custom visualizer presets.
+- **CLIamp Player (`cliamp/`):**
+  - Classic Winamp retro interface, 10-band custom EQ, 24-bit/96kHz WASAPI streaming, and radio/podcast support.
+  - Includes Discord Rich Presence (`plugins/discord-rpc.lua`) and Last.fm scrobbler (`plugins/cliamp-lastfm.lua`).
+- **MPD & ncmpc (`mpd/`, `ncmpc/`):**
+  - Native MPD daemon with non-exclusive WASAPI output and ReplayGain album normalization (`mpd/mpd.conf`).
+  - Curses-based ncmpc client styled with Apple Music accents over Catppuccin Mocha (`ncmpc/config`).
 
 ---
 

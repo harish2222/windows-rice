@@ -1,0 +1,68 @@
+## ===========================================================================
+##  ncmpc configuration  (~/.ncmpc/config — the path this build reports)
+##  Style: Apple Music accents over Catppuccin Mocha (named colors go through
+##         otty's palette; 197 is the fixed xterm red closest to Apple's
+##         #fa243c).  Docs: ncmpc.1 @ v0.20 (matches the installed build).
+## ===========================================================================
+
+############## Connection ##############
+## Reconnect tolerance (seconds) if MPD is slow to answer.
+timeout = 10
+
+############## Interface ##############
+enable-mouse = yes
+## Cycle these screens with Tab / Shift+Tab (all compiled into this build).
+screen-list = playlist browse artist search song outputs help
+## 0=title 1=artist 2=album 3=filename 4=artist+title
+search-mode = 4
+auto-center = yes
+find-show-last = yes
+find-wrap = yes
+wrap-around = yes
+bell-on-wrap = no
+audible-bell = no
+visible-bell = yes
+crossfade-time = 5
+seek-time = 5
+
+############## Display ##############
+## Screen names shown in the top nav line (the "sidebar" of this player).
+welcome-screen-list = yes
+wide-cursor = yes
+hardware-cursor = no
+## 0 = never hide the playlist cursor.
+hide-cursor = 0
+## Marquee-scroll long titles.
+scroll = yes
+scroll-sep = "..."
+## Apple Music row style: "Artist - Title", falling back to the file name.
+list-format = "[[%artist% - ]%title%]|%shortfile%"
+status-format = "[[%artist% - ]%title%]|%shortfile%[[  (%album%)]]"
+status-message-time = 3
+display-time = yes
+timedisplay-type = elapsed
+visible-bitrate = yes
+## Keep the otty tab title showing the playing song.
+set-xterm-title = yes
+xterm-title-format = "[%artist% - ]%title%  -  ncmpc"
+second-column = yes
+
+############## Colors ##############
+enable-colors = yes
+## Named colors (black red green yellow blue magenta cyan white) resolve
+## through otty's Catppuccin Mocha palette; integers are fixed xterm-256.
+## 111 = xterm light blue, the closest fixed colour to #8ab4f8 (the shared
+## accent). Swap 111 -> 197 for the Apple-red accent if preferred.
+color background = none
+color title = white
+color title-bold = 111,bold
+color line = 240
+color list = white
+color list-bold = white,bold
+color browser-directory = blue
+color browser-playlist = 111
+color progressbar = 111,bold
+color status-state = 111,bold
+color status-song = white,bold
+color status-time = white
+color alert = red,bold

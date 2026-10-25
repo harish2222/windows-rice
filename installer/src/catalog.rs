@@ -305,20 +305,50 @@ pub fn get_catalog() -> Vec<PackageItem> {
 
         // Media & Visualizers
         PackageItem {
+            id: "kew",
+            name: "Kew Music Player",
+            category: Category::Media,
+            description: "Lightweight terminal music player with Apple Music layouts, lyrics, visualizer, and Catppuccin themes",
+            binaries: &["kew.exe"],
+            scoop_cmd: Some("scoop install kew"),
+            winget_cmd: None,
+            choco_cmd: None,
+            cargo_cmd: None,
+            configs: vec![
+                ConfigMapping {
+                    source_rel: "kew",
+                    target_pattern: "AppData/Roaming/kew",
+                    is_dir: true,
+                },
+                ConfigMapping {
+                    source_rel: "kew",
+                    target_pattern: ".config/kew",
+                    is_dir: true,
+                },
+            ],
+        },
+        PackageItem {
             id: "cliamp",
             name: "CLIamp Music Player",
             category: Category::Media,
-            description: "Terminal audio player with Winamp nostalgic aesthetics",
+            description: "Terminal audio player with Winamp aesthetics, visualizer, Discord RPC, and radio streams",
             binaries: &["cliamp.exe"],
             scoop_cmd: Some("scoop install cliamp"),
             winget_cmd: None,
             choco_cmd: None,
             cargo_cmd: None,
-            configs: vec![ConfigMapping {
-                source_rel: "cliamp",
-                target_pattern: ".config/cliamp",
-                is_dir: true,
-            }],
+            configs: vec![
+                ConfigMapping {
+                    source_rel: "cliamp",
+                    target_pattern: ".config/cliamp",
+                    is_dir: true,
+                },
+                ConfigMapping {
+                    source_rel: "cliamp",
+                    target_pattern: "AppData/Roaming/cliamp",
+                    is_dir: true,
+                },
+            ],
         },
         PackageItem {
             id: "cava",
@@ -338,19 +368,31 @@ pub fn get_catalog() -> Vec<PackageItem> {
         },
         PackageItem {
             id: "mpd",
-            name: "MPD Music Daemon",
+            name: "MPD & ncmpc Ecosystem",
             category: Category::Media,
-            description: "Music Player Daemon client-server ecosystem for terminal music",
-            binaries: &["mpd.exe", "mpc.exe"],
-            scoop_cmd: Some("scoop install mpd mpc"),
+            description: "Music Player Daemon client-server stack with WASAPI output and ncmpc curses client",
+            binaries: &["mpd.exe", "mpc.exe", "ncmpc.exe"],
+            scoop_cmd: Some("scoop install mpd mpc ncmpc"),
             winget_cmd: None,
             choco_cmd: None,
             cargo_cmd: None,
-            configs: vec![ConfigMapping {
-                source_rel: "mpd",
-                target_pattern: ".config/mpd",
-                is_dir: true,
-            }],
+            configs: vec![
+                ConfigMapping {
+                    source_rel: "mpd",
+                    target_pattern: ".config/mpd",
+                    is_dir: true,
+                },
+                ConfigMapping {
+                    source_rel: "ncmpc",
+                    target_pattern: ".config/ncmpc",
+                    is_dir: true,
+                },
+                ConfigMapping {
+                    source_rel: "ncmpc/config",
+                    target_pattern: ".ncmpc/config",
+                    is_dir: false,
+                },
+            ],
         },
 
         // System & Monitoring

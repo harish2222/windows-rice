@@ -1,0 +1,71 @@
+# =============================================================================
+#  Album Colors theme  —  Apple Music-inspired design system
+#  (kew colorMode=3 "Album colors"; colors 101-104 are derived from the cover)
+#
+#  This file is the one kew loads for album-color mode, so it is where the
+#  design tokens are applied: soft-white primary text, muted gray secondary
+#  text, one restrained accent per screen, and a progress bar that reads as a
+#  single quiet line rather than a block of colour.
+#
+#  Layout-independent: the same palette is used by every kew view.
+# =============================================================================
+
+name=Album Colors
+
+# --- Core tokens ------------------------------------------------------------
+# The album's own colours stay as the accent family; everything structural is
+# neutral so the interface keeps the same shape whatever art is playing.
+accent=101
+text=#eceff4
+textDim=#a7acb6
+textMuted=#6b7280
+
+# --- General ----------------------------------------------------------------
+logo=101
+header=101
+footer=#6b7280
+help=#a7acb6
+link=103
+nowplaying=#f2f4f8
+playbackstatus=#6b7280
+
+# --- Playlist ---------------------------------------------------------------
+playlist.rownum=#6b7280
+playlist.title=#eceff4
+playlist.playing=103
+
+# --- Track view -------------------------------------------------------------
+trackview.title=#ffffff
+trackview.artist=101
+trackview.album=#b4b8c0
+trackview.year=#8b93a1
+trackview.time=#8b93a1
+trackview.visualizer=104
+trackview.lyrics=#d6dae2
+
+# --- Library ----------------------------------------------------------------
+library.artist=102
+library.album=102
+library.track=#eceff4
+library.enqueued=101
+library.playing=103
+
+# --- Search -----------------------------------------------------------------
+search.label=101
+search.query=#eceff4
+search.result=#eceff4
+search.enqueued=102
+search.playing=101
+
+# --- Progress ---------------------------------------------------------------
+# Filled bar keeps the album accent; the empty track is a flat dark surface and
+# the playhead is bright white, so the bar never competes with the artwork.
+progress.filled=102
+progress.empty=#2a2c31
+progress.elapsed=#eceff4
+
+# --- Status -----------------------------------------------------------------
+status.info=#eceff4
+status.warning=#e8c07c
+status.error=#e78284
+status.success=#a3be8c

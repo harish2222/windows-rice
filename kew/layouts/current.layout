@@ -1,0 +1,498 @@
+version=15
+
+# =============================================================================
+#  Apple Music-inspired kew layout  (kew 4.4.x, layout version 15)
+#
+#  Track view, top to bottom:
+#
+#    +----------------+-------------------+-------------------+
+#    |                |                   |                   |
+#    |   artwork      |   now playing     |     lyrics        |   <- auto
+#    |   (36% width)  |   (32% width)     |     (32% width)   |
+#    |                |                   |                   |
+#    +----------------+-------------------+-------------------+
+#    |              full-width visualizer (20% of height)      |
+#    +---------------------------------------------------------+
+#    |  full-width progress bar                                |
+#    +---------------------------------------------------------+
+#    |  key bindings (Kew's built-in footer alignment)          |
+#    +---------------------------------------------------------+
+#
+#  Every row either fills the width (visualizer, progress bar) or divides it
+#  with percent + auto widths, so the layout reflows on resize without any
+#  hard-coded column numbers.  Percentages are of the live terminal size.
+#
+#  Component notes (verified against kew 4.4.0 sources):
+#    cover            scales the album art to the pane, keeps the aspect ratio,
+#                     never distorts, and draws nothing when art is missing.
+#    metadata         title / artist / album / year, truncated at pane width.
+#    time             elapsed, duration, completion %, volume, queue position,
+#                     and (when the pane is wide enough) sample rate + bit rate.
+#    playback_status  repeat / shuffle / crossfade / fast-forward state icons.
+#    lyrics_page      synced lyrics (current line highlighted, auto-scrolled) or
+#                     plain lyrics; prints a short hint when none exist.
+#    visualizer       native spectrum visualizer, fills the row.
+#    progress_bar     native progress bar, fills the row.
+#
+#  The footer row uses kew's `indent_normal` column, which tracks the dynamic
+#  indent kew computes for the current window. Kew 4.4's layout grammar has no
+#  centring primitive for arbitrary text or transport buttons.
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Footer: error message line + key bindings
+# ---------------------------------------------------------------------------
+[footer_pane]
+
+row
+height=fixed:1
+col=0
+
+pane
+component=error_row
+dirty=footer
+width=auto
+
+row
+height=fixed:1
+col=0
+
+pane
+component=footer
+dirty=footer
+width=auto
+
+# ---------------------------------------------------------------------------
+# Middle column: track information panel
+#
+#   The information block is centred vertically in its column (a spacer above
+#   and below, both `auto`, so they split the slack evenly) instead of being
+#   pinned to the top with a dead tail underneath.  That is the whole point of
+#   this column: the eye lands in the middle of the screen next to the artwork.
+#
+#   kew's layout vocabulary only exposes four tag fields plus one transport
+#   line, so this block is exactly the information the renderer has:
+#     metadata        -> title / artist / album / year
+#     playback_status -> play/pause, repeat, shuffle, crossfade icons
+#   Composer, genre, codec, disc/track number and the like exist in the tag
+#   reader (TagSettings) but no component draws them - that needs the
+#   track_details patch described in reports/feasibility-matrix.md.
+#
+#   The rich time / sample-rate / bit-rate line stays on the full-width status
+#   row under the progress bar: kew's `time` component refuses to draw in a
+#   pane narrower than 39 columns.
+# ---------------------------------------------------------------------------
+[track_info]
+
+row
+height=auto
+col=0
+
+pane
+component=empty
+width=auto
+
+# title / artist / album / year
+row
+height=fixed:4
+col=0
+
+pane
+component=metadata
+dirty=all
+width=auto
+offsetX=2
+
+row
+height=fixed:1
+col=0
+
+pane
+component=empty
+width=auto
+
+# transport state icons (playing/paused, repeat, shuffle, crossfade)
+row
+height=fixed:1
+col=0
+
+pane
+component=playback_status
+dirty=footer
+width=auto
+offsetX=2
+
+row
+height=auto
+col=0
+
+pane
+component=empty
+width=auto
+
+# ---------------------------------------------------------------------------
+# Right column: lyrics, vertically centered against the track information.
+# Equal auto spacers above and below keep this block centered as the terminal
+# height changes instead of pinning it to the bottom edge.
+# ---------------------------------------------------------------------------
+[track_lyrics]
+
+row
+height=auto
+col=0
+
+pane
+component=empty
+width=auto
+
+row
+height=percent:50
+col=0
+
+pane
+component=lyrics_page
+dirty=all
+width=auto
+offsetX=2
+
+row
+height=auto
+col=0
+
+pane
+component=empty
+width=auto
+
+# ---------------------------------------------------------------------------
+# Track view
+# ---------------------------------------------------------------------------
+[track]
+
+# --- upper content area: artwork | now playing | lyrics ---------------------
+row
+height=auto
+col=0
+
+pane
+component=cover
+dirty=song
+width=percent:36
+
+pane
+layout=track_info
+width=percent:32
+
+pane
+layout=track_lyrics
+width=auto
+
+# --- full-width visualizer -------------------------------------------------
+row
+height=percent:20
+col=0
+
+pane
+component=visualizer
+dirty=visualizer
+width=auto
+
+# --- full-width progress bar, 2 columns of side margin ---------------------
+# Height is 2, not 1, on purpose: kew 4.4's layout pass adds `visualizerHeight`
+# to any progress-bar row whose height value is <= 1 (render_ui.c:
+# handle_layout_options), which would otherwise blow the bar up to a 7-row
+# block and leave dead space under it. The bar itself draws on the first row.
+row
+height=fixed:2
+col=0
+
+pane
+component=empty
+width=fixed:2
+
+pane
+component=progress_bar
+dirty=visualizer
+width=auto
+
+pane
+component=empty
+width=fixed:2
+
+# --- status row: elapsed / duration / percent / volume / queue, plus sample
+#     rate and bit rate when the terminal is wide enough ----------------------
+row
+height=fixed:1
+col=0
+
+pane
+component=empty
+width=fixed:2
+
+pane
+component=time
+dirty=all
+width=auto
+
+# --- footer ----------------------------------------------------------------
+row
+height=fixed:2
+col=indent_normal
+
+pane
+layout=footer_pane
+width=auto
+
+# ---------------------------------------------------------------------------
+# Wide/short terminals: kew switches to the track_landscape section when the
+# terminal is wider than 4x its height.  Reuse the same three-column design so
+# the view does not change shape on ultrawide windows.
+# ---------------------------------------------------------------------------
+[track_landscape]
+
+row
+height=auto
+col=0
+
+pane
+layout=track
+width=auto
+
+# ---------------------------------------------------------------------------
+# Playlist view
+# ---------------------------------------------------------------------------
+[playlist_pane]
+
+row
+height=fixed:5
+col=0
+
+pane
+component=logo
+dirty=visualizer
+width=auto
+offsetX=1
+
+row
+height=fixed:3
+col=0
+
+pane
+component=playlist_header
+width=auto
+offsetX=2
+
+row
+height=auto
+col=0
+
+pane
+component=playlist_rows
+dirty=playlist
+width=auto
+offsetX=3
+
+[playlist]
+
+row
+height=auto
+col=0
+
+pane
+component=side_cover
+dirty=song
+width=indent_wide
+
+pane
+layout=playlist_pane
+width=auto
+
+row
+height=fixed:2
+col=indent_normal
+
+pane
+layout=footer_pane
+width=auto
+
+# ---------------------------------------------------------------------------
+# Library view
+# ---------------------------------------------------------------------------
+[library_pane]
+
+row
+height=fixed:5
+col=0
+
+pane
+component=logo
+dirty=visualizer
+width=auto
+offsetX=1
+
+row
+height=fixed:3
+col=0
+
+pane
+component=library_header
+width=auto
+offsetX=2
+
+row
+height=auto
+col=0
+
+pane
+component=library_rows
+dirty=library
+width=auto
+offsetX=2
+
+[library]
+
+row
+height=auto
+col=0
+
+pane
+component=side_cover
+dirty=song
+width=indent_wide
+
+pane
+layout=library_pane
+width=auto
+
+row
+height=fixed:2
+col=indent_normal
+
+pane
+layout=footer_pane
+width=auto
+
+# ---------------------------------------------------------------------------
+# Search view
+# ---------------------------------------------------------------------------
+[search_pane]
+
+row
+height=fixed:5
+col=0
+
+pane
+component=logo
+dirty=visualizer
+width=auto
+offsetX=1
+
+row
+height=fixed:2
+col=0
+
+pane
+component=search_header
+width=auto
+offsetX=3
+
+row
+height=fixed:2
+col=0
+
+pane
+component=search_box
+dirty=search
+width=auto
+offsetX=3
+
+row
+height=auto
+col=0
+
+pane
+component=search_results
+dirty=search
+width=auto
+offsetX=2
+
+[search]
+
+row
+height=auto
+col=0
+
+pane
+component=side_cover
+dirty=song
+width=indent_wide
+
+pane
+layout=search_pane
+dirty=search
+width=auto
+
+row
+height=fixed:2
+col=indent_normal
+
+pane
+layout=footer_pane
+width=auto
+
+# ---------------------------------------------------------------------------
+# Help view
+# ---------------------------------------------------------------------------
+[help_pane]
+
+row
+height=fixed:5
+col=0
+
+pane
+component=logo
+dirty=visualizer
+width=auto
+offsetX=1
+
+row
+height=fixed:2
+col=0
+
+pane
+component=version
+width=auto
+offsetX=3
+
+row
+height=auto
+col=0
+
+pane
+component=help
+dirty=help
+width=auto
+offsetX=2
+
+[help]
+
+row
+height=auto
+col=0
+
+pane
+component=side_cover
+dirty=song
+width=indent_wide
+
+pane
+layout=help_pane
+dirty=help
+width=auto
+
+row
+height=fixed:2
+col=indent_normal
+
+pane
+layout=footer_pane
+width=auto
