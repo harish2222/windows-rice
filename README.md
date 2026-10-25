@@ -114,19 +114,72 @@ GlazeWM is the hotkey layer; Komorebi does the tiling.
 ## 🚀 WINDOW-RICE Installer & Real-Time Rice Manager
 
 ### Instant Web One-Liner (iwr / irm)
-Install and run on any Windows system with a single PowerShell command:
+Install and run on any Windows system (Windows 10, Windows 11, or Windows Sandbox) with a single PowerShell command:
 
 ```powershell
-# Web one-liner using Invoke-RestMethod:
+# Recommended (Invoke-RestMethod):
 irm https://raw.githubusercontent.com/harish2222/windows-rice/main/install.ps1 | iex
 
-# Or using Invoke-WebRequest:
+# Or using Invoke-WebRequest with -useb (-UseBasicParsing):
 iwr -useb https://raw.githubusercontent.com/harish2222/windows-rice/main/install.ps1 | iex
 ```
-*The script automatically sets up the repository at `~/.config`, verifies prerequisites, and launches the Rust Ratatui TUI installer (**WINDOW-RICE installer**).*
+
+> [!NOTE]
+> **Why `-useb` is required with `iwr` / `wget` on Windows PowerShell 5.1:**
+> In Windows PowerShell 5.1, `wget` and `iwr` are aliases for `Invoke-WebRequest`. By default in PS 5.1, `Invoke-WebRequest` attempts to use the legacy Internet Explorer DOM parsing engine unless `-UseBasicParsing` (`-useb`) is specified. Because Internet Explorer is deprecated in modern Windows, omitting `-useb` produces an `Internet Explorer engine is not available` error. `irm` (`Invoke-RestMethod`) bypasses the IE engine natively and works cleanly out of the box.
+
+### How the Turnkey Bootstrap Works
+1. **Pre-Compiled Binary Download:** Automatically downloads the official, Authenticode-signed `rice-installer.exe` binary from GitHub Releases directly to `$env:TEMP\rice-installer.exe`.
+2. **Repository Placement:** Deploys or clones the full rice repository into `~/.config` so all config sources and assets are instantly accessible.
+3. **Instant TUI Launch:** Immediately executes `rice-installer.exe` in your terminal without requiring compilation or prerequisites.
+
+---
+
+### 📦 Sequential Per-Package Installation, Linking & Verification Pipeline
+When you launch the TUI or run with `--install-missing` / `-Install`:
+1. **Selection:** Navigate with `↑`/`↓` or `k`/`j`, toggle items with `Space` or `Enter`, select missing with `m`, or select all with `a`.
+2. **Execute (`i`):** The installer executes a dedicated 3-step automated cycle for each selected package:
+   - **Step 1 (Binary):** Detects if the application binary is present in `PATH`. If missing, installs it automatically via Scoop (preferred), Winget, Chocolatey, or Cargo.
+   - **Step 2 (Config):** Connects the configuration files (creating symbolic links with copy fallback). Any preexisting user configuration files are safely backed up to `~/.rice-backups/` with entries recorded in `manifest.json`.
+   - **Step 3 (Automated Verification Testing):** Tests and verifies that the application binary is detectable in `PATH` and all target configuration files exist and are valid. Logs `[TEST: PASS]` diagnostics per package.
+   - **Sequential Advance:** Once a package passes, the installer cleanly moves forward to the next selected option until all selections are complete.
+3. **Automatic Hot-Reload:** Automatically signals Komorebi tiling engine, GlazeWM keybindings, and YASB status bar to reload configurations.
+
+---
+
+### 🛡️ Non-Destructive Config Unlinking & Backup Restoration
+Uninstall and remove configurations cleanly without leaving a trace:
+- **TUI Shortcut:** Press `u`, `x`, or `Delete` in the TUI to unlink selected configs.
+- **CLI Commands:**
+  ```powershell
+  # Unlink selected/installed configurations cleanly and restore backups
+  .\install.ps1 -Unlink
+  rice-installer.exe --unlink
+
+  # Unlink ALL configurations cleanly without trace and restore original user backups
+  .\install.ps1 -UnlinkAll
+  rice-installer.exe --unlink-all
+  ```
+- **Binary Preservation Guarantee:** The uninstaller **strictly removes configuration symlinks and copies only**. It **never uninstalls or deletes application binaries** (`.exe`) from your system.
+- **Pristine Backup Restoration:** Any configuration file that existed before installing the rice is automatically restored from `~/.rice-backups/` back to its original location.
+
+---
+
+### 🔏 Authenticode Code Signing & Verification
+The pre-compiled binary `rice-installer.exe` is digitally signed with Microsoft Authenticode by **HKDEVS Window-Rice**:
+- **Subject:** `CN=HKDEVS Window-Rice, O=HKDEVS, OU=Window-Rice Security`
+- **Certificate Thumbprint:** `D81F796B07179720E3CE12DE64710431AC8C32AF`
+- **Algorithm:** SHA-256 with Authenticode timestamping
+- **Verification Command:**
+  ```powershell
+  Get-AuthenticodeSignature (Join-Path $env:TEMP "rice-installer.exe") | Format-List *
+  ```
+- **Public Certificate:** The public root/publisher certificate is provided as [`HKDEVS_WindowRice.cer`](HKDEVS_WindowRice.cer) in the repository and release assets for local trust verification.
+
+---
 
 ### Universal Shell Command (`window-rice` / `rice`)
-Once installed, the `window-rice` function (and `rice` alias) is globally available in **PowerShell 7**, **Nushell**, and **Xonsh**:
+Once installed, the `window-rice` function (and `rice` alias) is globally available in **PowerShell 7**, **Windows PowerShell 5.1**, **Nushell**, and **Xonsh**:
 
 ```bash
 # Launch interactive TUI at any time:
@@ -140,6 +193,14 @@ rice -r                      # Nushell or Xonsh
 # Health check & real-time component verification:
 window-rice -Verify          # PowerShell
 rice -v                      # Nushell or Xonsh
+
+# Install missing binaries and link configs:
+window-rice -Install
+rice -i
+
+# Unlink configs and restore original backups:
+window-rice -Unlink
+rice -x
 
 # Check git updates against upstream:
 window-rice -Update
@@ -161,8 +222,13 @@ rice -w
 # Link all configuration files (Symbolic links with copy fallback)
 .\install.ps1 -LinkAll
 
-# Install missing packages and link corresponding configs
+# Install missing packages and link corresponding configs (with tests)
+.\install.ps1 -Install
 .\install.ps1 -InstallMissing
+
+# Unlink configs and restore backups (preserving binaries)
+.\install.ps1 -Unlink
+.\install.ps1 -UnlinkAll
 
 # Bootstrap package managers (Scoop, Chocolatey, UV, Vcpkg)
 .\install.ps1 -Bootstrap

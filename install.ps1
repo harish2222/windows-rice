@@ -40,6 +40,10 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# Prevent Internet Explorer DOM parser errors on Windows PowerShell 5.1
+$PSDefaultParameterValues['Invoke-WebRequest:UseBasicParsing'] = $true
+$PSDefaultParameterValues['Invoke-RestMethod:UseBasicParsing'] = $true
+
 # Force TLS 1.2 and TLS 1.3 protocol for GitHub and HTTPS connectivity in PowerShell 5.1
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 try {
@@ -88,7 +92,27 @@ $isRemote = [string]::IsNullOrEmpty($PSScriptRoot) -or (-not (Test-Path (Join-Pa
 if ($isRemote) {
     Write-Host "[Windows Rice] Remote execution detected (iwr / irm)." -ForegroundColor Cyan
     $repoUrl = "https://github.com/harish2222/windows-rice.git"
+    $tempInstaller = Join-Path $env:TEMP "rice-installer.exe"
+    $releaseExeUrl = "https://github.com/harish2222/windows-rice/releases/latest/download/rice-installer.exe"
 
+    # Step A: Download pre-compiled release binary directly to TEMP
+    if (-not (Test-Path $tempInstaller) -or ((Get-Item $tempInstaller).Length -lt 500000)) {
+        Write-Host "[Windows Rice] Downloading pre-compiled installer binary from GitHub releases..." -ForegroundColor Cyan
+        try {
+            Invoke-WebRequest -Uri $releaseExeUrl -OutFile $tempInstaller -UseBasicParsing -ErrorAction Stop
+        } catch {
+            try {
+                $webClient = New-Object System.Net.WebClient
+                $webClient.DownloadFile($releaseExeUrl, $tempInstaller)
+            } catch {
+                if (Get-Command curl.exe -ErrorAction SilentlyContinue) {
+                    try { & curl.exe -sSL $releaseExeUrl -o $tempInstaller } catch {}
+                }
+            }
+        }
+    }
+
+    # Step B: Ensure configuration repository exists at targetRepoDir
     if (Test-Path (Join-Path $targetRepoDir ".git")) {
         Write-Host "[Windows Rice] Repository already exists at $targetRepoDir." -ForegroundColor Green
         if (Get-Command git -ErrorAction SilentlyContinue) {
@@ -153,7 +177,29 @@ if ($isRemote) {
         }
     }
 
-    # Forward execution to local script inside targetRepoDir
+    # Step C: Launch pre-compiled binary directly if available
+    if (Test-Path $tempInstaller -and ((Get-Item $tempInstaller).Length -ge 500000)) {
+        $extraArgs = @()
+        if ($Verify) { $extraArgs += "--verify" }
+        if ($LinkAll) { $extraArgs += "--link-all" }
+        if ($Unlink) { $extraArgs += "--unlink" }
+        if ($UnlinkAll) { $extraArgs += "--unlink-all" }
+        if ($InstallMissing -or $Install) { $extraArgs += "--install-missing" }
+        if ($Bootstrap) { $extraArgs += "--bootstrap" }
+        if ($Reload) { $extraArgs += "--reload" }
+        if ($Update) { $extraArgs += "--update" }
+        if ($UninstallWallpapers) { $extraArgs += "--uninstall-wallpapers" }
+        if ($Wallpapers) {
+            $extraArgs += "--wallpapers"
+            if ($WallpaperDir) { $extraArgs += $WallpaperDir }
+        }
+
+        Write-Host "[Windows Rice] Launching WINDOW-RICE Ratatui TUI installer..." -ForegroundColor Green
+        & $tempInstaller $extraArgs
+        exit $LASTEXITCODE
+    }
+
+    # Fallback to local script inside targetRepoDir
     $localScript = Join-Path $targetRepoDir "install.ps1"
     if (Test-Path $localScript) {
         & $psExe -NoProfile -ExecutionPolicy Bypass -File $localScript @PSBoundParameters
@@ -294,3 +340,39 @@ if ($binaryToLaunch) {
     Write-Host "[Windows Rice] Error: Failed to acquire or build rice-installer.exe binary." -ForegroundColor Red
     exit 1
 }
+
+# SIG # Begin signature block
+# MIIGKwYJKoZIhvcNAQcCoIIGHDCCBhgCAQExDzANBglghkgBZQMEAgEFADB5Bgor
+# BgEEAYI3AgEEoGswaTA0BgorBgEEAYI3AgEeMCYCAwEAAAQQH8w7YFlLCE63JNLG
+# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCB9/Ox5gCMQqzUB
+# wV4PhZWQWghHKiFPnd1SXr8Ss3nEXaCCA24wggNqMIICUqADAgECAhARUGl3tg6h
+# n0/ys9hv8thvMA0GCSqGSIb3DQEBCwUAME0xHTAbBgNVBAsMFFdpbmRvdy1SaWNl
+# IFNlY3VyaXR5MQ8wDQYDVQQKDAZIS0RFVlMxGzAZBgNVBAMMEkhLREVWUyBXaW5k
+# b3ctUmljZTAeFw0yNjEwMjUxOTQ0MTBaFw0zMTEwMjUxOTU0MDlaME0xHTAbBgNV
+# BAsMFFdpbmRvdy1SaWNlIFNlY3VyaXR5MQ8wDQYDVQQKDAZIS0RFVlMxGzAZBgNV
+# BAMMEkhLREVWUyBXaW5kb3ctUmljZTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCC
+# AQoCggEBAKpMfjIWf4k5efsZ1Hgm44zSQ774gIOgLUlex8pCUOONd8CDPI3flSTP
+# IOGRL1v31kOkWrck0M98/vZNZsg8f7wUt+594e0xm81Hv7nVDLJJo8bVVlfji8HX
+# 1LqMyLZejHCG9LZ6OSACOma1+ZonjEGugwfyr5Z+GHzbLZJyjaN5PnmuRQUwAwUc
+# spcatF6pD4wRtXv/rRrn5MgH3AsxZ+kP0Lq4zN1ZHwUa6GQiqMCu7tdeISOf7e2V
+# 0NsVNbpoO1zyE85DAoVNPP8pzU1zN8iofUJCyEfCB5ReXqi32PaNNUqKKmJR7r4W
+# PFrrx3+V8Fq8bv/xDz78e1sV5siFYcECAwEAAaNGMEQwDgYDVR0PAQH/BAQDAgeA
+# MBMGA1UdJQQMMAoGCCsGAQUFBwMDMB0GA1UdDgQWBBTaR2HQjO53gOdME6JM5TuL
+# v3ZHkTANBgkqhkiG9w0BAQsFAAOCAQEAPDzOoHcNyhqB8amMMvJWT12jrn2JpHSP
+# Lwks/m776zAGKjgZGQzUbn+/J85/fJnmlEqqF/xC8SjZq5MRIjsR2ypmajbRvRo2
+# 1E+tzu+oOs8C+mMS/7Yz51ooOjtwz2Qyt4cukIggbtbxi2TgcIwbPPXZ9RzD8iVc
+# 8zh+m3/3Dy5PUy6IhstK8Y0FbIQzA2bByR/h6smd+3FWf3n5egui9cmc9dWIcegO
+# mQNr2RsRzLnbaz7AYGPj90HXOGT3H2TGJ6Vj5lsv75BCawpSLmr5aaiIMKgEeh2D
+# 9nJaDSAn7rMmyIRmZVZlXDtIu5UrdPIlhf0AJ6+TMG+J4yGyWzcSJDGCAhMwggIP
+# AgEBMGEwTTEdMBsGA1UECwwUV2luZG93LVJpY2UgU2VjdXJpdHkxDzANBgNVBAoM
+# BkhLREVWUzEbMBkGA1UEAwwSSEtERVZTIFdpbmRvdy1SaWNlAhARUGl3tg6hn0/y
+# s9hv8thvMA0GCWCGSAFlAwQCAQUAoIGEMBgGCisGAQQBgjcCAQwxCjAIoAKAAKEC
+# gAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwG
+# CisGAQQBgjcCARUwLwYJKoZIhvcNAQkEMSIEIJw/CU213+IS+Q//KlYoOqMK5WsS
+# HUEZvsU5gFvStyvuMA0GCSqGSIb3DQEBAQUABIIBAFxUg9UnNbGbCWueRUrbF2hM
+# Ifk+BReXzOaIfVIs7n/f2RlEabniJasTdjmI36oLimDoHETBpsIhCdoQR5mYzccB
+# 7+/7rZ20zmFhRbd8lpbcErk0B+qSPMJqGY5bKjKCcTKrut/v3ZDCf+9JAOWZMRG7
+# e1R6SZBtWlnHSVihjzZ6aoBVSoXiyKkzzpqmsAsuWCQZ5biL4T91TpKx5OsAy76I
+# YIwrjQV4na6LZ4Xu5AeIPLlXQ42yE+1zCa/3ccQdPS6hz++NZnCoxVEoSesYixiF
+# KghwMTddT8iKKgA2oHHCWh7kAKfe8bJS7K6wvRa95U0Ze6j2cSjyqFx+K52aNl8=
+# SIG # End signature block
