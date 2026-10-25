@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: YASB saka-popup Module (layout)
+// ============================================================================
 //! Panel geometry, in one place.
 //!
 //! This exists because the panel's first version computed its bands twice —

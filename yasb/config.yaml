@@ -1,4 +1,9 @@
-﻿# yaml-language-server: $schema=https://raw.githubusercontent.com/amnweb/yasb/main/schema.json
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: YASB Status Bar Configuration
+# ============================================================================
+# yaml-language-server: $schema=https://raw.githubusercontent.com/amnweb/yasb/main/schema.json
 # For more information, visit https://github.com/amnweb/yasb/wiki
 # Keep live reload enabled for configuration edits and palette switching.
 watch_stylesheet: true

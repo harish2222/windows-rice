@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: Hotkeys Overlay Main Entrypoint
+// ============================================================================
 // hotkeys-overlay — Omarchy-style hotkey reference overlay for the
 // komorebi + GlazeWM(key layer) rice. Zero external crates: raw Win32.
 //

@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: YASB keybind Module (model)
+// ============================================================================
 //! Data model for the keybindings cheatsheet.
 
 #[derive(Clone, Debug, PartialEq, Eq)]

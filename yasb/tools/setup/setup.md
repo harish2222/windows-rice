@@ -1,3 +1,8 @@
+<!--
+Author -: HKDEVS
+Project -: Window-Rice
+Title -: yasb\tools\setup / setup
+-->
 # setup — One-Shot Bootstrap & Replication Pipeline
 
 Scripts that compile and replicate the entire Rangalipi rice, window manager layers, and companion Win32 tools across any fresh Windows machine.

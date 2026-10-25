@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: Cava Audio Shader (northern_lights.frag)
+// ============================================================================
 #version 330
 
 in vec2 fragCoord;

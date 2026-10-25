@@ -1,3 +1,8 @@
+<!--
+Author -: HKDEVS
+Project -: Window-Rice
+Title -: yasb\themes\rangalipi / DESIGN
+-->
 # Apple Widget Design System Specification (DESIGN.md)
 
 This document establishes the Apple Human Interface Guidelines (HIG) and WidgetKit-inspired design principles governing the **native Win32/Rust custom widgets** (`keybind`, `palette-picker`, and `saka-popup`), while preserving the authentic **Madhubani / Rangalipi rice design** for native YASB Qt bar widgets and popups.

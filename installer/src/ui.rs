@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: WINDOW-RICE Installer Terminal UI
+// ============================================================================
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},

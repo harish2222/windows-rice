@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: Windows PowerShell Profile Configuration
+# ============================================================================
 ### HKDEVS PowerShell 5.1 Profile - Carapace + Oh-My-Posh
 $env:CARAPACE_BRIDGES = 'zsh,fish,bash,inshellisense'
 

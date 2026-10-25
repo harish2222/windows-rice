@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: YASB picker/palette-picker Module (catalog)
+// ============================================================================
 //! The palette catalog: `palette-themes.json` in the picker folder.
 //!
 //! Hand-rolled JSON on purpose. The file is a flat array of objects with

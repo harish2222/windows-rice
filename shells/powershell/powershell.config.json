@@ -1,1 +1,2 @@
-{"Microsoft.PowerShell:ExecutionPolicy":"RemoteSigned"}
+{
+  "$comment": "Author -: HKDEVS | Project -: Window-Rice | Title -: PowerShell 7 Runtime Configuration","Microsoft.PowerShell:ExecutionPolicy":"RemoteSigned"}

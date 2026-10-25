@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: YASB pomodoro Module (main)
+// ============================================================================
 // Rangalipi pomodoro — 55 min work / 5 min break focus timer for the YASB bar.
 //
 // Pure Rust, zero dependencies, no background process. The bar widget polls

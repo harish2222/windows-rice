@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: YASB saka-popup Package Manifest
+# ============================================================================
 [package]
 name = "saka-popup"
 version = "0.1.0"

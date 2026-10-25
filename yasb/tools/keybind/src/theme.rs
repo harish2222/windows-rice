@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: YASB keybind Module (theme)
+// ============================================================================
 //! Theme colors for the keybindings cheatsheet.
 
 use std::path::Path;

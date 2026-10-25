@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: YASB saka-popup Module (moon)
+// ============================================================================
 //! 3D Procedural Moon Sphere & Astronomical Sky Phase Renderer.
 //!
 //! Renders two distinct, authentic lunar presentations:

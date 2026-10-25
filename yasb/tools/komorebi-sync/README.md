@@ -1,3 +1,8 @@
+<!--
+Author -: HKDEVS
+Project -: Window-Rice
+Title -: Windows Rice Project Documentation & Architecture
+-->
 # komorebi-sync
 
 Lightweight background synchronization helper that updates YASB bar workspace labels and titles based on Komorebi's live window state.

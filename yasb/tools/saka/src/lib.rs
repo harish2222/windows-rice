@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: YASB saka Module (lib)
+// ============================================================================
 //! Rangalipi panchangam — Saka national calendar + full Telugu panchangam.
 //!
 //! Two calendars live here, and they are genuinely different things:

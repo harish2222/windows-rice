@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: mpd Carapace Completion Specification
+# ============================================================================
 # yaml-language-server: $schema=https://carapace.sh/schemas/command.json
 name: mpd
 description: Music Player Daemon - background music server

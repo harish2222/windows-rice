@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: Otty Terminal Profile (18dfa9857825984800000006)
+# ============================================================================
 [profile]
 name = "podman-machine-default"
 icon = 'exe:C:\WINDOWS\SYSTEM32\wsl.exe'

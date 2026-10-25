@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: WINDOW-RICE Installer Environment Detection Engine
+// ============================================================================
 use std::path::{Path, PathBuf};
 use crate::catalog::{PackageItem, resolve_target_path};
 

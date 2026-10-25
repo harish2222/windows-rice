@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: hermes Carapace Completion Specification
+# ============================================================================
 # yaml-language-server: $schema=https://carapace.sh/schemas/command.json
 name: hermes
 description: Hermes JavaScript engine and runtime

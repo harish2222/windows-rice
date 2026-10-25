@@ -1,3 +1,8 @@
+<!--
+Author -: HKDEVS
+Project -: Window-Rice
+Title -: Windows Rice Project Documentation & Architecture
+-->
 # Otty — User Fonts
 
 Drop font files into **this folder** and Otty will pick them up automatically.

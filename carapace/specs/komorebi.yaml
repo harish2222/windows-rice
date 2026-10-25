@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: komorebi Carapace Completion Specification
+# ============================================================================
 # yaml-language-server: $schema=https://carapace.sh/schemas/command.json
 name: komorebi
 description: Tiling window manager daemon for Windows

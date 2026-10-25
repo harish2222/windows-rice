@@ -1,3 +1,8 @@
+<!--
+Author -: HKDEVS
+Project -: Window-Rice
+Title -: kew\themes / THEMES-HOWTO
+-->
 ## How to make your own theme or edit an existing one
 
 ## Themes are overwritten as newer versions of them are available

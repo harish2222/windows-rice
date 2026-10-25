@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: YASB Turnkey Replication & Verification Script
+# ============================================================================
 # Rangalipi one-shot replication script — turns a fresh machine into this rice.
 #   powershell -NoProfile -ExecutionPolicy Bypass -File tools\setup\yasb-setup.ps1
 #

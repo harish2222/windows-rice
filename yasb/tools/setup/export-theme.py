@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: YASB Export Theme Script
+# ============================================================================
 """Export the Kanagawa Gold submission pack for yasb-themes.
 
 Reads the live bar files, emits a gallery-compliant pack into Z:\\Kanagawa-Gold:

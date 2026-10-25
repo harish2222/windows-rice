@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: WINDOW-RICE Installer Package Catalog
+// ============================================================================
 use std::path::PathBuf;
 
 #[derive(Debug, Clone, PartialEq, Eq)]

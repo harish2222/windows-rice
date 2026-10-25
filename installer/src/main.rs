@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: WINDOW-RICE Installer Main Entrypoint
+// ============================================================================
 mod catalog;
 mod detect;
 mod linker;

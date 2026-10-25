@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: YASB chrome/yasb-chrome Module (lib)
+// ============================================================================
 //! Shared window chrome for the YASB bar's popups.
 //!
 //! Both `saka-popup` and `palette-picker` are the same kind of program: one

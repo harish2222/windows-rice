@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: shells\nushell\completions / npm
+# ============================================================================
 # NPM custom completions for Nushell
 
 # ── NPM subcommands ──

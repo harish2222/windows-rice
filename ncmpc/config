@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: ncmpc Audio Client Configuration
+# ============================================================================
 ## ===========================================================================
 ##  ncmpc configuration  (~/.ncmpc/config — the path this build reports)
 ##  Style: Apple Music accents over Catppuccin Mocha (named colors go through

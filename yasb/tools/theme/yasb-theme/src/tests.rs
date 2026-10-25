@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: YASB theme/yasb-theme Module (tests)
+// ============================================================================
 //! Tests for the shared theme library. Included from `lib.rs` as
 //! `#[cfg(test)] #[path = "tests.rs"] mod tests;`.
 

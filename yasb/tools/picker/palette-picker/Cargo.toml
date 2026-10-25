@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: YASB picker/palette-picker Package Manifest
+# ============================================================================
 [package]
 name = "palette-picker"
 version = "0.2.0"

@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: Komorebi Environment Startup Script
+# ============================================================================
 # Komorebi startup script v2 (runs via Startup .lnk with -NoProfile)
 # Ownership:
 #   - komorebi.lnk (official `komorebic enable-autostart`) starts komorebi

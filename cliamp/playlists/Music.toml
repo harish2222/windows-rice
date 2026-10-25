@@ -1,2 +1,7 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: CLIamp Playlist Definition (Music.toml)
+# ============================================================================
 [[dir]]
 path = "C:\\Users\\haris\\Music\\dwm, hk4126"

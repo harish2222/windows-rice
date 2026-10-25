@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: Otty Terminal Theme (monokai-classic)
+# ============================================================================
 [meta]
 name = "Monokai Classic"
 mode = "dark"

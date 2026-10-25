@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: YASB komorebi-sync Module (main)
+// ============================================================================
 //! Komorebi Workspace Window Count Synchronizer
 //!
 //! Subscribes to Komorebi state and keeps workspace names formatted with

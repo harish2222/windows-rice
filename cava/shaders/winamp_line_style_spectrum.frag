@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: Cava Audio Shader (winamp_line_style_spectrum.frag)
+// ============================================================================
 #version 330
 
 // Emulate the "line style" spectrum analyzer from Winamp 2.

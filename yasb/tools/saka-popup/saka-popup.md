@@ -1,3 +1,8 @@
+<!--
+Author -: HKDEVS
+Project -: Window-Rice
+Title -: yasb\tools\saka-popup / saka-popup
+-->
 # saka-popup — The Vedic Panchangam & Lunar Portal Panel
 
 A frameless, always-on-top, Apple HIG-inspired Win32 panel displaying the complete Vedic Panchangam with dual hero moon discs, realistic telescopic selenography, solar timeline, and responsive layouts.

@@ -1,3 +1,8 @@
+-- ============================================================================
+-- Author -: HKDEVS
+-- Project -: Window-Rice
+-- Title -: CLIamp Audio Plugin (discord-rpc.lua)
+-- ============================================================================
 -- discord-rpc: publishes Cliamp playback state for cliamp-rpcd.
 --
 -- The state leaves this plugin one of two ways. Over Cliamp's local IPC pub/sub

@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: Otty Terminal Profile (18dfa9857738af7400000003)
+# ============================================================================
 [profile]
 name = "Ubuntu-26.04"
 icon = 'exe:C:\WINDOWS\SYSTEM32\wsl.exe'

@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: uvx Carapace Completion Specification
+# ============================================================================
 # yaml-language-server: $schema=https://carapace.sh/schemas/command.json
 name: uvx
 description: Run a command provided by a Python package in an ephemeral environment

@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: YASB theme/yasb-theme Module (motifs)
+// ============================================================================
 //! Random motif assignment from the SVG files already on disk.
 //!
 //! The generated mandala PNGs and their `--motif-mandala:` declarations have

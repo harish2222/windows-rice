@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: shells\nushell\completions / git
+# ============================================================================
 # Git custom completions for Nushell
 # Rich completions with branch names, stash names, remote names
 

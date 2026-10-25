@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: shells\nushell\completions / platformio
+# ============================================================================
 # PlatformIO custom completions for Nushell
 
 # ── PlatformIO subcommands ──

@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: WINDOW-RICE Installer Symlink & Copy Engine
+// ============================================================================
 use std::fs;
 use std::path::{Path, PathBuf};
 use anyhow::{Context, Result};

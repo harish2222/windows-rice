@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: WINDOW-RICE Installer Application State
+// ============================================================================
 use std::path::PathBuf;
 use crate::catalog::{get_catalog, PackageItem};
 use crate::detect::{detect_package_managers, inspect_package, ItemInspection, PackageManagerStatus, BinaryStatus};

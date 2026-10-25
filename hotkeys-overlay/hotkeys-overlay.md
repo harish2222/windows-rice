@@ -1,3 +1,8 @@
+<!--
+Author -: HKDEVS
+Project -: Window-Rice
+Title -: hotkeys-overlay / hotkeys-overlay
+-->
 # hotkeys-overlay — Alt+/ cheatsheet for the rice
 
 An **Omarchy-style hotkey reference overlay**: press `Alt+/` anywhere and

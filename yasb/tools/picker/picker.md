@@ -1,3 +1,8 @@
+<!--
+Author -: HKDEVS
+Project -: Window-Rice
+Title -: yasb\tools\picker / picker
+-->
 # picker — theme palette picker & font tool
 
 GUI companions to `theme.md`, living on the same tools shelf.

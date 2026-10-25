@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: yasb\tools\saka / saka-today
+# ============================================================================
 # saka-today: emits today's Indian national (Saka) calendar date.
 # YASB custom widget calls this; stdout becomes the widget label.
 # Long form = era-correct: "Ashwin 4, Saka 1948"

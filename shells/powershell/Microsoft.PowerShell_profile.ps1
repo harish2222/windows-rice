@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: PowerShell 7 Profile Configuration
+# ============================================================================
 ### HKDEVS PowerShell profile — unified shell/terminal engineering edition
 #
 # Startup budget (warm, time-to-usable-prompt):

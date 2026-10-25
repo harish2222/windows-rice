@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: shells\nushell\completions / cargo
+# ============================================================================
 # Cargo custom completions for Nushell
 
 # ── Cargo subcommands ──

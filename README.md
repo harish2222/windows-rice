@@ -1,3 +1,8 @@
+<!--
+Author -: HKDEVS
+Project -: Window-Rice
+Title -: Windows Rice Project Documentation & Architecture
+-->
 # windows-rice
 
 My Windows desktop rice. Three cooperating layers, all configs under `~/.config`:

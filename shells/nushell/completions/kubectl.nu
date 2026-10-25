@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: shells\nushell\completions / kubectl
+# ============================================================================
 # Kubernetes custom completions for Nushell
 
 # ── Namespace names ──

@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: YASB screen-shot Module (main)
+// ============================================================================
 //! screen-shot — screenshot and diff tool for the YASB bar's popups.
 //!
 //! This is the Rust replacement for `capture-screen.py`, `capture-window.py`

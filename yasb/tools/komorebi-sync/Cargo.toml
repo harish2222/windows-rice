@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: YASB komorebi-sync Package Manifest
+# ============================================================================
 [package]
 name = "komorebi-sync"
 version = "0.1.0"

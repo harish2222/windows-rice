@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: yasb\tools\theme / yasb-theme-build
+# ============================================================================
 # Rebuild + deploy yasb-theme.exe (run from anywhere).
 #   pwsh -File C:\Users\haris\.config\yasb\tools\theme\yasb-theme-build.ps1
 $ErrorActionPreference = 'Stop'

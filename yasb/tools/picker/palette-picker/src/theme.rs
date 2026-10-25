@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: YASB picker/palette-picker Module (theme)
+// ============================================================================
 //! Theme colours for the picker window.
 //!
 //! Deliberately thin: the picker is a chrome-less grid, so it needs far

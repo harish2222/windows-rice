@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: shells\nushell\modules / conda
+# ============================================================================
 # =============================================================================
 #  conda.nu — ZERO-LAG CONDA FOR NUSHELL (KV-snapshot approach)
 #  First `conda activate <env>` spawns conda once and caches the resulting

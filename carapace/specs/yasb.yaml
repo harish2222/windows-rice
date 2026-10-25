@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: yasb Carapace Completion Specification
+# ============================================================================
 # yaml-language-server: $schema=https://carapace.sh/schemas/command.json
 name: yasb
 description: Yet Another Status Bar for Windows

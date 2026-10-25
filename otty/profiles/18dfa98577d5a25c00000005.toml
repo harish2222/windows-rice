@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: Otty Terminal Profile (18dfa98577d5a25c00000005)
+# ============================================================================
 [profile]
 name = "openSUSE-Leap-16.0"
 icon = 'exe:C:\WINDOWS\SYSTEM32\wsl.exe'

@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: Otty Terminal Profile (18dfa985787daa6000000007)
+# ============================================================================
 [profile]
 name = "Git Bash"
 icon = 'exe:C:\Program Files\Git\bin\bash.exe'

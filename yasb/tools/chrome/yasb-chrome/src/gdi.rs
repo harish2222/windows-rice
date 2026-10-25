@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: YASB chrome/yasb-chrome Module (gdi)
+// ============================================================================
 //! Display-side plumbing: the DIB the canvas draws into, the GDI text pass
 //! that goes on top of it, and the blit that puts the result on screen.
 //!

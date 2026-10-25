@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: Otty Terminal Profile (18dfa98578d4933400000008)
+# ============================================================================
 [profile]
 name = "Developer Command Prompt 18"
 icon = 'exe:C:\WINDOWS\SYSTEM32\cmd.exe'

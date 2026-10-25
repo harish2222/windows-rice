@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: YASB theme/yasb-theme Module (bin/silent-run)
+// ============================================================================
 //! silent-run — launch a console program with no visible window.
 //!
 //! GlazeWM `shell-exec` gives every console child (komorebic) its own flashing

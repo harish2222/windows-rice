@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: Xonsh Runtime Configuration
+# ============================================================================
 """Xonsh rc — HKDEVS unified edition (single source of truth).
 
 This file is the ONLY xonsh startup file. The previous

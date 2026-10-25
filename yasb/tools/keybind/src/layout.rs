@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: YASB keybind Module (layout)
+// ============================================================================
 //! Geometry and layout calculation for the keybinds cheatsheet panel.
 
 pub const W: i32 = 940;

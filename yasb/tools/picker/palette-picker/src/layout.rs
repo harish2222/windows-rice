@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: YASB picker/palette-picker Module (layout)
+// ============================================================================
 //! Filtering and grid geometry, kept free of Win32 so it can be tested.
 //!
 //! The visual order is *computed*, not assumed from catalog order: items

@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: YASB chrome/yasb-chrome Module (typeface)
+// ============================================================================
 //! One type scale, shared by every panel, derived from the bar's own font.
 //!
 //! # The problem this exists to solve

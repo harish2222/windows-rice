@@ -1,3 +1,8 @@
+<!--
+Author -: HKDEVS
+Project -: Window-Rice
+Title -: yasb\tools\keybind / keybind
+-->
 # keybind — Keybindings Cheatsheet Menu
 
 Native Win32 companion widget providing an Apple Human Interface Guidelines (HIG)-inspired cheatsheet popup for all window manager, bar, terminal, and application hotkeys.

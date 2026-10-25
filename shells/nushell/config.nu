@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: Nushell Interactive Shell Configuration
+# ============================================================================
 # ==============================================================================
 #  NUSHELL GOD MODE - CONFIGURATION
 #  Target: Precision Visuals | Zero-Lag Prompt

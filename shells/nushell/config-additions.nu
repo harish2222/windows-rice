@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: shells\nushell / config-additions
+# ============================================================================
 # ==============================================================================
 # CONFIG-ADDITIONS.NU — Extra integrations, sourced from config.nu §30
 # RULES (Nu 0.114 semantics):

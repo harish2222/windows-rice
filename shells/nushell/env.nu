@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: Nushell Environment Configuration
+# ============================================================================
 # ==============================================================================
 #  NUSHELL GOD MODE - NATIVE ARCHITECTURE ORCHESTRATOR
 #  Target: Absolute Zero Lag | Native Oh-My-Posh Integration

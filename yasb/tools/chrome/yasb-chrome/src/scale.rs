@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: YASB chrome/yasb-chrome Module (scale)
+// ============================================================================
 //! One spacing and type scale for every panel.
 //!
 //! The panels are not a web page, so there is no utility framework to lean

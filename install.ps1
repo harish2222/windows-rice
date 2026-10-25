@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: WINDOW-RICE Turnkey Bootstrap & Installer Launcher
+# ============================================================================
 <#
 .SYNOPSIS
     Windows Rice Bootstrap & Interactive Installer Launcher

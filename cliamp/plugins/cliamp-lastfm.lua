@@ -1,3 +1,8 @@
+-- ============================================================================
+-- Author -: HKDEVS
+-- Project -: Window-Rice
+-- Title -: CLIamp Audio Plugin (cliamp-lastfm.lua)
+-- ============================================================================
 local p = plugin.register({
     name = "lastfm",
     type = "hook",

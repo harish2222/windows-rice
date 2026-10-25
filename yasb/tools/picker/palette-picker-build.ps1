@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: yasb\tools\picker / palette-picker-build
+# ============================================================================
 # Rebuilds the Rust palette picker.
 #
 # This used to drive PyInstaller over palette-picker.py. That picker has been

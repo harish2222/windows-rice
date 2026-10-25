@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: YASB chrome/yasb-chrome Module (singleton)
+// ============================================================================
 //! One instance of a panel at a time.
 //!
 //! The bar launches these panels on every click. Without a guard, a triple

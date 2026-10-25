@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: Cava Audio Shader (eye_of_phi.frag)
+// ============================================================================
 #version 330
 
 // this shader was stolen from shadertoy user ChunderFPV

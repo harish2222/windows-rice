@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: Otty Terminal Profile (18dfa98577864a4000000004)
+# ============================================================================
 [profile]
 name = "docker-desktop"
 icon = 'exe:C:\WINDOWS\SYSTEM32\wsl.exe'

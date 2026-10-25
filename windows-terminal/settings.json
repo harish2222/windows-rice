@@ -1,4 +1,5 @@
 {
+  "$comment": "Author -: HKDEVS | Project -: Window-Rice | Title -: Windows Terminal Settings Configuration",
     "$help": "https://aka.ms/terminal-documentation",
     "$schema": "https://aka.ms/terminal-profiles-schema",
     "actions": [],

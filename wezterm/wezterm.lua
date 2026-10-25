@@ -1,3 +1,8 @@
+-- ============================================================================
+-- Author -: HKDEVS
+-- Project -: Window-Rice
+-- Title -: WezTerm Terminal Configuration
+-- ============================================================================
 -- =============================================================================
 --  WezTerm — visually uniform with Windows Terminal, Otty, and Alacritty
 --  Theme: Catppuccin Mocha on Windows 11 Acrylic Frosted Glass

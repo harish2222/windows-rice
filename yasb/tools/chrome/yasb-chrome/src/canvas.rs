@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: YASB chrome/yasb-chrome Module (canvas)
+// ============================================================================
 //! Pure pixel drawing on a 32-bit BGRA buffer.
 //!
 //! Everything here is arithmetic on a byte slice: no GDI, no HWND, no display.

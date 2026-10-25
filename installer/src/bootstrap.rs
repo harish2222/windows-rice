@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: WINDOW-RICE Installer Package Manager Bootstrapper
+// ============================================================================
 use std::process::Command;
 use anyhow::{Context, Result};
 

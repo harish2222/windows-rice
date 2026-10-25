@@ -1,3 +1,8 @@
+<!--
+Author -: HKDEVS
+Project -: Window-Rice
+Title -: Windows Rice Project Documentation & Architecture
+-->
 # Shared Window Manager Configurations
 
 Configurations that govern window management and keyboard interaction alongside the YASB bar, designed for turnkey replication.

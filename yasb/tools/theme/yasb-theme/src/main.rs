@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: YASB theme/yasb-theme Module (main)
+// ============================================================================
 //! yasb-theme — switch the YASB bar color theme from the bar or terminal.
 //!
 //! The themes live as `/* <Name> */` blocks of CSS variables inside the `:root`

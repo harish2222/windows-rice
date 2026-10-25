@@ -1,4 +1,9 @@
-﻿@import "yasb_colors.css";
+/* ============================================================================
+ * Author -: HKDEVS
+ * Project -: Window-Rice
+ * Title -: YASB Status Bar Stylesheet
+ * ============================================================================ */
+@import "yasb_colors.css";
 
 /* Root Variables */
 :root {

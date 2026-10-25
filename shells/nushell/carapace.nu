@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: shells\nushell / carapace
+# ============================================================================
 # ==============================================================================
 # CARAPACE.NU — External Completer Bridge for Nushell
 # Comprehensive multi-shell autocompletion (built-in specs + bridges)

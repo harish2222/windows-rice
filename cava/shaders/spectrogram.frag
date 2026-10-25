@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: Cava Audio Shader (spectrogram.frag)
+// ============================================================================
 #version 330
 
 in vec2 fragCoord;

@@ -1,3 +1,8 @@
+<!--
+Author -: HKDEVS
+Project -: Window-Rice
+Title -: Windows Rice Project Documentation & Architecture
+-->
 # yasb-chrome
 
 Shared Win32 panel chrome, acrylic canvas, and window plumbing used across all Rangalipi custom widgets (`saka-popup`, `palette-picker`, and `keybind`).

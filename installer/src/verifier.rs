@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: WINDOW-RICE Installer System Health Verifier
+// ============================================================================
 use std::path::Path;
 use crate::catalog::get_catalog;
 use crate::detect::{detect_package_managers, inspect_package, BinaryStatus, LinkStatus};

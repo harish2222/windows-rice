@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: YASB Build Submission Script
+# ============================================================================
 """Build the submittable issue body (GitHub caps bodies at 65536 chars).
 
 Reads Z:\\Rangalipi pack files, emits Z:\\Rangalipi\\submission\\ with

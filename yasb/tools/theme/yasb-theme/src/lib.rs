@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: YASB theme/yasb-theme Module (lib)
+// ============================================================================
 //! Stylesheet parsing shared by the theme switcher and the palette picker.
 //!
 //! The themes are `/* <Name> */` blocks of CSS variables inside `:root` in

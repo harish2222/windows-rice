@@ -1,3 +1,8 @@
+<!--
+Author -: HKDEVS
+Project -: Window-Rice
+Title -: yasb\tools\theme / theme
+-->
 # theme — the bar's theme-switch engine
 
 The machinery behind the palette chip in the omega dropdown: click it and

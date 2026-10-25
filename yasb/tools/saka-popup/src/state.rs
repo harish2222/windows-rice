@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: YASB saka-popup Module (state)
+// ============================================================================
 //! Persistent state for saka-popup.
 //!
 //! Remembers the user's chosen layout mode (`Portrait`, `Landscape`, `Compact`)

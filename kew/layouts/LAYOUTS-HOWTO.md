@@ -1,3 +1,8 @@
+<!--
+Author -: HKDEVS
+Project -: Window-Rice
+Title -: Kew Music Player Layout (LAYOUTS-HOWTO.md)
+-->
 ## How to make your own kew
 
 kew provides a very simple and minimal way to make kew look the way you want it.

@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: Nushell Git Ignore Rules
+# ============================================================================
 # Runtime data — never commit
 history.txt
 history.sqlite3

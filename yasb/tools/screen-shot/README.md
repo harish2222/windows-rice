@@ -1,3 +1,8 @@
+<!--
+Author -: HKDEVS
+Project -: Window-Rice
+Title -: Windows Rice Project Documentation & Architecture
+-->
 # screen-shot
 
 Fast, layered-window capable screen capture CLI written in Rust for Windows.

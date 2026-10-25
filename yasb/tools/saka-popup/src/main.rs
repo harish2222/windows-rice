@@ -1,3 +1,8 @@
+// ============================================================================
+// Author -: HKDEVS
+// Project -: Window-Rice
+// Title -: YASB saka-popup Module (main)
+// ============================================================================
 //! saka-popup — a frameless, always-on-top panchangam panel for the YASB bar.
 //!
 //! YASB's `CustomWidget` has no popup support (its schema only exposes `*_menu`

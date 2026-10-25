@@ -1,3 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: PowerShell 7 Common Profile Configuration
+# ============================================================================
 # All-hosts profile (every PowerShell host).
 # Startup critical path only: nothing here may block for more than a few ms.
 
