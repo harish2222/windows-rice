@@ -160,26 +160,28 @@ switch ($choice) {
         }
 
         $destMap = @{
-            "glazewm"           = "$userProfile\.glzr\glazewm"
-            "komorebi"          = "$userProfile\.config\komorebi"
-            "yasb"              = "$userProfile\.config\yasb"
-            "hotkeys-overlay"   = "$userProfile\.config\hotkeys-overlay"
-            "otty"              = "$userProfile\.config\otty"
-            "wezterm"           = "$userProfile\.config\wezterm"
-            "rio"               = "$userProfile\.config\rio"
-            "kew"               = "$appData\kew"
-            "cliamp"            = "$userProfile\.config\cliamp"
-            "cava"              = "$userProfile\.config\cava"
-            "mpd"               = "$userProfile\.config\mpd"
-            "ncmpc"             = "$userProfile\.ncmpc"
-            "fastfetch"         = "$userProfile\.config\fastfetch"
-            "forgum"            = "$userProfile\.config\forgum"
-            "nvim"              = "$userProfile\.config\nvim"
-            "carapace"          = "$userProfile\.config\carapace"
-            "carapace\specs"    = "$appData\carapace\specs"
-            "shells\powershell" = $pwshDest
-            "shells\nushell"    = "$userProfile\.config\nushell"
-            "shells\xonsh"      = "$userProfile\.config\xonsh"
+            "glazewm"                           = "$userProfile\.glzr\glazewm"
+            "komorebi"                          = "$userProfile\.config\komorebi"
+            "yasb"                              = "$userProfile\.config\yasb"
+            "hotkeys-overlay"                   = "$userProfile\.config\hotkeys-overlay"
+            "windows-terminal\settings.json"    = "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
+            "otty"                              = "$userProfile\.config\otty"
+            "wezterm"                           = "$userProfile\.config\wezterm"
+            "wezterm\wezterm.lua"               = "$userProfile\.wezterm.lua"
+            "alacritty"                         = "$userProfile\.config\alacritty"
+            "alacritty\alacritty.toml"          = "$appData\alacritty\alacritty.toml"
+            "rio"                               = "$userProfile\.config\rio"
+            "kew"                               = "$appData\kew"
+            "cliamp"                            = "$userProfile\.config\cliamp"
+            "cava"                              = "$userProfile\.config\cava"
+            "mpd"                               = "$userProfile\.config\mpd"
+            "ncmpc"                             = "$userProfile\.ncmpc"
+            "fastfetch"                         = "$userProfile\.config\fastfetch"
+            "carapace"                          = "$userProfile\.config\carapace"
+            "carapace\specs"                    = "$appData\carapace\specs"
+            "shells\powershell"                 = $pwshDest
+            "shells\nushell"                    = "$userProfile\.config\nushell"
+            "shells\xonsh"                      = "$userProfile\.config\xonsh"
         }
 
         foreach ($src in $destMap.Keys) {

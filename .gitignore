@@ -1,4 +1,6 @@
 # ===== Never commit: secrets & personal data =====
+forgum/
+nvim/
 freebuff-desktop/
 komorebi/backups/
 yasb/assets/raw-art/

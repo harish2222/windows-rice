@@ -1,0 +1,64 @@
+# =============================================================================
+#  Alacritty — visually uniform with Windows Terminal, Otty, and WezTerm
+#  Docs: https://alacritty.org/config-alacritty.html
+#  Theme: Catppuccin Mocha
+# =============================================================================
+
+[window]
+# Frosted glass opacity over desktop
+opacity = 0.85
+decorations = "full"
+dynamic_padding = true
+padding = { x = 8, y = 8 }
+
+[scrolling]
+history = 50000
+multiplier = 3
+
+[terminal.shell]
+# Uniform default shell with Otty / WezTerm / Nushell
+program = "nu"
+args = []
+
+[font]
+normal = { family = "CaskaydiaCove Nerd Font Mono", style = "SemiBold" }
+bold = { family = "CaskaydiaCove Nerd Font Mono", style = "Bold" }
+italic = { family = "CaskaydiaCove Nerd Font Mono", style = "Italic" }
+bold_italic = { family = "CaskaydiaCove Nerd Font Mono", style = "Bold Italic" }
+size = 15.0
+offset = { x = 1, y = 0 }
+
+[cursor]
+style = { shape = "Underline", blinking = "Never" }
+
+[colors.primary]
+background = "#1E1E2E"
+foreground = "#CDD6F4"
+
+[colors.cursor]
+text = "#1E1E2E"
+cursor = "#F5E0DC"
+
+[colors.selection]
+text = "#1E1E2E"
+background = "#F5E0DC"
+
+[colors.normal]
+black   = "#45475A"
+red     = "#F38BA8"
+green   = "#A6E3A1"
+yellow  = "#F9E2AF"
+blue    = "#89B4FA"
+magenta = "#F5C2E7"
+cyan    = "#94E2D5"
+white   = "#BAC2DE"
+
+[colors.bright]
+black   = "#585B70"
+red     = "#F38BA8"
+green   = "#A6E3A1"
+yellow  = "#F9E2AF"
+blue    = "#89B4FA"
+magenta = "#F5C2E7"
+cyan    = "#94E2D5"
+white   = "#A6ADC8"

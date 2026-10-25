@@ -1,0 +1,306 @@
+{
+    "$help": "https://aka.ms/terminal-documentation",
+    "$schema": "https://aka.ms/terminal-profiles-schema",
+    "actions": [],
+    "copyFormatting": "none",
+    "copyOnSelect": true,
+    "defaultProfile": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+    "initialCols": 132,
+    "initialRows": 50,
+    "keybindings":
+    [
+        {
+            "id": "Terminal.CopyToClipboard",
+            "keys": "ctrl+c"
+        },
+        {
+            "id": "Terminal.PasteFromClipboard",
+            "keys": "ctrl+v"
+        },
+        {
+            "id": "Terminal.DuplicatePaneAuto",
+            "keys": "alt+shift+d"
+        }
+    ],
+    "launchMode": "maximizedFocus",
+    "newTabMenu":
+    [
+        {
+            "type": "remainingProfiles"
+        }
+    ],
+    "profiles":
+    {
+        "defaults":
+        {
+            "antialiasingMode": "cleartype",
+            "colorScheme": "Catppuccin Mocha",
+            "cursorShape": "doubleUnderscore",
+            "font":
+            {
+                "face": "CaskaydiaCove Nerd Font Mono",
+                "size": 15,
+                "weight": "semi-bold"
+            },
+            "intenseTextStyle": "all",
+            "opacity": 50,
+            "padding": "8",
+            "scrollbarState": "visible",
+            "useAcrylic": true
+        },
+        "list":
+        [
+            {
+                "commandline": "%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+                "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
+                "hidden": false,
+                "name": "Windows PowerShell"
+            },
+            {
+                "commandline": "%SystemRoot%\\System32\\cmd.exe",
+                "guid": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
+                "hidden": false,
+                "name": "Command Prompt"
+            },
+            {
+                "antialiasingMode": "grayscale",
+                "colorScheme": "Catppuccin Mocha",
+                "commandline": "C:\\Users\\haris\\AppData\\Local\\Programs\\kew\\kew.exe",
+                "font":
+                {
+                    "face": "CaskaydiaCove Nerd Font Mono",
+                    "size": 18
+                },
+                "guid": "{bd1c03b2-a9ad-4bf1-9297-1f6f80b2ec71}",
+                "hidden": true,
+                "icon": "C:\\Users\\haris\\AppData\\Local\\Programs\\kew\\kew.ico",
+                "name": "KewMusic",
+                "opacity": 50,
+                "padding": "8",
+                "startingDirectory": "C:\\Users\\haris\\Music",
+                "tabColor": "#45475A",
+                "tabTitle": "Music",
+                "useAcrylic": true
+            },
+            {
+                "antialiasingMode": "grayscale",
+                "colorScheme": "Catppuccin Mocha",
+                "commandline": "C:\\Users\\haris\\scoop\\shims\\cliamp.exe",
+                "cursorShape": "doubleUnderscore",
+                "font":
+                {
+                    "face": "GohuFont 11 Nerd Font Mono",
+                    "size": 25,
+                    "weight": "bold"
+                },
+                "guid": "{f3b7f04f-bd45-4d55-8b82-11061bbd7c23}",
+                "hidden": true,
+                "name": "CLIampMusic",
+                "opacity": 50,
+                "padding": "8",
+                "startingDirectory": "C:\\Users\\haris\\Music",
+                "tabTitle": "Radio",
+                "useAcrylic": true
+            },
+            {
+                "guid": "{b453ae62-4e3d-5e58-b989-0a998ec441b8}",
+                "hidden": true,
+                "name": "Azure Cloud Shell",
+                "source": "Windows.Terminal.Azure"
+            },
+            {
+                "adjustIndistinguishableColors": "always",
+                "antialiasingMode": "grayscale",
+                "cursorColor": "#A6E3A1",
+                "font":
+                {
+                    "face": "Hurmit Nerd Font Propo",
+                    "size": 15
+                },
+                "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+                "hidden": false,
+                "intenseTextStyle": "bright",
+                "name": "PowerShell",
+                "opacity": 50,
+                "padding": "8",
+                "scrollbarState": "visible",
+                "source": "Windows.Terminal.PowershellCore",
+                "useAcrylic": true
+            },
+            {
+                "guid": "{a6a921e0-7c15-5291-92ed-6041b240d0bc}",
+                "hidden": true,
+                "name": "Developer Command Prompt for VS 18",
+                "source": "Windows.Terminal.VisualStudio"
+            },
+            {
+                "guid": "{51b12c3d-3450-5d0c-bd8f-0267320ddeb2}",
+                "hidden": true,
+                "name": "Developer PowerShell for VS 18",
+                "source": "Windows.Terminal.VisualStudio"
+            },
+            {
+                "guid": "{74cf87bc-ca7e-5c88-931e-bd187663a065}",
+                "hidden": false,
+                "name": "openSUSE-Leap-16.0",
+                "source": "Microsoft.WSL"
+            },
+            {
+                "guid": "{95f1a069-2633-58f4-a304-1c2c4ea6cf9d}",
+                "hidden": false,
+                "name": "Ubuntu-26.04",
+                "source": "Microsoft.WSL"
+            },
+            {
+                "guid": "{823f3664-6dff-5d6a-a116-615cb89f4526}",
+                "hidden": false,
+                "name": "podman-machine-default",
+                "source": "Microsoft.WSL"
+            },
+            {
+                "antialiasingMode": "grayscale",
+                "cursorColor": "#A6E3A1",
+                "guid": "{47302f9c-1ac4-566c-aa3e-8cf29889d6ab}",
+                "hidden": false,
+                "name": "Nushell",
+                "opacity": 50,
+                "padding": "8",
+                "source": "nu",
+                "tabTitle": "NU",
+                "useAcrylic": true
+            },
+            {
+                "commandline": "C:\\Python314\\python.exe -m xonsh",
+                "cursorColor": "#A6E3A1",
+                "cursorShape": "doubleUnderscore",
+                "guid": "{f81395b0-379f-4f6c-b26a-9f5cd2d4c062}",
+                "hidden": false,
+                "icon": "ms-appx:///ProfileIcons/{0caa0dad-35be-5f56-a8ff-afceeeaa6101}.png",
+                "name": "Xonsh",
+                "padding": "8"
+            },
+            {
+                "commandline": "\"%WINDIR%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\" -ExecutionPolicy ByPass -NoExit -Command & 'C:\\Users\\haris\\anaconda3\\shell\\condabin\\conda-hook.ps1' ; conda activate 'C:\\Users\\haris\\anaconda3' ",
+                "guid": "{eed49005-877d-5de2-94d5-5ce5e370f8c3}",
+                "hidden": true,
+                "icon": "C:\\Users\\haris\\anaconda3\\Menu\\anaconda_powershell_prompt.ico",
+                "name": "Anaconda PowerShell Prompt (anaconda3)",
+                "startingDirectory": "%USERPROFILE%"
+            },
+            {
+                "commandline": "\"%WINDIR%\\System32\\cmd.exe\" /K C:\\Users\\haris\\anaconda3\\Scripts\\activate.bat C:\\Users\\haris\\anaconda3",
+                "guid": "{e78b37b4-0017-568b-9279-1abde5e14cde}",
+                "hidden": true,
+                "icon": "C:\\Users\\haris\\anaconda3\\Menu\\anaconda_prompt.ico",
+                "name": "Anaconda Prompt (anaconda3)",
+                "startingDirectory": "%USERPROFILE%"
+            },
+            {
+                "guid": "{46ca431a-3a87-5fb3-83cd-11ececc031d2}",
+                "hidden": false,
+                "name": "kali-linux",
+                "source": "Windows.Terminal.Wsl",
+                "tabTitle": "kALI"
+            }
+        ]
+    },
+    "rendering.graphicsAPI": "direct3d11",
+    "schemes":
+    [
+        {
+            "background": "#1D1F21",
+            "black": "#1D1F21",
+            "blue": "#81A2BE",
+            "brightBlack": "#969896",
+            "brightBlue": "#81A2BE",
+            "brightCyan": "#8ABEB7",
+            "brightGreen": "#B5BD68",
+            "brightPurple": "#B294BB",
+            "brightRed": "#CC6666",
+            "brightWhite": "#FFFFFF",
+            "brightYellow": "#E6C545",
+            "cursorColor": "#C5C8C6",
+            "cyan": "#8ABEB7",
+            "foreground": "#C5C8C6",
+            "green": "#B5BD68",
+            "name": "Atom Dark",
+            "purple": "#B294BB",
+            "red": "#CC6666",
+            "selectionBackground": "#373B41",
+            "white": "#C5C8C6",
+            "yellow": "#E6C545"
+        },
+        {
+            "background": "#1E1E2E",
+            "black": "#45475A",
+            "blue": "#89B4FA",
+            "brightBlack": "#585B70",
+            "brightBlue": "#89B4FA",
+            "brightCyan": "#94E2D5",
+            "brightGreen": "#A6E3A1",
+            "brightPurple": "#F5C2E7",
+            "brightRed": "#F38BA8",
+            "brightWhite": "#A6ADC8",
+            "brightYellow": "#F9E2AF",
+            "cursorColor": "#F5E0DC",
+            "cyan": "#94E2D5",
+            "foreground": "#CDD6F4",
+            "green": "#A6E3A1",
+            "name": "Catppuccin Mocha",
+            "purple": "#F5C2E7",
+            "red": "#F38BA8",
+            "selectionBackground": "#F5E0DC",
+            "white": "#BAC2DE",
+            "yellow": "#F9E2AF"
+        },
+        {
+            "background": "#1E1E1E",
+            "black": "#000000",
+            "blue": "#2472C8",
+            "brightBlack": "#666666",
+            "brightBlue": "#3B8EEA",
+            "brightCyan": "#29B8DB",
+            "brightGreen": "#23D18B",
+            "brightPurple": "#D670D6",
+            "brightRed": "#F14C4C",
+            "brightWhite": "#E5E5E5",
+            "brightYellow": "#F5F543",
+            "cursorColor": "#D4D4D4",
+            "cyan": "#11A8CD",
+            "foreground": "#D4D4D4",
+            "green": "#0DBC79",
+            "name": "Dark+ (modified)",
+            "purple": "#BC3FBC",
+            "red": "#CD3131",
+            "selectionBackground": "#264F78",
+            "white": "#E5E5E5",
+            "yellow": "#E5E510"
+        },
+        {
+            "background": "#2D2A2E",
+            "black": "#403E41",
+            "blue": "#FC9867",
+            "brightBlack": "#727072",
+            "brightBlue": "#FC9867",
+            "brightCyan": "#78DCE8",
+            "brightGreen": "#A9DC76",
+            "brightPurple": "#AB9DF2",
+            "brightRed": "#FF6188",
+            "brightWhite": "#FCFCFA",
+            "brightYellow": "#FFD866",
+            "cursorColor": "#FCFCFA",
+            "cyan": "#78DCE8",
+            "foreground": "#FCFCFA",
+            "green": "#A9DC76",
+            "name": "Monokai",
+            "purple": "#AB9DF2",
+            "red": "#FF6188",
+            "selectionBackground": "#5B595C",
+            "white": "#FCFCFA",
+            "yellow": "#FFD866"
+        }
+    ],
+    "theme": "dark",
+    "themes": [],
+    "useAcrylicInTabRow": true
+}

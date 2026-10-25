@@ -8,7 +8,6 @@ pub enum Category {
     Navigation,
     Media,
     System,
-    Editors,
 }
 
 impl Category {
@@ -20,7 +19,6 @@ impl Category {
             Category::Navigation => "Navigation & Autocomplete",
             Category::Media => "Audio & Visualizers",
             Category::System => "System & Monitoring",
-            Category::Editors => "Editors & IDEs",
         }
     }
 }
@@ -117,6 +115,29 @@ pub fn get_catalog() -> Vec<PackageItem> {
 
         // Terminals
         PackageItem {
+            id: "windows-terminal",
+            name: "Windows Terminal",
+            category: Category::Terminals,
+            description: "Microsoft Windows Terminal with Catppuccin Mocha, acrylic blur, font size 15",
+            binaries: &["wt.exe"],
+            scoop_cmd: None,
+            winget_cmd: Some("winget install Microsoft.WindowsTerminal"),
+            choco_cmd: None,
+            cargo_cmd: None,
+            configs: vec![
+                ConfigMapping {
+                    source_rel: "windows-terminal/settings.json",
+                    target_pattern: "AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json",
+                    is_dir: false,
+                },
+                ConfigMapping {
+                    source_rel: "windows-terminal/settings.json",
+                    target_pattern: "AppData/Local/Microsoft/Windows Terminal/settings.json",
+                    is_dir: false,
+                },
+            ],
+        },
+        PackageItem {
             id: "otty",
             name: "Otty Terminal",
             category: Category::Terminals,
@@ -136,17 +157,47 @@ pub fn get_catalog() -> Vec<PackageItem> {
             id: "wezterm",
             name: "WezTerm",
             category: Category::Terminals,
-            description: "GPU-accelerated cross-platform terminal emulator and multiplexer",
+            description: "GPU-accelerated terminal emulator with native Win32 acrylic backdrop and size 15 font",
             binaries: &["wezterm.exe"],
             scoop_cmd: Some("scoop install wezterm"),
             winget_cmd: Some("winget install wez.wezterm"),
             choco_cmd: None,
             cargo_cmd: None,
-            configs: vec![ConfigMapping {
-                source_rel: "wezterm",
-                target_pattern: ".config/wezterm",
-                is_dir: true,
-            }],
+            configs: vec![
+                ConfigMapping {
+                    source_rel: "wezterm",
+                    target_pattern: ".config/wezterm",
+                    is_dir: true,
+                },
+                ConfigMapping {
+                    source_rel: "wezterm/wezterm.lua",
+                    target_pattern: ".wezterm.lua",
+                    is_dir: false,
+                },
+            ],
+        },
+        PackageItem {
+            id: "alacritty",
+            name: "Alacritty",
+            category: Category::Terminals,
+            description: "Fast OpenGL terminal emulator styled with Catppuccin Mocha, size 15 font, and underline cursor",
+            binaries: &["alacritty.exe"],
+            scoop_cmd: Some("scoop install alacritty"),
+            winget_cmd: Some("winget install Alacritty.Alacritty"),
+            choco_cmd: Some("choco install alacritty"),
+            cargo_cmd: None,
+            configs: vec![
+                ConfigMapping {
+                    source_rel: "alacritty",
+                    target_pattern: ".config/alacritty",
+                    is_dir: true,
+                },
+                ConfigMapping {
+                    source_rel: "alacritty/alacritty.toml",
+                    target_pattern: "AppData/Roaming/alacritty/alacritty.toml",
+                    is_dir: false,
+                },
+            ],
         },
         PackageItem {
             id: "rio",
@@ -411,47 +462,6 @@ pub fn get_catalog() -> Vec<PackageItem> {
                 target_pattern: ".config/fastfetch",
                 is_dir: true,
             }],
-        },
-        PackageItem {
-            id: "forgum",
-            name: "Forgum Engine",
-            category: Category::System,
-            description: "AI-enhanced developer workflow and orchestration assistant",
-            binaries: &["forgum.exe", "forgum-engine.exe"],
-            scoop_cmd: None,
-            winget_cmd: None,
-            choco_cmd: None,
-            cargo_cmd: None,
-            configs: vec![ConfigMapping {
-                source_rel: "forgum",
-                target_pattern: ".config/forgum",
-                is_dir: true,
-            }],
-        },
-
-        // Editors
-        PackageItem {
-            id: "nvim",
-            name: "Neovim",
-            category: Category::Editors,
-            description: "Vim-fork focused on extensibility and usability with Lua configuration",
-            binaries: &["nvim.exe"],
-            scoop_cmd: Some("scoop install neovim"),
-            winget_cmd: Some("winget install Neovim.Neovim"),
-            choco_cmd: Some("choco install neovim"),
-            cargo_cmd: None,
-            configs: vec![
-                ConfigMapping {
-                    source_rel: "nvim",
-                    target_pattern: ".config/nvim",
-                    is_dir: true,
-                },
-                ConfigMapping {
-                    source_rel: "nvim",
-                    target_pattern: "AppData/Local/nvim",
-                    is_dir: true,
-                },
-            ],
         },
     ]
 }
