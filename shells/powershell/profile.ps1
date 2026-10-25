@@ -130,7 +130,7 @@ if (Test-FastCommand fzf) {
         Set-PSReadLineKeyHandler -Chord 'Alt+c' -ScriptBlock {
             Enable-PSFzf
         }
-        Set-PSReadLineKeyHandler -Chord 'Ctrl+Space' -ScriptBlock {
+        Set-PSReadLineKeyHandler -Chord 'Ctrl+Spacebar' -ScriptBlock {
             Enable-PSFzf
             if (Get-Command Invoke-FzfTabCompletion -ErrorAction SilentlyContinue) {
                 Invoke-FzfTabCompletion

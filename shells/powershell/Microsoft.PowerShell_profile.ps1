@@ -1080,8 +1080,7 @@ elseif ($isInteractiveShell) {
 if (Get-Command fzf -ErrorAction SilentlyContinue) {
     if ($isInteractiveShell -and (Get-Module -Name PSReadLine -ErrorAction SilentlyContinue)) {
         # Ctrl+Space: Interactive fuzzy completion across all parameters, cmdlets, paths
-        Set-PSReadLineKeyHandler -Chord 'Ctrl+Space' -ScriptBlock {
-            Enable-Carapace
+        Set-PSReadLineKeyHandler -Chord 'Ctrl+Spacebar' -ScriptBlock {
             Enable-Carapace
             if (Get-Command Enable-PSFzf -ErrorAction SilentlyContinue) { Enable-PSFzf }
             if (Get-Command Invoke-FzfTabCompletion -ErrorAction SilentlyContinue) {
