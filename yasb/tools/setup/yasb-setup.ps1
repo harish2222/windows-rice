@@ -47,6 +47,10 @@ function Backup-File($path) {
 }
 
 function Deploy-File($src, $dst) {
+    if (-not (Test-Path -LiteralPath $src)) { return }
+    $srcFull = (Get-Item -LiteralPath $src).FullName
+    $dstFull = [System.IO.Path]::GetFullPath($dst)
+    if ($srcFull -eq $dstFull) { return }
     $d = Split-Path $dst
     if ($d -and -not (Test-Path -LiteralPath $d)) {
         New-Item $d -ItemType Directory -Force | Out-Null
@@ -55,15 +59,18 @@ function Deploy-File($src, $dst) {
 }
 
 function Deploy-Adapted-File($src, $dst, [hashtable]$replacements) {
-    $d = Split-Path $dst
-    if ($d -and -not (Test-Path -LiteralPath $d)) {
-        New-Item $d -ItemType Directory -Force | Out-Null
-    }
-    $content = [System.IO.File]::ReadAllText($src, [System.Text.Encoding]::UTF8)
+    if (-not (Test-Path -LiteralPath $src)) { return }
+    $srcFull = (Get-Item -LiteralPath $src).FullName
+    $dstFull = [System.IO.Path]::GetFullPath($dst)
+    $content = [System.IO.File]::ReadAllText($srcFull, [System.Text.Encoding]::UTF8)
     foreach ($k in $replacements.Keys) {
         $content = $content.Replace($k, $replacements[$k])
     }
-    [System.IO.File]::WriteAllText($dst, $content, [System.Text.Encoding]::UTF8)
+    $d = Split-Path $dstFull
+    if ($d -and -not (Test-Path -LiteralPath $d)) {
+        New-Item $d -ItemType Directory -Force | Out-Null
+    }
+    [System.IO.File]::WriteAllText($dstFull, $content, [System.Text.Encoding]::UTF8)
 }
 
 Step 'paths' {
@@ -72,7 +79,8 @@ Step 'paths' {
         $glazeDir,
         $komorebiDir,
         (Join-Path $yasbDir 'tools'),
-        (Join-Path $yasbDir 'mandala'),
+        (Join-Path $yasbDir 'assets'),
+        (Join-Path $yasbDir 'screenshot'),
         (Join-Path $HOME 'scoop\shims')
     )) {
         if (-not (Test-Path -LiteralPath $d)) {
@@ -224,17 +232,26 @@ Step 'deploy bar files with path adaptation' {
         (Join-Path $repoRoot 'styles.css') `
         (Join-Path $yasbDir 'styles.css') `
         @{
+            'C:/Users/haris/.config/yasb/assets' = "$homeFwdSlash/.config/yasb/assets";
+            'C:\\Users\\haris\\.config\\yasb\\assets' = "$homeEscapedYaml\\.config\\yasb\\assets";
             'C:/Users/haris' = $homeFwdSlash;
             'C:\\Users\\haris' = $homeEscapedYaml;
         }
 
-    # Deploy mandala artwork
-    $mandalaSrc = Join-Path $repoRoot 'mandala'
-    if (Test-Path $mandalaSrc) {
-        Get-ChildItem -LiteralPath $mandalaSrc -Filter "*.png" | ForEach-Object {
-            Deploy-File $_.FullName (Join-Path $yasbDir ("mandala\" + $_.Name))
-        }
-        Write-Output '  mandala artwork deployed'
+    # Deploy assets (mandala, motifs, raw-art)
+    $assetsSrc = Join-Path $repoRoot 'assets'
+    $assetsDst = Join-Path $yasbDir 'assets'
+    if ((Test-Path $assetsSrc) -and ((Get-Item $assetsSrc).FullName -ne (Get-Item $assetsDst -ErrorAction SilentlyContinue).FullName)) {
+        robocopy $assetsSrc $assetsDst /E /NFL /NDL /NJH /NJS | Out-Null
+        Write-Output '  assets (mandala, motifs, raw-art) deployed'
+    }
+
+    # Deploy screenshots
+    $screenshotSrc = Join-Path $repoRoot 'screenshot'
+    $screenshotDst = Join-Path $yasbDir 'screenshot'
+    if ((Test-Path $screenshotSrc) -and ((Get-Item $screenshotSrc).FullName -ne (Get-Item $screenshotDst -ErrorAction SilentlyContinue).FullName)) {
+        robocopy $screenshotSrc $screenshotDst /E /NFL /NDL /NJH /NJS | Out-Null
+        Write-Output '  screenshots deployed'
     }
 
     # Deploy auxiliary configs & design docs
@@ -244,11 +261,6 @@ Step 'deploy bar files with path adaptation' {
             Deploy-File $sp (Join-Path $yasbDir $aux)
         }
     }
-
-    # Deploy SVGs if present
-    $art = @(Get-ChildItem -LiteralPath $repoRoot -File -ErrorAction SilentlyContinue |
-        Where-Object { $_.Name -match '^(motif|runner)-.*\.svg$|^media-rangoli\.svg$' })
-    foreach ($a in $art) { Deploy-File $a.FullName (Join-Path $yasbDir $a.Name) }
 
     Write-Output '  bar config, stylesheet, and art deployed'
 }

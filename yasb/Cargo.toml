@@ -1,0 +1,19 @@
+[workspace]
+members = [
+    "tools/chrome/yasb-chrome",
+    "tools/theme/yasb-theme",
+    "tools/saka",
+    "tools/saka-popup",
+    "tools/picker/palette-picker",
+    "tools/keybind",
+    "tools/pomodoro",
+    "tools/komorebi-sync",
+    "tools/screen-shot",
+]
+resolver = "2"
+
+[profile.release]
+opt-level = "z"
+lto = true
+strip = true
+codegen-units = 1

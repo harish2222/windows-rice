@@ -1,7 +1,7 @@
 # ===== Never commit: secrets & personal data =====
 freebuff-desktop/
 komorebi/backups/
-yasb/mandala art/
+yasb/assets/raw-art/
 manicode/
 higgsfield/
 containers/podman/
@@ -20,11 +20,13 @@ powershell/
 *.pdb
 *.so
 target/
+yasb/target/
 build/
 dist/
 __pycache__/
 rzodo/bin/
 yasb/tools/picker/
+*.bak*
 
 # ===== Dependencies =====
 node_modules/

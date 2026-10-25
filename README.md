@@ -2,79 +2,119 @@
 
 My Windows desktop rice. Three cooperating layers, all configs under `~/.config`:
 
-- **komorebi** - the tiling window manager (i3/hyprland-style rules: float
-  popups, workspace assignments, cloak hiding, macOS-style EaseOutBack window
-  animations).
-- **GlazeWM** - hotkey layer only. It manages zero windows (ignore-all rule)
-  and shells every binding to `komorebic`, so Alt-based muscle memory works
-  without touching Windows defaults.
-- **YASB** - the status bar, with a switchable Rangalipi theme and a uniform
-  UI system: one font (FiraCode Nerd Font Mono), one weight (600), a three
-  tier radius scale (14 / 10 / 4), and colour-token-only styling.
+- **komorebi** — the tiling window manager (clean ignore rules, workspace assignments, cloak window hiding, smooth animations).
+- **GlazeWM** — global hotkey layer only. Shells every binding to `komorebic` through `silent-run.exe` (`CREATE_NO_WINDOW`) so Alt-based hotkeys execute with zero black console flash.
+- **YASB** — the status bar with 21 switchable Rangalipi themes, live Cava spectrum synchronization, icon-only active window/stack displays, and native Apple HIG custom Win32 companion widgets.
 
-## Layout
+---
 
-| Directory | What lives there |
+## 📸 Desktop Showcase & Gallery
+
+Real desktop captures across themes with active Cava spectrum audio visualizer and layered popups:
+
+| Japanese Demon Scroll (Dark Theme) | Hummingbird Rice (Matcha Light Theme) |
 |---|---|
-| `yasb/` | Bar config, full stylesheet, and all companion tools under `yasb/tools/` |
-| `glazewm/` | Keybindings and WM behaviour (hardlinked to `.glzr` for the default path) |
-| `komorebi/` | Tiling rules, float rules, workspace rules, autostart script |
-| `hotkeys-overlay/` | Rust `Alt+/` hotkey cheatsheet overlay (zero dependencies) |
-| `zellij/`, `nvim/`, `nushell/`, `oh-my-posh/`, ... | Terminal and shell configs |
+| ![Demon Scroll](yasb/screenshot/Screenshot%20(62).png) | ![Hummingbird](yasb/screenshot/Screenshot%20(63).png) |
 
-## Tool & script shortcuts
-
-Every script and tool in this rice has a one-page doc next to its source:
-
-| Doc | Tool |
+| Firewatch Blue Mountain (Night Theme) | Earth Orbit (Cava Spectrum Active) |
 |---|---|
-| [`yasb/tools/saka/saka.md`](yasb/tools/saka/saka.md) | **Saka calendar converter** (Rust) — Indian national date on the bar; includes the why-1948-in-2026 era math |
-| [`yasb/tools/pomodoro/pomodoro.md`](yasb/tools/pomodoro/pomodoro.md) | **Pomodoro focus timer** — the bar now uses YASB's native `PomodoroWidget` (55/5); the old Rust timer is kept as a fallback |
-| [`yasb/tools/theme/theme.md`](yasb/tools/theme/theme.md) | **Theme switch engine** (Rust) — recolours the whole bar between Rangalipi themes; also a shared library |
-| [`yasb/tools/saka-popup/saka-popup.md`](yasb/tools/saka-popup/saka-popup.md) | **Panchangam panel** (Rust/Win32) — the full Telugu panchangam in a layered top-level window |
-| [`yasb/tools/picker/picker.md`](yasb/tools/picker/picker.md) | **Palette & font pickers** — the palette picker is Rust/Win32 (layered, no Qt); a PyQt6 version is kept as a fallback |
-| [`yasb/tools/setup/setup.md`](yasb/tools/setup/setup.md) | **Bootstrap & submission pipeline** — replicate the rice; package a theme for yasb-themes |
-| [`hotkeys-overlay/hotkeys-overlay.md`](hotkeys-overlay/hotkeys-overlay.md) | **Hotkey cheatsheet overlay** (Rust/Win32) — the `Alt+/` popup |
-| [`yasb/configs/README.md`](yasb/configs/README.md) | Snapshots of the live GlazeWM/Komorebi configs |
+| ![Firewatch](yasb/screenshot/Screenshot%20(64).png) | ![Earth Orbit](yasb/screenshot/Screenshot%20(65).png) |
 
-## Keybindings (quick reference)
+| Media Player Popup (Lyrics & Audio Spectrum) | Demon Scroll with Active Media |
+|---|---|
+| ![Media Player](yasb/screenshot/Screenshot%20(72).png) | ![Media Playing](yasb/screenshot/Screenshot%20(66).png) |
 
-GlazeWM is the hotkey layer; komorebic does the tiling. Full list:
-`Alt+/` in the overlay.
+### Bar Precision Views
+
+| Rangalipi Wine Dark |
+|---|
+| ![Wine Dark Bar](yasb/screenshot/yasb_bar_primary-bar_20261025_131423.png) |
+
+| Rangalipi Wine Light (High Contrast) |
+|---|
+| ![Wine Light Bar](yasb/screenshot/yasb_bar_primary-bar_20261025_131613.png) |
+
+---
+
+## 📁 Directory Structure & Organization
+
+```
+.config/
+├── glazewm/                   # GlazeWM keybindings (global hotkey layer)
+├── komorebi/                  # Komorebi tiling engine rules & startup script
+├── cava/                      # Cava audio spectrum visualizer configuration & shaders
+├── yasb/                      # YASB bar configuration, themes, assets, and companion tools
+│   ├── assets/                # Graphic assets
+│   │   ├── mandala/           # Processed mandala artwork PNGs
+│   │   ├── motifs/            # SVG motifs & runners dealt out by yasb-theme
+│   │   └── raw-art/           # Vector artwork sources (.ai, .eps, .jpg)
+│   ├── configs/               # Shared WM config snapshots (glazewm, komorebi)
+│   ├── screenshot/            # Desktop captures & bar crops
+│   ├── themes/                # Themes directory
+│   ├── tools/                 # Native Win32/Rust companion widgets
+│   │   ├── chrome/            # yasb-chrome acrylic canvas & DWM blur library
+│   │   ├── keybind/           # Apple HIG cheatsheet menu (Win+K)
+│   │   ├── komorebi-sync/     # Workspace state synchronizer
+│   │   ├── picker/            # palette-picker (21-palette theme browser)
+│   │   ├── pomodoro/          # Focus timer state machine
+│   │   ├── saka/              # Vedic Panchang calculation engine
+│   │   ├── saka-popup/        # Dual hero moons & telescopic night sky panel
+│   │   ├── screen-shot/       # Layered-window screen capture tool (CAPTUREBLT)
+│   │   ├── setup/             # Turnkey replication script (yasb-setup.ps1)
+│   │   └── theme/             # yasb-theme engine & silent-run shim
+│   ├── config.yaml            # YASB bar configuration
+│   ├── styles.css             # Active theme stylesheet
+│   ├── DESIGN.md              # Apple HIG visual design contract
+│   ├── rangalipi-options.css  # Widget styling options
+│   └── yasb_colors.css        # Color palette variables
+└── fastfetch/, nvim/, ...     # Terminal and shell configurations
+```
+
+---
+
+## 🌟 Native Win32 / Rust Companion Widgets
+
+All custom companion widgets run in pure Rust Win32 with GDI hardware-buffered layered acrylic surfaces (zero Python, zero Qt, zero webview dependencies):
+
+| Tool | Trigger | Description |
+|---|---|---|
+| [`saka-popup`](yasb/tools/saka-popup/saka-popup.md) | Click Saka bar widget | Vedic Panchangam panel with dual $116\text{px}$ hero moons: 3D rotating moon + telescopic night sky moon with authentic lunar maria (*Imbrium*, *Procellarum*, *Serenitatis*) and ray craters (*Tycho*, *Copernicus*). 3 layout modes (`M` to cycle) and English/Telugu bilingual toggle (`Tab`). |
+| [`palette-picker`](yasb/tools/picker/picker.md) | Click Palette icon / `yt` | Win32 acrylic theme switcher for all 21 Rangalipi themes (11 dark + 10 light). Type to fuzzy-filter, instant live re-theme with zero restart. |
+| [`keybind`](yasb/tools/keybind/keybind.md) | **`Win + K`** / Click keyboard | Apple HIG cheatsheet popup with category chips (WM Focus, Move, Layout, Workspaces, Apps, System) and live fuzzy search. |
+| [`silent-run`](yasb/tools/theme/theme.md) | GlazeWM / scripts | Spawns console children with `CREATE_NO_WINDOW` (`0x08000000`) for zero-flash hotkey execution. |
+| [`pomodoro`](yasb/tools/pomodoro/pomodoro.md) | Click Pomodoro widget | Persistent focus timer with work/break cycle tracking. |
+
+---
+
+## ⌨️ Essential Hotkeys (Quick Reference)
+
+GlazeWM is the hotkey layer; Komorebi does the tiling.
 
 | Keys | Action |
 |---|---|
-| `Alt + h j k l` | focus left/down/up/right |
-| `Alt + Shift + h j k l` | move window |
-| `Alt + r` | resize mode (hjkl/arrows, Esc to exit) |
-| `Alt + Return` | terminal (again: fullscreen) |
-| `Alt + Shift + e / b / o` | file explorer / browser / editor |
+| **Win + K** | Open Keybindings Cheatsheet Menu |
+| **Alt + h / j / k / l** | Focus Left / Down / Up / Right window |
+| **Alt + Shift + h / j / k / l** | Move focused window Left / Down / Up / Right |
+| **Alt + Return** | Launch terminal |
+| **Alt + Shift + b** / **Alt + z** | Launch browser |
+| **Alt + o** | Launch editor |
+| **Alt + q** | Close window |
+| **Alt + f** | Toggle maximize |
+| **Alt + Shift + f** | Toggle monocle layout |
+| **Alt + r** | Resize mode (arrow keys / hjkl to adjust, Escape to exit) |
+| **Alt + Shift + r** | Reload GlazeWM & Komorebi configurations |
 
-## Applying changes live
+---
 
-```sh
+## 🔄 Applying Changes Live
+
+```powershell
+# Reload Komorebi configuration
 komorebic replace-configuration ~/.config/komorebi/komorebi.json
+
+# Reload GlazeWM hotkey layer
 glazewm command wm-reload-config
-yasbc reload
+
+# Re-run replication / verification
+powershell -ExecutionPolicy Bypass -File ~/.config/yasb/tools/setup/yasb-setup.ps1
 ```
-
-Rust tools rebuild with `cargo build --release` inside their crate
-(`yasb/tools/saka`, `yasb/tools/saka-popup`,
-`yasb/tools/picker/palette-picker`, `yasb/tools/theme/yasb-theme`,
-`yasb/tools/pomodoro`, `hotkeys-overlay`); the theme exe redeploys via
-`yasb/tools/theme/yasb-theme-build.ps1`. Saka, saka-popup, the picker
-and yasb-theme carry `cargo test` suites (saka's pins the official
-Gazette month table); the whole chain rebuilds + verifies via
-`yasb/tools/setup/yasb-setup.ps1`.
-
-The bar also ships a **55/5 pomodoro chip** (`pomodoro` widget, right
-section), driven by YASB's native `PomodoroWidget`: left-click opens the
-circular-timer popup, middle-click starts/pauses, right-click swaps the
-label. The popup and chip follow the active Rangalipi theme, and
-`yasb-theme` rewrites the two circle colours on every switch.
-
-## Notes
-
-This repo is public and machine-specific: paths reference one Windows user.
-Credential files, chat logs, binaries, and nested repositories are excluded
-via `.gitignore`.

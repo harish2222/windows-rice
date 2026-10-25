@@ -186,10 +186,22 @@ fn run() -> Result<(), String> {
     }
 }
 
-/// `%USERPROFILE%\.config\yasb` — where the SVG motifs live, alongside the
-/// stylesheet that references them.
+/// `%USERPROFILE%\.config\yasb\assets\motifs` — where the SVG motifs live.
+/// Falls back to next-to-binary assets or yasb root for legacy compatibility.
 fn default_motif_dir() -> PathBuf {
     let home = env::var("USERPROFILE").unwrap_or_else(|_| ".".to_string());
+    let assets = Path::new(&home).join(".config").join("yasb").join("assets").join("motifs");
+    if assets.is_dir() {
+        return assets;
+    }
+    if let Ok(exe) = env::current_exe() {
+        if let Some(tool_dir) = exe.parent() {
+            let repo_assets = tool_dir.join("..").join("..").join("assets").join("motifs");
+            if repo_assets.is_dir() {
+                return repo_assets;
+            }
+        }
+    }
     Path::new(&home).join(".config").join("yasb")
 }
 
