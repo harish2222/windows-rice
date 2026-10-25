@@ -27,6 +27,7 @@ containers/podman/
 
 # ===== Binaries, build output, compiled tool assets =====
 *.exe
+!bin/rice-installer.exe
 *.dll
 *.pyd
 *.pdb

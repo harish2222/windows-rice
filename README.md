@@ -131,12 +131,14 @@ iwr -useb https://raw.githubusercontent.com/harish2222/windows-rice/main/install
 ### How the Turnkey Bootstrap Works (Clean Sandbox & System)
 1. **Scoop Setup:** Installs the Scoop package manager if not already present on the system.
 2. **Git Installation:** Automatically installs Git via Scoop (`scoop install git`) to ensure git commands and tools are immediately available in `$env:PATH`.
-3. **Repository Clone via Tag:** Clones the repository using:
+3. **Repository Clone via Tag:** Clones the repository using the repository URL:
    ```bash
    git clone --branch v1.0.0 --depth 1 https://github.com/harish2222/windows-rice.git ~/.config
    ```
+   > [!IMPORTANT]
+   > Always clone the repository URL `https://github.com/harish2222/windows-rice.git`, NOT a release asset download URL (e.g. `.../releases/download/.../rice-installer.exe`). Git requires a repository endpoint; passing a binary download URL causes Git to fail with `fatal: unable to access ... Could not connect to server`.
    *(If `~/.config` already contains preexisting files, it cleanly clones and merges without overwriting user data).*
-4. **Binary Acquisition & Instant TUI Launch:** Fetches the official, Authenticode-signed `rice-installer.exe` binary from GitHub Releases directly to `$env:TEMP\rice-installer.exe` and launches the Ratatui TUI installer in your terminal. All subsequent package installation, config linking, and verification is handled interactively inside the TUI.
+4. **Bundled Binary & Instant TUI Launch:** The official Authenticode-signed `rice-installer.exe` binary is tracked directly inside the repository at `~/.config/bin/rice-installer.exe` (as well as on GitHub Releases). The script immediately executes `~/.config/bin/rice-installer.exe`, launching the Ratatui TUI installer in your terminal with zero extra downloads. All subsequent package installation, config linking, and verification is handled interactively inside the TUI.
 
 ---
 

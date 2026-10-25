@@ -196,7 +196,12 @@ if ($isRemote) {
         }
     }
 
-    # Step 4: Ensure pre-compiled binary is downloaded and ready in TEMP
+    # Step 4: Ensure pre-compiled binary is ready
+    $repoBin = Join-Path $targetRepoDir "bin\rice-installer.exe"
+    if (Test-Path $repoBin) {
+        Copy-Item $repoBin $tempInstaller -Force -ErrorAction SilentlyContinue
+    }
+
     if (-not (Test-Path $tempInstaller) -or ((Get-Item $tempInstaller).Length -lt 500000)) {
         Write-Host "[Windows Rice] Step 4/4: Downloading pre-compiled installer binary ($Tag)..." -ForegroundColor Cyan
         try {
@@ -218,13 +223,11 @@ if ($isRemote) {
     }
 
     # Step 5: Launch TUI installer immediately
-    if (Test-Path $tempInstaller -and ((Get-Item $tempInstaller).Length -ge 500000)) {
-        # Copy to repository as well if present
-        $repoBuilt = Join-Path $targetRepoDir "installer\target\release\rice-installer.exe"
-        $repoBuiltDir = Split-Path $repoBuilt -Parent
-        if (-not (Test-Path $repoBuiltDir)) { New-Item -ItemType Directory -Force -Path $repoBuiltDir | Out-Null }
-        Copy-Item $tempInstaller $repoBuilt -Force -ErrorAction SilentlyContinue
+    $binaryToLaunch = if (Test-Path $repoBin) { $repoBin }
+                      elseif (Test-Path $tempInstaller -and ((Get-Item $tempInstaller).Length -ge 500000)) { $tempInstaller }
+                      else { $null }
 
+    if ($binaryToLaunch) {
         $extraArgs = @()
         if ($Verify) { $extraArgs += "--verify" }
         if ($LinkAll) { $extraArgs += "--link-all" }
@@ -241,7 +244,7 @@ if ($isRemote) {
         }
 
         Write-Host "[Windows Rice] Launching WINDOW-RICE Ratatui TUI installer..." -ForegroundColor Green
-        & $tempInstaller $extraArgs
+        & $binaryToLaunch $extraArgs
         exit $LASTEXITCODE
     }
 
@@ -279,11 +282,14 @@ if ($Wallpapers) {
     if ($WallpaperDir) { $extraArgs += $WallpaperDir }
 }
 
+$repoBin = Join-Path $ScriptRoot "bin\rice-installer.exe"
 $tempInstaller = Join-Path $env:TEMP "rice-installer.exe"
 $builtExe = Join-Path $installerDir "target\release\rice-installer.exe"
 
-# 2. If already built in repository, deploy to temp
-if (Test-Path $builtExe) {
+# 2. If already built or bundled in repository, deploy to temp
+if (Test-Path $repoBin) {
+    Copy-Item $repoBin $tempInstaller -Force -ErrorAction SilentlyContinue
+} elseif (Test-Path $builtExe) {
     Copy-Item $builtExe $tempInstaller -Force -ErrorAction SilentlyContinue
 }
 
@@ -376,7 +382,7 @@ if (-not (Test-Path $tempInstaller)) {
 }
 
 # 5. Launch the binary in the terminal
-$binaryToLaunch = if (Test-Path $tempInstaller) { $tempInstaller } elseif (Test-Path $builtExe) { $builtExe } else { $null }
+$binaryToLaunch = if (Test-Path $repoBin) { $repoBin } elseif (Test-Path $tempInstaller) { $tempInstaller } elseif (Test-Path $builtExe) { $builtExe } else { $null }
 
 if ($binaryToLaunch) {
     Write-Host "[Windows Rice] Launching WINDOW-RICE Ratatui TUI installer..." -ForegroundColor Green
@@ -390,8 +396,8 @@ if ($binaryToLaunch) {
 # SIG # Begin signature block
 # MIIGKwYJKoZIhvcNAQcCoIIGHDCCBhgCAQExDzANBglghkgBZQMEAgEFADB5Bgor
 # BgEEAYI3AgEEoGswaTA0BgorBgEEAYI3AgEeMCYCAwEAAAQQH8w7YFlLCE63JNLG
-# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCAVboY4EXmhMUt0
-# o8eykFqm6QtvCVWrRf3qZLrNYryBVKCCA24wggNqMIICUqADAgECAhARUGl3tg6h
+# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCDtkghxXkjoPKLl
+# OVJikN9HoGo0R+8GUqV8JdAEjfOywKCCA24wggNqMIICUqADAgECAhARUGl3tg6h
 # n0/ys9hv8thvMA0GCSqGSIb3DQEBCwUAME0xHTAbBgNVBAsMFFdpbmRvdy1SaWNl
 # IFNlY3VyaXR5MQ8wDQYDVQQKDAZIS0RFVlMxGzAZBgNVBAMMEkhLREVWUyBXaW5k
 # b3ctUmljZTAeFw0yNjEwMjUxOTQ0MTBaFw0zMTEwMjUxOTU0MDlaME0xHTAbBgNV
@@ -414,11 +420,11 @@ if ($binaryToLaunch) {
 # BkhLREVWUzEbMBkGA1UEAwwSSEtERVZTIFdpbmRvdy1SaWNlAhARUGl3tg6hn0/y
 # s9hv8thvMA0GCWCGSAFlAwQCAQUAoIGEMBgGCisGAQQBgjcCAQwxCjAIoAKAAKEC
 # gAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwG
-# CisGAQQBgjcCARUwLwYJKoZIhvcNAQkEMSIEIORDFVbB/TaitcwbgsyuhvumP00O
-# d6RTJggQFeBPNfG4MA0GCSqGSIb3DQEBAQUABIIBAGZflQKAJ6o3pbVwgtJI5Kcy
-# Klamic1+0QrXkMsVzidKU5ELu3HFcp2Gv1KZD7YFWgYQESkA/q/9DgOzIzaaMprK
-# XbkTsFvKIMLh7MyDhAi2W8P32lumjvH2hiVn6UrkMm2MqJyr38ggjIAbyHXpMNhR
-# i/z+E+Z1qXIGHtlpchq+lhkW9MXHJuDCbiBmdVG+HfR9fe961nY44NzCA0BfwR9D
-# QZKL4+NouBnukUqgdEDMhCokUn5ldhCbPD0gM16XWsdDYYLEBPk9ZV1fbkSO/523
-# SABqvhgXd2X0VA3A63SgrY6iuuItZ/HZp7EYoynx53MW+FAW3mRUQRCihKw0TNs=
+# CisGAQQBgjcCARUwLwYJKoZIhvcNAQkEMSIEIBII6kEONmZW3AIBzCn8t+LopvvL
+# jfAH5+ARhyuH4TOGMA0GCSqGSIb3DQEBAQUABIIBACTNwQ5ryLyzCVoBsEB0W8tp
+# Kq9pqT/CPrCFUJnozzmo74qkcKL/qaA0Dy6ZRL61JnOZrQJqzgr5Sx/XJWbSOd27
+# 3ELn/QstRFTRlj0hvv3FDHB1nZ6csq9vkJ9ifzzdS5j3h9vOiNpRAhXsO5Vd4Q2O
+# b6GR4Gl+h9ypfzCXHGKkak7syd8tI0QyS+l44VJR6Zc6VHmQRONECSLhxFhuzjyX
+# 0z1WovVgvrzcxXT/qaDZBTEqepqCMKrk9x2+Lx4BH4xKx1VsuWT0CXLxaTGgbK9F
+# B868TlOlAaD6ORufrWcQezdL3R5Z/UxAKg1T+kVP71nNt84GaHznJAR+69lEErc=
 # SIG # End signature block
