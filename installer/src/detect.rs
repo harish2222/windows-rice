@@ -9,6 +9,8 @@ pub struct PackageManagerStatus {
     pub cargo: bool,
     pub python: bool,
     pub npm: bool,
+    pub uv: bool,
+    pub vcpkg: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -46,6 +48,17 @@ pub fn detect_package_managers() -> PackageManagerStatus {
     status.cargo = find_binary_in_path("cargo.exe").is_some()
         || user_profile_file_exists(".cargo/bin/cargo.exe");
 
+    status.uv = find_binary_in_path("uv.exe").is_some()
+        || user_profile_file_exists(".local/bin/uv.exe")
+        || user_profile_file_exists(".cargo/bin/uv.exe")
+        || user_profile_file_exists("scoop/shims/uv.exe");
+
+    status.vcpkg = find_binary_in_path("vcpkg.exe").is_some()
+        || user_profile_file_exists("scoop/shims/vcpkg.exe")
+        || std::env::var_os("VCPKG_ROOT").map(|p| PathBuf::from(p).join("vcpkg.exe").exists()).unwrap_or(false)
+        || Path::new("C:\\vcpkg\\vcpkg.exe").exists()
+        || user_profile_file_exists("vcpkg/vcpkg.exe");
+
     status.python = find_binary_in_path("python.exe").is_some()
         || find_binary_in_path("py.exe").is_some();
 
@@ -79,6 +92,10 @@ pub fn find_binary_in_path(binary_name: &str) -> Option<PathBuf> {
         let cargo_bin = PathBuf::from(&user_profile).join(".cargo/bin").join(binary_name);
         if cargo_bin.exists() {
             return Some(cargo_bin);
+        }
+        let local_bin = PathBuf::from(&user_profile).join(".local/bin").join(binary_name);
+        if local_bin.exists() {
+            return Some(local_bin);
         }
     }
 

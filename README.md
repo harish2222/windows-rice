@@ -140,7 +140,7 @@ iwr -useb https://raw.githubusercontent.com/harish2222/windows-rice/main/install
 
 ### Installer Capabilities
 - **Dual-Pane TUI Layout:** Left pane categorizes Window Managers, Terminals, Shells, Navigation, Media, and Editors with multi-select checkboxes. Right pane displays package metadata, binary locations, target configuration paths, and live execution logs.
-- **Automated Package Detection:** Detects installed binaries and packages across Scoop, Winget, Chocolatey, Cargo, NPM, and Python.
+- **Automated Package Detection:** Detects installed binaries and package managers across Scoop, Winget, Chocolatey, Cargo, UV, Vcpkg, NPM, and Python.
 - **Smart Linking:** Creates symbolic links (`mklink` / `New-Item -ItemType SymbolicLink`) with automatic fallback to file copy if Windows Developer Mode or elevation is not available.
 - **Verification Engine:** Validates that all 22 binaries and 20 configuration targets are properly deployed and reachable in `PATH`.
 

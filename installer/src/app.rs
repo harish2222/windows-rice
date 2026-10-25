@@ -215,6 +215,26 @@ impl App {
             self.add_log("Chocolatey is already installed.");
         }
 
+        if !self.pm_status.uv {
+            self.add_log("Bootstrapping UV...");
+            match crate::bootstrap::bootstrap_uv() {
+                Ok(_) => self.add_log("  [PASS] UV successfully bootstrapped!"),
+                Err(e) => self.add_log(format!("  [FAIL] Failed to bootstrap UV: {}", e)),
+            }
+        } else {
+            self.add_log("UV is already installed.");
+        }
+
+        if !self.pm_status.vcpkg {
+            self.add_log("Bootstrapping Vcpkg...");
+            match crate::bootstrap::bootstrap_vcpkg() {
+                Ok(_) => self.add_log("  [PASS] Vcpkg successfully bootstrapped!"),
+                Err(e) => self.add_log(format!("  [FAIL] Failed to bootstrap Vcpkg: {}", e)),
+            }
+        } else {
+            self.add_log("Vcpkg is already installed.");
+        }
+
         self.refresh_detection();
     }
 }

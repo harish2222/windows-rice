@@ -22,6 +22,8 @@ pub fn run_verification(repo_root: &Path) -> VerificationReport {
     lines.push(format!("  - Winget:      {}", if pm.winget { "[PASS] Installed" } else { "[WARN] Not found" }));
     lines.push(format!("  - Chocolatey:  {}", if pm.choco { "[PASS] Installed" } else { "[INFO] Not found" }));
     lines.push(format!("  - Cargo:       {}", if pm.cargo { "[PASS] Installed" } else { "[INFO] Not found" }));
+    lines.push(format!("  - UV (Python): {}", if pm.uv { "[PASS] Installed" } else { "[INFO] Not found" }));
+    lines.push(format!("  - Vcpkg (C++): {}", if pm.vcpkg { "[PASS] Installed" } else { "[INFO] Not found" }));
     lines.push(format!("  - Python:      {}", if pm.python { "[PASS] Installed" } else { "[WARN] Not found" }));
     lines.push(format!("  - NPM:         {}", if pm.npm { "[PASS] Installed" } else { "[INFO] Not found" }));
 

@@ -11,6 +11,16 @@ pub fn bootstrap_choco() -> Result<String> {
     run_powershell_command(script)
 }
 
+pub fn bootstrap_uv() -> Result<String> {
+    let script = "Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; Invoke-RestMethod -Uri https://astral.sh/uv/install.ps1 | Invoke-Expression";
+    run_powershell_command(script)
+}
+
+pub fn bootstrap_vcpkg() -> Result<String> {
+    let script = "if (Get-Command scoop -ErrorAction SilentlyContinue) { scoop install vcpkg } else { git clone https://github.com/microsoft/vcpkg.git $env:USERPROFILE/vcpkg; & $env:USERPROFILE/vcpkg/bootstrap-vcpkg.bat }";
+    run_powershell_command(script)
+}
+
 pub fn run_package_install(install_cmd: &str) -> Result<String> {
     run_powershell_command(install_cmd)
 }

@@ -44,17 +44,21 @@ fn render_header(f: &mut Frame, area: Rect) {
 fn render_pm_status(f: &mut Frame, app: &App, area: Rect) {
     let pm = &app.pm_status;
     let pm_spans = vec![
-        Span::raw(" Package Managers:  "),
+        Span::raw(" PMs: "),
         badge("Scoop", pm.scoop),
-        Span::raw("   "),
+        Span::raw(" "),
         badge("Winget", pm.winget),
-        Span::raw("   "),
+        Span::raw(" "),
         badge("Choco", pm.choco),
-        Span::raw("   "),
+        Span::raw(" "),
         badge("Cargo", pm.cargo),
-        Span::raw("   "),
+        Span::raw(" "),
+        badge("UV", pm.uv),
+        Span::raw(" "),
+        badge("Vcpkg", pm.vcpkg),
+        Span::raw(" "),
         badge("Python", pm.python),
-        Span::raw("   "),
+        Span::raw(" "),
         badge("NPM", pm.npm),
     ];
 
