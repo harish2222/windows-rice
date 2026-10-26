@@ -1052,71 +1052,18 @@ if (Test-Path $carapacePath) {
         $script:CarapaceLoaded = $true
         $cacheItem = Get-Item -LiteralPath $script:CarapaceCache -ErrorAction SilentlyContinue
         $exeTime = (Get-Item -LiteralPath $carapacePath).LastWriteTimeUtc
-        if (-not $cacheItem -or $cacheItem.LastWriteTimeUtc -lt $exeTime) {
+        # Regenerate when the binary is newer, or when specs were added/changed
+        # (keeps future commands composable without any per-keystroke overhead).
+        $script:CarapaceSpecs = Join-Path $env:USERPROFILE '.config\carapace\specs'
+        $specLatest = $null
+        if (Test-Path -LiteralPath $script:CarapaceSpecs) {
+            $specLatest = (Get-ChildItem -LiteralPath $script:CarapaceSpecs -File | Measure-Object LastWriteTimeUtc -Maximum).Maximum
+        }
+        if (-not $cacheItem -or $cacheItem.LastWriteTimeUtc -lt $exeTime -or ($specLatest -and $cacheItem.LastWriteTimeUtc -lt $specLatest)) {
             $null = New-Item -ItemType Directory -Path (Split-Path -Parent $script:CarapaceCache) -Force
             & $carapacePath _carapace powershell | Set-Content -LiteralPath $script:CarapaceCache -Encoding UTF8
         }
         Invoke-Expression (Get-Content -LiteralPath $script:CarapaceCache -Raw)
-        # Universal fallback completer for any native command (current or future) via Carapace
-        Register-ArgumentCompleter -Native -CommandName * -ScriptBlock {
-            param($wordToComplete, $commandAst, $cursorPosition)
-            if (-not (Get-Command carapace -ErrorAction SilentlyContinue)) { return }
-            $commandElements = $commandAst.CommandElements
-            $elems = @()
-            foreach ($elem in $commandElements) {
-                if ($elem.Extent.StartOffset -gt $cursorPosition) { break }
-                $t = $elem.Extent.Text
-                if ($elem.Extent.EndOffset -gt $cursorPosition) {
-                    $t = $t.Substring(0, $elem.Extent.Text.Length - ($elem.Extent.EndOffset - $cursorPosition))
-                }
-                $elems += $t.Trim("'`"")
-            }
-            if ($elems.Count -eq 0) { return }
-            $cmd = ($elems[0] -replace '\.exe$', '')
-            try {
-                $json = if (-not $wordToComplete) {
-                    & carapace $cmd powershell @elems '' 2>$null
-                } else {
-                    & carapace $cmd powershell @elems 2>$null
-                }
-                if ($json) {
-                    $parsed = $json | ConvertFrom-Json
-                    $parsed | ForEach-Object {
-                        [System.Management.Automation.CompletionResult]::new($_.CompletionText, $_.ListItemText, [System.Management.Automation.CompletionResultType]::ParameterValue, $_.ToolTip)
-                    }
-                }
-            } catch { }
-        }
-        # Universal fallback completer for any native command (current or future) via Carapace
-        Register-ArgumentCompleter -Native -CommandName * -ScriptBlock {
-            param($wordToComplete, $commandAst, $cursorPosition)
-            if (-not (Get-Command carapace -ErrorAction SilentlyContinue)) { return }
-            $commandElements = $commandAst.CommandElements
-            $elems = @()
-            foreach ($elem in $commandElements) {
-                if ($elem.Extent.StartOffset -gt $cursorPosition) { break }
-                $t = $elem.Extent.Text
-                if ($elem.Extent.EndOffset -gt $cursorPosition) {
-                    $t = $t.Substring(0, $elem.Extent.Text.Length - ($elem.Extent.EndOffset - $cursorPosition))
-                }
-                $elems += $t.Trim("'`"")
-            }
-            if ($elems.Count -eq 0) { return }
-            $cmd = ($elems[0] -replace '\.exe$', '')
-            try {
-                $json = if (-not $wordToComplete) {
-                    & carapace $cmd powershell @elems '' 2>$null
-                } else {
-                    & carapace $cmd powershell @elems 2>$null
-                }
-                if ($json) {
-                    $parsed = $json | ConvertFrom-Json
-                    $parsed | ForEach-Object {
-                        [System.Management.Automation.CompletionResult]::new($_.CompletionText, $_.ListItemText, [System.Management.Automation.CompletionResultType]::ParameterValue, $_.ToolTip)
-                    }
-                }
-            } catch { }
-        }
     }
 
     if ($isInteractiveShell) {

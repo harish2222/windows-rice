@@ -139,9 +139,23 @@ $env.config = {
         external: {
             enable: true
             max_results: 20
-            completer: {|buffer|
-                let parts = ($buffer | split row " ")
-                carapace-complete ($parts | first) ...($parts | rest)
+            # Canonical Carapace completer (https://carapace.sh/docs/integrations/nushell/).
+            # Heavy `help commands` enumeration only fires when completing the `nu`
+            # binary itself; alias expansion and ergonomics preserved.
+            completer: {|spans|
+                if ($spans.0 == 'nu') {
+                    load-env {
+                        CARAPACE_SHELL_BUILTINS: (help commands | where category != "" | get name | each { split row " " | first } | uniq | str join "\n"),
+                        CARAPACE_SHELL_FUNCTIONS: (help commands | where category == "" | get name | each { split row " " | first } | uniq | str join "\n"),
+                    }
+                }
+                let expanded = (scope aliases | where name == $spans.0 | $in.0?.expansion?)
+                let spans = if $expanded != null {
+                    $spans | skip 1 | prepend ($expanded | split row " " | take 1 | str replace --regex '\.exe$' '')
+                } else {
+                    $spans | skip 1 | prepend ($spans.0 | str replace --regex '\.exe$' '')
+                }
+                carapace $spans.0 nushell ...$spans | from json
             }
         }
     }

@@ -1,0 +1,314 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: docker Carapace Static Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+# Static overrides the dynamic builtin completer: with the Docker engine offline
+# the dynamic spec waits ~5s on the named pipe per Tab. This spec is instant.
+name: docker
+description: A self-sufficient runtime for containers
+flags:
+  -c, --context: Name of the context to use to connect to the daemon
+  -D, --debug: Enable debug mode
+  -H, --host: Daemon socket to connect to
+  -l, --log-level: Set logging level (debug, info, warn, error, fatal)
+  --tls: Use TLS; implied by --tlsverify
+  --tlsverify: Use TLS and verify the remote
+  -v, --version: Print version information and quit
+commands:
+  - name: attach
+    description: Attach local standard input, output, and error streams to a running container
+    flags:
+      -d, --detach: Detach container on SIGINT
+  - name: build
+    description: Build an image from a Dockerfile
+    flags:
+      -f, --file: Name of the Dockerfile
+      -q, --quiet: Suppress the build output
+      -t, --tag: Name and optionally tag
+      --target: Target build stage
+      --pull: Attempt to pull a newer version
+      --build-arg: Set build-time variables
+      --no-cache: Do not use cache when building
+  - name: commit
+    description: Create a new image from a container's changes
+    flags:
+      -a, --author: Author
+      -m, --message: Commit message
+  - name: compose
+    description: Define and run multi-container applications with Compose
+    commands:
+      - name: up
+        description: Start services
+        flags:
+          -d, --detach: Run containers in background
+          --build: Build images before starting containers
+          -p, --project-name: Project name
+      - name: down
+        description: Stop and remove containers, networks
+        flags:
+          -v, --volumes: Remove named volumes
+      - name: logs
+        description: View output from containers
+        flags:
+          -f, --follow: Follow log output
+          --tail: Number of lines to show
+      - name: ps
+        description: List containers of the project
+      - name: build
+        description: Build or rebuild services
+      - name: restart
+        description: Restart services
+      - name: pull
+        description: Pull service images
+      - name: exec
+        description: Execute a command in a running container
+        flags:
+          -u, --user: Username
+      - name: config
+        description: Parse, resolve and render compose file
+  - name: container
+    description: Manage containers
+    commands:
+      - name: prune
+        description: Remove stopped containers
+      - name: ls
+        description: List containers
+  - name: context
+    description: Manage contexts
+    commands:
+      - name: create
+      - name: inspect
+      - name: ls
+        description: List contexts
+      - name: rm
+      - name: use
+  - name: cp
+    description: Copy files/folders between a container and the local filesystem
+  - name: create
+    description: Create a new container
+    flags:
+      --name: Assign a name to the container
+      -e, --env: Set environment variables
+      -v, --volume: Bind mount a volume
+      -p, --publish: Publish a container's port
+      --network: Connect a container to a network
+      --entrypoint: Overwrite the default ENTRYPOINT
+      -w, --workdir: Working directory inside the container
+      --user: Username or UID
+      -u, --ulimit: Ulimit options
+  - name: diff
+    description: Inspect changes to files or directories on a container's filesystem
+  - name: events
+    description: Get real time events from the server
+  - name: exec
+    description: Run a command in a running container
+    flags:
+      -d, --detach: "Detached mode: run command in the background"
+      -i, --interactive: Keep STDIN open even if not attached
+      -t, --tty: Allocate a pseudo-TTY
+      -u, --user: Username or UID
+      -w, --workdir: Working directory inside the container
+      -e, --env: Set environment variables
+  - name: export
+    description: Export a container's filesystem as a tar archive
+  - name: history
+    description: Show the history of an image
+  - name: image
+    description: Manage images
+    commands:
+      - name: prune
+        description: Remove unused images
+      - name: ls
+        description: List images
+        flags:
+          -a, --all: Show intermediate images
+          -q, --quiet: Only show image IDs
+  - name: images
+    description: List images
+    flags:
+      -a, --all: Show all images (default filters out intermediate images)
+      -q, --quiet: Only show numeric IDs
+  - name: import
+    description: Import the contents from a tarball to create a filesystem image
+  - name: info
+    description: Display system-wide information
+  - name: inspect
+    description: Return low-level information on Docker objects
+  - name: kill
+    description: Kill one or more running containers
+  - name: load
+    description: Load an image from a tar archive
+  - name: login
+    description: Log in to a registry
+  - name: logout
+    description: Log out from a registry
+  - name: logs
+    description: Fetch the logs of a container
+    flags:
+      -f, --follow: Follow log output
+      --tail: Number of lines to show from the end of the logs
+      -t, --timestamps: Show timestamps
+  - name: manifest
+    description: Manage and view build manifests
+    commands:
+      - name: annotate
+      - name: create
+      - name: inspect
+      - name: push
+  - name: network
+    description: Manage networks
+    commands:
+      - name: create
+      - name: connect
+      - name: disconnect
+      - name: inspect
+      - name: ls
+        description: List networks
+      - name: prune
+        description: Remove all unused networks
+      - name: rm
+  - name: node
+    description: Manage Swarm nodes
+    commands:
+      - name: ls
+        description: List nodes in the swarm
+      - name: inspect
+      - name: ps
+      - name: rm
+  - name: pause
+    description: Pause all processes within one or more containers
+  - name: plugin
+    description: Manage plugins
+    commands:
+      - name: install
+      - name: ls
+        description: List plugins
+      - name: rm
+  - name: port
+    description: List port mappings or a specific mapping for the container
+  - name: ps
+    description: List containers
+    flags:
+      -a, --all: Show all containers (default shows just running)
+      -q, --quiet: Only display container IDs
+      -s, --size: Display total file sizes
+  - name: pull
+    description: Download an image from a registry
+    flags:
+      -q, --quiet: Suppress verbose output
+      --all-tags: Download all tagged images
+  - name: push
+    description: Upload an image to a registry
+    flags:
+      -q, --quiet: Suppress verbose output
+  - name: rmi
+    description: Remove one or more images
+    flags:
+      -f, --force: Force removal of the image
+  - name: restart
+    description: Restart one or more containers
+  - name: rm
+    description: Remove one or more containers
+    flags:
+      -f, --force: Force the removal of a running container
+      -v, --volumes: Remove anonymous volumes associated with the container
+  - name: run
+    description: Run a command in a new container
+    flags:
+      -d, --detach: Run container in background and print container ID
+      -e, --env: Set environment variables
+      --entrypoint: Overwrite the default ENTRYPOINT
+      -h, --hostname: Container host name
+      -i, --interactive: Keep STDIN open even if not attached
+      -m, --memory: Memory limit
+      --name: Assign a name to the container
+      --network: Connect a container to a network
+      -p, --publish: Publish a container's port(s) to the host
+      -P, --publish-all: Publish all exposed ports
+      --pull: Pull image before running
+      -t, --tty: Allocate a pseudo-TTY
+      -u, --user: Username or UID
+      -v, --volume: Bind mount a volume
+      -w, --workdir: Working directory inside the container
+      --rm: Automatically remove the container when it exits
+      --privileged: Give extended privileges to this container
+      --restart: Restart policy to apply
+  - name: save
+    description: Save one or more images to a tar archive
+  - name: search
+    description: Search the Docker Hub for images
+    flags:
+      -f, --filter: Filter output (stars>=, is-official=)
+      --limit: Max number of search results
+  - name: service
+    description: Manage services
+    commands:
+      - name: create
+      - name: inspect
+      - name: ls
+        description: List services
+      - name: rm
+  - name: stack
+    description: Manage Docker stacks
+    commands:
+      - name: deploy
+      - name: ls
+        description: List stacks
+      - name: rm
+      - name: services
+      - name: ps
+  - name: start
+    description: Start one or more stopped containers
+    flags:
+      -a, --attach: Attach STDOUT/STDERR and forward signals
+      -i, --interactive: Attach container's STDIN
+  - name: stats
+    description: Display a live stream of container(s) resource usage statistics
+    flags:
+      -a, --all: Include all containers (default shows just running)
+      --no-stream: Disable streaming stats
+  - name: stop
+    description: Stop one or more running containers
+    flags:
+      -t, --time: Seconds to wait for stop before killing it
+  - name: swarm
+    description: Manage Swarm
+    commands:
+      - name: init
+      - name: join
+      - name: leave
+      - name: update
+  - name: system
+    description: Manage Docker
+    commands:
+      - name: df
+        description: Show docker disk usage
+      - name: events
+      - name: info
+        description: Display system-wide information
+      - name: prune
+        description: Remove unused data
+  - name: tag
+    description: Create a tag TARGET_IMAGE that refers to SOURCE_IMAGE
+  - name: top
+    description: Display the running processes of a container
+  - name: unpause
+    description: Unpause all processes within one or more containers
+  - name: update
+    description: Update configuration of one or more containers
+  - name: version
+    description: Show the Docker version information
+  - name: volume
+    description: Manage volumes
+    commands:
+      - name: create
+      - name: inspect
+      - name: ls
+        description: List volumes
+      - name: prune
+        description: Remove all unused local volumes
+      - name: rm
+  - name: wait
+    description: Block until one or more containers stop, then print their exit codes
