@@ -5,6 +5,7 @@
 // ============================================================================
 mod catalog;
 mod detect;
+mod ledger;
 mod linker;
 mod bootstrap;
 mod verifier;
@@ -77,6 +78,8 @@ Options:
     --verify, -v             Run non-interactive system health check and exit
     --link-all               Link all configuration files (symlink with copy fallback)
     --unlink-all             Unlink all configs cleanly without trace & restore backups
+    --uninstall-all          FULL REVOKE: remove every rice-installed config & wallpaper
+                             entry (binaries stay, user-modified copies preserved)
     --unlink, -x             Unlink configs for selected/missing items & restore backups
     --install-missing        Install missing packages and link corresponding configs
     --bootstrap, -b          Bootstrap Scoop, Chocolatey, UV, and Vcpkg if missing
@@ -92,6 +95,8 @@ Interactive TUI Controls:
     [m/M]                    Select missing / unlinked packages only
     [l/L]                    Link configs for selected packages (and auto-reload)
     [u/U] or [x/X] or [Del]  Unlink selected configs cleanly & restore original backups
+    [0]                      Full revoke - uninstall EVERYTHING the installer placed
+                             (red confirmation modal; [Y] confirms, [N/Esc] cancels)
     [i/I]                    Install missing binaries & link configs for selected
     [r/R]                    Reload Komorebi, GlazeWM, and YASB
     [c/C] or [g/G]           Check git repository for updates
@@ -148,6 +153,17 @@ fn main() -> Result<()> {
         println!("Uninstalling 8K Wallpapers...");
         let mut app = App::new(repo_root);
         app.uninstall_wallpapers(None);
+        for log in &app.logs {
+            println!("{}", log);
+        }
+        return Ok(());
+    }
+
+    if args.iter().any(|a| a == "--uninstall-all") {
+        println!("FULL REVOKE: removing EVERY config installed by Window-Rice & its wallpaper entries...");
+        println!("Binaries stay installed; user-modified copies are preserved & archived; repo-native targets are never touched.");
+        let mut app = App::new(repo_root);
+        app.uninstall_everything();
         for log in &app.logs {
             println!("{}", log);
         }

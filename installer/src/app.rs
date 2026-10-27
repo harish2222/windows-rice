@@ -69,6 +69,8 @@ pub struct App {
     pub status_message: String,
     pub git_update_status: Option<String>,
     pub should_quit: bool,
+    /// [0] Full-revoke confirmation modal open (y/Y confirms, n/N/Esc cancels).
+    pub confirm_uninstall: bool,
     // === Async worker state (TUI mode; CLI/unit tests stay synchronous) ===
     pub async_worker: bool,
     pub is_busy: bool,
@@ -108,6 +110,7 @@ impl App {
             git_update_status: None,
             should_quit: false,
             async_worker: false,
+            confirm_uninstall: false,
             is_busy: false,
             active_task_name: None,
             progress_percentage: 0,
@@ -179,6 +182,28 @@ impl App {
     }
 
     pub fn handle_key(&mut self, code: KeyCode) -> bool {
+        // Full-revoke confirmation modal: absorbs everything until answered.
+        if self.confirm_uninstall {
+            match code {
+                KeyCode::Char('y') | KeyCode::Char('Y') => {
+                    self.confirm_uninstall = false;
+                    self.uninstall_everything();
+                }
+                KeyCode::Char('n') | KeyCode::Char('N') => {
+                    self.confirm_uninstall = false;
+                    self.status_message =
+                        "Full revoke cancelled. Nothing was modified.".to_string();
+                }
+                KeyCode::Esc => {
+                    self.confirm_uninstall = false;
+                    self.status_message =
+                        "Full revoke cancelled. Nothing was modified.".to_string();
+                }
+                _ => {}
+            }
+            return self.should_quit;
+        }
+
         if self.is_busy {
             // Busy mode: only navigation, selection, console scroll, cancel & quit.
             match code {
@@ -276,6 +301,10 @@ impl App {
             }
             KeyCode::Char('w') | KeyCode::Char('W') => {
                 self.dispatch(WorkerTask::Wallpapers);
+            }
+            KeyCode::Char('0') => {
+                // Full revoke: open the red confirmation modal first.
+                self.confirm_uninstall = true;
             }
             _ => {}
         }
@@ -384,6 +413,9 @@ impl App {
             WorkerTask::Wallpapers => {
                 ctx.custom_dest = None;
             }
+            // Full revoke reads the entire catalog inside the flow and the
+            // ledger for wallpaper entries; no extra context needed.
+            WorkerTask::UninstallAll => {}
         }
         Ok(ctx)
     }
@@ -399,6 +431,7 @@ impl App {
             WorkerTask::Reload => worker::flow_reload(&ctx, &mut |m| self.absorb_sync_message(m)),
             WorkerTask::CheckUpdates => worker::flow_check_updates(&ctx, &mut |m| self.absorb_sync_message(m)),
             WorkerTask::Wallpapers => worker::flow_wallpapers(&ctx, false, &mut |m| self.absorb_sync_message(m)),
+            WorkerTask::UninstallAll => worker::flow_uninstall_all(&ctx, &mut |m| self.absorb_sync_message(m)),
         };
         result.summary
     }
@@ -420,6 +453,14 @@ impl App {
                 }
             }
         }
+    }
+
+    /// Public revoke entry used by the TUI confirmation modal and the CLI
+    /// `--uninstall-all` flag: removes every rice-owned config target,
+    /// restores/backs up, preserves user-modified copies, reverts wallpaper
+    /// entries, and never touches program binaries.
+    pub fn uninstall_everything(&mut self) {
+        self.dispatch(WorkerTask::UninstallAll);
     }
 
     /// TUI entry: hands a task to a dedicated worker thread and switches to busy mode.
@@ -983,6 +1024,7 @@ mod tests {
             git_update_status: None,
             should_quit: false,
             async_worker: false,
+            confirm_uninstall: false,
             is_busy: false,
             active_task_name: None,
             progress_percentage: 0,
@@ -1089,6 +1131,7 @@ mod tests {
             git_update_status: None,
             should_quit: false,
             async_worker: false,
+            confirm_uninstall: false,
             is_busy: false,
             active_task_name: None,
             progress_percentage: 0,
@@ -1180,6 +1223,7 @@ mod tests {
             git_update_status: None,
             should_quit: false,
             async_worker: false,
+            confirm_uninstall: false,
             is_busy: false,
             active_task_name: None,
             progress_percentage: 0,

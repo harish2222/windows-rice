@@ -7,7 +7,7 @@ use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Line, Span},
-    widgets::{Block, Borders, Gauge, List, ListItem, Paragraph, Wrap},
+    widgets::{Block, Borders, Clear, Gauge, List, ListItem, Paragraph, Wrap},
     Frame,
 };
 use crate::app::App;
@@ -33,6 +33,78 @@ pub fn render(f: &mut Frame, app: &App) {
     render_main_split(f, app, chunks[2]);
     render_progress_bar(f, app, chunks[3]);
     render_footer(f, app, chunks[4]);
+
+    // Full-revoke confirmation modal renders LAST as an overlay on everything.
+    if app.confirm_uninstall {
+        render_confirm_modal(f, app, size);
+    }
+}
+
+/// Centered sub-rectangle used by overlay modals.
+fn centered_rect(percent_x: u16, percent_y: u16, area: Rect) -> Rect {
+    let pad_y = (100 - percent_y.min(100)) / 2;
+    let pad_x = (100 - percent_x.min(100)) / 2;
+    let v = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Percentage(pad_y),
+            Constraint::Percentage(percent_y),
+            Constraint::Percentage(pad_y),
+        ])
+        .split(area);
+    Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([
+            Constraint::Percentage(pad_x),
+            Constraint::Percentage(percent_x),
+            Constraint::Percentage(pad_x),
+        ])
+        .split(v[1])[1]
+}
+
+fn render_confirm_modal(f: &mut Frame, _app: &App, area: Rect) {
+    let modal = centered_rect(72, 58, area);
+    let red = Color::Rgb(243, 139, 168);
+
+    f.render_widget(Clear, modal);
+    let text = vec![
+        Line::from(Span::styled(
+            "                 FULL REVOKE - UNINSTALL EVERYTHING",
+            Style::default().fg(red).add_modifier(Modifier::BOLD),
+        )),
+        Line::from(""),
+        Line::from(Span::styled("This removes EVERYTHING the Window-Rice installer placed on your PC:", Style::default().fg(Color::Rgb(205, 214, 244)))),
+        Line::from(vec![
+            Span::raw("  x "),
+            Span::styled("Every config target installed by this repo (symlinks + copies)", Style::default().fg(Color::Rgb(249, 226, 175))),
+        ]),
+        Line::from(vec![
+            Span::raw("  x "),
+            Span::styled("Wallpaper entries the installer created (entries-only)", Style::default().fg(Color::Rgb(249, 226, 175))),
+        ]),
+        Line::from(""),
+        Line::from(Span::styled("What stays SAFE - never touched:", Style::default().fg(Color::Rgb(166, 227, 161)))),
+        Line::from("  + Program binaries (installed tools remain available)"),
+        Line::from("  + Your own configs: user-modified copies are PRESERVED & archived"),
+        Line::from("  + Repo-native targets (repo root == config location)"),
+        Line::from("  + Any wallpaper folder containing your own media"),
+        Line::from(""),
+        Line::from(Span::styled("User files with backup records are restored to their originals.", Style::default().fg(Color::Rgb(148, 226, 213)))),
+        Line::from(""),
+        Line::from(vec![
+            Span::styled(" [Y] YES, revoke everything ", Style::default().fg(Color::Rgb(30, 30, 46)).bg(red).add_modifier(Modifier::BOLD)),
+            Span::raw("   "),
+            Span::styled(" [N / Esc] Cancel ", Style::default().fg(Color::Rgb(205, 214, 244)).bg(Color::Rgb(49, 50, 68)).add_modifier(Modifier::BOLD)),
+        ]),
+    ];
+
+    let block = Paragraph::new(text)
+        .block(Block::default()
+            .borders(Borders::ALL)
+            .title(" CONFIRM FULL REVOKE ")
+            .border_style(Style::default().fg(red).add_modifier(Modifier::BOLD)))
+        .wrap(Wrap { trim: false });
+    f.render_widget(block, modal);
 }
 
 fn render_header(f: &mut Frame, area: Rect) {
@@ -373,6 +445,8 @@ fn render_footer(f: &mut Frame, app: &App, area: Rect) {
             Span::raw("Update "),
             Span::styled("[v] ", Style::default().fg(Color::Rgb(137, 180, 250)).add_modifier(Modifier::BOLD)),
             Span::raw("Verify "),
+            Span::styled("[0] ", Style::default().fg(Color::Rgb(243, 139, 168)).add_modifier(Modifier::BOLD)),
+            Span::raw("Revoke "),
             Span::styled("[[/]] ", Style::default().fg(Color::Rgb(249, 226, 175)).add_modifier(Modifier::BOLD)),
             Span::raw("Scroll "),
             Span::styled("[q] ", Style::default().fg(Color::Rgb(243, 139, 168)).add_modifier(Modifier::BOLD)),

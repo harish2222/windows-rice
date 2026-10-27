@@ -23,6 +23,12 @@ pub enum LinkOutcome {
 pub enum UnlinkOutcome {
     UnlinkedAndRestored { target: PathBuf, backup_source: PathBuf },
     UnlinkedCleanly(PathBuf),
+    /// Copy-fallback config where the user made their own edits: archived and
+    /// LEFT on disk — the rice never deletes user-modified configuration.
+    PreservedUserModified { target: PathBuf, archive: PathBuf },
+    /// Source and target are the same repo file (repo lives natively at the
+    /// target). Removing it would delete the repository itself - never touch.
+    RepoNativeNotTouched(PathBuf),
     NotLinked(PathBuf),
     Failed(String),
 }
@@ -182,6 +188,9 @@ pub fn link_config_mapping(repo_root: &Path, mapping: &ConfigMapping, package_id
 
     // 1. If source and target are the exact same canonical path, it's already in-place
     if source == target || source.canonicalize().ok() == target.canonicalize().ok() {
+        // Repo-native layout (this machine's ~/.config IS the repo): nothing
+        // is "installed" by us here, so no ledger record must ever exist —
+        // revoke guards refuse to touch repo-native targets.
         return LinkOutcome::AlreadyValid(target);
     }
 
@@ -197,6 +206,7 @@ pub fn link_config_mapping(repo_root: &Path, mapping: &ConfigMapping, package_id
         if meta.file_type().is_symlink() {
             if let Ok(dest) = fs::read_link(&target) {
                 if dest == source || dest.canonicalize().ok() == source.canonicalize().ok() {
+                    crate::ledger::ensure_symlink_record(package_id, &source, &target, mapping.is_dir);
                     return LinkOutcome::AlreadyValid(target);
                 }
             }
@@ -256,6 +266,13 @@ pub fn link_config_mapping(repo_root: &Path, mapping: &ConfigMapping, package_id
 
     match symlink_res {
         Ok(_) => {
+            crate::ledger::record_installed(
+                package_id,
+                &source,
+                &target,
+                crate::ledger::LinkMode::Symlink,
+                mapping.is_dir,
+            );
             if let Some(bp) = backup_created {
                 LinkOutcome::BackedUpAndLinked { target, backup: bp }
             } else {
@@ -266,50 +283,227 @@ pub fn link_config_mapping(repo_root: &Path, mapping: &ConfigMapping, package_id
             // Symlink failed fallback to recursive copy
             if let Err(copy_err) = copy_recursive(&source, &target, mapping.is_dir) {
                 LinkOutcome::Failed(format!("Symlink failed ({}) and copy fallback failed: {}", e, copy_err))
-            } else if let Some(bp) = backup_created {
-                LinkOutcome::BackedUpAndLinked { target, backup: bp }
             } else {
-                LinkOutcome::CopiedFallback(target)
+                crate::ledger::record_installed(
+                    package_id,
+                    &source,
+                    &target,
+                    crate::ledger::LinkMode::Copy,
+                    mapping.is_dir,
+                );
+                if let Some(bp) = backup_created {
+                    LinkOutcome::BackedUpAndLinked { target, backup: bp }
+                } else {
+                    LinkOutcome::CopiedFallback(target)
+                }
             }
         }
     }
 }
 
-pub fn unlink_config_mapping(_repo_root: &Path, mapping: &ConfigMapping, package_id: &str) -> UnlinkOutcome {
-    let target = resolve_target_path(mapping.target_pattern);
-    let had_target = target.exists() || target.symlink_metadata().is_ok();
-
-    if had_target {
-        let remove_res = if mapping.is_dir {
-            if let Ok(meta) = target.symlink_metadata() {
-                if meta.file_type().is_symlink() {
-                    fs::remove_dir(&target)
-                } else {
-                    fs::remove_dir_all(&target)
+/// Byte-for-byte equivalence check between a repo source and an installed
+/// copy. For directories: same relative file set (no extras added by the
+/// user) and identical contents for every file. Used to decide whether a
+/// copy-fallback install is still pure repo data (safe to remove) or has
+/// diverged (user's own - preserve).
+pub fn paths_equivalent(src: &Path, dst: &Path, is_dir: bool) -> bool {
+    if !src.exists() || !dst.exists() {
+        return false;
+    }
+    if !is_dir {
+        return file_contents_equal(src, dst);
+    }
+    if !src.is_dir() || !dst.is_dir() {
+        return false;
+    }
+    fn walk(src: &Path, dst: &Path) -> bool {
+        let src_entries: std::collections::BTreeSet<String> = match fs::read_dir(src) {
+            Ok(rd) => rd
+                .flatten()
+                .map(|e| e.file_name().to_string_lossy().to_string())
+                .collect(),
+            Err(_) => return false,
+        };
+        let dst_entries: std::collections::BTreeSet<String> = match fs::read_dir(dst) {
+            Ok(rd) => rd
+                .flatten()
+                .map(|e| e.file_name().to_string_lossy().to_string())
+                .collect(),
+            Err(_) => return false,
+        };
+        // Any file the user added (or any file the rice never had) means the
+        // directory is no longer pure repo content.
+        if src_entries != dst_entries {
+            return false;
+        }
+        for name in &src_entries {
+            let s = src.join(name);
+            let d = dst.join(name);
+            if s.is_dir() {
+                if !d.is_dir() || !walk(&s, &d) {
+                    return false;
                 }
-            } else {
-                fs::remove_dir_all(&target)
+            } else if !file_contents_equal(&s, &d) {
+                return false;
             }
+        }
+        true
+    }
+    walk(src, dst)
+}
+
+fn file_contents_equal(a: &Path, b: &Path) -> bool {
+    let Ok(am) = fs::metadata(a) else { return false };
+    let Ok(bm) = fs::metadata(b) else { return false };
+    if am.len() != bm.len() {
+        return false;
+    }
+    use std::io::Read;
+    let (Ok(mut fa), Ok(mut fb)) = (fs::File::open(a), fs::File::open(b)) else {
+        return false;
+    };
+    const CHUNK: usize = 64 * 1024;
+    let mut ba = vec![0u8; CHUNK];
+    let mut bb = vec![0u8; CHUNK];
+    loop {
+        let ra = fa.read(&mut ba).unwrap_or(usize::MAX);
+        let rb = fb.read(&mut bb).unwrap_or(usize::MAX);
+        if ra != rb {
+            return false;
+        }
+        if ra == 0 {
+            return true;
+        }
+        if ba[..ra] != bb[..rb] {
+            return false;
+        }
+    }
+}
+
+/// Ownership-aware removal of one config mapping.
+///
+/// Decision tree per target:
+///   1. Repo-native (source == target canonical path)  -> RepoNativeNotTouched.
+///      The repository IS the config here; deleting it would delete the repo.
+///   2. Symlink pointing elsewhere                     -> remove link, restore
+///      user backup when the manifest has one.
+///   3. Real file/dir WITH a manifest backup           -> backup is the user's
+///      original; current copy is repo data -> restore backup.
+///   4. Real file/dir WITHOUT backup, still identical
+///      to the repo source                             -> pure rice data;
+///      safe to remove (UnlinkedCleanly).
+///   5. Real file/dir WITHOUT backup, user modified it -> Preserve: archive a
+///      copy into .rice-backups, leave the file untouched, report.
+pub fn unlink_config_mapping(repo_root: &Path, mapping: &ConfigMapping, package_id: &str) -> UnlinkOutcome {
+    let source = repo_root.join(mapping.source_rel);
+    let target = resolve_target_path(mapping.target_pattern);
+
+    // --- 1. Repo-native guard: source and target are the same file ------ //
+    let same_canon = source == target
+        || (source.canonicalize().is_ok()
+            && source.canonicalize().ok() == target.canonicalize().ok());
+    if same_canon {
+        return UnlinkOutcome::RepoNativeNotTouched(target);
+    }
+
+    let symlink_meta = target.symlink_metadata().ok();
+    let is_symlink = symlink_meta.as_ref().map_or(false, |m| m.file_type().is_symlink());
+    let had_target = target.exists() || symlink_meta.is_some();
+
+    if had_target && !is_symlink {
+        // Real user file/dir or a copy the installer materialized. If the
+        // backup manifest owns a record, the backup IS the user's original
+        // content: restore it (this both removes the rice copy and returns
+        // the user's file).
+        match restore_target_backup(package_id, &target) {
+            Ok(Some(bp)) => {
+                crate::ledger::remove_record(package_id, &target);
+                return UnlinkOutcome::UnlinkedAndRestored {
+                    target,
+                    backup_source: bp,
+                };
+            }
+            Ok(None) => {}
+            Err(e) => {
+                return UnlinkOutcome::Failed(format!(
+                    "Failed to restore backup for {}: {}",
+                    target.display(),
+                    e
+                ));
+            }
+        }
+        // No manifest record: is this still pure repo content, or the user's
+        // own (modified) configuration?
+        if paths_equivalent(&source, &target, mapping.is_dir) {
+            let remove_res = if mapping.is_dir {
+                fs::remove_dir_all(&target)
+            } else {
+                fs::remove_file(&target)
+            };
+            return match remove_res {
+                Ok(_) => {
+                    crate::ledger::remove_record(package_id, &target);
+                    UnlinkOutcome::UnlinkedCleanly(target)
+                }
+                Err(e) => UnlinkOutcome::Failed(format!("Failed to remove {}: {}", target.display(), e)),
+            };
+        }
+        // User-modified copy-fallback config: archive + preserve on disk.
+        return match archive_preserved_copy(package_id, &target, mapping.is_dir) {
+            Ok(archive) => UnlinkOutcome::PreservedUserModified { target, archive },
+            Err(e) => UnlinkOutcome::Failed(format!(
+                "Failed to archive preserved config {}: {}",
+                target.display(),
+                e
+            )),
+        };
+    }
+
+    if had_target && is_symlink {
+        // Symlink: always repo-owned. Remove the link itself (never follow).
+        let remove_res = if mapping.is_dir {
+            fs::remove_dir(&target)
         } else {
             fs::remove_file(&target)
         };
-
         if let Err(e) = remove_res {
-            return UnlinkOutcome::Failed(format!("Failed to remove {}: {}", target.display(), e));
+            return UnlinkOutcome::Failed(format!("Failed to remove symlink {}: {}", target.display(), e));
         }
+        crate::ledger::remove_record(package_id, &target);
+        return match restore_target_backup(package_id, &target) {
+            Ok(Some(bp)) => UnlinkOutcome::UnlinkedAndRestored {
+                target,
+                backup_source: bp,
+            },
+            Ok(None) => UnlinkOutcome::UnlinkedCleanly(target),
+            Err(e) => UnlinkOutcome::Failed(format!("Unlinked {} but failed to restore backup: {}", target.display(), e)),
+        };
     }
 
+    // No target at all; still surface any orphan backup for restoration.
     match restore_target_backup(package_id, &target) {
-        Ok(Some(bp)) => UnlinkOutcome::UnlinkedAndRestored { target, backup_source: bp },
-        Ok(None) => {
-            if had_target {
-                UnlinkOutcome::UnlinkedCleanly(target)
-            } else {
-                UnlinkOutcome::NotLinked(target)
-            }
-        }
-        Err(e) => UnlinkOutcome::Failed(format!("Unlinked {} but failed to restore backup: {}", target.display(), e)),
+        Ok(Some(bp)) => UnlinkOutcome::UnlinkedAndRestored {
+            target,
+            backup_source: bp,
+        },
+        Ok(None) => UnlinkOutcome::NotLinked(target),
+        Err(e) => UnlinkOutcome::Failed(format!("Failed to restore orphan backup: {}", e)),
     }
+}
+
+/// Archives a user-modified config copy into the backup root without touching
+/// the live file. Returns the archive path.
+fn archive_preserved_copy(package_id: &str, target: &Path, is_dir: bool) -> Result<PathBuf> {
+    let timestamp = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .unwrap_or(0);
+    let archive_dir = get_backup_root().join(package_id).join(format!("preserved-{}", timestamp));
+    fs::create_dir_all(&archive_dir)?;
+    let file_name = target.file_name().unwrap_or_else(|| std::ffi::OsStr::new("preserved"));
+    let archive_dest = archive_dir.join(file_name);
+    copy_recursive(target, &archive_dest, is_dir)?;
+    Ok(archive_dest)
 }
 
 pub fn copy_recursive(src: &Path, dst: &Path, is_dir: bool) -> Result<()> {
@@ -488,6 +682,202 @@ pub(crate) mod tests {
 
         // Cleanup
         unsafe { std::env::remove_var("RICE_BACKUP_DIR"); }
+        let _ = fs::remove_dir_all(&temp_dir);
+    }
+
+    fn leak_path(p: &Path) -> &'static str {
+        Box::leak(p.to_string_lossy().to_string().into_boxed_str())
+    }
+
+    #[test]
+    fn test_paths_equivalent_file_and_dir() {
+        let temp_dir = std::env::temp_dir().join("rice_test_equiv");
+        let _ = fs::remove_dir_all(&temp_dir);
+        fs::create_dir_all(&temp_dir).unwrap();
+
+        // Files: identical vs changed
+        let f1 = temp_dir.join("a.toml");
+        let f2 = temp_dir.join("b.toml");
+        fs::write(&f1, "theme = mocha").unwrap();
+        fs::write(&f2, "theme = mocha").unwrap();
+        assert!(super::file_contents_equal(&f1, &f2));
+        assert!(paths_equivalent(&f1, &f2, false));
+        fs::write(&f2, "theme = custom").unwrap();
+        assert!(!paths_equivalent(&f1, &f2, false));
+        assert!(!paths_equivalent(&f1, &temp_dir.join("missing.toml"), false));
+
+        // Directories: same set + same contents vs user-added extra file
+        let sdir = temp_dir.join("srcdir");
+        let ddir = temp_dir.join("dstdir");
+        fs::create_dir_all(sdir.join("sub")).unwrap();
+        fs::create_dir_all(ddir.join("sub")).unwrap();
+        fs::write(sdir.join("k.yaml"), "K: 1").unwrap();
+        fs::write(sdir.join("sub").join("n.txt"), "N").unwrap();
+        fs::write(ddir.join("k.yaml"), "K: 1").unwrap();
+        fs::write(ddir.join("sub").join("n.txt"), "N").unwrap();
+        assert!(paths_equivalent(&sdir, &ddir, true));
+        fs::write(ddir.join("my-own-file.txt"), "user added this").unwrap();
+        assert!(
+            !paths_equivalent(&sdir, &ddir, true),
+            "user-added files inside an installed dir make it NOT repo-owned"
+        );
+        let _ = fs::remove_dir_all(&temp_dir);
+    }
+
+    #[test]
+    fn test_unlink_identical_copy_removed() {
+        let _guard = TEST_MUTEX.lock().unwrap_or_else(|p| p.into_inner());
+        let temp_dir = std::env::temp_dir().join("rice_test_unlink_copy");
+        let _ = fs::remove_dir_all(&temp_dir);
+        let backup_root = temp_dir.join(".rice-backups");
+        fs::create_dir_all(&backup_root).unwrap();
+        unsafe { std::env::set_var("RICE_BACKUP_DIR", &backup_root) }
+
+        let repo = temp_dir.join("repo").join("somepkg");
+        fs::create_dir_all(&repo).unwrap();
+        fs::write(repo.join("cfg.toml"), "v = 1").unwrap();
+        let mpz_target = temp_dir.join("targets").join("somepkg");
+        fs::create_dir_all(&mpz_target).unwrap();
+        // Copy-fallback install: identical bytes.
+        fs::write(mpz_target.join("cfg.toml"), "v = 1").unwrap();
+
+        let pattern = leak_path(&mpz_target);
+        let mapping = crate::catalog::ConfigMapping {
+            source_rel: leak_path(&repo),
+            target_pattern: pattern,
+            is_dir: true,
+        };
+        let outcome =
+            super::unlink_config_mapping(&temp_dir.join("repo"), &mapping, "somepkg");
+        assert!(
+            matches!(outcome, super::UnlinkOutcome::UnlinkedCleanly(_)),
+            "identical pure-rice copy must be removed, got {:?}",
+            outcome
+        );
+        assert!(!mpz_target.exists(), "target must be removed");
+        // Ledger record for this target must be gone.
+        let ledger = crate::ledger::load_ledger();
+        assert!(!ledger.records.iter().any(|r| r.pkg_id == "somepkg"));
+
+        unsafe { std::env::remove_var("RICE_BACKUP_DIR") };
+        let _ = fs::remove_dir_all(&temp_dir);
+    }
+
+    #[test]
+    fn test_unlink_user_modified_copy_preserved() {
+        let _guard = TEST_MUTEX.lock().unwrap_or_else(|p| p.into_inner());
+        let temp_dir = std::env::temp_dir().join("rice_test_unlink_modified");
+        let _ = fs::remove_dir_all(&temp_dir);
+        let backup_root = temp_dir.join(".rice-backups");
+        fs::create_dir_all(&backup_root).unwrap();
+        unsafe { std::env::set_var("RICE_BACKUP_DIR", &backup_root) }
+
+        let repo = temp_dir.join("repo").join("pkg2");
+        fs::create_dir_all(&repo).unwrap();
+        fs::write(repo.join("cfg.toml"), "v = 1").unwrap();
+        let target_file = temp_dir.join("targets").join("pkg2.toml");
+        fs::create_dir_all(target_file.parent().unwrap()).unwrap();
+        // Installer copied, USER edited afterwards.
+        fs::write(&target_file, "v = 2 # my personal tweak").unwrap();
+
+        let mapping = crate::catalog::ConfigMapping {
+            source_rel: leak_path(&repo),
+            target_pattern: leak_path(&target_file),
+            is_dir: false,
+        };
+        let outcome =
+            super::unlink_config_mapping(&temp_dir.join("repo"), &mapping, "pkg2");
+        assert!(
+            matches!(outcome, super::UnlinkOutcome::PreservedUserModified { .. }),
+            "user-modified copy must be preserved, got {:?}",
+            outcome
+        );
+        // The live file stays; the archive copy exists with identical bytes.
+        assert!(target_file.exists(), "modified config must remain on disk");
+        assert_eq!(
+            fs::read_to_string(&target_file).unwrap(),
+            "v = 2 # my personal tweak"
+        );
+        // A preserved archive directory must exist under .rice-backups/pkg2.
+        let archives_dir = backup_root.join("pkg2");
+        let archived = fs::read_dir(&archives_dir)
+            .map(|entries| entries.count())
+            .unwrap_or(0);
+        assert!(
+            archived > 0,
+            "a preserved archive must exist under {}",
+            archives_dir.display()
+        );
+        unsafe { std::env::remove_var("RICE_BACKUP_DIR") };
+        let _ = fs::remove_dir_all(&temp_dir);
+    }
+
+    #[test]
+    fn test_unlink_repo_native_never_touched() {
+        let _guard = TEST_MUTEX.lock().unwrap_or_else(|p| p.into_inner());
+        let temp_dir = std::env::temp_dir().join("rice_test_unlink_native");
+        let _ = fs::remove_dir_all(&temp_dir);
+        let backup_root = temp_dir.join(".rice-backups");
+        fs::create_dir_all(&backup_root).unwrap();
+        unsafe { std::env::set_var("RICE_BACKUP_DIR", &backup_root) }
+
+        // Mapping where the "repo directory" IS the target (repo lives at
+        // ~/.config with ~/.config as both repo_root and install target).
+        let cfg = temp_dir.join("pkg3");
+        fs::create_dir_all(&cfg).unwrap();
+        fs::write(cfg.join("x.yaml"), "live config").unwrap();
+        let mapping = crate::catalog::ConfigMapping {
+            source_rel: leak_path(&cfg),
+            target_pattern: leak_path(&cfg),
+            is_dir: true,
+        };
+        let outcome = super::unlink_config_mapping(&temp_dir, &mapping, "pkg3");
+        assert!(
+            matches!(outcome, super::UnlinkOutcome::RepoNativeNotTouched(_)),
+            "repo-native target must be skipped, got {:?}",
+            outcome
+        );
+        assert!(cfg.join("x.yaml").exists(), "repo-native files must NEVER be deleted");
+        unsafe { std::env::remove_var("RICE_BACKUP_DIR") };
+        let _ = fs::remove_dir_all(&temp_dir);
+    }
+
+    #[test]
+    fn test_unlink_restores_user_backup_over_rice_copy() {
+        let _guard = TEST_MUTEX.lock().unwrap_or_else(|p| p.into_inner());
+        let temp_dir = std::env::temp_dir().join("rice_test_unlink_restore");
+        let _ = fs::remove_dir_all(&temp_dir);
+        let backup_root = temp_dir.join(".rice-backups");
+        fs::create_dir_all(&backup_root).unwrap();
+        unsafe { std::env::set_var("RICE_BACKUP_DIR", &backup_root) }
+
+        let target_file = temp_dir.join("eam.json");
+        fs::write(&target_file, r#"{"user":"original"}"#).unwrap();
+        // Installer found the user file and backed it up
+        let _ = super::backup_existing_target("pkg4", &target_file, false).unwrap();
+        // ...then installed its own copy, which is NOT what unlink should keep
+        fs::write(&target_file, r#"{"theme":"rice"}"#).unwrap();
+
+        let repo = temp_dir.join("repo").join("pkg4");
+        fs::create_dir_all(&repo).unwrap();
+        fs::write(repo.join("eam.json"), r#"{"theme":"rice"}"#).unwrap();
+        let mapping = crate::catalog::ConfigMapping {
+            source_rel: leak_path(&repo),
+            target_pattern: leak_path(&target_file),
+            is_dir: false,
+        };
+        let outcome = super::unlink_config_mapping(&temp_dir.join("repo"), &mapping, "pkg4");
+        assert!(
+            matches!(outcome, super::UnlinkOutcome::UnlinkedAndRestored { .. }),
+            "manifest backup wins over equivalence: user original returns, got {:?}",
+            outcome
+        );
+        assert_eq!(
+            fs::read_to_string(&target_file).unwrap(),
+            r#"{"user":"original"}"#,
+            "the user's own pre-install content must be back in place"
+        );
+        unsafe { std::env::remove_var("RICE_BACKUP_DIR") };
         let _ = fs::remove_dir_all(&temp_dir);
     }
 

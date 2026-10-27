@@ -12,7 +12,7 @@ use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
-use crate::catalog::{ConfigMapping, PackageItem, resolve_target_path};
+use crate::catalog::{get_catalog, ConfigMapping, PackageItem, resolve_target_path};
 use crate::detect::{
     detect_package_managers, find_binary_in_path, inspect_package, BinaryStatus, LinkStatus,
     PackageManagerStatus,
@@ -44,6 +44,9 @@ pub enum WorkerTask {
     CheckUpdates,
     /// [w] Install the 8K wallpaper collection.
     Wallpapers,
+    /// [0] Full revoke: remove every rice-owned config & wallpaper entry.
+    /// Binaries stay installed; the user's own configs are never touched.
+    UninstallAll,
 }
 
 impl WorkerTask {
@@ -57,6 +60,7 @@ impl WorkerTask {
             WorkerTask::Reload => "Reload Environment",
             WorkerTask::CheckUpdates => "Check Repository Updates",
             WorkerTask::Wallpapers => "Install 8K Wallpapers",
+            WorkerTask::UninstallAll => "Uninstall Everything (Full Revoke)",
         }
     }
 }
@@ -163,6 +167,7 @@ pub fn run_flow(task: WorkerTask, ctx: &TaskContext, notify: Notify) -> TaskResu
         WorkerTask::Reload => flow_reload(ctx, notify),
         WorkerTask::CheckUpdates => flow_check_updates(ctx, notify),
         WorkerTask::Wallpapers => flow_wallpapers(ctx, false, notify),
+        WorkerTask::UninstallAll => flow_uninstall_all(ctx, notify),
     }
 }
 
@@ -449,6 +454,8 @@ pub fn flow_unlink(ctx: &TaskContext, notify: Notify) -> TaskResult {
     let mut count_restored = 0;
     let mut count_cleaned = 0;
     let mut count_not_linked = 0;
+    let mut count_preserved = 0;
+    let mut count_native = 0;
     let mut count_err = 0;
 
     for (idx, job) in jobs.iter().enumerate() {
@@ -484,6 +491,15 @@ pub fn flow_unlink(ctx: &TaskContext, notify: Notify) -> TaskResult {
                     count_not_linked += 1;
                     send_log(notify, format!("  [NO-OP]    -> Not linked: {}", target.display()));
                 }
+                UnlinkOutcome::PreservedUserModified { target, archive } => {
+                    count_preserved += 1;
+                    send_log(notify, format!("  [PRESERVED]-> User-modified config left untouched: {}", target.display()));
+                    send_log(notify, format!("  [ARCHIVED] -> Copy saved to {}", archive.display()));
+                }
+                UnlinkOutcome::RepoNativeNotTouched(target) => {
+                    count_native += 1;
+                    send_log(notify, format!("  [NATIVE]   -> Repo-native target never touched: {}", target.display()));
+                }
                 UnlinkOutcome::Failed(err) => {
                     count_err += 1;
                     send_log(notify, format!("  [ERROR]    -> {}", err));
@@ -493,14 +509,106 @@ pub fn flow_unlink(ctx: &TaskContext, notify: Notify) -> TaskResult {
     }
 
     let summary = format!(
-        "Unlink complete: {} restored from backup, {} cleaned, {} no-op, {} failed.",
-        count_restored, count_cleaned, count_not_linked, count_err
+        "Unlink complete: {} restored from backup, {} cleaned, {} preserved (user-modified), {} repo-native skipped, {} no-op, {} failed.",
+        count_restored, count_cleaned, count_preserved, count_native, count_not_linked, count_err
     );
     send_log(notify, summary.clone());
 
     flow_reload(ctx, notify);
     emit_progress(notify, 100, "Done", summary.clone());
     TaskResult { summary, success: true }
+}
+
+// ============================================================================
+// UNINSTALL EVERYTHING (FULL REVOKE)
+// ============================================================================
+/// Ownership-aware full revoke over the ENTIRE catalog (not just the current
+/// selection): every config target the repo placed on this machine is removed
+/// or restored, wallpaper entries the installer created are reverted, and the
+/// tracking ledger is cleared.
+///
+/// Safety invariants:
+///   * Program binaries are NEVER uninstalled (package managers keep them).
+///   * The user's own configurations are never deleted: symlinked targets get
+///     their backup restored, and copy-fallback targets that the user modified
+///     are preserved on disk + archived into .rice-backups.
+///   * Repo-native targets (the repo root IS the config location) are never
+///     touched - removing them would destroy the repository itself.
+///   * Wallpaper removal is entries-only: only entries recorded in the ledger
+///     (or pre-ledger folders matching the tracked collection) are removed.
+pub fn flow_uninstall_all(ctx: &TaskContext, notify: Notify) -> TaskResult {
+    send_log(notify, "--- FULL REVOKE: removing EVERYTHING the Window-Rice installer placed ---");
+    send_log(notify, "Binaries stay installed; user-owned configs are never deleted.");
+
+    let catalog = get_catalog();
+    let total = catalog.len();
+    let mut count_restored = 0;
+    let mut count_cleaned = 0;
+    let mut count_preserved = 0;
+    let mut count_native = 0;
+    let mut count_not_linked = 0;
+    let mut count_err = 0;
+
+    for (idx, pkg) in catalog.iter().enumerate() {
+        if is_cancelled(&ctx.cancel_flag) {
+            return cancelled_result(notify);
+        }
+        if pkg.configs.is_empty() {
+            continue;
+        }
+        emit_progress(
+            notify,
+            ((idx * 100) / total.max(1)) as u16,
+            format!("[{}/{}] {}", idx + 1, total, pkg.name),
+            "Revoking configs".to_string(),
+        );
+        send_log(notify, format!("Revoking configs for {} (binaries kept):", pkg.name));
+        for mapping in &pkg.configs {
+            match unlink_config_mapping(&ctx.repo_root, mapping, pkg.id) {
+                UnlinkOutcome::UnlinkedAndRestored { target, backup_source } => {
+                    count_restored += 1;
+                    send_log(notify, format!("  [RESTORED] -> Restored backup: {}", backup_source.display()));
+                    send_log(notify, format!("  [TARGET]   -> {}", target.display()));
+                }
+                UnlinkOutcome::UnlinkedCleanly(target) => {
+                    count_cleaned += 1;
+                    send_log(notify, format!("  [CLEAN]    -> Removed {}", target.display()));
+                }
+                UnlinkOutcome::PreservedUserModified { target, archive } => {
+                    count_preserved += 1;
+                    send_log(notify, format!("  [PRESERVED]-> User-modified config left untouched: {}", target.display()));
+                    send_log(notify, format!("  [ARCHIVED] -> Copy saved to {}", archive.display()));
+                }
+                UnlinkOutcome::RepoNativeNotTouched(target) => {
+                    count_native += 1;
+                    send_log(notify, format!("  [NATIVE]   -> Repo-native target never touched: {}", target.display()));
+                }
+                UnlinkOutcome::NotLinked(target) => {
+                    count_not_linked += 1;
+                    send_log(notify, format!("  [NO-OP]    -> Not linked: {}", target.display()));
+                }
+                UnlinkOutcome::Failed(err) => {
+                    count_err += 1;
+                    send_log(notify, format!("  [ERROR]    -> {}", err));
+                }
+            }
+        }
+    }
+
+    // Wallpaper entries - entries-only removal, never a whole-directory nuke.
+    send_log(notify, "--- Reverting wallpaper entries installed by the rice ---");
+    let wall_res = flow_uninstall_wallpapers(ctx, notify);
+
+    let summary = format!(
+        "Full revoke complete: {} restored, {} cleaned, {} preserved (user-modified), {} repo-native skipped, {} no-op, {} failed. {}",
+        count_restored, count_cleaned, count_preserved, count_native, count_not_linked, count_err, wall_res.summary
+    );
+    let success = count_err == 0 && wall_res.success;
+
+    // The machine is clean of rice links: reset the tracking ledger.
+    crate::ledger::clear_all();
+    emit_progress(notify, 100, "Done", summary.clone());
+    TaskResult { summary, success }
 }
 
 // ============================================================================
@@ -774,18 +882,21 @@ fn flow_install_wallpapers(ctx: &TaskContext, notify: Notify) -> TaskResult {
                 let name = entry.file_name();
                 let target = dest.join(&name);
                 let src = entry.path();
+                let name_str = name.to_string_lossy().to_string();
                 #[cfg(windows)]
                 {
                     if src.is_dir() {
                         match std::os::windows::fs::symlink_dir(&src, &target) {
                             Ok(_) => {
                                 linked_count += 1;
+                                crate::ledger::record_wallpaper_entry(&dest, &name_str, true);
                                 send_log(notify, format!("  [SYMLINK] -> {}", target.display()));
                             }
                             Err(_) => {
-                                send_log(notify, format!("  [COPY] Copying {}...", name.to_string_lossy()));
+                                send_log(notify, format!("  [COPY] Copying {}...", name_str));
                                 let _ = copy_recursive(&src, &target, true);
                                 linked_count += 1;
+                                crate::ledger::record_wallpaper_entry(&dest, &name_str, false);
                             }
                         }
                     }
@@ -807,7 +918,7 @@ fn flow_install_wallpapers(ctx: &TaskContext, notify: Notify) -> TaskResult {
 }
 
 fn flow_uninstall_wallpapers(ctx: &TaskContext, notify: Notify) -> TaskResult {
-    send_log(notify, "=== Removing 8K Wallpaper Collection ===");
+    send_log(notify, "=== Removing 8K Wallpaper Collection (entries-only) ===");
     let dest = ctx.custom_dest.clone().unwrap_or_else(default_wallpaper_dest);
 
     // Test environment guard: never touch real wallpaper storage under `cargo test`.
@@ -817,18 +928,94 @@ fn flow_uninstall_wallpapers(ctx: &TaskContext, notify: Notify) -> TaskResult {
         return TaskResult { summary, success: true };
     }
 
-    if dest.exists() || dest.symlink_metadata().is_ok() {
-        let _ = std::fs::remove_dir_all(&dest);
-        send_log(notify, format!("  [CLEAN] Removed wallpaper directory: {}", dest.display()));
-        let summary = format!("Wallpapers uninstalled from {}.", dest.display());
+    // Candidate entries: everything recorded in the ledger for this
+    // destination (entries created by this installer), plus, for installs made
+    // before the ledger existed, folders in the destination whose names match
+    // the tracked collection root.
+    let mut names: Vec<(String, bool)> = crate::ledger::wallpaper_entries_for(&dest)
+        .into_iter()
+        .map(|e| (e.entry_name, e.is_symlink))
+        .collect();
+    let local_organized = PathBuf::from("Z:\\HK\\8K Wallpaper\\_Organized");
+    let has_collection = local_organized.exists();
+    if has_collection {
+        if let Ok(entries) = std::fs::read_dir(&local_organized) {
+            for entry in entries.flatten() {
+                let name = entry.file_name().to_string_lossy().to_string();
+                if dest.join(&name).symlink_metadata().is_ok()
+                    && !names.iter().any(|(n, _)| *n == name)
+                {
+                    names.push((name, true));
+                }
+            }
+        }
+    }
+
+    if names.is_empty() {
+        send_log(notify, format!("  [INFO] No rice wallpaper entries recorded under {}", dest.display()));
+        let summary = "Wallpapers were not installed.".to_string();
         send_log(notify, summary.clone());
         emit_progress(notify, 100, "Done", summary.clone());
         return TaskResult { summary, success: true };
     }
 
-    send_log(notify, format!("  [INFO] Wallpapers not installed at {}", dest.display()));
-    let summary = "Wallpapers were not installed.".to_string();
+    if is_cancelled(&ctx.cancel_flag) {
+        return cancelled_result(notify);
+    }
+
+    let total = names.len();
+    let mut removed = 0;
+    let mut preserved = 0;
+    for (idx, (name, is_symlink)) in names.iter().enumerate() {
+        emit_progress(notify, ((idx * 100) / total.max(1)) as u16, "Removing wallpapers", name.clone());
+        let entry_path = dest.join(name);
+        if entry_path.symlink_metadata().is_err() {
+            // Already gone; just drop the stale record.
+            crate::ledger::remove_wallpaper_entry(&dest, name);
+            removed += 1;
+            continue;
+        }
+        // Remove the entry itself only (never follow symlinks). A plain
+        // remove_dir handles dir-symlinks and empty dirs; remove_file handles
+        // file symlinks. A copied rice wallpaper directory (contents identical
+        // to the collection copy) is the only case that may be deep-deleted -
+        // and only when the collection root is locally available to compare.
+        let src_path = local_organized.join(name);
+        let res = std::fs::remove_dir(&entry_path)
+            .or_else(|_| std::fs::remove_file(&entry_path))
+            .or_else(|e| {
+                if !*is_symlink && has_collection && crate::linker::paths_equivalent(&src_path, &entry_path, true) {
+                    std::fs::remove_dir_all(&entry_path)
+                } else {
+                    Err(e)
+                }
+            });
+        match res {
+            Ok(_) => {
+                removed += 1;
+                send_log(notify, format!("  [CLEAN] Removed wallpaper entry: {}", entry_path.display()));
+                crate::ledger::remove_wallpaper_entry(&dest, name);
+            }
+            Err(e) => {
+                preserved += 1;
+                send_log(notify, format!("  [PRESERVED] Could not remove {} ({}). Your own media is not deleted.", entry_path.display(), e));
+            }
+        }
+    }
+
+    // The destination directory itself is removed only when empty; anything
+    // remaining is end-user media and stays untouched.
+    let empty_after = std::fs::read_dir(&dest)
+        .map(|mut rd| rd.next().is_none())
+        .unwrap_or(true);
+    if empty_after {
+        let _ = std::fs::remove_dir(&dest);
+    } else {
+        send_log(notify, format!("  [PRESERVED] Destination {} still contains your own files - left untouched.", dest.display()));
+    }
+
+    let summary = format!("Wallpaper entries removed: {}, preserved: {}.", removed, preserved);
     send_log(notify, summary.clone());
     emit_progress(notify, 100, "Done", summary.clone());
-    TaskResult { summary, success: true }
+    TaskResult { summary, success: preserved == 0 }
 }
