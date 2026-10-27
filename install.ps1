@@ -28,6 +28,7 @@ param(
     [switch]$LinkAll,
     [switch]$Unlink,
     [switch]$UnlinkAll,
+    [switch]$UninstallAll,
     [switch]$Install,
     [switch]$InstallMissing,
     [switch]$Bootstrap,
@@ -297,6 +298,7 @@ if ($isRemote) {
         if ($LinkAll) { $extraArgs += "--link-all" }
         if ($Unlink) { $extraArgs += "--unlink" }
         if ($UnlinkAll) { $extraArgs += "--unlink-all" }
+        if ($UninstallAll) { $extraArgs += "--uninstall-all" }
         if ($InstallMissing -or $Install) { $extraArgs += "--install-missing" }
         if ($Bootstrap) { $extraArgs += "--bootstrap" }
         if ($Reload) { $extraArgs += "--reload" }
@@ -336,6 +338,7 @@ if ($Verify) { $extraArgs += "--verify" }
 if ($LinkAll) { $extraArgs += "--link-all" }
 if ($Unlink) { $extraArgs += "--unlink" }
 if ($UnlinkAll) { $extraArgs += "--unlink-all" }
+if ($UninstallAll) { $extraArgs += "--uninstall-all" }
 if ($InstallMissing -or $Install) { $extraArgs += "--install-missing" }
 if ($Bootstrap) { $extraArgs += "--bootstrap" }
 if ($Reload) { $extraArgs += "--reload" }

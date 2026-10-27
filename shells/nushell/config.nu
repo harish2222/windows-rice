@@ -266,6 +266,7 @@ def --env window-rice [
     --link-all                   # Link all configs
     --unlink (-x)                # Unlink configs cleanly and restore backups
     --unlink-all                 # Unlink all configs cleanly without trace and restore backups
+    --uninstall-all              # FULL REVOKE: remove every rice-installed config & wallpaper entry (binaries stay)
     --install-missing            # Install missing packages
     --wallpapers (-w)            # Install 8K wallpapers
     --uninstall-wallpapers       # Uninstall 8K wallpapers
@@ -300,6 +301,7 @@ def --env window-rice [
     if $link_all { $pass_args = ($pass_args | append "--link-all") }
     if $unlink { $pass_args = ($pass_args | append "--unlink") }
     if $unlink_all { $pass_args = ($pass_args | append "--unlink-all") }
+    if $uninstall_all { $pass_args = ($pass_args | append "--uninstall-all") }
     if $install_missing { $pass_args = ($pass_args | append "--install-missing") }
     if $wallpapers { $pass_args = ($pass_args | append "--wallpapers") }
     if $uninstall_wallpapers { $pass_args = ($pass_args | append "--uninstall-wallpapers") }

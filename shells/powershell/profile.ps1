@@ -153,6 +153,7 @@ function window-rice {
         [switch]$LinkAll,
         [Alias('x')][switch]$Unlink,
         [switch]$UnlinkAll,
+        [switch]$UninstallAll,
         [switch]$InstallMissing,
         [Alias('r')][switch]$Reload,
         [Alias('c')][switch]$Update,
@@ -190,6 +191,10 @@ function window-rice {
     if ($LinkAll) { $passArgs += "--link-all" }
     if ($Unlink) { $passArgs += "--unlink" }
     if ($UnlinkAll) { $passArgs += "--unlink-all" }
+    if ($UninstallAll) {
+        Write-Host "FULL REVOKE requested: every rice-installed config & wallpaper entry will be removed (binaries stay)." -ForegroundColor Red
+        $passArgs += "--uninstall-all"
+    }
     if ($InstallMissing) { $passArgs += "--install-missing" }
     if ($Update) { $passArgs += "--update" }
     if ($Wallpapers -or $WallpaperDir) {
