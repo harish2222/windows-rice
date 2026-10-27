@@ -18,6 +18,4 @@ elevate = false
 shell-integration = true
 
 [appearance]
-theme = "catppuccin-mocha-glass"
-theme-dark = "catppuccin-mocha-glass"
 title-prefix = "xonsh"

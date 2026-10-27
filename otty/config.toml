@@ -9,18 +9,11 @@
 #
 #  Only flat, documented keys are used here. Otty silently ignores unknown keys
 #  ("gpu_acceleration", "material", "blur", "line-height" are NOT config keys —
-#  they live inside .ottytheme files).
-#
-#  Frosted glass: the theme `catppuccin-mocha-glass` asks the XAML compositor
-#  for `acrylic-thin` on the window frame and `acrylic` on the chrome columns.
-#  A previous setup put `material = "acrylic"` on the whole window and that
-#  crashed the compositor on this build, so the thin variant is used instead.
+#  they live inside .ottytheme files). No custom theme is set: otty default.
 # =============================================================================
 
 # --- Theme -------------------------------------------------------------------
-theme = "catppuccin-mocha-glass"
-theme-dark = "catppuccin-mocha-glass"
-auto-theme-dark-mode = false
+# No theme keys: otty falls back to its built-in default theme (One Light / Acrylic Dark).
 
 # --- Shell -------------------------------------------------------------------
 # `command` is the documented shell key for panes launched without a profile.
@@ -41,14 +34,8 @@ windows-text-rendering = "natural"
 # --- Cursor ------------------------------------------------------------------
 cursor-style = "underline"
 cursor-style-blink = "always_off"
-cursor-color = "#f5e0dc"
 
 # --- Window / performance ----------------------------------------------------
-# Acrylic is supplied by the theme's [windows] material block; window-opacity is kept
-# at 1.0 so the OS compositor does not create a raw alpha hole over the desktop,
-# while background-opacity at 0.92 gives neutral frosted glass blur without wallpaper bleed.
-background-opacity = 0.92
-window-opacity = 1.0
 window-size = "remember"
 scrollback-lines = 50000
 session-log-size-mb = 10
@@ -78,26 +65,6 @@ language = "english"
 auto-hide-tabs-panel = "auto"
 editor-visible-whitespace = true
 # term = "xterm-ghostty" (reset to default)
-
-# --- Catppuccin Mocha palette -------------------------------------------------
-foreground = "#cdd6f4"
-background = "#1e1e2e"
-palette-0 = "#45475a"
-palette-1 = "#f38ba8"
-palette-2 = "#a6e3a1"
-palette-3 = "#f9e2af"
-palette-4 = "#89b4fa"
-palette-5 = "#f5c2e7"
-palette-6 = "#94e2d5"
-palette-7 = "#bac2de"
-palette-8 = "#585b70"
-palette-9 = "#f38ba8"
-palette-10 = "#a6e3a1"
-palette-11 = "#f9e2af"
-palette-12 = "#89b4fa"
-palette-13 = "#f5c2e7"
-palette-14 = "#94e2d5"
-palette-15 = "#a6adc8"
 
 # --- Profiles ----------------------------------------------------------------
 profile = "18dfa98576390b5000000000"
