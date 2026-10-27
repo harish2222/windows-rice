@@ -166,8 +166,9 @@ Describe "Tier 4 - Real-World End-to-End User Workflows" {
             Should-Contain $report $c "Verifier must report component $c"
         }
 
-        # Carapace count
-        Should-Contain $report "63 custom YAML specs loaded" "Must report 63 carapace specs"
+        # Carapace count (dynamic - the spec directory keeps growing with the rice)
+        $specCount = (Get-ChildItem (Join-Path $RepoRoot "carapace\specs") -Filter *.yaml | Measure-Object).Count
+        Should-Contain $report "$specCount custom YAML specs loaded" "Must report $specCount carapace specs"
         Should-Contain $report "23/23 binaries detected" "Must report 23/23 binaries detected"
     }
 }
