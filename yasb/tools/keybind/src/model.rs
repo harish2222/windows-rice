@@ -231,7 +231,8 @@ mod tests {
         let f2 = filter_keybinds(&all, "alt+f");
         assert!(!f2.is_empty());
         let f3 = filter_keybinds(&all, "terminal");
-        assert_eq!(f3.len(), 3);
+        // 4 terminal launchers now ship: Otty, Win+Return wt, Alt+Shift+Return wt, Win+Shift+Return alacritty.
+        assert_eq!(f3.len(), 4);
     }
 
     #[test]
@@ -251,7 +252,7 @@ mod tests {
             assert_eq!(all[idx].category, "Navigation");
         }
         let term = filter_keybinds_with_category(&all, "terminal", Some("Launchers"));
-        assert_eq!(term.len(), 3);
+        assert_eq!(term.len(), 4);
     }
 
     #[test]
