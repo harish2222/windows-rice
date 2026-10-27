@@ -840,7 +840,10 @@ if _which("carapace"):
 
             cmd = ["carapace", clean_cmd, "xonsh", *extra_prefix_args, *words, current_prefix]
             try:
-                proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
+                # Timer: carapace spawns per completion (~220-560 ms warm, worse
+                # on cache misses); a hung spec must never block the Tab key.
+                # run() kills the child and re-raises, caught below as None.
+                proc = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=2.0)
                 if proc.returncode != 0 or not proc.stdout.strip():
                     return None
                 data = json.loads(proc.stdout)
