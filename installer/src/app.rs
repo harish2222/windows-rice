@@ -4,12 +4,13 @@
 // Title -: WINDOW-RICE Installer Application State
 // ============================================================================
 use std::path::PathBuf;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::mpsc::{self, Receiver};
 use std::sync::Mutex;
+use std::sync::Arc;
 use crate::catalog::{get_catalog, PackageItem};
-use crate::detect::{detect_package_managers, inspect_package, ItemInspection, PackageManagerStatus, BinaryStatus, LinkStatus};
-use crate::linker::{link_config_mapping, LinkOutcome};
-use crate::bootstrap::{bootstrap_scoop, bootstrap_choco, run_package_install};
-use crate::verifier::run_verification;
+use crate::detect::{detect_package_managers, inspect_package, ItemInspection, PackageManagerStatus};
+use crate::worker::{self, PackageJob, TaskContext, WorkerMessage, WorkerTask};
 use crossterm::event::KeyCode;
 
 static LOG_MUTEX: Mutex<()> = Mutex::new(());
@@ -68,6 +69,17 @@ pub struct App {
     pub status_message: String,
     pub git_update_status: Option<String>,
     pub should_quit: bool,
+    // === Async worker state (TUI mode; CLI/unit tests stay synchronous) ===
+    pub async_worker: bool,
+    pub is_busy: bool,
+    pub active_task_name: Option<String>,
+    pub progress_percentage: u16,
+    pub progress_label: String,
+    pub progress_detail: String,
+    pub log_scroll_offset: usize,
+    pub cancel_flag: Arc<AtomicBool>,
+    worker_rx: Option<Receiver<WorkerMessage>>,
+    worker_handle: Option<std::thread::JoinHandle<()>>,
 }
 
 impl App {
@@ -95,6 +107,16 @@ impl App {
             status_message: "WINDOW-RICE ready. [Space/Enter] Toggle | [l] Link | [u/x] Unlink & Restore | [r] Reload | [c] Updates".to_string(),
             git_update_status: None,
             should_quit: false,
+            async_worker: false,
+            is_busy: false,
+            active_task_name: None,
+            progress_percentage: 0,
+            progress_label: "Ready".to_string(),
+            progress_detail: String::new(),
+            log_scroll_offset: 0,
+            cancel_flag: Arc::new(AtomicBool::new(false)),
+            worker_rx: None,
+            worker_handle: None,
         };
 
         app.add_log("WINDOW-RICE installer initialized.");
@@ -157,6 +179,37 @@ impl App {
     }
 
     pub fn handle_key(&mut self, code: KeyCode) -> bool {
+        if self.is_busy {
+            // Busy mode: only navigation, selection, console scroll, cancel & quit.
+            match code {
+                KeyCode::Esc => {
+                    self.cancel_current_task();
+                }
+                KeyCode::Down | KeyCode::Char('j') | KeyCode::Char('J') => {
+                    self.next_item();
+                }
+                KeyCode::Up | KeyCode::Char('k') | KeyCode::Char('K') => {
+                    self.prev_item();
+                }
+                KeyCode::PageDown => self.page_down(),
+                KeyCode::PageUp => self.page_up(),
+                KeyCode::Home => self.home(),
+                KeyCode::End => self.end(),
+                KeyCode::Char(' ') | KeyCode::Enter => {
+                    self.toggle_selected();
+                }
+                KeyCode::Char('[') => self.scroll_log_up(),
+                KeyCode::Char(']') => self.scroll_log_down(),
+                KeyCode::Char('q') | KeyCode::Char('Q') => {
+                    self.cancel_current_task();
+                    self.should_quit = true;
+                }
+                // Action hotkeys (i/l/u/b/r/c/v/w, a/m/n/g...) are ignored while busy.
+                _ => {}
+            }
+            return self.should_quit;
+        }
+
         match code {
             KeyCode::Char('q') | KeyCode::Char('Q') | KeyCode::Esc => {
                 self.should_quit = true;
@@ -191,32 +244,38 @@ impl App {
             KeyCode::Char('m') | KeyCode::Char('M') => {
                 self.select_missing_only();
             }
+            KeyCode::Char('[') => {
+                self.scroll_log_up();
+            }
+            KeyCode::Char(']') => {
+                self.scroll_log_down();
+            }
             KeyCode::Char('l') | KeyCode::Char('L') => {
-                self.link_selected_configs();
+                self.dispatch(WorkerTask::Link);
             }
             KeyCode::Char('u') | KeyCode::Char('U')
             | KeyCode::Char('x') | KeyCode::Char('X')
             | KeyCode::Delete => {
-                self.unlink_selected_configs();
+                self.dispatch(WorkerTask::Unlink);
             }
             KeyCode::Char('i') | KeyCode::Char('I') => {
-                self.install_and_link_selected();
+                self.dispatch(WorkerTask::InstallLink);
             }
             KeyCode::Char('v') | KeyCode::Char('V') => {
-                self.run_verification_report();
+                self.dispatch(WorkerTask::Verify);
             }
             KeyCode::Char('b') | KeyCode::Char('B') => {
-                self.bootstrap_package_managers();
+                self.dispatch(WorkerTask::Bootstrap);
             }
             KeyCode::Char('r') | KeyCode::Char('R') => {
-                self.reload_environment();
+                self.dispatch(WorkerTask::Reload);
             }
             KeyCode::Char('c') | KeyCode::Char('C')
             | KeyCode::Char('g') | KeyCode::Char('G') => {
-                self.check_updates();
+                self.dispatch(WorkerTask::CheckUpdates);
             }
             KeyCode::Char('w') | KeyCode::Char('W') => {
-                self.install_wallpapers(None);
+                self.dispatch(WorkerTask::Wallpapers);
             }
             _ => {}
         }
@@ -251,115 +310,267 @@ impl App {
         self.status_message = "Selected all missing/unlinked items.".to_string();
     }
 
-    pub fn link_selected_configs(&mut self) {
-        self.add_log("--- Starting Config Linking ---");
-        let mut count_symlink = 0;
-        let mut count_copy = 0;
-        let mut count_valid = 0;
-        let mut count_backed_up = 0;
-        let mut count_err = 0;
+    // ========================================================================
+    // Async worker plumbing (TUI: worker thread; CLI/tests: synchronous pass)
+    // ========================================================================
 
-        let selected_pkgs: Vec<(String, String, Vec<crate::catalog::ConfigMapping>)> = self.items
-            .iter()
-            .filter(|i| i.selected && !i.package.configs.is_empty())
-            .map(|i| (i.package.id.to_string(), i.package.name.to_string(), i.package.configs.clone()))
-            .collect();
+    /// Routes a worker-produced message into App state for the synchronous path.
+    fn absorb_sync_message(&mut self, msg: WorkerMessage) {
+        match msg {
+            WorkerMessage::Log(text) => {
+                self.logs.push(text.clone());
+                log_to_file(&text);
+            }
+            WorkerMessage::Progress { percentage, label, detail } => {
+                self.progress_percentage = percentage;
+                self.progress_label = label;
+                self.progress_detail = detail;
+            }
+            WorkerMessage::PmStatus(pm) => {
+                self.pm_status = pm;
+            }
+            WorkerMessage::GitStatus(status) => {
+                self.git_update_status = Some(status);
+            }
+            WorkerMessage::TaskFinished { .. } => {}
+        }
+    }
 
-        for (pkg_id, pkg_name, configs) in selected_pkgs {
-            self.add_log(format!("Linking configs for {}:", pkg_name));
-            for mapping in &configs {
-                match link_config_mapping(&self.repo_root, mapping, &pkg_id) {
-                    LinkOutcome::SymlinkCreated(target) => {
-                        count_symlink += 1;
-                        self.add_log(format!("  [SYMLINK] -> {}", target.display()));
-                    }
-                    LinkOutcome::CopiedFallback(target) => {
-                        count_copy += 1;
-                        self.add_log(format!("  [COPIED]  -> {}", target.display()));
-                    }
-                    LinkOutcome::BackedUpAndLinked { target, backup } => {
-                        count_backed_up += 1;
-                        count_symlink += 1;
-                        self.add_log(format!("  [BACKUP]  -> Existing saved to {}", backup.display()));
-                        self.add_log(format!("  [SYMLINK] -> {}", target.display()));
-                    }
-                    LinkOutcome::AlreadyValid(target) => {
-                        count_valid += 1;
-                        self.add_log(format!("  [ALREADY] -> {}", target.display()));
-                    }
-                    LinkOutcome::Failed(err) => {
-                        count_err += 1;
-                        self.add_log(format!("  [ERROR]   -> {}", err));
-                    }
+    /// Snapshot of everything a task needs, taken before the worker starts.
+    fn build_task_context(&self, task: WorkerTask) -> Result<TaskContext, (String, String)> {
+        let mut ctx = TaskContext::new(self.repo_root.clone(), self.cancel_flag.clone(), self.pm_status.clone());
+        match task {
+            WorkerTask::InstallLink => {
+                let packages: Vec<PackageItem> = self
+                    .items
+                    .iter()
+                    .filter(|i| i.selected)
+                    .map(|i| i.package.clone())
+                    .collect();
+                if packages.is_empty() {
+                    return Err((
+                        "No packages selected for installation.".to_string(),
+                        "No packages selected.".to_string(),
+                    ));
+                }
+                ctx.packages = packages;
+            }
+            WorkerTask::Link => {
+                ctx.jobs = self
+                    .items
+                    .iter()
+                    .filter(|i| i.selected && !i.package.configs.is_empty())
+                    .map(|i| PackageJob {
+                        pkg_id: i.package.id.to_string(),
+                        pkg_name: i.package.name.to_string(),
+                        configs: i.package.configs.clone(),
+                    })
+                    .collect();
+                ctx.also_install_wallpapers = self.items.iter().any(|i| i.selected && i.package.id == "wallpapers");
+            }
+            WorkerTask::Unlink => {
+                ctx.jobs = self
+                    .items
+                    .iter()
+                    .filter(|i| i.selected)
+                    .map(|i| PackageJob {
+                        pkg_id: i.package.id.to_string(),
+                        pkg_name: i.package.name.to_string(),
+                        configs: i.package.configs.clone(),
+                    })
+                    .collect();
+            }
+            WorkerTask::Bootstrap | WorkerTask::Verify | WorkerTask::Reload | WorkerTask::CheckUpdates => {}
+            WorkerTask::Wallpapers => {
+                ctx.custom_dest = None;
+            }
+        }
+        Ok(ctx)
+    }
+
+    /// Runs a task synchronously by routing flow messages into App state.
+    fn run_task_flow(&mut self, task: WorkerTask, ctx: TaskContext) -> String {
+        let result = match task {
+            WorkerTask::InstallLink => worker::flow_install(&ctx, &mut |m| self.absorb_sync_message(m)),
+            WorkerTask::Link => worker::flow_link(&ctx, &mut |m| self.absorb_sync_message(m)),
+            WorkerTask::Unlink => worker::flow_unlink(&ctx, &mut |m| self.absorb_sync_message(m)),
+            WorkerTask::Bootstrap => worker::flow_bootstrap(&ctx, &mut |m| self.absorb_sync_message(m)),
+            WorkerTask::Verify => worker::flow_verify(&ctx, &mut |m| self.absorb_sync_message(m)),
+            WorkerTask::Reload => worker::flow_reload(&ctx, &mut |m| self.absorb_sync_message(m)),
+            WorkerTask::CheckUpdates => worker::flow_check_updates(&ctx, &mut |m| self.absorb_sync_message(m)),
+            WorkerTask::Wallpapers => worker::flow_wallpapers(&ctx, false, &mut |m| self.absorb_sync_message(m)),
+        };
+        result.summary
+    }
+
+    /// Single dispatch point for every action hotkey / API entry.
+    fn dispatch(&mut self, task: WorkerTask) {
+        if self.async_worker {
+            self.start_worker_task(task);
+        } else {
+            match self.build_task_context(task) {
+                Ok(ctx) => {
+                    let summary = self.run_task_flow(task, ctx);
+                    self.refresh_detection();
+                    self.status_message = summary;
+                }
+                Err((log, status)) => {
+                    self.add_log(log);
+                    self.status_message = status;
                 }
             }
         }
+    }
 
-        self.refresh_detection();
-        self.status_message = format!("Linked configs: {} symlinks ({} backed up), {} copied, {} already valid, {} failed.",
-            count_symlink, count_backed_up, count_copy, count_valid, count_err);
-        self.add_log(self.status_message.clone());
-
-        // Check if wallpapers was selected
-        if self.items.iter().any(|i| i.selected && i.package.id == "wallpapers") {
-            self.install_wallpapers(None);
+    /// TUI entry: hands a task to a dedicated worker thread and switches to busy mode.
+    pub fn start_worker_task(&mut self, task: WorkerTask) {
+        if self.is_busy {
+            self.add_log("[WARN] A task is already running. Press Esc to cancel it before starting a new one.");
+            return;
         }
 
-        // Automatically reload window managers and status bar
-        self.reload_environment();
+        let ctx = match self.build_task_context(task) {
+            Ok(ctx) => ctx,
+            Err((log, status)) => {
+                self.add_log(log);
+                self.status_message = status;
+                return;
+            }
+        };
+
+        let (tx, rx) = mpsc::channel::<WorkerMessage>();
+        self.worker_rx = Some(rx);
+        self.is_busy = true;
+        self.active_task_name = Some(task.display_name().to_string());
+        self.progress_percentage = 0;
+        self.progress_label = "Initializing...".to_string();
+        self.progress_detail = String::new();
+        self.log_scroll_offset = 0;
+        self.status_message = format!("Task started: {}. Press Esc to cancel.", task.display_name());
+        self.add_log(format!("[START] Dispatching task '{}' to worker thread.", task.display_name()));
+
+        // Fresh cancellation token exclusively for this task.
+        self.cancel_flag = Arc::new(AtomicBool::new(false));
+        let ctx = TaskContext {
+            cancel_flag: self.cancel_flag.clone(),
+            ensure_pm: true,
+            stream_install: true,
+            ..ctx
+        };
+
+        let task_name = task.display_name().to_string();
+        let thread_name = format!("rice-worker-{}", task_name.to_lowercase().replace([' '], "-"));
+        let spawned = std::thread::Builder::new()
+            .name(thread_name)
+            .spawn(move || {
+                let result = worker::run_flow(task, &ctx, &mut |m: WorkerMessage| {
+                    let _ = tx.send(m);
+                });
+                let _ = tx.send(WorkerMessage::TaskFinished {
+                    task_name,
+                    success: result.success,
+                    summary: result.summary,
+                });
+            });
+
+        match spawned {
+            Ok(handle) => self.worker_handle = Some(handle),
+            Err(e) => {
+                self.is_busy = false;
+                self.active_task_name = None;
+                self.worker_rx = None;
+                self.status_message = "Failed to start worker thread.".to_string();
+                self.add_log(format!("[ERROR] Failed to spawn worker thread: {}", e));
+            }
+        }
+    }
+
+    /// Drains worker messages called from the TUI event loop every frame.
+    pub fn poll_worker_events(&mut self) {
+        if let Some(rx) = self.worker_rx.take() {
+            let mut task_done = false;
+            while let Ok(msg) = rx.try_recv() {
+                match msg {
+                    WorkerMessage::Log(text) => {
+                        self.logs.push(text.clone());
+                        log_to_file(&text);
+                    }
+                    WorkerMessage::Progress { percentage, label, detail } => {
+                        self.progress_percentage = percentage;
+                        self.progress_label = label;
+                        self.progress_detail = detail;
+                    }
+                    WorkerMessage::PmStatus(pm) => {
+                        self.pm_status = pm;
+                    }
+                    WorkerMessage::GitStatus(status) => {
+                        self.git_update_status = Some(status);
+                    }
+                    WorkerMessage::TaskFinished { task_name, success, summary } => {
+                        self.is_busy = false;
+                        self.active_task_name = None;
+                        self.worker_handle = None;
+                        self.status_message = summary.clone();
+                        self.progress_percentage = 0;
+                        self.progress_label = "Ready".to_string();
+                        self.progress_detail = String::new();
+                        if !success {
+                            self.add_log(format!("[ENDED] Task '{}' ended: {}", task_name, summary));
+                        }
+                        self.refresh_detection();
+                        task_done = true;
+                    }
+                }
+            }
+            self.worker_rx = if task_done { None } else { Some(rx) };
+        }
+
+        // Safety net: worker thread ended without sending TaskFinished (panic etc.).
+        if self.is_busy {
+            let thread_ended = self.worker_handle.as_ref().map_or(false, |h| h.is_finished());
+            if thread_ended {
+                self.worker_handle = None;
+                self.worker_rx = None;
+                self.is_busy = false;
+                self.active_task_name = None;
+                self.progress_percentage = 0;
+                self.progress_label = "Ready".to_string();
+                self.progress_detail = String::new();
+                self.add_log("[ERROR] Worker thread ended without a completion message.".to_string());
+                self.status_message = "Worker thread ended unexpectedly.".to_string();
+                self.refresh_detection();
+            }
+        }
+    }
+
+    /// Requests cooperative cancellation of the running task (Esc during busy).
+    pub fn cancel_current_task(&mut self) {
+        if !self.is_busy {
+            return;
+        }
+        if !self.cancel_flag.swap(true, Ordering::SeqCst) {
+            self.add_log("[CANCEL] Cancellation requested - signalling worker task...");
+        }
+        self.status_message = "Cancelling current task...".to_string();
+    }
+
+    /// Scrolls the activity console backwards (older entries).
+    pub fn scroll_log_up(&mut self) {
+        let max = self.logs.len();
+        self.log_scroll_offset = (self.log_scroll_offset + 10).min(max);
+    }
+
+    /// Scrolls the activity console forwards / back to live tail.
+    pub fn scroll_log_down(&mut self) {
+        self.log_scroll_offset = self.log_scroll_offset.saturating_sub(10);
+    }
+
+    pub fn link_selected_configs(&mut self) {
+        self.dispatch(WorkerTask::Link);
     }
 
     pub fn unlink_selected_configs(&mut self) {
-        self.add_log("--- Starting Config Removal & Unlinking (Preserving Binaries) ---");
-        let mut count_restored = 0;
-        let mut count_cleaned = 0;
-        let mut count_not_linked = 0;
-        let mut count_err = 0;
-
-        let selected_pkgs: Vec<(String, String, Vec<crate::catalog::ConfigMapping>)> = self.items
-            .iter()
-            .filter(|i| i.selected)
-            .map(|i| (i.package.id.to_string(), i.package.name.to_string(), i.package.configs.clone()))
-            .collect();
-
-        for (pkg_id, pkg_name, configs) in selected_pkgs {
-            if pkg_id == "wallpapers" {
-                self.add_log("Uninstalling 8K Wallpapers from Pictures...");
-                self.uninstall_wallpapers(None);
-                continue;
-            }
-
-            self.add_log(format!("Removing configs for {} (binaries kept):", pkg_name));
-            for mapping in &configs {
-                match crate::linker::unlink_config_mapping(&self.repo_root, mapping, &pkg_id) {
-                    crate::linker::UnlinkOutcome::UnlinkedAndRestored { target, backup_source } => {
-                        count_restored += 1;
-                        self.add_log(format!("  [RESTORED] -> Restored backup: {}", backup_source.display()));
-                        self.add_log(format!("  [TARGET]   -> {}", target.display()));
-                    }
-                    crate::linker::UnlinkOutcome::UnlinkedCleanly(target) => {
-                        count_cleaned += 1;
-                        self.add_log(format!("  [CLEAN]    -> Removed {}", target.display()));
-                    }
-                    crate::linker::UnlinkOutcome::NotLinked(target) => {
-                        count_not_linked += 1;
-                        self.add_log(format!("  [NO-OP]    -> Not linked: {}", target.display()));
-                    }
-                    crate::linker::UnlinkOutcome::Failed(err) => {
-                        count_err += 1;
-                        self.add_log(format!("  [ERROR]    -> {}", err));
-                    }
-                }
-            }
-        }
-
-        self.refresh_detection();
-        self.status_message = format!("Unlink complete: {} restored from backup, {} cleaned, {} no-op, {} failed.",
-            count_restored, count_cleaned, count_not_linked, count_err);
-        self.add_log(self.status_message.clone());
-
-        // Automatically reload window managers and status bar
-        self.reload_environment();
+        self.dispatch(WorkerTask::Unlink);
     }
 
     pub fn unlink_all_configs(&mut self) {
@@ -368,394 +579,37 @@ impl App {
     }
 
     pub fn install_and_link_selected(&mut self) {
-        self.add_log("--- Starting Sequential Package Installation, Linking & Verification ---");
-
-        let selected_pkgs: Vec<PackageItem> = self.items
-            .iter()
-            .filter(|i| i.selected)
-            .map(|i| i.package.clone())
-            .collect();
-
-        if selected_pkgs.is_empty() {
-            self.add_log("No packages selected for installation.");
-            self.status_message = "No packages selected.".to_string();
-            return;
-        }
-
-        let mut total_installed_bin = 0;
-        let mut total_symlinks = 0;
-        let mut total_copies = 0;
-        let mut total_backed_up = 0;
-        let mut total_valid = 0;
-        let mut total_errors = 0;
-
-        for (idx, pkg) in selected_pkgs.iter().enumerate() {
-            self.add_log(format!(
-                "=== [{}/{}] Processing: {} ({}) ===",
-                idx + 1,
-                selected_pkgs.len(),
-                pkg.name,
-                pkg.id
-            ));
-
-            // Step 1: Binary Installation (if missing)
-            let inspection_before = inspect_package(pkg, &self.repo_root);
-            match inspection_before.binary_status {
-                BinaryStatus::Missing => {
-                    let cmd_opt = if self.pm_status.scoop && pkg.scoop_cmd.is_some() {
-                        pkg.scoop_cmd.map(|s| s.to_string())
-                    } else if self.pm_status.winget && pkg.winget_cmd.is_some() {
-                        pkg.winget_cmd.map(|s| s.to_string())
-                    } else if self.pm_status.choco && pkg.choco_cmd.is_some() {
-                        pkg.choco_cmd.map(|s| s.to_string())
-                    } else if self.pm_status.cargo && pkg.cargo_cmd.is_some() {
-                        pkg.cargo_cmd.map(|s| s.to_string())
-                    } else {
-                        pkg.scoop_cmd.or(pkg.winget_cmd).map(|s| s.to_string())
-                    };
-
-                    if let Some(cmd) = cmd_opt {
-                        self.add_log(format!("  [STEP 1: INSTALL] Installing binary for {} via: {}", pkg.name, cmd));
-                        match run_package_install(&cmd) {
-                            Ok(_) => {
-                                total_installed_bin += 1;
-                                self.add_log(format!("  [PASS] Installed binary for {}", pkg.name));
-                            }
-                            Err(e) => {
-                                total_errors += 1;
-                                self.add_log(format!("  [FAIL] Error installing binary for {}: {}", pkg.name, e));
-                            }
-                        }
-                    } else {
-                        self.add_log(format!("  [NOTE] No automated install command available for {}", pkg.name));
-                    }
-                }
-                BinaryStatus::Installed(ref p) => {
-                    self.add_log(format!("  [STEP 1: BINARY] Binary already installed: {}", p.display()));
-                }
-            }
-
-            // Step 2: Connect / Link Configuration
-            if pkg.id == "wallpapers" {
-                self.add_log("  [STEP 2: WALLPAPERS] Installing 8K Wallpapers to Pictures...");
-                self.install_wallpapers(None);
-            } else if !pkg.configs.is_empty() {
-                self.add_log(format!("  [STEP 2: CONFIG] Connecting & linking configurations for {}:", pkg.name));
-                for mapping in &pkg.configs {
-                    match link_config_mapping(&self.repo_root, mapping, &pkg.id) {
-                        LinkOutcome::SymlinkCreated(target) => {
-                            total_symlinks += 1;
-                            self.add_log(format!("    [SYMLINK]  -> Linked to {}", target.display()));
-                        }
-                        LinkOutcome::CopiedFallback(target) => {
-                            total_copies += 1;
-                            self.add_log(format!("    [COPIED]   -> Copied fallback to {}", target.display()));
-                        }
-                        LinkOutcome::BackedUpAndLinked { target, backup } => {
-                            total_backed_up += 1;
-                            total_symlinks += 1;
-                            self.add_log(format!("    [BACKUP]   -> Existing saved to {}", backup.display()));
-                            self.add_log(format!("    [SYMLINK]  -> Linked to {}", target.display()));
-                        }
-                        LinkOutcome::AlreadyValid(target) => {
-                            total_valid += 1;
-                            self.add_log(format!("    [ALREADY]  -> Already valid at {}", target.display()));
-                        }
-                        LinkOutcome::Failed(err) => {
-                            total_errors += 1;
-                            self.add_log(format!("    [ERROR]    -> Failed: {}", err));
-                        }
-                    }
-                }
-            } else {
-                self.add_log("  [STEP 2: CONFIG] No configuration files required.");
-            }
-
-            // Step 3: Test and Verify Package Setup
-            self.add_log(format!("  [STEP 3: VERIFY] Testing installation & configuration for {}:", pkg.name));
-            let inspection_after = inspect_package(pkg, &self.repo_root);
-
-            match &inspection_after.binary_status {
-                BinaryStatus::Installed(p) => {
-                    self.add_log(format!("    [TEST: PASS] Binary verified: {}", p.display()));
-                }
-                BinaryStatus::Missing => {
-                    self.add_log(format!("    [TEST: WARN] Binary not detected in current PATH (may need shell restart)."));
-                }
-            }
-
-            match &inspection_after.link_status {
-                LinkStatus::LinkedSymlink(p) => {
-                    self.add_log(format!("    [TEST: PASS] Config symlink verified: {}", p.display()));
-                }
-                LinkStatus::LinkedCopy(p) => {
-                    self.add_log(format!("    [TEST: PASS] Config copy verified: {}", p.display()));
-                }
-                LinkStatus::NotApplicable => {
-                    self.add_log("    [TEST: PASS] Config check: N/A".to_string());
-                }
-                LinkStatus::NotLinked => {
-                    self.add_log(format!("    [TEST: WARN] One or more configuration files not linked for {}.", pkg.name));
-                }
-            }
-
-            if !inspection_after.is_missing_any {
-                self.add_log(format!("  [RESULT: READY] {} is fully configured and verified.", pkg.name));
-            } else {
-                self.add_log(format!("  [RESULT: PENDING] {} partially configured (see warnings above).", pkg.name));
-            }
-
-            self.add_log(format!("Finished setup for {}. Advancing to next selected option...\n", pkg.name));
-        }
-
-        self.refresh_detection();
-        self.reload_environment();
-
-        self.status_message = format!(
-            "Setup complete for {} package(s): {} binaries installed, {} symlinks ({} backed up), {} copied, {} valid, {} errors.",
-            selected_pkgs.len(),
-            total_installed_bin,
-            total_symlinks,
-            total_backed_up,
-            total_copies,
-            total_valid,
-            total_errors
-        );
-        self.add_log(format!("--- {} ---", self.status_message));
-    }
-
-    pub fn run_verification_report(&mut self) {
-        self.add_log("--- Running Health Check Report ---");
-        let report = run_verification(&self.repo_root);
-        for line in report.lines {
-            self.add_log(line);
-        }
-        self.refresh_detection();
-        self.status_message = format!("Health check complete: {}/{} binaries, {}/{} configs.",
-            report.installed_binaries, report.total_packages, report.linked_configs, report.total_packages);
-        self.add_log(self.status_message.clone());
+        self.dispatch(WorkerTask::InstallLink);
     }
 
     pub fn bootstrap_package_managers(&mut self) {
-        self.add_log("--- Bootstrapping Package Managers ---");
-        if !self.pm_status.scoop {
-            self.add_log("Bootstrapping Scoop...");
-            match bootstrap_scoop() {
-                Ok(_) => self.add_log("  [PASS] Scoop successfully bootstrapped!"),
-                Err(e) => self.add_log(format!("  [FAIL] Failed to bootstrap Scoop: {}", e)),
-            }
-        } else {
-            self.add_log("Scoop is already installed.");
-        }
-
-        if !self.pm_status.choco {
-            self.add_log("Bootstrapping Chocolatey...");
-            match bootstrap_choco() {
-                Ok(_) => self.add_log("  [PASS] Chocolatey successfully bootstrapped!"),
-                Err(e) => self.add_log(format!("  [FAIL] Failed to bootstrap Chocolatey: {}", e)),
-            }
-        } else {
-            self.add_log("Chocolatey is already installed.");
-        }
-
-        if !self.pm_status.uv {
-            self.add_log("Bootstrapping UV...");
-            match crate::bootstrap::bootstrap_uv() {
-                Ok(_) => self.add_log("  [PASS] UV successfully bootstrapped!"),
-                Err(e) => self.add_log(format!("  [FAIL] Failed to bootstrap UV: {}", e)),
-            }
-        } else {
-            self.add_log("UV is already installed.");
-        }
-
-        if !self.pm_status.vcpkg {
-            self.add_log("Bootstrapping Vcpkg...");
-            match crate::bootstrap::bootstrap_vcpkg() {
-                Ok(_) => self.add_log("  [PASS] Vcpkg successfully bootstrapped!"),
-                Err(e) => self.add_log(format!("  [FAIL] Failed to bootstrap Vcpkg: {}", e)),
-            }
-        } else {
-            self.add_log("Vcpkg is already installed.");
-        }
-
-        self.refresh_detection();
+        self.dispatch(WorkerTask::Bootstrap);
     }
 
     pub fn reload_environment(&mut self) {
-        self.add_log("=== Reloading Windows Rice Environment ===");
-
-        // 1. Komorebi
-        if crate::detect::find_binary_in_path("komorebic.exe").is_some() {
-            self.add_log("Reloading Komorebi configuration...");
-            let config_path = crate::catalog::resolve_target_path(".config/komorebi/komorebi.json");
-            let res = std::process::Command::new("komorebic")
-                .args(["replace-configuration", &config_path.to_string_lossy()])
-                .output();
-            match res {
-                Ok(out) if out.status.success() => self.add_log("  [PASS] Komorebi configuration reloaded."),
-                Ok(out) => {
-                    let err = String::from_utf8_lossy(&out.stderr);
-                    if err.trim().is_empty() {
-                        self.add_log("  [PASS] Komorebi configuration reloaded.");
-                    } else {
-                        self.add_log(format!("  [INFO] Komorebi reload: {}", err.trim()));
-                    }
-                }
-                Err(e) => self.add_log(format!("  [WARN] Komorebi reload notice: {}", e)),
-            }
-        } else {
-            self.add_log("  [INFO] komorebic not in PATH (skipping).");
-        }
-
-        // 2. GlazeWM
-        if crate::detect::find_binary_in_path("glazewm.exe").is_some() {
-            self.add_log("Reloading GlazeWM hotkey layer...");
-            let res = std::process::Command::new("glazewm")
-                .args(["command", "wm-reload-config"])
-                .output();
-            match res {
-                Ok(out) if out.status.success() => self.add_log("  [PASS] GlazeWM hotkey layer reloaded."),
-                Ok(out) => {
-                    let err = String::from_utf8_lossy(&out.stderr);
-                    if err.trim().is_empty() {
-                        self.add_log("  [PASS] GlazeWM hotkey layer reloaded.");
-                    } else {
-                        self.add_log(format!("  [INFO] GlazeWM: {}", err.trim()));
-                    }
-                }
-                Err(e) => self.add_log(format!("  [WARN] GlazeWM reload notice: {}", e)),
-            }
-        } else {
-            self.add_log("  [INFO] glazewm not in PATH (skipping).");
-        }
-
-        // 3. YASB
-        let yasb_setup = self.repo_root.join("yasb/tools/setup/yasb-setup.ps1");
-        if yasb_setup.exists() {
-            self.add_log("Re-running YASB status bar replication / verification...");
-            let res = std::process::Command::new("pwsh")
-                .args(["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", &yasb_setup.to_string_lossy()])
-                .output()
-                .or_else(|_| {
-                    std::process::Command::new("powershell")
-                        .args(["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", &yasb_setup.to_string_lossy()])
-                        .output()
-                });
-            match res {
-                Ok(out) if out.status.success() => self.add_log("  [PASS] YASB status bar active and verified."),
-                Ok(out) => {
-                    let out_msg = String::from_utf8_lossy(&out.stdout);
-                    self.add_log(format!("  [PASS] YASB updated: {}", out_msg.lines().next().unwrap_or("OK")));
-                }
-                Err(e) => self.add_log(format!("  [WARN] YASB setup notice: {}", e)),
-            }
-        }
-
-        self.status_message = "Windows Rice environment (Komorebi, GlazeWM, YASB) reloaded!".to_string();
-        self.add_log(self.status_message.clone());
+        self.dispatch(WorkerTask::Reload);
     }
 
     pub fn check_updates(&mut self) {
-        self.add_log("Checking for repository updates against origin/main...");
-        let git_status = std::process::Command::new("git")
-            .args(["-C", &self.repo_root.to_string_lossy(), "status", "-uno"])
-            .output();
-
-        if let Ok(out) = git_status {
-            let msg = String::from_utf8_lossy(&out.stdout);
-            if msg.contains("Your branch is behind") {
-                self.git_update_status = Some("UPDATE AVAILABLE".to_string());
-                self.add_log("  [WARN] Updates available on origin/main! Run 'git pull' to update.");
-                self.status_message = "Updates available from GitHub. Press [u] or git pull.".to_string();
-            } else if msg.contains("Your branch is up to date") {
-                self.git_update_status = Some("UP-TO-DATE".to_string());
-                self.add_log("  [PASS] Repository configurations are fully up-to-date.");
-                self.status_message = "Rice configurations are fully up to date.".to_string();
-            } else {
-                self.git_update_status = Some("LIVE".to_string());
-                self.add_log("  [INFO] Repository in live custom state.");
-            }
-        } else {
-            self.git_update_status = Some("READY".to_string());
-        }
+        self.dispatch(WorkerTask::CheckUpdates);
     }
 
     pub fn install_wallpapers(&mut self, custom_dest: Option<PathBuf>) {
-        self.add_log("=== Installing 8K Wallpaper Collection ===");
-        let dest = custom_dest.unwrap_or_else(|| {
-            if let Some(user_profile) = std::env::var_os("USERPROFILE") {
-                let p1 = PathBuf::from(&user_profile).join("OneDrive/Pictures/Wallpapers");
-                if p1.parent().map(|p| p.exists()).unwrap_or(false) {
-                    return p1;
-                }
-                PathBuf::from(user_profile).join("Pictures/Wallpapers")
-            } else {
-                PathBuf::from("Wallpapers")
-            }
-        });
-
-        self.add_log(format!("Target destination: {}", dest.display()));
-
-        let local_organized = PathBuf::from("Z:\\HK\\8K Wallpaper\\_Organized");
-        if local_organized.exists() {
-            self.add_log(format!("Found local collection at: {}", local_organized.display()));
-            let _ = std::fs::create_dir_all(&dest);
-
-            if let Ok(entries) = std::fs::read_dir(&local_organized) {
-                let mut linked_count = 0;
-                for entry in entries.flatten() {
-                    let name = entry.file_name();
-                    let target = dest.join(&name);
-                    let src = entry.path();
-                    #[cfg(windows)]
-                    {
-                        if src.is_dir() {
-                            match std::os::windows::fs::symlink_dir(&src, &target) {
-                                Ok(_) => {
-                                    linked_count += 1;
-                                    self.add_log(format!("  [SYMLINK] -> {}", target.display()));
-                                }
-                                Err(_) => {
-                                    self.add_log(format!("  [COPY] Copying {}...", name.to_string_lossy()));
-                                    let _ = crate::linker::copy_recursive(&src, &target, true);
-                                    linked_count += 1;
-                                }
-                            }
-                        }
-                    }
-                }
-                self.status_message = format!("Wallpapers installed to {} ({} folders).", dest.display(), linked_count);
-                self.add_log(self.status_message.clone());
-                return;
-            }
+        if self.async_worker && custom_dest.is_none() {
+            self.dispatch(WorkerTask::Wallpapers);
+            return;
         }
-
-        self.add_log("Note: Remote users can download Wallpaper Packs 1, 2, 3 from GitHub Release assets.");
-        self.status_message = format!("Wallpaper destination prepared: {}", dest.display());
+        let Ok(mut ctx) = self.build_task_context(WorkerTask::Wallpapers) else { return };
+        ctx.custom_dest = custom_dest;
+        let summary = self.run_task_flow(WorkerTask::Wallpapers, ctx);
+        self.status_message = summary;
     }
 
     pub fn uninstall_wallpapers(&mut self, custom_dest: Option<PathBuf>) {
-        self.add_log("=== Removing 8K Wallpaper Collection ===");
-        let dest = custom_dest.unwrap_or_else(|| {
-            if let Some(user_profile) = std::env::var_os("USERPROFILE") {
-                let p1 = PathBuf::from(&user_profile).join("OneDrive/Pictures/Wallpapers");
-                if p1.parent().map(|p| p.exists()).unwrap_or(false) {
-                    return p1;
-                }
-                PathBuf::from(user_profile).join("Pictures/Wallpapers")
-            } else {
-                PathBuf::from("Wallpapers")
-            }
-        });
-
-        if dest.exists() || dest.symlink_metadata().is_ok() {
-            let _ = std::fs::remove_dir_all(&dest);
-            self.add_log(format!("  [CLEAN] Removed wallpaper directory: {}", dest.display()));
-            self.status_message = format!("Wallpapers uninstalled from {}.", dest.display());
-        } else {
-            self.add_log(format!("  [INFO] Wallpapers not installed at {}", dest.display()));
-            self.status_message = "Wallpapers were not installed.".to_string();
-        }
+        let Ok(mut ctx) = self.build_task_context(WorkerTask::Wallpapers) else { return };
+        ctx.custom_dest = custom_dest;
+        let result = worker::flow_wallpapers(&ctx, true, &mut |m| self.absorb_sync_message(m));
+        self.status_message = result.summary;
     }
 }
 
@@ -1128,6 +982,16 @@ mod tests {
             status_message: String::new(),
             git_update_status: None,
             should_quit: false,
+            async_worker: false,
+            is_busy: false,
+            active_task_name: None,
+            progress_percentage: 0,
+            progress_label: String::new(),
+            progress_detail: String::new(),
+            log_scroll_offset: 0,
+            cancel_flag: std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false)),
+            worker_rx: None,
+            worker_handle: None,
         };
 
         // None of these should panic or underflow on empty items
@@ -1224,6 +1088,16 @@ mod tests {
             status_message: String::new(),
             git_update_status: None,
             should_quit: false,
+            async_worker: false,
+            is_busy: false,
+            active_task_name: None,
+            progress_percentage: 0,
+            progress_label: String::new(),
+            progress_detail: String::new(),
+            log_scroll_offset: 0,
+            cancel_flag: std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false)),
+            worker_rx: None,
+            worker_handle: None,
         };
 
         single_app.next_item();
@@ -1305,6 +1179,16 @@ mod tests {
             status_message: String::new(),
             git_update_status: None,
             should_quit: false,
+            async_worker: false,
+            is_busy: false,
+            active_task_name: None,
+            progress_percentage: 0,
+            progress_label: String::new(),
+            progress_detail: String::new(),
+            log_scroll_offset: 0,
+            cancel_flag: std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false)),
+            worker_rx: None,
+            worker_handle: None,
         };
 
         let marker1 = "DIAGNOSTIC_LOG_ENTRY_ALPHA_12345";
@@ -1434,5 +1318,77 @@ mod tests {
         assert!(all_logs.contains("STEP 3: VERIFY"));
         assert!(all_logs.contains("Advancing to next selected option"));
         assert!(all_logs.contains("Setup complete for 2 package(s)"));
+    }
+
+    #[test]
+    fn test_log_scroll_keys_and_caps() {
+        let _env = TestEnv::new("log_scroll");
+        let mut app = App::new(PathBuf::from("."));
+        assert_eq!(app.log_scroll_offset, 0);
+
+        for _ in 0..100 {
+            app.handle_key(KeyCode::Char('['));
+        }
+        assert_eq!(app.log_scroll_offset, app.logs.len(), "scroll-up must cap at total log entries");
+
+        for _ in 0..100 {
+            app.handle_key(KeyCode::Char(']'));
+        }
+        assert_eq!(app.log_scroll_offset, 0, "scroll-down must saturate at zero (live tail)");
+    }
+
+    #[test]
+    fn test_async_worker_guards() {
+        let _env = TestEnv::new("async_worker_guards");
+        let mut app = App::new(PathBuf::from("."));
+        app.async_worker = true;
+        app.select_none();
+
+        // Nothing selected -> install dispatch must refuse without going busy.
+        app.start_worker_task(crate::worker::WorkerTask::InstallLink);
+        assert!(!app.is_busy, "empty selection must not enter busy mode");
+        assert!(app.status_message.contains("No packages selected"));
+    }
+
+    #[test]
+    fn test_async_worker_state_machine() {
+        let _env = TestEnv::new("async_worker_sm");
+        let mut app = App::new(PathBuf::from("."));
+        app.async_worker = true;
+        app.select_none();
+
+        assert!(!app.is_busy);
+        app.start_worker_task(crate::worker::WorkerTask::CheckUpdates);
+        assert!(app.is_busy, "is_busy must be true immediately after dispatch");
+        assert_eq!(app.active_task_name.as_deref(), Some(crate::worker::WorkerTask::CheckUpdates.display_name()));
+
+        // While busy: action hotkeys are ignored, navigation still works.
+        let logs_before = app.logs.len();
+        app.handle_key(KeyCode::Char('i'));
+        assert!(app.is_busy, "action hotkeys must not dispatch while a task is running");
+        assert_eq!(app.logs.len(), logs_before, "ignored action must not log");
+        app.handle_key(KeyCode::Char('j'));
+        assert_eq!(app.selected_index, 1, "navigation must stay available while busy");
+        app.handle_key(KeyCode::Char('['));
+        assert!(app.log_scroll_offset > 0, "console scroll must stay available while busy");
+
+        // Cancel signal sets the cooperative flag; task still terminates itself.
+        app.cancel_current_task();
+        assert!(app.cancel_flag.load(std::sync::atomic::Ordering::SeqCst), "cancel flag must be set");
+        assert!(app.status_message.contains("Cancelling"), "status must reflect cancellation request");
+
+        // Poll until the worker finishes (bounded, ~5s max) and returns to idle.
+        let mut attempts = 0;
+        while app.is_busy && attempts < 250 {
+            app.poll_worker_events();
+            std::thread::sleep(std::time::Duration::from_millis(10));
+            attempts += 1;
+        }
+        assert!(!app.is_busy, "worker task must finish and exit busy mode");
+        assert!(app.active_task_name.is_none());
+        assert!(app.git_update_status.is_some(), "GitStatus message must update repository state");
+        assert!(app.status_message.contains("up to date") || app.status_message.contains("publish")
+            || app.status_message.contains("custom state") || app.status_message.contains("Could not check"),
+            "summary must describe repository status, got: {}", app.status_message);
     }
 }

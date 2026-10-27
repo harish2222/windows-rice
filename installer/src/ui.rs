@@ -7,7 +7,7 @@ use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Line, Span},
-    widgets::{Block, Borders, List, ListItem, Paragraph, Wrap},
+    widgets::{Block, Borders, Gauge, List, ListItem, Paragraph, Wrap},
     Frame,
 };
 use crate::app::App;
@@ -16,21 +16,23 @@ use crate::detect::{BinaryStatus, LinkStatus};
 pub fn render(f: &mut Frame, app: &App) {
     let size = f.area();
 
-    // Vertical layout: Header (3) -> PM status (3) -> Main Content (Min 10) -> Footer (3)
+    // Vertical layout: Header (3) -> PM status (3) -> Main Content (Min 8) -> Progress/Status Gauge (3) -> Footer (3)
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
             Constraint::Length(3), // Header
             Constraint::Length(3), // PM Status
-            Constraint::Min(10),   // Dual Pane
-            Constraint::Length(3), // Footer / Keybinds
+            Constraint::Min(8),    // Dual Pane (Item List & Details/Console)
+            Constraint::Length(3), // Real-time Progress Bar / Operational Status
+            Constraint::Length(3), // Dynamic Footer & Keybindings
         ])
         .split(size);
 
     render_header(f, chunks[0]);
     render_pm_status(f, app, chunks[1]);
     render_main_split(f, app, chunks[2]);
-    render_footer(f, app, chunks[3]);
+    render_progress_bar(f, app, chunks[3]);
+    render_footer(f, app, chunks[4]);
 }
 
 fn render_header(f: &mut Frame, area: Rect) {
@@ -38,7 +40,7 @@ fn render_header(f: &mut Frame, area: Rect) {
         Span::styled("  WINDOW-RICE INSTALLER  ", Style::default().fg(Color::Rgb(30, 30, 46)).bg(Color::Rgb(137, 180, 250)).add_modifier(Modifier::BOLD)),
         Span::raw(" "),
         Span::styled("Interactive Setup & Real-Time Rice Manager", Style::default().fg(Color::Rgb(205, 214, 244)).add_modifier(Modifier::BOLD)),
-        Span::styled(" (Catppuccin Mocha Edition)", Style::default().fg(Color::Rgb(166, 227, 161))),
+        Span::styled(" (Catppuccin Mocha Multi-Threaded Edition)", Style::default().fg(Color::Rgb(166, 227, 161))),
     ])];
 
     let p = Paragraph::new(header_text)
@@ -95,8 +97,8 @@ fn render_main_split(f: &mut Frame, app: &App, area: Rect) {
     let h_chunks = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([
-            Constraint::Percentage(45), // Left: Item List
-            Constraint::Percentage(55), // Right: Details & Log
+            Constraint::Percentage(42), // Left: Item List
+            Constraint::Percentage(58), // Right: Details & Activity Console
         ])
         .split(area);
 
@@ -164,8 +166,8 @@ fn render_right_pane(f: &mut Frame, app: &App, area: Rect) {
     let v_chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
-            Constraint::Percentage(50), // Top: Package Details
-            Constraint::Percentage(50), // Bottom: Logs
+            Constraint::Percentage(45), // Top: Package Details
+            Constraint::Percentage(55), // Bottom: Live Streaming Activity Console
         ])
         .split(area);
 
@@ -240,18 +242,35 @@ fn render_details(f: &mut Frame, app: &App, area: Rect) {
 
 fn render_logs(f: &mut Frame, app: &App, area: Rect) {
     let height = area.height.saturating_sub(2) as usize;
-    let start = app.logs.len().saturating_sub(height);
-    let log_lines: Vec<Line> = app.logs[start..]
+    let total_logs = app.logs.len();
+
+    let end_idx = total_logs.saturating_sub(app.log_scroll_offset);
+    let start_idx = end_idx.saturating_sub(height);
+
+    let visible_logs = if start_idx < end_idx && end_idx <= total_logs {
+        &app.logs[start_idx..end_idx]
+    } else if !app.logs.is_empty() {
+        let s = total_logs.saturating_sub(height);
+        &app.logs[s..]
+    } else {
+        &[]
+    };
+
+    let log_lines: Vec<Line> = visible_logs
         .iter()
         .map(|l| {
-            let color = if l.contains("[PASS]") || l.contains("[SYMLINK]") {
+            let color = if l.contains("[PASS]") || l.contains("[SYMLINK]") || l.contains("[COMPLETED") {
                 Color::Rgb(166, 227, 161)
-            } else if l.contains("[FAIL]") || l.contains("[ERROR]") {
+            } else if l.contains("[FAIL]") || l.contains("[ERROR]") || l.contains("[ERR]") {
                 Color::Rgb(243, 139, 168)
-            } else if l.contains("[COPIED]") || l.contains("[INFO]") {
+            } else if l.contains("[COPIED]") || l.contains("[INFO]") || l.contains("[STEP") || l.contains("[START") {
                 Color::Rgb(137, 180, 250)
             } else if l.contains("[WARN]") {
                 Color::Rgb(249, 226, 175)
+            } else if l.contains("[OUT]") {
+                Color::Rgb(180, 190, 254)
+            } else if l.contains("[CANCEL") {
+                Color::Rgb(235, 160, 172)
             } else {
                 Color::Rgb(186, 194, 222)
             };
@@ -259,44 +278,107 @@ fn render_logs(f: &mut Frame, app: &App, area: Rect) {
         })
         .collect();
 
+    let scroll_indicator = if app.log_scroll_offset > 0 {
+        format!(" (scroll: -{}) ", app.log_scroll_offset)
+    } else {
+        " (live) ".to_string()
+    };
+
     let p = Paragraph::new(log_lines)
         .block(Block::default()
             .borders(Borders::ALL)
-            .title(format!(" Activity Console ({} entries) ", app.logs.len()))
-            .border_style(Style::default().fg(Color::Rgb(88, 91, 112))))
+            .title(format!(" Activity & Debug Console ({} entries){} ", total_logs, scroll_indicator))
+            .border_style(if app.is_busy { Style::default().fg(Color::Rgb(137, 180, 250)) } else { Style::default().fg(Color::Rgb(88, 91, 112)) }))
         .wrap(Wrap { trim: false });
     f.render_widget(p, area);
 }
 
+fn render_progress_bar(f: &mut Frame, app: &App, area: Rect) {
+    if app.is_busy {
+        let task_name = app.active_task_name.as_deref().unwrap_or("Processing");
+        let title = format!(" [ACTIVE TASK] {} ({}%) ", task_name, app.progress_percentage);
+        let detail = if !app.progress_detail.is_empty() {
+            format!("{} | {}", app.progress_label, app.progress_detail)
+        } else {
+            app.progress_label.clone()
+        };
+
+        let gauge = Gauge::default()
+            .block(Block::default()
+                .borders(Borders::ALL)
+                .title(title)
+                .border_style(Style::default().fg(Color::Rgb(137, 180, 250)).add_modifier(Modifier::BOLD)))
+            .gauge_style(Style::default().fg(Color::Rgb(166, 227, 161)).bg(Color::Rgb(49, 50, 68)))
+            .percent(app.progress_percentage.min(100))
+            .label(Span::styled(
+                detail,
+                Style::default().fg(Color::Rgb(205, 214, 244)).add_modifier(Modifier::BOLD)
+            ));
+        f.render_widget(gauge, area);
+    } else {
+        let status_text = if app.status_message.is_empty() {
+            "Ready. Select components with [Space] and press [i] to Install or [l] to Link configs."
+        } else {
+            &app.status_message
+        };
+
+        let p = Paragraph::new(Line::from(vec![
+            Span::styled(" [IDLE] ", Style::default().fg(Color::Rgb(30, 30, 46)).bg(Color::Rgb(166, 227, 161)).add_modifier(Modifier::BOLD)),
+            Span::raw(" "),
+            Span::styled(status_text, Style::default().fg(Color::Rgb(205, 214, 244))),
+        ]))
+        .block(Block::default()
+            .borders(Borders::ALL)
+            .title(" Operational Status ")
+            .border_style(Style::default().fg(Color::Rgb(88, 91, 112))));
+        f.render_widget(p, area);
+    }
+}
+
 fn render_footer(f: &mut Frame, app: &App, area: Rect) {
-    let keys = vec![
-        Span::styled("[↑/↓/PgUp/PgDn] ", Style::default().fg(Color::Rgb(137, 180, 250)).add_modifier(Modifier::BOLD)),
-        Span::raw("Nav "),
-        Span::styled("[Space/Enter] ", Style::default().fg(Color::Rgb(166, 227, 161)).add_modifier(Modifier::BOLD)),
-        Span::raw("Toggle "),
-        Span::styled("[a] ", Style::default().fg(Color::Rgb(180, 190, 254)).add_modifier(Modifier::BOLD)),
-        Span::raw("All "),
-        Span::styled("[m] ", Style::default().fg(Color::Rgb(249, 226, 175)).add_modifier(Modifier::BOLD)),
-        Span::raw("Missing "),
-        Span::styled("[l] ", Style::default().fg(Color::Rgb(148, 226, 213)).add_modifier(Modifier::BOLD)),
-        Span::raw("Link "),
-        Span::styled("[u/x] ", Style::default().fg(Color::Rgb(243, 139, 168)).add_modifier(Modifier::BOLD)),
-        Span::raw("Unlink/Restore "),
-        Span::styled("[i] ", Style::default().fg(Color::Rgb(166, 227, 161)).add_modifier(Modifier::BOLD)),
-        Span::raw("Install "),
-        Span::styled("[r] ", Style::default().fg(Color::Rgb(203, 166, 247)).add_modifier(Modifier::BOLD)),
-        Span::raw("Reload WM "),
-        Span::styled("[c] ", Style::default().fg(Color::Rgb(137, 220, 235)).add_modifier(Modifier::BOLD)),
-        Span::raw("Updates "),
-        Span::styled("[w] ", Style::default().fg(Color::Rgb(249, 226, 175)).add_modifier(Modifier::BOLD)),
-        Span::raw("Wallpapers "),
-        Span::styled("[v] ", Style::default().fg(Color::Rgb(137, 180, 250)).add_modifier(Modifier::BOLD)),
-        Span::raw("Verify "),
-        Span::styled("[b] ", Style::default().fg(Color::Rgb(249, 226, 175)).add_modifier(Modifier::BOLD)),
-        Span::raw("Boot "),
-        Span::styled("[q] ", Style::default().fg(Color::Rgb(243, 139, 168)).add_modifier(Modifier::BOLD)),
-        Span::raw("Quit"),
-    ];
+    let keys = if app.is_busy {
+        vec![
+            Span::styled("[Esc] ", Style::default().fg(Color::Rgb(243, 139, 168)).add_modifier(Modifier::BOLD)),
+            Span::raw("Cancel/Abort Task  "),
+            Span::styled("[↑/↓/j/k] ", Style::default().fg(Color::Rgb(137, 180, 250)).add_modifier(Modifier::BOLD)),
+            Span::raw("Navigate List  "),
+            Span::styled("[Space] ", Style::default().fg(Color::Rgb(166, 227, 161)).add_modifier(Modifier::BOLD)),
+            Span::raw("Toggle  "),
+            Span::styled("[[/]] ", Style::default().fg(Color::Rgb(249, 226, 175)).add_modifier(Modifier::BOLD)),
+            Span::raw("Scroll Console  "),
+            Span::styled("[q] ", Style::default().fg(Color::Rgb(243, 139, 168)).add_modifier(Modifier::BOLD)),
+            Span::raw("Quit"),
+        ]
+    } else {
+        vec![
+            Span::styled("[↑/↓] ", Style::default().fg(Color::Rgb(137, 180, 250)).add_modifier(Modifier::BOLD)),
+            Span::raw("Nav "),
+            Span::styled("[Space/Enter] ", Style::default().fg(Color::Rgb(166, 227, 161)).add_modifier(Modifier::BOLD)),
+            Span::raw("Toggle "),
+            Span::styled("[a] ", Style::default().fg(Color::Rgb(180, 190, 254)).add_modifier(Modifier::BOLD)),
+            Span::raw("All "),
+            Span::styled("[m] ", Style::default().fg(Color::Rgb(249, 226, 175)).add_modifier(Modifier::BOLD)),
+            Span::raw("Missing "),
+            Span::styled("[i] ", Style::default().fg(Color::Rgb(166, 227, 161)).add_modifier(Modifier::BOLD)),
+            Span::raw("Install "),
+            Span::styled("[l] ", Style::default().fg(Color::Rgb(148, 226, 213)).add_modifier(Modifier::BOLD)),
+            Span::raw("Link "),
+            Span::styled("[u/x] ", Style::default().fg(Color::Rgb(243, 139, 168)).add_modifier(Modifier::BOLD)),
+            Span::raw("Unlink "),
+            Span::styled("[b] ", Style::default().fg(Color::Rgb(249, 226, 175)).add_modifier(Modifier::BOLD)),
+            Span::raw("Boot "),
+            Span::styled("[r] ", Style::default().fg(Color::Rgb(203, 166, 247)).add_modifier(Modifier::BOLD)),
+            Span::raw("Reload "),
+            Span::styled("[c] ", Style::default().fg(Color::Rgb(137, 220, 235)).add_modifier(Modifier::BOLD)),
+            Span::raw("Update "),
+            Span::styled("[v] ", Style::default().fg(Color::Rgb(137, 180, 250)).add_modifier(Modifier::BOLD)),
+            Span::raw("Verify "),
+            Span::styled("[[/]] ", Style::default().fg(Color::Rgb(249, 226, 175)).add_modifier(Modifier::BOLD)),
+            Span::raw("Scroll "),
+            Span::styled("[q] ", Style::default().fg(Color::Rgb(243, 139, 168)).add_modifier(Modifier::BOLD)),
+            Span::raw("Quit"),
+        ]
+    };
 
     let p = Paragraph::new(vec![
         Line::from(keys),

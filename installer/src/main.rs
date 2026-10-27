@@ -8,6 +8,7 @@ mod detect;
 mod linker;
 mod bootstrap;
 mod verifier;
+mod worker;
 mod app;
 mod ui;
 
@@ -97,8 +98,13 @@ Interactive TUI Controls:
     [w/W]                    Install 8K wallpapers to Pictures\Wallpapers
     [v/V]                    Run comprehensive verification health check
     [b/B]                    Bootstrap Scoop / Chocolatey / UV / Vcpkg
-    [q/Q] or [Esc]           Quit cleanly
-"#);
+    [[/]]                    Scroll the activity console ([ live tail ])
+    [Esc] while task runs    Cancel/abort the running task (subprocess killed)
+    [q/Q]                    Quit cleanly
+
+All long actions (install/link/unlink/bootstrap/verify/reload/update/wallpapers)
+run on a dedicated worker thread with live progress, streaming [OUT] console
+output, and cooperative Esc cancellation."#);
 }
 
 fn main() -> Result<()> {
@@ -277,15 +283,21 @@ fn run_tui(repo_root: PathBuf) -> Result<()> {
     let mut terminal = Terminal::new(backend)?;
 
     let mut app = App::new(repo_root);
+    // TUI mode: long actions run on a dedicated worker thread with live progress.
+    app.async_worker = true;
 
     loop {
+        // Drain worker messages (logs / progress / completion) before drawing.
+        app.poll_worker_events();
+
         terminal.draw(|f| ui::render(f, &app))?;
 
         if app.should_quit {
             break;
         }
 
-        if event::poll(Duration::from_millis(100))? {
+        let poll_ms = if app.is_busy { 50 } else { 100 };
+        if event::poll(Duration::from_millis(poll_ms))? {
             if let Event::Key(key) = event::read()? {
                 if key.kind == KeyEventKind::Press {
                     if app.handle_key(key.code) {
@@ -294,6 +306,12 @@ fn run_tui(repo_root: PathBuf) -> Result<()> {
                 }
             }
         }
+    }
+
+    // If a worker task is still running on quit, signal cancellation so the
+    // streaming runner kills its subprocess before the process exits.
+    if app.is_busy {
+        app.cancel_current_task();
     }
 
     disable_raw_mode()?;
