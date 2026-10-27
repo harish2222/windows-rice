@@ -142,7 +142,11 @@ $env.config = {
             # Canonical Carapace completer (https://carapace.sh/docs/integrations/nushell/).
             # Heavy `help commands` enumeration only fires when completing the `nu`
             # binary itself; alias expansion and ergonomics preserved.
-            completer: {|spans|
+            completer: {|token, place, buffer|
+                #  Record-input contract (nushell deprecated positional `spans`):
+                #  `$place.command` = token list of the command being completed.
+                let spans = ($place.command? | default [])
+                if ($spans | is-empty) { return [] }
                 if ($spans.0 == 'nu') {
                     load-env {
                         CARAPACE_SHELL_BUILTINS: (help commands | where category != "" | get name | each { split row " " | first } | uniq | str join "\n"),
