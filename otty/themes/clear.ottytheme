@@ -1,0 +1,87 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: Otty Terminal Colorless Transparent Glass Theme (Opacity 0.5)
+# ============================================================================
+#  ZERO chrome colour. Every surface is neutral black/white at 50% alpha and
+#  material = "none" so no acrylic/mica pulls the wallpaper (red tint) through
+#  the chrome. Text colours come from the shell programs, not this theme.
+#
+#  Grammar copied from otty-stock themes (acrylic-dark / one-light).
+# ============================================================================
+[meta]
+name        = "Clear 0.5"
+author      = "HKDEVS"
+mode        = "dark"
+description = "No theme colours, opacity 0.5 on every surface (window, pane, sidebar, panels, tabs)."
+
+[terminal]
+foreground           = "#F2F2F2"
+background           = "#000000"
+cursor               = "#F2F2F2"
+selection-background = "#FFFFFF50"
+
+[token]
+foreground = "#F2F2F2"
+secondary  = "#B0B0B0"
+tertiary   = "#707070"
+accent     = "#8C8C8C"
+success    = "#8C8C8C"
+warning    = "#8C8C8C"
+danger     = "#8C8C8C"
+hover-bg   = "rgba(255,255,255,0.05)"
+active-bg  = "rgba(255,255,255,0.10)"
+radius     = 4
+
+# Backdrop surfaces: dialogs, command palette, settings.
+[panel]
+background = "rgba(0,0,0,0.5)"
+surface    = "rgba(0,0,0,0.5)"
+border     = "rgba(255,255,255,0.08)"
+
+# One flat translucent surface under the whole window - no blur material, so
+# no wallpaper bleed (red tint). The fill itself is neutral black at 50%.
+[window]
+material   = "none"
+background = "#000000"
+opacity    = 0.5
+radius     = 8
+
+# Windows-specific block mirrors the shared one; the sidebar inherits the same
+# treatment (no sidebar-scoped material, so nothing column is more opaque).
+[windows]
+material = "none"
+color    = "#000000"
+opacity  = 0.5
+
+[sidebar]
+border-right = "none"
+
+[details-panel]
+border-right = "none"
+
+[titlebar]
+foreground = "#F2F2F2"
+
+[tab]
+radius          = 4
+foreground      = "#B0B0B0"
+font-weight     = 400
+indicator       = "bar"
+indicator-color = "#8C8C8C"
+
+[tab.active]
+background  = "rgba(255,255,255,0.08)"
+foreground  = "#F2F2F2"
+border      = "1px solid rgba(255,255,255,0.10)"
+font-weight = 600
+
+[tab.hover]
+background = "rgba(255,255,255,0.05)"
+
+# Content column gutter: same 50% veil so the pane and its frame match.
+[container]
+background = "rgba(0,0,0,0.5)"
+
+[ghost]
+foreground = "rgba(255,255,255,0.40)"

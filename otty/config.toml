@@ -13,7 +13,12 @@
 # =============================================================================
 
 # --- Theme -------------------------------------------------------------------
-# No theme keys: otty falls back to its built-in default theme (One Light / Acrylic Dark).
+#  Colourless chrome: "clear" sets every surface (window, sidebar, panels, tabs)
+#  to neutral black at 0.5 with material = "none", so no acrylic/mica pulls
+#  wallpaper colours (the red tint) through the chrome. Light slot is pinned;
+#  no auto-switching to a dark-mode theme.
+theme = "clear"
+auto-theme-dark-mode = false
 
 # --- Shell -------------------------------------------------------------------
 # `command` is the documented shell key for panes launched without a profile.
@@ -39,6 +44,8 @@ cursor-style-blink = "always_off"
 #  50% opacity for ALL themes: set at config level so it applies to every theme,
 #  including the built-in default (no theme files exist in ~/.config/otty/themes).
 background-opacity = 0.5
+unfocused-split-opacity = 0.5
+cursor-opacity = 0.5
 window-size = "remember"
 scrollback-lines = 50000
 session-log-size-mb = 10
