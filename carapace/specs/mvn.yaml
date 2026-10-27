@@ -1,0 +1,83 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: mvn Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: mvn
+description: Apache Maven build tool
+flags:
+  -am, --also-make: Build projects dependencies
+  -amd, --also-make-dependents: Also build projects that depend on selected projects
+  -B, --batch-mode: Run in non-interactive batch mode
+  -C, --strict-checksums: Fail if checksums don't match
+  -c, --lax-checksums: Warn if checksums don't match
+  -D=: Define a system property
+  -e, --errors: Produce execution error messages
+  -emp=: Encrypt master security password
+  -ep=: Encrypt password
+  -f=: Force the use of alternate POM file
+  -fn, --fail-never: NEVER fail the build, regardless of project result
+  -ff, --fail-fast: Stop at first failure in reactorized build
+  -fae, --fail-at-end: Only fail the build afterwards
+  -gs=: Alternate path for the global settings file
+  -s, --settings=: Alternate path for the user settings file
+  -llr, --legacy-local-repository: Use legacy local repository behaviour
+  -l, --log-file=: Log file where all build output goes
+  -N, --non-recursive: Do not recurse into sub-projects
+  -npr, --no-plugin-registry: Upcompat only, not used by Maven
+  -npu, --no-plugin-updates: Surpress plugin updates
+  -nsu, --no-snapshot-updates: Suppress SNAPSHOT updates
+  -o, --offline: Work offline
+  -P=: Activate one or more profiles
+  -pl=: Comma-delimited list of projects to build
+  -q, --quiet: Quiet output, only show errors
+  -rf=: Resume reactor from specified project
+  -T=: Thread count for parallel builds
+  -t=: Alternate path for the toolchains file
+  -U, --update-snapshots: Forces a check for missing releases and updated snapshots
+  -up, --update-plugins: Surpress plugin updates
+  -V, --show-version: Display version information WITHOUT stopping build
+  -X, --debug: Produce execution debug output
+  -cp=: Comma-delimited list of paths to search for jars and classes
+  -r, --projects=: Aggregator housekeeping shortcut
+  --color=: Color output
+  -v, --version: Display version information
+  -h, --help: Display help information
+completion:
+  flag:
+    f:
+      - $files
+    s:
+      - $files
+    gs:
+      - $files
+    t:
+      - $files
+    l:
+      - $files
+    ef:
+      - $files
+    color:
+      - always
+      - never
+      - auto
+  positional:
+    - [clean, validate, initialize, generate-sources, process-sources,
+      generate-resources, process-resources, compile, process-classes,
+      process-test-sources, process-test-resources, generate-test-sources,
+      test-compile, test, prepare-package, package, pre-integration-test,
+      integration-test, post-integration-test, verify, install, deploy,
+      pre-site, site, post-site, site-deploy, pre-clean, clean,
+      post-clean, archetype\:generate, archetype\:generate-local,
+      dependency\:analyze, dependency\:analyze-duplicate,
+      dependency\:build-classpath, dependency\:copy-dependencies,
+      dependency\:get, dependency\:go-offline, dependency\:list,
+      dependency\:purge-local-repository, dependency\:resolve,
+      dependency\:resolve-plugins, dependency\:tree, dependency\:unpack,
+      exec\:exec, exec\:java, help\:active-profiles, help\:all-profiles,
+      help\:describe, help\:effective-pom, help\:effective-settings,
+      help\:evaluate, install\:, jetty\:run, jetty\:run-war,
+      package\:, site\:run, surefire\:test, versions\:display-dependency-updates,
+      versions\:display-plugin-updates, versions\:set, versions\:use-releases]
+    - ['$directories']

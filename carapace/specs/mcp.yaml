@@ -1,0 +1,42 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: mcp Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: mcp
+description: Model Context Protocol CLI
+flags:
+  -h, --help: Print help
+  -V, --version: Print version
+commands:
+  - name: version
+    description: Show version info
+  - name: dev
+    description: Run the MCP inspector in dev mode
+    flags:
+      --port=: Port to use
+    completion:
+      flag:
+        port:
+          - $directories
+  - name: run
+    description: Run a configured MCP server
+    flags:
+      --config=: Config file to use
+      --profile=: Profile to use
+      --verbose: Verbose output
+      --timeout=: Request timeout
+    completion:
+      flag:
+        config:
+          - $files
+  - name: install
+    description: Install an MCP server
+    flags:
+      --config=: Config file to use
+      -g, --global: Install globally
+    completion:
+      flag:
+        config:
+          - $files

@@ -1,0 +1,126 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: chafa Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: chafa
+description: Terminal graphics and character art generator
+flags:
+  --files=: Read list of files to process from PATH
+  --files0=: Similar to --files, using NUL separator
+  -h, --help: Show help
+  --probe=: Probe terminal capabilities and wait for response
+  --probe-mode=: How to probe the terminal
+  --version: Show version
+  -v, --verbose: Be verbose
+  -f, --format=: Set output format
+  -O, --optimize=: Compress the output using control sequences
+  --relative=: Use relative cursor positioning
+  --passthrough=: Graphics protocol passthrough mode
+  --polite=: Polite mode inhibits escape sequences
+  --align=: Horizontal and vertical alignment
+  --clear: Clear screen before processing each file
+  --exact-size=: Try to match the input's size exactly
+  --fit-width: Fit images to view's width
+  --font-ratio=: Target font's width to height ratio
+  --grid=: Lay out images in a grid of CxR columns per screenful
+  -g: Alias for --grid auto
+  --label=: Labeling, filenames below images
+  -l: Alias for --label on
+  --link=: Link labels into clickable hyperlinks
+  --margin-bottom=: Reserve NUM rows at the bottom as safety margin
+  --margin-right=: Reserve NUM columns safety margin on right
+  --scale=: Scale image respecting view's dimensions
+  --colors=: Number of colors to use
+  --fg=: Foreground color
+  --bg=: Background color
+  --saturation=: Chroma saturation of output
+  --channels=: Color channels to use
+  --work=: How hard to work on image optimization
+  --view-size=: Absolute dimensions to scale output to
+  --speed=: Animation speed multiplier
+  --duration=: Time to show each animation frame
+  --animate=: Animate frames
+  --dither=: Dithering method
+  --dither-intensity=: Strength of dithering
+  --preprocess=: Preprocessing strength for pattern removal
+  --threshold=: Threshold transition to black
+  --symbols=: Select symbol set for output
+  --fill=: Select fill symbols
+  --strength=: Symbol strength ratio
+  --zalgo=: Use combining characters to improve output
+  --fg-only=: Leave the variance to the VT sequences
+  --skip=: Which movie frame types are to be skipped
+completion:
+  flag:
+    format:
+      - iterm
+      - kitty
+      - sixel
+      - symbols
+    probe:
+      - auto
+      - on
+      - off
+    probe-mode:
+      - any
+      - ctty
+      - stdio
+    relative:
+      - on
+      - off
+    passthrough:
+      - auto
+      - none
+      - screen
+      - tmux
+    polite:
+      - on
+      - off
+    exact-size:
+      - auto
+      - on
+      - off
+    label:
+      - on
+      - off
+    link:
+      - auto
+      - on
+      - off
+    animate:
+      - auto
+      - on
+      - off
+    colors:
+      - '2'
+      - '4'
+      - '8'
+      - '16'
+      - '32'
+      - '64'
+      - '128'
+      - '240'
+      - '256'
+    work:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+      - '5'
+      - '6'
+      - '7'
+      - '8'
+      - '9'
+    dither:
+      - none
+      - fs
+      - atkinson
+      - floyd-steinberg
+    files:
+      - $files
+    files0:
+      - $files
+  positionalany:
+    - $files

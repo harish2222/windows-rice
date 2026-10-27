@@ -1,0 +1,56 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: corepack Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: corepack
+description: Node.js package manager shim manager (yarn pnpm npm)
+flags:
+  -h, --help: Show help
+  -V, --version: Print version
+commands:
+  - name: enable
+    description: Add the Corepack shims to the install directory
+    flags:
+      --install-directory=: Directory where shims are added
+    completion:
+      flag:
+        install-directory:
+          - $directories
+  - name: disable
+    description: Remove the Corepack shims from the install directory
+    flags:
+      --install-directory=: Directory where shims are removed
+    completion:
+      flag:
+        install-directory:
+          - $directories
+  - name: install
+    description: Install the package manager configured in the local project
+    flags:
+      -g, --global: Install package managers on the system
+      --cache-only: Only install from the offline cache
+      --all: Install all package managers
+  - name: install-global
+    description: Install package managers on the system
+  - name: pack
+    description: Store package managers in a tarball
+    flags:
+      --json: Print JSON output
+      -o, --output=: Output file
+    completion:
+      flag:
+        output:
+          - $files
+  - name: up
+    description: Update the package manager used in the current project
+  - name: use
+    description: Define the package manager to use for the current project
+  - name: cache
+    description: Manage Corepack cache
+    commands:
+      - name: clean
+        description: Cleans Corepack cache
+  - name: help
+    description: Print this message or the help of the given subcommand(s)

@@ -1,0 +1,170 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: tailscale Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: tailscale
+description: Securely connect computers networks and apps with WireGuard
+flags:
+  --socket=: Path to tailscaled socket
+  -h, --help: Show help
+  -v, --version: Print version
+commands:
+  - name: up
+    description: Connect to Tailscale, logging in if needed
+    flags:
+      --advertise-exit-node: Offer to be an exit node
+      --accept-dns=: Accept DNS config from Tailscale
+      --accept-routes=: Accept routes advertised by other Tailscale nodes
+      --advertise-routes=: Export physical subnet routes
+      --authkey=: Node authorization key
+      --config-file=: Path to config file
+      --force-reassign: Force reassigning tags
+      --hostname=: Hostname to use for node
+      --operator=: Username to become operator
+      --ssh=: Run an SSH server on the Tailscale node
+      --shields-up=: Prevent incoming connections
+      --timeout=: Maximum amount of time to wait
+      --qr: Print QR code of login URL
+  - name: down
+    description: Disconnect from Tailscale
+  - name: login
+    description: Log in to a Tailscale account
+    flags:
+      --qr: Print QR code of login URL
+      --force-reauth: Force reauthentication
+  - name: logout
+    description: Disconnect from Tailscale and expire current node key
+  - name: switch
+    description: Switch to a different Tailscale account
+  - name: set
+    description: Change specified preferences
+  - name: get
+    description: Show current preference values
+  - name: configure
+    description: Configure the host to enable more Tailscale features
+    commands:
+      - name: kubeconfig
+        description: Connect to a Kubernetes cluster
+      - name: synology
+        description: Enable/disable some Synology features
+  - name: syspolicy
+    description: Diagnose the MDM and system policy configuration
+  - name: netcheck
+    description: Print an analysis of local network conditions
+  - name: ip
+    description: Show Tailscale IP addresses
+  - name: dns
+    description: Diagnose the internal DNS forwarder
+    commands:
+      - name: status
+        description: Print DNS manager status
+      - name: query
+        description: Do DNS lookup
+  - name: status
+    description: Show state of tailscaled and its connections
+    flags:
+      --json: Output in JSON format
+      --active: Show only connections
+      --self=: Show only status from local machine
+      --peers=: Show peer status
+  - name: metrics
+    description: Show Tailscale metrics
+  - name: ping
+    description: Ping a host at the Tailscale layer
+    flags:
+      --c=: Number of pings to send
+      --timeout=: Time before ping is considered to have failed
+      --tsmp: Do TSMP ping
+      --disco: Do discovery ping
+      --until-direct=: Until a direct connection is established
+      --verbose: Print more details
+  - name: nc
+    description: Connect to a port on a host, connected to stdin and stdout
+    flags:
+      -u: UDP mode
+      --local-addr=: Local address to bind
+      --timeout=: Timeout for connection
+  - name: ssh
+    description: SSH to a Tailscale machine
+  - name: funnel
+    description: Serve content and local servers on the internet
+    commands:
+      - name: status
+        description: Show current funnel status
+      - name: reload
+        description: Reload running config
+  - name: serve
+    description: Serve content and local servers on your tailnet
+    commands:
+      - name: tcp
+        description: Serve a TCP port
+      - name: tls-terminated-tcp
+        description: Serve a TLS terminated TCP port
+      - name: status
+        description: Show current serve status
+      - name: reset
+        description: Reset previous serve config
+  - name: service
+    description: Interact with Tailscale Services
+  - name: version
+    description: Print Tailscale version
+  - name: web
+    description: Run a web server for controlling Tailscale
+    flags:
+      --listen=: Listen address
+      --cgi: Run as CGI script
+  - name: file
+    description: Send or receive files
+    commands:
+      - name: cp
+        description: Send files to a host
+      - name: get
+        description: Move received files out of Tailscale file directory
+  - name: bugreport
+    description: Print a shareable identifier to help diagnose issues
+  - name: cert
+    description: Get TLS certs
+    flags:
+      --cert-file=: File where cert is saved
+      --key-file=: Where key is saved
+      --secret-key-file=: Where key is saved from mobile
+  - name: lock
+    description: Manage tailnet lock
+    commands:
+      - name: init
+        description: Initialize tailnet lock
+      - name: add
+        description: Add a TKA node or node-signing key
+      - name: remove
+        description: Remove a TKA node or node-signing key
+      - name: status
+        description: Show state of tailnet lock
+      - name: disable
+        description: Surrender keys and disable TKA
+  - name: licenses
+    description: Get open source license information
+  - name: exit-node
+    description: Show machines on your tailnet configured as exit nodes
+  - name: update
+    description: Update Tailscale to the latest version
+  - name: whois
+    description: Show the machine and user associated with a Tailscale IP
+  - name: whoami
+    description: Show the machine and user identity of the current machine
+  - name: drive
+    description: Share a directory with your tailnet
+    commands:
+      - name: rename
+        description: Rename a share
+      - name: remove
+        description: Remove a share
+      - name: add
+        description: Create a share
+  - name: appc-routes
+    description: Print the current app connector routes
+  - name: wait
+    description: Wait for Tailscale interface IPs to be ready for binding
+  - name: completion
+    description: Shell tab-completion scripts

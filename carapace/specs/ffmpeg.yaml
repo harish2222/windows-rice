@@ -1,0 +1,189 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: ffmpeg Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: ffmpeg
+description: Universal media converter
+flags:
+  -L: Show license
+  -h: Show basic options help
+  -version: Show version
+  -muxers: Show available muxers
+  -demuxers: Show available demuxers
+  -devices: Show available devices
+  -decoders: Show available decoders
+  -encoders: Show available encoders
+  -filters: Show available filters
+  -pix_fmts: Show available pixel formats
+  -layouts: Show standard channel layouts
+  -sample_fmts: Show available audio sample formats
+  -v=: Set logging level
+  -y: Overwrite output files
+  -n: Never overwrite output files
+  -stats: Print progress report during encoding
+  -f=: Force container format
+  -i=: Input file
+  -t=: Stop transcoding after specified duration
+  -to=: Stop transcoding after specified time is reached
+  -ss=: Start transcoding at specified time
+  -c=: Select encoder or decoder for all streams
+  -codec=: Select encoder or decoder for all streams
+  -c:v=: Select the video encoder
+  -c:a=: Select the audio encoder
+  -vcodec=: Force video codec
+  -acodec=: Force audio codec
+  -scodec=: Force subtitle codec
+  -hwaccel=: Select hardware acceleration method
+  -hwaccels: Show available hwaccel methods
+  -map=: Designate input stream as a source for output
+  -map_chapters=: Set chapters of output file
+  -metadata=: Add metadata key=value
+  -vf=: Set video filters
+  -af=: Set audio filters
+  -filter_complex=: Create a complex filtergraph
+  -ac=: Set number of audio channels
+  -ar=: Set sampling rate
+  -b:v=: Set video bitrate
+  -b:a=: Set audio bitrate
+  -crf=: Set quality (constant rate factor)
+  -preset=: Encoding speed preset
+  -s=: Set frame size
+  -r=: Set frame rate
+  -fps=: Set frame rate per second
+  -pix_fmt=: Set pixel format
+  -frames:v=: Set number of video frames to output
+  -frames:a=: Set number of audio frames to output
+  -vsync=: Set video sync method
+  -movflags=: MOV/MP4 muxer flags
+  -start_number=: First number in the sequence
+  -loop=: Set number of times input stream loop
+  -re: Read input at native frame rate
+  -stream_loop=: Loop input stream N times
+  -profile:v=: Set video codec profile
+  -level=: Set encoding level
+  -tune=: Video tuning option
+  -bitexact: Bitexact mode
+  -shortest: Finish encoding when the shortest stream ends
+  -copyts: Copy timestamps from input to output
+  -an: Disable audio
+  -vn: Disable video
+  -sn: Disable subtitle
+  -dn: Disable data
+completion:
+  flag:
+    v:
+      - quiet
+      - panic
+      - fatal
+      - error
+      - warning
+      - info
+      - verbose
+      - debug
+      - trace
+    hwaccel:
+      - none
+      - auto
+      - d3d11va
+      - dxva2
+      - nvdec
+      - cuda
+      - vulkan
+      - qsv
+      - opencl
+      - vaapi
+    f:
+      - mp4
+      - matroska
+      - webm
+      - avi
+      - mov
+      - mkv
+      - flac
+      - mp3
+      - wav
+      - gif
+      - srt
+      - aac
+      - m3u8
+      - hls
+      - mpegts
+      - f4v
+      - wma
+      - ogg
+    'c:v':
+      - libx264
+      - libx265
+      - h264
+      - hevc
+      - vp8
+      - vp9
+      - av1
+      - libsvtav1
+      - h264_qsv
+      - hevc_qsv
+      - h264_nvenc
+      - hevc_nvenc
+      - copy
+      - mpeg4
+      - mjpeg
+      - png
+    'c:a':
+      - aac
+      - libmp3lame
+      - mp3
+      - flac
+      - opus
+      - libopus
+      - libvorbis
+      - pcm_s16le
+      - pcm_f32le
+      - alac
+      - copy
+      - ac3
+    preset:
+      - ultrafast
+      - superfast
+      - veryfast
+      - faster
+      - fast
+      - medium
+      - slow
+      - slower
+      - veryslow
+    pix_fmt:
+      - yuv420p
+      - yuv444p
+      - yuv422p
+      - rgb24
+      - nv12
+      - p010
+      - gray
+    profile:v:
+      - baseline
+      - main
+      - high
+      - high10
+      - high422
+      - high444
+    tune:
+      - film
+      - animation
+      - grain
+      - stillimage
+      - psnr
+      - ssim
+      - fastdecode
+      - zerolatency
+    movflags:
+      - faststart
+      - frag_keyframe
+      - empty_moov
+      - default_base_moof
+      - use_metadata_tags
+    i:
+      - $files
+  positionalany:
+    - $files

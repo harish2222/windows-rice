@@ -1,0 +1,89 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: higgsfield Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: higgsfield
+description: Run Higgsfield image video and Marketing Studio workflows
+flags:
+  -h, --help: Help for higgsfield
+  --json: Print raw JSON responses
+  --no-color: Disable color output
+  -v, --version: Print build info
+commands:
+  - name: account
+    description: Credits and transactions
+  - name: auth
+    description: Login logout token
+    commands:
+      - name: login
+        description: Login to Higgsfield
+      - name: logout
+        description: Log out
+      - name: token
+        description: Print current auth token
+  - name: generate
+    description: Create, cost, list, wait jobs
+    commands:
+      - name: create
+        description: Create a generation job
+        flags:
+          --prompt=: Generation prompt
+          --image=: Uploaded image id reference
+          --video=: Uploaded video id reference
+          --output=: Output file
+      - name: cost
+        description: Estimate generation cost
+      - name: list
+        description: List generation jobs
+      - name: wait
+        description: Wait for a generation job
+  - name: marketing-studio
+    description: Marketing Studio assets
+  - name: marketplace-cards
+    description: Marketplace product cards
+  - name: model
+    description: List models and params
+    flags:
+      --list: List models
+      --video: Filter video models
+  - name: preset
+    description: Browse and resolve generation presets
+    flags:
+      --list: List presets
+  - name: product-photoshoot
+    description: Brand-quality image generation
+    flags:
+      --prompt=: Generation prompt
+      --image=: Uploaded image id
+  - name: soul-id
+    description: Train and manage Soul refs
+    flags:
+      --train=: Train a Soul ID
+      --list: List Soul IDs
+  - name: upload
+    description: Upload media and document inputs
+    flags:
+      --file=: File to upload
+      --url=: URL to upload
+    completion:
+      flag:
+        file:
+          - $files
+  - name: version
+    description: Print build info
+  - name: voices
+    description: List voices for text-to-speech
+    flags:
+      --list: List voices
+  - name: website
+    description: Build and ship full-stack websites
+  - name: workflow
+    description: List workflows and inspect params
+    flags:
+      --list: List workflows
+  - name: workspace
+    description: Select billing workspace
+    flags:
+      --list: List workspaces

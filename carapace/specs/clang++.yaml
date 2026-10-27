@@ -1,0 +1,106 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: clang++ Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: clang++
+description: LLVM C++ compiler driver
+flags:
+  -c: Compile and assemble, but do not link
+  -E: Preprocess only
+  -S: Compile only, do not assemble or link
+  -o=: Place the output into file
+  -std=: Language standard to compile for
+  --analyze: Run the static analyzer
+  --analyzer-output=: Static analyzer report output format
+  --config=: Specify configuration file
+  -###: Print (but do not run) the commands for this compilation
+  -g: Generate debugging information
+  -O0: Reduce compilation time and improve debugging
+  -O1: Optimize
+  -O2: Optimize more
+  -O3: Optimize yet more
+  -Os: Optimize for size
+  -Oz: Aggressively optimize for size
+  -Og: Optimize for debugging
+  -flto: Enable link-time optimization
+  -fPIC: Generate position independent code
+  -fvisibility=: Set default visibility of symbols
+  -shared: Produce a shared library
+  -static: Link against static libraries
+  -pie: Produce dynamically linked position independent executable
+  -pthread: Use POSIX threads library
+  -pipe: Use pipes rather than intermediate files
+  -Wall: Enable all warnings
+  -Wextra: Enable extra warnings
+  -Werror: Make all warnings into errors
+  -Wl=: Pass comma-separated options to the linker
+  -Wa=: Pass comma-separated options to the assembler
+  -Wp=: Pass comma-separated options to the preprocessor
+  -Xassembler=: Pass argument to the assembler
+  -Xpreprocessor=: Pass argument to the preprocessor
+  -Xlinker=: Pass argument to the linker
+  -D=: Pre-define macro with optional definition
+  -U=: Pre-undefine macro
+  -I=: Add include search path
+  -L=: Add library search path
+  -l=: Link against library
+  -B=: Search prefix file executables libraries and data files
+  -cxx-isystem=: Add directory to the C++ SYSTEM include search path
+  --cstdlib=: C standard library to use
+  -fno-color-diagnostics: Disable color diagnostics
+  -save-temps: Do not delete intermediate files
+  -v: Show commands to run and use verbose output
+  -M: Print Makefile dependencies
+  -MF=: Write dependency output to file
+  --version: Display compiler version information
+  --help: Display this information
+completion:
+  flag:
+    o:
+      - $files
+    std:
+      - c++98
+      - gnu++98
+      - c++03
+      - c++11
+      - gnu++11
+      - c++14
+      - gnu++14
+      - c++17
+      - gnu++17
+      - c++20
+      - gnu++20
+      - c++23
+      - gnu++23
+      - c++26
+      - gnu++26
+    analyzer-output:
+      - html
+      - plist
+      - plist-multi-file
+      - plist-html
+      - sarif
+      - sarif-html
+      - text
+    x:
+      - c
+      - c++
+      - assembler
+      - none
+    fvisibility:
+      - default
+      - hidden
+    I:
+      - $directories
+    L:
+      - $directories
+    B:
+      - $directories
+    config:
+      - $files
+    MF:
+      - $files
+  positionalany:
+    - $files

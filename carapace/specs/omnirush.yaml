@@ -1,0 +1,65 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: omnirush Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: omnirush
+description: Free daily tokens for the most powerful coding model on earth
+flags:
+  -p=: Run a one-shot prompt
+  --json: Print raw JSON responses
+  -h, --help: Show help
+  -v, --version: Print build info
+commands:
+  - name: login
+    description: Sign in (device flow via your browser)
+  - name: logout
+    description: Forget the stored device tokens
+  - name: whoami
+    description: Show the signed-in identity
+  - name: usage
+    description: Today's tokens, cap, bonus pot, tokens left, rewards
+    flags:
+      --json: Print raw JSON responses
+  - name: doctor
+    description: Check auth, manager, runtime, agent config
+  - name: feedback
+    description: Tell the OmniRush team what works and what doesn't
+    flags:
+      --bug: Report a bug
+      --idea: Suggest an idea
+      --praise: Send praise
+  - name: spin
+    description: Spend a quality-rewards spin
+  - name: good
+    description: How to make a Good session
+  - name: files-used
+    description: The files the agent reads, runs or creates
+    flags:
+      --json: Print raw JSON
+  - name: assist
+    description: What the agent does on its own
+  - name: keep-awake
+    description: Keep this computer from sleeping while the agent works
+  - name: mcp
+    description: The MCP servers of this folder
+  - name: permissions
+    description: When the agent asks before acting
+  - name: notify
+    description: Bell or system notification when a task is done
+  - name: cleanup
+    description: Free disk space from older releases and logs
+    flags:
+      --dry-run: Don't delete anything, show what would happen
+  - name: theme
+    description: The app's colours
+  - name: computer
+    description: Computer use on this device
+    commands:
+      - name: on
+        description: Turn computer use on
+      - name: off
+        description: Turn computer use off
+      - name: stop
+        description: Stop computer use in every open session

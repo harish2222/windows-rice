@@ -1,0 +1,101 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: tree-sitter Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: tree-sitter
+description: Parser generator tool and incremental parsing library CLI
+flags:
+  -h, --help: Print help
+  -V, --version: Print version
+commands:
+  - name: generate
+    description: Generate a parser by reading a grammar file
+    flags:
+      -a, --abi=: Select the ABI version
+      -b, --build: Compile your parser(s) and show a message
+      -l, --locate: Open the generated parser.c file
+      -L, --lib=: Language library for multi-language
+      -k, --report-states-for-rule=: Give a compilation report for a rule
+      -O=: Set optimization level of generated code
+      --dot-graph: Make error messages include a graphviz DOT graph
+      --json: Make error messages use JSON
+      --abi=: Select the ABI version
+      --lowercase=, -o=: Output directory
+    completion:
+      flag:
+        lowercased-filename:
+          - $directories
+  - name: build
+    description: Compile a parser into a shared library
+    flags:
+      -s, --shared: Shared library
+      -s=: Shared library
+      --wasm: Compile to a .wasm file
+      --abi=: Language ABI version
+      -h, --help: Help
+  - name: parse
+    description: Parse files and print syntax trees
+    flags:
+      -q, --quiet: Suppress printing syntax trees
+      -v, --debug=: Show how the node was created
+      -d: Show output for all nodes
+      -c, --cancel=: Cancel parsing after timeout
+      -t, --time: Print time used for each file
+      -s, --stat: Show statistics for each file
+      --edt=: Print the Extended Debug Tree
+      --xml: Print in xml format
+      -x: Print in xml format
+      -n=: Parse a directory and show line info
+      -l, --limit=: Limit the number of lines of output
+      -C, --cst: Print the concrete syntax tree
+      -a, --aggregate: Print aggregate parse stats
+      --dot: Log dot graph
+      --debug-log=: Log debug info from run
+      --embed=: Log debug embedding
+      -h, --help: Print help
+    completion:
+      flag:
+        cancel:
+          - $files
+  - name: test
+    description: Run a parser's test corpus
+    flags:
+      -u, --update: Update the test corpus with failing tests
+      --open-log=: Log debug info
+      -e, --example=: Only run the example with this name
+      -i, --include=: Only run tests whose name matches pattern
+      -x, --exclude=: Exclude tests matching pattern
+      -h, --help: Print help
+  - name: highlight
+    description: Highlight a file
+    flags:
+      -t, --theme=: Specify the theme of the highlights
+      -h, --help: Print help
+  - name: query
+    description: Search files using a syntax query
+    flags:
+      -h, --help: Print help
+  - name: tags
+    description: Generate a list of tags
+    flags:
+      -s, --scope=: Name of scope used in tags files
+      -O=: Output format
+      -h, --help: Print help
+  - name: init
+    description: Initialize a project
+  - name: init-config
+    description: Create default configuration files
+    flags:
+      -g, --global: Do global config
+  - name: describe
+    description: Describe the query of a given rule
+  - name: dump-languages
+    description: Dump subgraph of a given project
+  - name: add-parser
+    description: Add a new parser to this project
+  - name: update
+    description: Update grammar to latest commit
+  - name: show
+    description: Show parse times

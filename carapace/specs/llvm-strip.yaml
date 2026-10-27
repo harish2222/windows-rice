@@ -1,0 +1,58 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: llvm-strip Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: llvm-strip
+description: LLVM symbol stripper, removes symbols and debug sections
+flags:
+  --allow-broken-links: Allow removing sections leaving invalid references
+  --disable-deterministic-archives: Use real values for UIDs, GIDs, timestamps
+  --discard-all: Remove most local symbols
+  -x: Alias for --discard-all
+  --discard-locals: Remove local symbols starting with .L
+  -X: Alias for --discard-locals
+  --enable-deterministic-archives: Use zero for UIDs, GIDs, and timestamps
+  -D: Alias for --enable-deterministic-archives
+  --extract-section=: Extract section into standalone object in file
+  -g: Alias for --strip-debug
+  --keep-file-symbols: Keep symbols of type STT_FILE
+  --keep-section=: Keep section
+  --keep-symbol=: When stripping, do not remove symbol
+  -K=: Alias for --keep-symbol
+  --keep-undefined: Do not remove undefined symbols
+  --no-strip-all: Disable --strip-all
+  --only-keep-debug: Keep only sections useful for debugging
+  -N=: Alias for --strip-symbol
+  -o=: Write output to file
+  --preserve-dates: Preserve access and modification timestamps
+  -p: Alias for --preserve-dates
+  --regex: Permit regular expressions in name comparison
+  --remove-section=: Remove section
+  -R=: Alias for --remove-section
+  --strip-all: Remove all symbols and non-alloc sections
+  -s: Alias for --strip-all
+  --strip-all-gnu: Compatible with GNU's --strip-all
+  --strip-debug: Remove all debug sections
+  -S: Alias for --strip-debug
+  --strip-sections: Remove all section headers and data not within segments
+  --strip-symbol=: Strip symbol
+  --strip-unneeded: Remove all symbols not needed by relocations
+  --swift-module-path=: Swift symbols from module
+  -T: Remove Swift symbols
+  --version: Print the version and exit
+  -V: Alias for --version
+  --verbose: Print the paths of files that are copied
+  -v: Alias for --verbose
+  --wildcard: Allow wildcard syntax in symbol-related flags
+  -w: Alias for --wildcard
+  -h, --help: Display this help and exit
+completion:
+  flag:
+    o:
+      - $files
+    extract-section:
+      - $files
+  positionalany:
+    - $files

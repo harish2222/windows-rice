@@ -1,0 +1,85 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: nasm Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: nasm
+description: The Netwide Assembler x86 and x86-64
+flags:
+  -o=: Write output to outfile
+  -f=: Select output file format
+  -F=: Select debugging format
+  -l=: Write listing to a list file
+  -o?=: Write output to outfile
+  -g: Generate debugging information
+  -gF=: Generate debugging information in given format
+  -O=: Select optimization level
+  -t: Assemble in limited SciTech TASM compatible mode
+  -E: Preprocess only
+  -e: Preprocess only
+  -a: Do not preprocess, assemble only
+  -s: Redirect error messages to stdout
+  -I=: Add a pathname to the include file path
+  -P=: Pre-include a file
+  -D=: Pre-define a macro
+  -U=: Undefine a macro
+  -X=: Specify error reporting format
+  -Z=: Redirect messages to file
+  -v: Print the NASM version number and exit
+  -M: Generate Makefile dependencies
+  -MG: Generate missing-file Makefile dependencies
+  -MF=: Write dependency output to file
+  -h: List command line options and exit
+  --help: List command line options and exit
+  --version: Print version
+  --bits=: Set bits (16 32 or 64)
+  --keep-all: Output files will not be removed even if an error happens
+  --reproducible: Attempt to produce run-to-run identical output
+  --pragma=: Pre-execute a specific %pragma
+  --before=: Add line before the input
+  --no-line: Ignore %line directives in input
+  --gprefix=: Prepend string to external common and global symbols
+  --gpostfix=: Append string to external common and global symbols
+  --lprefix=: Prepend string to local symbols
+  --lpostfix=: Append string to local symbols
+  --prefix=: Prepend string to all global and common symbols
+  --postfix=: Append string to all global and common symbols
+completion:
+  flag:
+    f:
+      - elf
+      - elf32
+      - elf64
+      - win32
+      - win64
+      - macho
+      - macho32
+      - macho64
+      - bin
+      - obj
+      - ieee
+      - rdoff
+    F:
+      - null
+      - elf
+      - dwarf
+    bits:
+      - '16'
+      - '32'
+      - '64'
+    X:
+      - gnu
+      - vc
+    o:
+      - $files
+    l:
+      - $files
+    I:
+      - $directories
+    P:
+      - $files
+    Z:
+      - $files
+  positionalany:
+    - $files

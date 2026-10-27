@@ -1,0 +1,39 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: code-tunnel Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: code-tunnel
+description: VS Code remote tunnels CLI
+flags:
+  -h, --help: Print help
+  -V, --version: Print version
+commands:
+  - name: tunnel
+    description: Secure tunnel between a machine and code CLI
+    flags:
+      --name=: Name the machine for use with Visual Studio Code
+      -n, --random-name: Sets a random name for the tunnel
+      --machine-id=: Machine ID for the tunnel
+      --parent-process-id=: Parent process id
+      --verbose: Enables verbose logging
+  - name: ext
+    description: Manage extensions
+    commands:
+      - name: install
+        description: Installs or updates an extension
+      - name: uninstall
+        description: Uninstalls an extension
+      - name: list
+        description: Lists installed extensions
+  - name: status
+    description: Prints process and diagnostic information
+  - name: version
+    description: Change the version of the CLI
+  - name: serve-web
+    description: Runs VS Code web server remotely
+  - name: agent
+    description: Manages the machine agent
+  - name: update
+    description: Updates the CLI

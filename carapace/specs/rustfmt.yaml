@@ -1,0 +1,50 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: rustfmt Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: rustfmt
+description: Formats Rust code
+flags:
+  --check: Run in check mode, exit 0 if formatting correct
+  --emit=: What data to emit and how
+  --backup: Backup any modified files
+  --config-path=: Recursively search this path for rustfmt.toml config
+  --config=: Set options from command line
+  --edition=: Rust edition to use
+  --style-edition=: The edition of the Style Guide
+  --color=: Use colored output
+  --print-config=: Dump a default or minimal config to PATH
+  -l, --files-with-diff: Print names of mismatched files
+  -v, --verbose: Print verbose output
+  -q, --quiet: Print less output
+  -V, --version: Show version information
+  -h, --help: Show this message
+completion:
+  flag:
+    emit:
+      - files
+      - stdout
+    edition:
+      - '2015'
+      - '2018'
+      - '2021'
+      - '2024'
+    style-edition:
+      - '2015'
+      - '2018'
+      - '2021'
+      - '2024'
+    color:
+      - always
+      - never
+      - auto
+    print-config:
+      - default
+      - minimal
+      - current
+    config-path:
+      - $files
+  positionalany:
+    - $files

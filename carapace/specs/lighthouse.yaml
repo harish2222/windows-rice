@@ -1,0 +1,73 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: lighthouse Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: lighthouse
+description: Automates auditing performance and quality metrics for a web page
+flags:
+  --verbose: Displays verbose logging
+  --quiet: Displays no progress debug logs or errors
+  --save-assets: Save trace contents and devtools logs to disk
+  --list-all-audits: Prints a list of all available audits and exits
+  --list-locales: Prints a list of all supported locales and exits
+  --list-trace-categories: Prints a list of all required trace categories and exits
+  --additional-trace-categories=: Additional categories to capture with the trace
+  --config-path=: Path to the config JSON
+  --preset=: Use a built-in configuration
+  --chrome-flags=: Custom flags to pass to Chrome
+  --port=: The port to use for the debugging protocol
+  --hostname=: The hostname to use for the debugging protocol
+  --form-factor=: Determines how performance metrics are scored
+  --screenEmulation=: Sets screen emulation parameters
+  --emulatedUserAgent=: Sets useragent emulation
+  --max-wait-for-load=: Timeout in ms to wait before run should continue
+  --enable-error-reporting=: Enables error reporting, overriding any saved preference
+  -G, --gather-mode=: Collect artifacts from a connected browser and save to disk
+  -A, --audit-mode=: Process saved artifacts from disk
+  --only-audits=: Only run the specified audits
+  --only-categories=: Only run the specified categories
+  --skip-audits=: Run everything except these audits
+  --disable-full-page-screenshot: Disables collection of the full page screenshot
+  --ignore-status-code: Disables failing on all error status codes
+  --output=: Reporter for the results
+  --output-path=: File path to output the results
+  --view: Open HTML report in your browser
+  --disable-storage-reset: Disable clearing cache and storage APIs before a run
+  --blocked-url-patterns=: Block network requests to the specified URL patterns
+  --throttling-method=: Controls throttling method
+  --locale=: The locale the report should be formatted in
+  --debug-navigation: Pause after page load for permission to continue
+  --cli-flags-path=: Path to a JSON file with flags to apply
+  --help: Show help
+  --version: Show version number
+completion:
+  flag:
+    preset:
+      - perf
+      - experimental
+      - desktop
+    form-factor:
+      - mobile
+      - desktop
+    only-categories:
+      - accessibility
+      - best-practices
+      - performance
+      - seo
+      - agentic-browsing
+    output:
+      - json
+      - html
+      - csv
+    throttling-method:
+      - devtools
+      - provided
+      - simulate
+    config-path:
+      - $files
+    cli-flags-path:
+      - $files
+  positional:
+    - [url]

@@ -1,0 +1,72 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: clippy-driver Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: clippy-driver
+description: Clippy lints driver, run with rustc arguments
+flags:
+  --rustc: Pass all arguments to rustc
+  -V, --version: Print version info and exit
+  -h, --help: Print this message
+  --edition=: Rust edition to use
+  --crate-name=: Crate name
+  --crate-type=: Crate type
+  --extern=: Specify extern crate as name=path
+  -L=: Add a directory to the library search path
+  --emit=: What data to emit and how
+  --out-dir=: Directory in which output is placed
+  -o=: Write output to file
+  --sysroot=: Override the system root
+  -W=: Warnings
+  -A=: Allows
+  -D=: Denies
+  --test: Build a test harness
+  --cfg=: Configure the compilation environment
+  --deny=: Deny lints
+  --allow=: Allow lints
+  --warn=: Warn on lints
+  --force-warn=: Force warn on lints
+  --error-format=: How errors should be formatted
+completion:
+  flag:
+    crate-type:
+      - bin
+      - lib
+      - rlib
+      - cdylib
+      - staticlib
+      - dylib
+      - proc-macro
+    edition:
+      - '2015'
+      - '2018'
+      - '2021'
+      - '2024'
+    emit:
+      - asm
+      - llvm-bc
+      - llvm-ir
+      - metadata
+      - mir
+      - link
+      - obj
+      - dep-info
+      - metadata
+    error-format:
+      - human
+      - json
+      - short
+    out-dir:
+      - $directories
+    o:
+      - $files
+    sysroot:
+      - $directories
+    L:
+      - $directories
+    extern:
+      - $files
+  positionalany:
+    - $files

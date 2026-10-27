@@ -1,0 +1,26 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: openocd Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: openocd
+description: On-Chip Debugger for embedded target debugging
+flags:
+  -f, --file=: Use configuration file
+  -s, --search=: Directory to search for config files and scripts
+  -d, --debug: Set debug level to 3
+  -l, --log_output=: Redirect log output to file
+  -c, --command=: Run command
+  -v, --version: Display OpenOCD version
+  -h, --help: Display this help
+completion:
+  flag:
+    file:
+      - $files
+    search:
+      - $directories
+    log_output:
+      - $files
+  positionalany:
+    - $files

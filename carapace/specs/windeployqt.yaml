@@ -1,0 +1,58 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: windeployqt Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: windeployqt
+description: Qt Deploy Tool, deploys Qt runtime beside the executable
+flags:
+  -h, --help: Displays help on commandline options
+  --help-all: Displays help including generic Qt options
+  -v, --version: Displays version information
+  --dir=: Use directory instead of binary directory
+  --qmake=: Use specified qmake instead of qmake from PATH
+  --qtpaths=: Use specified qtpaths.exe instead of from PATH
+  --libdir=: Copy libraries to path
+  --plugindir=: Copy plugins to path
+  --translationdir=: Copy translations to path
+  --qml-deploy-dir=: Copy qml files to path
+  --debug: Assume debug binaries
+  --release: Assume release binaries
+  --pdb: Deploy .pdb files (MSVC)
+  --force: Force updating files
+  --dry-run: Simulation mode, behave normally, do not copy or update files
+  --no-patchqt: Do not patch the Qt6Core library
+  --ignore-library-errors: Ignore errors when libraries cannot be found
+  --no-plugins: Skip plugin deployment
+  --include-soft-plugins: Include all relevant plugins by soft dependencies
+  --skip-plugin-types=: Comma-separated list of plugin types that are not deployed
+  --add-plugin-types=: Comma-separated list of plugin types to add
+  --include-plugins=: Comma-separated list of individual plugins to add
+  --exclude-plugins=: Comma-separated list of individual plugins to skip
+  --no-libraries: Skip library deployment
+  --qmldir=: Scan for QML-imports starting from directory
+  --compiler-runtime: Deploy compiler runtime (MSVC)
+  --json: Print JSON output
+  --list=: Print listed contents
+completion:
+  flag:
+    dir:
+      - $directories
+    libdir:
+      - $directories
+    plugindir:
+      - $directories
+    translationdir:
+      - $directories
+    qml-deploy-dir:
+      - $directories
+    qmldir:
+      - $directories
+    list:
+      - source
+      - mapping
+    qmake:
+      - $files
+  positionalany:
+    - $files

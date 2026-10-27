@@ -1,0 +1,91 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: forgum Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: forgum
+description: cowsay plus fortune plus lolcat with a Rust ANSI animation engine
+flags:
+  --config=: Path to custom JSON, TOML, or YAML configuration file
+  --reduce-motion: Disable animated motions and effects
+  --text-only: Skip art generation, print speech bubble text only
+  -f, --file=: Load a full scene specification from a JSON file
+  -c, --cow=: Animal mascot name to render
+  -t, --text=: Cow speech bubble text
+  --think=: Cow think bubble text
+  --list=: List available mascots effects scenery colors shells
+  -m=: The mascot to render
+  -h, --help: Print help
+  -V, --version: Print version
+commands:
+  - name: render
+    description: Render a cow (default command)
+  - name: think
+    description: Render a thought bubble (cowthink mode)
+  - name: fortune
+    description: Print a random fortune to stdout
+  - name: tui
+    description: Launch the interactive terminal UI and studio
+  - name: install
+    description: First-time celestial setup wizard
+  - name: uninstall
+    description: Cleanly uninstall Forgum
+  - name: update
+    description: Check for updates or upgrade Forgum
+  - name: channel
+    description: View, switch, or manage release channels
+  - name: init
+    description: Generate shell integration hooks
+  - name: completions
+    description: Generate shell completion scripts
+  - name: list
+    description: List available options in structured tables
+  - name: status
+    description: Print ok and exit
+  - name: doctor
+    description: Diagnose terminal capabilities and configuration
+  - name: checkhealth
+    description: Run comprehensive health check
+  - name: config
+    description: View or edit configuration
+  - name: logs
+    description: View, query, or clear structured engine logs
+  - name: diagnose
+    description: Run diagnostic triage across logs and subsystems
+  - name: tmux
+    description: Tmux integration subcommands
+  - name: status-line
+    description: One-shot status line for tmux status-right
+  - name: herd
+    description: Fleet manager, control all running daemons
+  - name: theme
+    description: Theme management
+  - name: demo
+    description: Run the showcase demo
+  - name: showcase
+    description: Run the 60-second showcase demo reel
+  - name: remote
+    description: Remote sync, follow your cow across SSH sessions
+  - name: say
+    description: Run a command and render its output in a cow bubble
+  - name: timer
+    description: Time a command and show duration in a cow popup
+  - name: battle
+    description: ASCII cow jousting battle between two mascots
+  - name: rps-battle
+    description: Interactive mascot battle, User vs Computer
+  - name: sweep
+    description: Emergency recovery command
+  - name: stop
+    description: Stop any running animation or background daemon
+  - name: image
+    description: Convert an image to ASCII art
+  - name: help
+    description: Print this message
+completion:
+  flag:
+    config:
+      - $files
+    file:
+      - $files

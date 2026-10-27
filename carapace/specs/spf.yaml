@@ -1,0 +1,30 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: spf Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: spf
+description: Superfile terminal file manager
+flags:
+  --print-last-dir: Print the last directory to stdout on exit
+  -c, --config=: Specify config file
+  -hf, --hotfiles=: Specify hotfiles file
+  -cf, --config-file=: Specify config file path
+  -h, --help: Show help
+  -v, --version: Show version
+completion:
+  flag:
+    config:
+      - $files
+    hotfiles:
+      - $files
+    config-file:
+      - $files
+  positionalany:
+    - $directories
+commands:
+  - name: path-list
+    description: List paths managed by spf
+  - name: pl
+    description: List paths managed by spf (alias)

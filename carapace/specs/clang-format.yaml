@@ -1,0 +1,54 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: clang-format Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: clang-format
+description: Formats C C++ Java JavaScript JSON Objective-C Protobuf C# code
+flags:
+  -i: Inplace edit files
+  --Werror: Changes formatting warnings to errors
+  --Wno-error=: Don't error out on the specified warning type
+  --assume-filename=: Filename used to determine the language and find .clang-format
+  --cursor=: Cursor position when invoking from an editor integration
+  --dry-run: Do not actually make the formatting changes
+  --dump-config: Dump configuration options to stdout and exit
+  --fail-on-incomplete-format: Fail with exit code 1 on incomplete format
+  --fallback-style=: Name of predefined style used as fallback for style=file
+  --ferror-limit=: Maximum number of clang-format errors to emit
+  --files=: File containing a list of files to process one per line
+  --length=: Format a range of this length in bytes
+  --lines=: Format a range of lines from start to end
+  --offset=: Format a range from this offset
+  --output-replacements-xml: Output replacements as XML
+  --sort-includes: Rearrange includes to be sorted
+  --style=: Coding style to apply
+  -n: Suppress errors
+  --version: Print version
+  -h, --help: Print help
+completion:
+  flag:
+    style:
+      - LLVM
+      - GNU
+      - Google
+      - Chromium
+      - Microsoft
+      - Mozilla
+      - WebKit
+      - file
+    fallback-style:
+      - LLVM
+      - Google
+      - Chromium
+      - Microsoft
+      - Mozilla
+      - WebKit
+      - file
+    files:
+      - $files
+    assume-filename:
+      - $files
+  positionalany:
+    - $files

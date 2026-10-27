@@ -1,0 +1,55 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: qmake Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: qmake
+description: Qt project and Makefile generator
+flags:
+  -project: Put qmake into project file generation mode
+  -makefile: Put qmake into makefile generation mode (default)
+  -Wnone: Turn off all warnings
+  -Wall: Turn on all warnings
+  -Wparser: Turn on parser warnings
+  -Wlogic: Turn on logic warnings
+  -Wdeprecated: Turn on deprecation warnings
+  -o=: Write output to file
+  -d: Increase debug level
+  -t=: Overrides TEMPLATE
+  -tp=: Overrides TEMPLATE so prefix is prefixed into the value
+  -help: This help
+  -v: Version information
+  -early: Subsequent variable assignments parsed right before default_pre.prf
+  -before: Subsequent variable assignments parsed before files (default)
+  -after: Subsequent variable assignments parsed after files
+  -late: Subsequent assignments parsed right after default_post.prf
+  -norecursive: Do not do a recursive search
+  -recursive: Do a recursive search
+  -set=: Set persistent property to value
+  -unset=: Unset persistent property
+  -query=: Query persistent property, show all if empty
+  -qtconf=: Use file instead of looking for qt6.conf/qt.conf
+  -cache=: Use file as cache
+  -spec=: Use spec as QMAKESPEC
+  -nocache: Do not use a cache file
+completion:
+  flag:
+    o:
+      - $files
+    cache:
+      - $files
+    qtconf:
+      - $files
+    query:
+      - QT_INSTALL_PREFIX
+      - QT_INSTALL_HEADERS
+      - QT_INSTALL_LIBS
+      - QT_INSTALL_BINS
+      - QT_INSTALL_PLUGINS
+      - QT_HOST_BINS
+      - QT_HOST_DATA
+      - QMAKE_XSPEC
+      - QT_VERSION
+  positionalany:
+    - $files

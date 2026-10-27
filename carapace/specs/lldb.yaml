@@ -1,0 +1,62 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: lldb Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: lldb
+description: LLDB debugger
+flags:
+  --attach-name=: Attach to process with the given name
+  -n=: Alias for --attach-name
+  --attach-pid=: Attach to process with the given pid
+  -p=: Alias for --attach-pid
+  --wait-for: Wait for the process to launch before attaching
+  -w: Alias for --wait-for
+  --batch: Run commands from -s -S -o -O and then quit
+  -b: Alias for --batch
+  --one-line=: Run one-line lldb command after file has been loaded
+  -o=: Alias for --one-line
+  --one-line-before-file=: Run one-line command before file is loaded
+  -O=: Alias for --one-line-before-file
+  --one-line-on-crash=: Run one-line command if the target crashes in batch mode
+  -k=: Alias for --one-line-on-crash
+  --source=: Execute lldb commands from file after loading
+  -s=: Alias for --source
+  --source-before-file=: Execute lldb commands before file is loaded
+  -S=: Alias for --source-before-file
+  --source-on-crash=: Source this file if the target crashes in batch mode
+  -K=: Alias for --source-on-crash
+  --source-quietly: Do not echo commands while sourcing files
+  -Q: Alias for --source-quietly
+  --no-lldbinit: Do not automatically parse .lldbinit files
+  -x: Alias for --no-lldbinit
+  --arch=: Use specified architecture
+  -a=: Alias for --arch
+  --core=: Use file as the core file
+  -c=: Alias for --core
+  --editor: Open source files using external editor
+  -e: Alias for --editor
+  --file=: Use file as the program to be debugged
+  -f=: Alias for --file
+  --no-use-colors: Do not use colors
+  -X: Alias for --no-use-colors
+  --version: Print version
+  -v: Alias for --version
+  -h, --help: Print help
+completion:
+  flag:
+    file:
+      - $files
+    core:
+      - $files
+    source:
+      - $files
+    source-before-file:
+      - $files
+    source-on-crash:
+      - $files
+    attach-name:
+      - $directories
+  positionalany:
+    - $files

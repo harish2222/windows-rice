@@ -1,0 +1,187 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: yarnpkg Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: yarnpkg
+description: Yarn package manager CLI entrypoint
+flags:
+  --cache-folder=: Specify a custom folder to store the yarn cache
+  --check-files: Install will verify file tree of packages for consistency
+  --cwd=: Working directory to use
+  --disable-pnp: Disable the Plug'n'Play installation
+  --emoji=: Enable emoji in output
+  --enable-pnp: Enable the Plug'n'Play installation
+  --flat: Only allow one version of a package
+  --focus: Focus on a single workspace
+  --force: Install and build packages even if they were built before
+  --frozen-lockfile: Don't generate a lockfile and fail if update is needed
+  --global-folder=: Specify a custom folder to store global packages
+  --har: Save HAR output of network traffic
+  --https-proxy=: Use specified https proxy
+  --ignore-engines: Ignore engines check
+  --ignore-optional: Ignore optional dependencies
+  --ignore-platform: Ignore platform checks
+  --ignore-scripts: Don't run lifecycle scripts
+  --json: Format Yarn log messages as lines of JSON
+  --link-duplicates: Create hardlinks to repeated modules
+  --link-folder=: Specify a custom folder to store global links
+  --modules-folder=: Rather than install modules into node_modules, output here
+  --mutex=: Use a mutex to ensure only one yarn instance executes
+  --network-concurrency=: Maximum number of concurrent network requests
+  --network-timeout=: TCP timeout for network requests in milliseconds
+  --no-bin-links: Don't generate bin links when setting up packages
+  --no-default-rc: Prevent Yarn from automatically detecting yarnrc and npmrc files
+  --no-lockfile: Don't read or generate a lockfile
+  --non-interactive: Do not show interactive prompts
+  --no-node-version-check: Do not warn when using unsupported Node version
+  --no-progress: Disable progress bar
+  --offline: Trigger error if dependencies unavailable in local cache
+  --otp=: One-time password for two factor authentication
+  --prefer-offline: Use network only if dependencies unavailable in local cache
+  --preferred-cache-folder=: Specify a custom cache folder if possible
+  --prod: Production mode
+  --production: Production mode
+  --proxy=: Use specified proxy
+  --pure-lockfile: Don't generate a lockfile
+  --registry=: Override configuration registry
+  -s, --silent: Skip Yarn console logs
+  --scripts-prepend-node-path=: Prepend node executable dir to PATH in scripts
+  --skip-integrity-check: Run install without checking if node_modules installed
+  --strict-semver: Strict semver
+  --update-checksums: Update package checksums from current repository
+  --use-yarnrc=: Specifies a yarnrc file that Yarn should use
+  -v, --version: Output the version number
+  --verbose: Output verbose messages
+  -h, --help: Output usage information
+completion:
+  positionalany:
+    - $files
+  positional:
+    - [add, bin, cache, check, config, create, dedupe, generate-lock-entry,
+      global, help, import, info, init, install, licenses, link, list,
+      login, logout, outdated, owner, pack, peek, prune, remove, run,
+      stage, tag, team, unlink, upgrade, upgrade-interactive, version,
+      versions, why, workspaces, workspace]
+commands:
+  - name: add
+    description: Installs a package and any packages that it depends on
+    flags:
+      --dev: Save to devDependencies
+      -D: Save to devDependencies
+      --peer: Save to peerDependencies
+      --optional: Save to optionalDependencies
+      --exact: Save exact version
+      -E: Save exact version
+      --tilde: Save the most recent tilde version
+      -T: Save the most recent tilde version
+      --caret: Save the most recent caret version
+      -C: Save the most recent caret version
+      --audit: Checks for known security issues
+      --verbose: Output verbose messages
+  - name: bin
+    description: Displays the location of the yarn bin folder
+  - name: cache
+    description: Manage yarn cache
+    commands:
+      - name: clean
+        description: Cleans yarn cache
+      - name: dir
+        description: Print yarn cache dir
+  - name: config
+    description: Manages config
+  - name: create
+    description: Creates new projects from any create-* starter kits
+  - name: global
+    description: Manage global packages
+    commands:
+      - name: add
+        description: Installs packages globally
+      - name: bin
+        description: Displays location of global bin folder
+      - name: list
+        description: Lists global packages
+      - name: remove
+        description: Removes global packages
+      - name: upgrade
+        description: Upgrades global packages
+      - name: upgrade-interactive
+        description: Interactively upgrades global packages
+  - name: info
+    description: Display information about a package
+  - name: init
+    description: Interactively creates package.json
+    flags:
+      -y, --yes: Use default init options
+      -p, --private: Makes the repository private
+      -2: Generate a v2 yarn.lock and .yarnrc.yml file
+  - name: install
+    description: Install all the dependencies
+    flags:
+      --check-files: Verify file tree of packages
+      --flat: Only allow one version of a package
+      --force: Install and build packages even if they were built before
+      --frozen-lockfile: Don't generate a lockfile
+      --har: Save HAR output of network traffic
+      --ignore-scripts: Don't run lifecycle scripts
+      --offline: Use local cache only
+  - name: licenses
+    description: List licenses for installed packages
+  - name: link
+    description: Symlink a package folder during development
+  - name: list
+    description: Lists installed packages
+    flags:
+      --depth=: Limit depth of listing
+      --pattern=: Filter by regex pattern
+  - name: outdated
+    description: Checks for outdated package dependencies
+  - name: owner
+    description: Manages package owners
+    commands:
+      - name: ls
+        description: List owners of a package
+      - name: add
+        description: Add owner to a package
+      - name: rm
+        description: Remove owner from a package
+  - name: pack
+    description: Creates a compressed gzip archive of package dependencies
+  - name: prune
+    description: Prunes extraneous packages from node_modules
+  - name: remove
+    description: Removes a package
+    flags:
+      --dev: Remove from devDependencies
+      --peer: Remove from peerDependencies
+      --optional: Remove from optionalDependencies
+  - name: run
+    description: Runs scripts defined in package.json or node_modules
+    flags:
+      --verbose: Verbose output
+  - name: tag
+    description: Tag a specific version of the package
+  - name: team
+    description: Maintain team memberships
+  - name: unlink
+    description: Unlink a previously created symlink
+  - name: upgrade
+    description: Upgrades packages to their latest version
+  - name: upgrade-interactive
+    description: Interactively upgrades packages
+  - name: version
+    description: Updates the package version
+    flags:
+      --new-version=: Give new version an explicit version
+      --major: Auto-increment major version number
+      --minor: Auto-increment minor version number
+      --patch: Auto-increment patch version number
+  - name: versions
+    description: Displays version components of yarn and dependencies
+  - name: why
+    description: Explains why a package is installed
+  - name: workspace
+    description: Run command in the workspace specified as rootDir
+  - name: workspaces
+    description: Runs the specified command in each workspace

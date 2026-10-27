@@ -1,0 +1,77 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: aqt Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: aqt
+description: Another unofficial Qt installer, downloads Qt SDK archives
+flags:
+  -c=: Config file to use
+  -C=: Configuration to use (download-qt config value)
+  -b=: Base URL to use
+  -m=: Comma-delimited list of additional external tool archives
+  -a=: Comma-delimited list of additional Qt archives
+  -o=: Target output directory
+  -h, --help: Show help and exit
+  --version: Show version and exit
+commands:
+  - name: install-qt
+    description: Install desktop Qt
+    flags:
+      -c=: Config file to use
+      -b=: Base URL
+      -o=: Target output directory
+      --archives=: Comma-delimited list of Qt archives
+      --outputdir=: Output directory
+      --host=: Host platform (linux, mac, windows)
+      --arch=: Architecture (desktop targets)
+      --win-desktop=: Windows desktop Qt
+      -q, --quiet=: Suppress progress bar
+      --list: Lists available versions only
+    completion:
+      flag:
+        host:
+          - linux
+          - mac
+          - windows
+        arch:
+          - win64_msvc2022_64
+          - win64_mingw
+          - win32_msvc2022
+          - win64_opengl
+        outputdir:
+          - $directories
+  - name: install-tool
+    description: Install desktop Qt tools
+    flags:
+      -c=: Config file to use
+      -b=: Base URL
+      -o=: Target output directory
+      -m=: Additional external tools archives
+      --outputdir=: Output directory
+      --host=: Host platform
+      -h, --help: Show help info
+  - name: list-qt
+    description: List all available version of Qt
+    flags:
+      -c=: Config file
+      -b=: Base URL
+      --archives=: List available archives
+      --arch=: List available architectures
+      --modules=: List available modules
+      --host=: Host platform
+      --qt-name=: Predefined Qt version name
+      -h, --help: Show help info
+  - name: install-doc
+    description: Install documentation
+  - name: install-example
+    description: Install examples
+  - name: install-src
+    description: Install sources
+  - name: list-doc
+    description: List all available versions of documentation
+  - name: list-example
+    description: List all available examples
+  - name: list-src
+    description: List all available source archives

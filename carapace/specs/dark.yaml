@@ -1,0 +1,36 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: dark Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: dark
+description: Windows Installer XML Toolset Decompiler
+flags:
+  -? : Show help information
+  -help: Show help information
+  -nologo: Skip printing dark logo information
+  -notidy: Do not delete temporary files
+  -ext=: Extension assembly
+  -sct: Suppress decompiling custom tables
+  -sdet: Suppress dropping empty tables
+  -sras: Suppress relative action sequencing
+  -sui: Suppress decompiling UI-related tables
+  -sw=: Suppress all warnings or a specific message ID
+  -swall: Suppress all warnings
+  -v: Verbose output
+  -wx=: Treat all warnings or a specific ID as an error
+  -wxall: Treat all warnings as errors
+  -o=: Specify output file
+  -x=: Export binaries from cabinets to path
+  -xo: Output wixout instead of WiX source code
+completion:
+  flag:
+    o:
+      - $files
+    x:
+      - $directories
+    ext:
+      - $files
+  positionalany:
+    - $files

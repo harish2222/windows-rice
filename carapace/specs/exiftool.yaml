@@ -1,0 +1,74 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: exiftool Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: exiftool
+description: Read and write meta information in files
+flags:
+  -h: Print usage information
+  --help: Print usage information
+  -ver: Print exiftool version number
+  -version: Print exiftool version number
+  -r: Recursively scan sub-directories
+  -a: Allow duplicate tags to be extracted
+  -u: Extract unknown tags
+  -U: Extract unknown binary tags
+  -g0=: Organize output by tag group
+  -g1=: Organize output by tag group
+  -G0=: Same as -g0 (heads of groups)
+  -G1=: Same as -g1 (heads of groups)
+  -s: Use short tag names
+  -S: Very short tag names and values
+  -csv=: Export information in CSV format or import CSV file
+  -json: Use JSON formatted output
+  -j=: Use JSON formatted output
+  -php: Use PHP serialized JSON format
+  -n: No print conversion
+  -m: Ignore minor errors and warnings
+  -q: Quiet output
+  -t: Output a tab-delimited list of tag names and values
+  -T: Output tag descriptions
+  -w=: Write console output to file
+  -o=: Rename file according to DateTimeOriginal
+  -b=: Output data in binary format
+  -e: Combine --print- and --binary
+  -ee: Extract information from embedded documents
+  -fast: Fast processing
+  -fast2: Very fast processing, unknown tags skipped
+  -d=: Set date/time format
+  -D: Print tag descriptions (very verbose)
+  -x=: Exclude specified tag
+  -if=: Set condition for file processing
+  -p=: Format string to specify tags
+  -f=: Force printing of specified tags
+  -c=: GPS alternates format
+  -listw: List writable tags
+  -listf: List supported file types
+  -listr: List recognized file extensions
+  -listwf: List writable file extensions
+  -listg=: List tag groups
+  -listd: List deletable groups
+  -listx: List tags with definitions
+  -listgeo: List geotag tags
+  -tagsFromFile=: Copy tag values from SRCFILE
+  -P: Preserve file Modification date/time
+  -k: Pause before terminating
+  -v=: Verbose messages
+completion:
+  flag:
+    w:
+      - $files
+    o:
+      - $files
+    csv:
+      - $files
+    j:
+      - $files
+    p:
+      - $files
+    tagsFromFile:
+      - $files
+  positionalany:
+    - $files

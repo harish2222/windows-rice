@@ -1,0 +1,27 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: impeccable Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: impeccable
+description: AI-assisted frontend design CLI
+flags:
+  -h, --help: Show help
+commands:
+  - name: detect
+    description: Detect the frontend project and framework
+    flags:
+      --json: JSON output
+  - name: ignores
+    description: Show ignored files or configure ignore patterns
+  - name: install
+    description: Install the project adapter
+  - name: link
+    description: Link local project
+  - name: update
+    description: Update to latest version
+  - name: check
+    description: Run design checks
+  - name: help
+    description: Show help

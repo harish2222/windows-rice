@@ -1,0 +1,81 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: semgrep Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: semgrep
+description: Lightweight static analysis for many languages
+flags:
+  -h, --help: Show this message and exit
+commands:
+  - name: ci
+    description: Run Semgrep on a git diff (for use in CI)
+  - name: scan
+    description: Run Semgrep rules on local folders or files
+    flags:
+      --config=: Configuration file(s) to use
+      -c=: Configuration file(s) to use
+      --json: Output results as JSON
+      --json-output=: Path to write JSON output to
+      --error: Exit 1 if there are findings
+      --github-annotate: Show findings in GitHub annotation format
+      --gitlab-sast: Output results in GitLab SAST format
+      --sarif: Output results in SARIF format
+      --emacs: Output results in Emacs format
+      --vim: Output results in Vim format
+      --inject-rules: Inject rules into the SARIF output
+      -j=: Number of jobs to run in parallel
+      --jobs=: Number of jobs to run in parallel
+      --max-memory=: Maximum memory to use
+      --max-target-bytes=: Maximum size of a file to scan
+      --metrics=: Enable or disable metrics
+      --no-git-ignore: Do not respect .gitignore when searching files
+      --no-secrets: Skip the secrets engine
+      --pro: Force use of Pro engine
+      --oss-only: Run with OSS engine only
+      --quiet: Less output to the console
+      --verbose: Show more output
+      --exclude=: Skip any file or directory that matches pattern
+      --include=: Include only files matching pattern
+      --timeout=: Timeout in seconds for rules
+      --timeout-threshold=: Number of rules hit by timeout to exit
+      --baseline-commit=: Scan changes relative to this commit
+      --dry-run: Do not write config files, print actions only
+    completion:
+      flag:
+        config:
+          - $files
+        json-output:
+          - $files
+        include:
+          - $files
+        exclude:
+          - $files
+  - name: install-semgrep-pro
+    description: Install the Semgrep Pro Engine
+  - name: login
+    description: Obtain and save credentials for semgrep.dev
+  - name: logout
+    description: Remove locally stored credentials to semgrep.dev
+  - name: lsp
+    description: Start the Semgrep LSP server
+  - name: publish
+    description: Upload rule to semgrep.dev
+  - name: show
+    description: Show various types of information
+    commands:
+      - name: supportedlangs
+        description: Show supported language extensions
+      - name: config
+        description: Show config
+      - name: findings
+        description: Show findings output
+      - name: matcher-types
+        description: Show available matcher types
+  - name: test
+    description: Test the rules
+  - name: validate
+    description: Validate the rules
+  - name: mcp
+    description: Start the Semgrep MCP server

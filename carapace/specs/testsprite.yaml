@@ -1,0 +1,52 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: testsprite Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: testsprite
+description: Official TestSprite command-line interface
+flags:
+  -V, --version: Output the version number
+  --output=: Output format (json or text)
+  --profile=: Configuration profile to use
+  --endpoint-url=: Override the API endpoint host
+  --verbose: Emit human readable retry and backoff transitions
+  --debug: Print HTTP method path request id latency retry decisions
+  --dry-run: Skip network and credentials, emit canned sample
+  --request-timeout=: Client-side per-request timeout in seconds
+  -h, --help: Display help for command
+commands:
+  - name: setup
+    description: Set up TestSprite, configure API key, install skills
+  - name: auth
+    description: Manage TestSprite credentials
+  - name: project
+    description: Manage TestSprite projects
+  - name: test
+    description: Inspect TestSprite tests
+  - name: testlist
+    description: Manage test lists
+  - name: ci
+    description: Scaffold CI integration for TestSprite
+  - name: schedule
+    description: Manage TestSprite schedules
+  - name: tunnel
+    description: Open a tunnel so TestSprite can reach a local app
+  - name: agent
+    description: Install TestSprite guidance into coding-agent config
+  - name: usage
+    description: Show credit balance and plan info
+  - name: credits
+    description: Show credit balance and plan info (alias)
+  - name: doctor
+    description: Diagnose CLI setup
+  - name: completion
+    description: Print a shell completion script
+  - name: help
+    description: Display help for command
+completion:
+  flag:
+    output:
+      - json
+      - text

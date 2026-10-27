@@ -1,0 +1,99 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: llvm-objcopy Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: llvm-objcopy
+description: LLVM object copy tool, translates object files between formats
+flags:
+  --add-gnu-debuglink=: Add a .gnu_debuglink for debug file
+  --add-section=: Add a section with the contents of file
+  --add-symbol=: Add new symbol to .symtab
+  --adjust-start=: Alias for --change-start
+  --allow-broken-links: Allow removing sections leaving invalid references
+  --binary-architecture=: Ignored for compatibility
+  -B=: Alias for --binary-architecture
+  --change-section-address=: Set or adjust the address of a section
+  --change-start=: Add increment to the start address
+  --compress-debug-sections=: Compress DWARF debug sections using format
+  --decompress-debug-sections: Decompress DWARF debug sections
+  --discard-all: Remove most local symbols
+  -x: Alias for --discard-all
+  --discard-locals: Remove local symbols starting with .L
+  -X: Alias for --discard-locals
+  --dump-section=: Dump contents of section into file
+  --enable-deterministic-archives: Use zero for UIDs, GIDs, and timestamps
+  -D: Alias for --enable-deterministic-archives
+  --disable-deterministic-archives: Use real values for UIDs, GIDs, timestamps
+  --extract-section=: Extract section into standalone object in file
+  --extract-dwo: Remove all sections that are not DWARF .dwo sections
+  --gap-fill=: Fill gaps between sections with value
+  --globalize-symbol=: Mark symbol as global
+  -G=: Alias for --keep-global-symbol
+  -g: Alias for --strip-debug
+  --input-target=: Read the input as the specified format
+  -I=: Alias for --input-target
+  --output-target=: Write the input as the specified format
+  -O=: Alias for --output-target
+  --only-keep-debug: Keep only sections useful for debugging
+  --only-section=: Copy only sections matching pattern
+  -j=: Alias for --only-section
+  --keep-symbol=: When stripping symbols, do not remove symbol
+  -K=: Alias for --keep-symbol
+  --keep-section=: Keep section
+  --localize-symbol=: Mark symbol as local
+  -L=: Alias for --localize-symbol
+  --localize-hidden: Hide all non-section symbols marked as hidden
+  --newline-prefix=: Prefix all symbols in output newlines
+  --prefix=: Add prefix to all global symbols
+  --remove-section=: Remove section
+  -R=: Alias for --remove-section
+  --rename-section=: Rename section from old to new
+  --set-section-flags=: Set section flags to string
+  --set-symbol-visibility=: Set the visibility of a symbol
+  --split-dwo=: Equivalent to extract-dwo on the input file
+  --strip-all: Remove all symbols and non-alloc sections
+  -s: Alias for --strip-all
+  --strip-all-gnu: Compatible with GNU's --strip-all
+  --strip-debug: Remove all debug sections
+  --strip-sections: Remove all section headers and data not within segments
+  --strip-symbol=: Strip symbol
+  -N=: Alias for --strip-symbol
+  --strip-unneeded: Remove all symbols not needed by relocations
+  --update-section=: Update section contents with file contents
+  --weak-symbol=: Mark symbol as weak
+  --wildcard: Allow wildcard syntax in symbol-related flags
+  -w: Alias for --wildcard
+  --version: Print the version and exit
+  -V: Alias for --version
+  -h, --help: Display this help and exit
+completion:
+  flag:
+    compress-debug-sections:
+      - zlib
+      - zstd
+    input-target:
+      - binary
+      - coff
+      - elf
+      - elf64-x86-64
+      - pe-x86-64
+    output-target:
+      - binary
+      - coff
+      - elf
+      - elf64-x86-64
+      - pe-x86-64
+    add-gnu-debuglink:
+      - $files
+    add-section:
+      - $files
+    dump-section:
+      - $files
+    extract-section:
+      - $files
+    update-section:
+      - $files
+  positional:
+    - ['$files']

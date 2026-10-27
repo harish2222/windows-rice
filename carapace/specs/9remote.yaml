@@ -1,0 +1,27 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: 9remote Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: 9remote
+description: Remote terminal access from anywhere
+flags:
+  -h, --help: Show help
+commands:
+  - name: start
+    description: Run server and tunnel in foreground
+  - name: key
+    description: Show permanent key and connect URL
+    flags:
+      --new: Regenerate the permanent key
+  - name: otk
+    description: Create a fresh one-time connect key and URL
+  - name: devices
+    description: List approved devices
+  - name: auto-approve
+    description: Toggle device auto-approve
+  - name: approve
+    description: Approve a pending device
+  - name: help
+    description: Show this help

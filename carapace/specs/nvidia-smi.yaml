@@ -1,0 +1,69 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: nvidia-smi Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: nvidia-smi
+description: NVIDIA System Management Interface
+flags:
+  -h, --help: Print usage information and exit
+  --version: Print version information and exit
+  -L, --list-gpus: Display a list of GPUs connected to the system
+  -B, --list-excluded-gpus: Display a list of excluded GPUs
+  -col, --columns=: Show summary in multi-column format
+  -q, --query: Display GPU or Unit info
+  -u, --unit: Show unit rather than GPU attributes
+  -i, --id=: Target a specific GPU
+  -f, --filename=: Log to a specified file rather than stdout
+  -l, --loop=: Probe until Ctrl+C at specified second interval
+  --show-all-processes: Show all GPU clients
+  --query-gpu=: Display information for specified comma-separated fields
+  --query-unit=: Display info for specified fields on unit
+  --query-supported-clocks=: List supported clock frequencies
+  --query-applications-clocks=: List application clock frequencies
+  --query-default-applications-clocks=: List default clock frequencies
+  --query-gpu-info=: Display GPU info
+  --query-accounted-apps=: Display accounted applications
+  --query-retired-pages=: List pages that were retired
+  --dsl=: set debug level
+  -pm=: Persistence mode
+  -r, --gpu-reset: Reset GPU
+  -c, --compute-mode=: Set compute mode
+  -pl, --power-limit=: Set power management limit
+  -e, --ecc-config=: ECC configuration
+  -d=: Fields to output
+  --debug=: Set debug mode
+completion:
+  flag:
+    'query-gpu':
+      - name
+      - utilization.gpu
+      - memory.used
+      - memory.total
+      - temperature.gpu
+      - power.draw
+      - power.limit
+      - fan.speed
+      - clocks.sm
+      - clocks.max.sm
+      - driver_version
+      - pci.bus_id
+      - uuid
+      - serial
+      - count
+    compute-mode:
+      - '0'
+      - '1'
+      - '2'
+      - '3'
+    ecc-config:
+      - '0'
+      - '1'
+    filename:
+      - $files
+    id:
+      - '0'
+      - '1'
+  positionalany:
+    - $files

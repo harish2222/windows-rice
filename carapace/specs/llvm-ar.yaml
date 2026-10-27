@@ -1,0 +1,50 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: llvm-ar Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: llvm-ar
+description: LLVM Archiver
+flags:
+  --format=: Archive format to create
+  --plugin=: Ignored for compatibility
+  --output=: Directory to extract archive members to
+  --rsp-quoting=: Quoting style for response files
+  --thin: Create a thin archive
+  --version: Print the version and exit
+  -h, --help: Display this help and exit
+commands:
+  - name: d
+    description: Delete files from the archive
+  - name: m
+    description: Move files in the archive
+  - name: p
+    description: Print contents of files found in the archive
+  - name: q
+    description: Quick append files to the archive
+  - name: r
+    description: Replace or insert files into the archive
+  - name: s
+    description: Act as ranlib
+  - name: t
+    description: Display list of files in archive
+  - name: x
+    description: Extract files from the archive
+completion:
+  flag:
+    format:
+      - default
+      - gnu
+      - darwin
+      - bsd
+      - bigarchive
+      - zos
+      - coff
+    rsp-quoting:
+      - posix
+      - windows
+    output:
+      - $directories
+  positionalany:
+    - $files

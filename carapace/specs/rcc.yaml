@@ -1,0 +1,48 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: rcc Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: rcc
+description: Qt Resource Compiler, embeds .qrc resources into binaries
+flags:
+  -h, --help: Displays help on commandline options
+  --help-all: Displays help including generic Qt options
+  -v, --version: Displays version information
+  -o, --output=: Write output to file rather than stdout
+  -t, --temp=: Use temporary file for big resources
+  --name=: Create an external initialization function with name
+  --root=: Prefix resource access path with root path
+  --compress-algo=: Compress input files using algorithm
+  --compress=: Compress input files by level
+  --no-compress: Disable all compression
+  --no-zstd: Disable usage of zstd compression
+  --threshold=: Threshold to consider compressing files
+  --binary: Output a binary file for use as a dynamic resource
+  -g, --generator=: Select generator
+  --pass=: Pass number for big resources
+  --namespace: Turn off namespace macros
+  --verbose: Enable verbose mode
+  --list: Only list .qrc file entries, do not generate code
+  --list-mapping: Only output a mapping of resource paths
+  -d, --depfile=: Write a depfile with the .qrc dependencies
+  --project: Output a resource file containing all files from current directory
+  --format-version=: The RCC format version to write
+completion:
+  flag:
+    output:
+      - $files
+    temp:
+      - $files
+    depfile:
+      - $files
+    compress-algo:
+      - zlib
+      - none
+    generator:
+      - cpp
+      - python
+      - python2
+  positionalany:
+    - $files

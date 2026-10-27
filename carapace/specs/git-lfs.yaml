@@ -1,0 +1,123 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: git-lfs Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: git-lfs
+description: Git extension for versioning large files
+flags:
+  -h, --help: Show help
+  -v, --version: Print version
+commands:
+  - name: install
+    description: Install Git LFS configuration
+    flags:
+      --force: Overwrite any existing config files
+      --local: Only set up repos in current git repository
+      --skip-repo: Skip repo setup, only set user level hooks
+      --skip-smudge: Skip automatic downloading on checkout
+  - name: uninstall
+    description: Remove LFS program from git hooks
+  - name: init
+    description: Same as git lfs install
+    flags:
+      --force: Overwrite any existing config files
+      --skip-smudge: Skip automatic downloading on checkout
+  - name: track
+    description: View or add Git LFS patterns to .gitattributes
+    flags:
+      --dry-run: Print what would be tracked
+      --no-excluded: Don't list exclude patterns
+      --no-modify-attrs: Don't change .gitattributes
+      --fixup: Fix up possible consistency problems
+      -I=: Include only paths matching pattern
+      --include=: Include only paths matching pattern
+      -X=: Exclude paths matching pattern
+      --exclude=: Exclude paths matching pattern
+  - name: untrack
+    description: Remove Git LFS paths from Git Attributes
+  - name: checkout
+    description: Populate working copy with real content from Git LFS files
+    flags:
+      -I=: Include only paths matching pattern
+      -X=: Exclude paths matching pattern
+  - name: fetch
+    description: Download Git LFS files from a remote
+    flags:
+      -I=: Include only paths matching pattern
+      -X=: Exclude paths matching pattern
+      -R, --recent: Fetch recent objects based on locally configured
+      --all: Fetch all objects
+      -r, --ref=: Which ref to fetch
+      --dry-run: Show what would be fetched
+  - name: pull
+    description: Fetch Git LFS files, checkout, then checkout LFS files
+    flags:
+      -I=: Include only paths matching pattern
+      -X=: Exclude paths matching pattern
+      -r, --recent: Fetch recent objects
+      --all: Fetch all objects
+  - name: push
+    description: Upload queued local files to remote server
+    flags:
+      -I=: Include only paths matching pattern
+      -X=: Exclude paths matching pattern
+      --all: Push all objects
+      --dry-run: Do a test run
+      --object-id=: Push only specific object ID
+  - name: status
+    description: Show the status of Git LFS files in the repository
+    flags:
+      --porcelain: Show status in porcelain format
+      -I=: Include only paths matching pattern
+      -X=: Exclude paths matching pattern
+  - name: ls-files
+    description: Show information about Git LFS files in index and working tree
+    flags:
+      -l, --long: Show the full 40-byte OID
+      -I=: Include only paths matching pattern
+      -s, --size: Show the size of the file on disk
+      -d, --debug: Show file's OIDs, pointer file location and download status
+  - name: ext
+    description: Display Git LFS extension details
+  - name: env
+    description: Display the current Git LFS environment
+  - name: locks
+    description: List currently locked files from the Git LFS server
+    flags:
+      --local: Just show the locally locked files
+      -I=: Include only paths matching pattern
+      -X=: Exclude paths matching pattern
+  - name: lock
+    description: Set a file as locked on the Git LFS server
+    flags:
+      -r, --remote=: Remote server to check
+  - name: unlock
+    description: Remove a lock on a file from the Git LFS server
+  - name: logs
+    description: Show errors from the Git LFS command
+  - name: fsck
+    description: Check Git LFS files for consistency
+    flags:
+      --pointers: Analyze LFS pointer files
+      --recover: Recover corrupted git LFS working files
+  - name: migrate
+    description: Migrate history to or from Git LFS
+    commands:
+      - name: import
+        description: Import Git history into Git LFS
+      - name: export
+        description: Export Git LFS files to plain Git
+      - name: info
+        description: Show a list of files that would migrate
+  - name: prune
+    description: Delete old Git LFS files from local storage
+  - name: dedup
+    description: De-duplicate Git LFS files.
+  - name: update
+    description: Update Git hook configuration
+    flags:
+      --force: Overwrite hook files
+  - name: completion
+    description: Generate shell scripts for command-line tab-completion

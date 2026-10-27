@@ -1,0 +1,18 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: cursor-agent Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: cursor-agent
+description: Cursor AI coding agent in the terminal
+flags:
+  -p, --print=: Run in non-interactive print mode with prompt
+  -H: Show help
+  -e=: Evaluate instruction or response
+  --api-key=: API key for authentication
+  -v, --version: Print version
+  -h, --help: Print help
+completion:
+  positionalany:
+    - $files

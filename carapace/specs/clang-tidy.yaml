@@ -1,0 +1,41 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: clang-tidy Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: clang-tidy
+description: LLVM C/C++ static analysis with configurable checks
+flags:
+  --checks=: Comma-separated list of globs with optional - prefix
+  --config=: Specifies a configuration in YAML/JSON format
+  --config-file=: Specify the path of .clang-tidy or custom config file
+  --dump-config: Dumps configuration in YAML format to stdout
+  --enable-check-profile: Enable per-check timing profiles
+  --explain=: Explain the enabled checks
+  --export-fixes=: YAML file to store suggested fixes in
+  --fix: Apply suggested fixes
+  --fix-errors: Apply suggested fixes even if compilation errors were found
+  --fix-notes: Apply suggested fixes to warnings and their notes
+  --header-filter=: Regular expression matching the names of headers to output
+  --exclude-header-filter=: Regular expression matching headers to exclude
+  --line-filter=: List of filters for source lines
+  --list-checks: List all enabled checks
+  --warnings-as-errors=: Upgrades warnings to errors with matching names
+  --system-headers: Display errors from system headers
+  --quiet: Suppress clock seeding and major events
+  --store-check-profile=: Store profiles in this directory
+  --use-color: Use colors in diagnostics
+  --allow-no-checks: Suppresses the no checks enabled error
+  --version: Display the version of this program
+  -h, --help: Display available options
+completion:
+  flag:
+    export-fixes:
+      - $files
+    store-check-profile:
+      - $directories
+    config-file:
+      - $files
+  positional:
+    - ['$files']

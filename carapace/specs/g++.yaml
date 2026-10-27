@@ -1,0 +1,109 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: g++ Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: g++
+description: GNU C++ compiler driver
+flags:
+  -c: Compile and assemble, but do not link
+  -E: Preprocess only
+  -S: Compile only, do not assemble or link
+  -o=: Place the output into file
+  -std=: Assume that the input sources are for standard
+  -x=: Specify the language of the following input files
+  -g: Generate debugging information in the host OS default format
+  -O0: Reduce compilation time and make debugging produce expected results
+  -O1: Optimize compilation takes more time and memory
+  -O2: Optimize even more (default performance build)
+  -O3: Optimize yet more
+  -Os: Optimize for size
+  -Oz: Aggressively optimize for size
+  -Og: Optimize for debugging experience
+  -flto: Enable link-time optimization
+  -fPIC: Generate position independent code
+  -fvisibility=: Set default visibility of symbols
+  -shared: Produce a shared object
+  -static: Do not link against shared libraries
+  -pie: Create a dynamically linked position independent executable
+  -pthread: Use POSIX threads library
+  -pipe: Use pipes rather than intermediate files
+  -Wall: Enable all warnings
+  -Wextra: Enable extra warnings
+  -Werror: Make all warnings into errors
+  -Wl=: Pass comma-separated options to the linker
+  -Wa=: Pass comma-separated options to the assembler
+  -Wp=: Pass comma-separated options to the preprocessor
+  -Xassembler=: Pass argument to the assembler
+  -Xpreprocessor=: Pass argument to the preprocessor
+  -Xlinker=: Pass argument to the linker
+  -D=: Pre-define macro with optional definition
+  -U=: Pre-undefine macro
+  -I=: Add include search path
+  -L=: Add library search path
+  -l=: Link against library
+  -B=: Add directory to the compiler search paths
+  --sysroot=: Use directory as the root directory for headers and libraries
+  -M: Print Makefile dependencies
+  -MF=: Write dependency output to file
+  -save-temps: Do not delete intermediate files
+  -specs=: Override built-in specs with file contents
+  -v: Display the programs invoked by the compiler
+  -s: Strip symbol tables
+  -print-search-dirs: Display compiler search path directories
+  -print-file-name=: Display full path to library
+  -dumpversion: Display compiler version
+  -dumpmachine: Display target processor
+  --version: Display compiler version information
+  --help: Display this information
+  -pass-exit-codes: Exit with highest error code from a phase
+completion:
+  flag:
+    o:
+      - $files
+    std:
+      - c++98
+      - gnu++98
+      - c++03
+      - c++11
+      - gnu++11
+      - c++14
+      - gnu++14
+      - c++17
+      - gnu++17
+      - c++20
+      - gnu++20
+      - c++23
+      - gnu++23
+      - c++26
+      - gnu++26
+    x:
+      - c
+      - c++
+      - assembler
+      - none
+    fvisibility:
+      - default
+      - hidden
+    march:
+      - x86-64
+      - native
+      - znver3
+      - znver4
+      - skylake
+      - haswell
+    I:
+      - $directories
+    L:
+      - $directories
+    B:
+      - $directories
+    sysroot:
+      - $directories
+    MF:
+      - $files
+    specs:
+      - $files
+  positionalany:
+    - $files

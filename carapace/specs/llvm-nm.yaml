@@ -1,0 +1,79 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: llvm-nm Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: llvm-nm
+description: LLVM symbol table dumper
+flags:
+  -A: Precede each symbol with the object file it came from
+  -a: Show all symbols, even debugger only
+  -B: Use bsd output format
+  -C: Demangle C++ symbol names
+  -D: Display dynamic symbols instead of normal symbols
+  -f=: Specify output format
+  -g: Only show external symbols
+  -j: Just symbols output format
+  -l: Use debugging information to print line numbers
+  -m: Use darwin output format
+  -n: Sort symbols by address
+  -o: Precede each symbol with the object file it came from
+  -P: Use posix output format
+  -p: Show symbols in order encountered
+  -r: Sort in reverse order
+  -S: Show symbol size as well as address
+  -t=: Radix for printing symbol values
+  -U: Show only defined symbols
+  -u: Show only undefined symbols
+  -V: Display the version
+  -v: Sort symbols by address
+  -W: Show only non-weak symbols
+  --debug-syms: Show all symbols, even debugger only
+  --defined-only: Show only defined symbols
+  --demangle: Demangle C++ symbol names
+  --dynamic: Display dynamic symbols instead of normal symbols
+  --export-symbols: Export symbol list for all inputs
+  --extern-only: Show only external symbols
+  --format=: Specify output format
+  --line-numbers: Print symbol filenames and line numbers
+  --no-demangle: Don't demangle symbol names
+  --no-llvm-bc: Disable LLVM bitcode reader
+  --no-sort: Show symbols in order encountered
+  --no-weak: Show only non-weak symbols
+  --numeric-sort: Sort symbols by address
+  --portability: Use posix output format
+  --print-armap: Print the archive map
+  --print-file-name: Precede each symbol with the object file it came from
+  --print-size: Show symbol size as well as address
+  --quiet: Suppress no symbols diagnostic
+  --radix=: Radix for printing symbol values
+  --reverse-sort: Sort in reverse order
+  --size-sort: Sort symbols by size
+  --special-syms: Do not filter special symbols
+  --undefined-only: Show only undefined symbols
+  --version: Display the version
+  -h, --help: Display this help
+completion:
+  flag:
+    format:
+      - bsd
+      - posix
+      - sysv
+      - darwin
+      - just-symbols
+    radix:
+      - o
+      - d
+      - x
+    t:
+      - o
+      - d
+      - x
+    X:
+      - '32'
+      - '64'
+      - 32_64
+      - any
+  positionalany:
+    - $files

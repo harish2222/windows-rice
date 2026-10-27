@@ -1,0 +1,110 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: ast-grep Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: ast-grep
+description: Search and rewrite code at large scale using AST patterns
+flags:
+  -c, --config=: Path to ast-grep root config, default is sgconfig.yml
+  -h, --help: Print help
+  -V, --version: Print version
+commands:
+  - name: run
+    description: Run one time search or rewrite in command line (default command)
+    flags:
+      -p, --pattern=: AST pattern to match
+      -r, --rewrite=: Pattern to rewrite
+      -l, --lang=: Language of pattern
+      -U, --update-all: Apply all rewrites without confirmation
+      -o, --interactive=: Edit project in interactive mode
+      -N, --no-ignore: Do not respect hidden rule files
+      --debug-query=: Debug the query
+      --selector=: Used in command to select a specific rule
+      --color=: Output style
+      --engine=: Pick engine to run rules
+      -h, --help: Print help
+    completion:
+      flag:
+        lang:
+          - c
+          - cpp
+          - cs
+          - css
+          - dart
+          - elixir
+          - go
+          - haskell
+          - hcl
+          - html
+          - java
+          - javascript
+          - json
+          - jsx
+          - kotlin
+          - lua
+          - nix
+          - php
+          - python
+          - ruby
+          - rust
+          - scala
+          - sql
+          - swift
+          - tsx
+          - typescript
+          - yaml
+        color:
+          - auto
+          - always
+          - never
+        debug-query:
+          - log
+          - ast
+          - cst
+          - pattern
+        engine:
+          - native
+          - tree-sitter
+  - name: scan
+    description: Scan and rewrite code by configuration
+    flags:
+      -c, --config=: Path to ast-grep root config
+      -r, --rule=: Transform the files using an inline rule
+      -n=: Specify namespace for the inline rule
+      --no-G: Do not respect .gitignore
+      --no-ignore: Do not respect .gitignore
+      --json=: Output result as JSON
+      --scan-rule-paths=: Scan rules from specific paths
+      -h, --help: Print help
+  - name: test
+    description: Test ast-grep rules
+    flags:
+      --include=: Test rules with specific test file name
+      --exclude=: Skip specific test file name
+      --spread=: Test rules in specific directories
+      -h, --help: Print help
+  - name: new
+    description: Create new ast-grep project or items like rules/tests
+    commands:
+      - name: project
+        description: Create new ast-grep project
+      - name: rule
+        description: Create new basic rule
+      - name: test
+        description: Create new test case
+      - name: preset
+        description: Create new reusable pattern
+      - name: util
+        description: Create new utility rule
+  - name: lsp
+    description: Start language server
+  - name: outline
+    description: Explore code structure for symbols imports exports and members
+    flags:
+      -h, --help: Print help
+  - name: completions
+    description: Generate shell completion script
+  - name: help
+    description: Print this message or the help of the given subcommand(s)

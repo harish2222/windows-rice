@@ -1,0 +1,83 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: llvm-objdump Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: llvm-objdump
+description: LLVM object file dumper and disassembler
+flags:
+  --all-headers: Display all header information relocations and symbol table
+  -a: Display archive header information
+  --arch-name=: Target arch to disassemble for
+  --build-id=: Build ID to look up
+  -C: Demangle symbol names
+  --demangle: Demangle symbol names
+  --debug-vars=: Print source-level variable locations alongside disassembly
+  --disassemble: Disassemble all executable sections
+  -d: Alias for --disassemble
+  --disassemble-all: Disassemble all sections
+  -D: Alias for --disassemble-all
+  --disassemble-symbols=: List of symbols to disassemble
+  --disassemble-zeroes: Do not skip blocks of zeroes
+  --disassembler-color=: Enable or disable disassembler color output
+  --dwarf=: Dump the specified DWARF debug sections
+  --dynamic-reloc: Display the dynamic relocation entries
+  --dynamic-syms: Display the dynamic symbol table contents
+  --file-headers: Display the contents of the overall file header
+  -f: Alias for --file-headers
+  --full-contents: Display the content of each section
+  -s: Alias for --full-contents
+  --headers: Alias for --section-headers
+  --line-numbers: Display source line numbers when disassembling
+  -l: Alias for --line-numbers
+  --macho: Use MachO specific object file parser
+  -m: Alias for --macho
+  --mattr=: Target specific attributes
+  --mcpu=: Target a specific cpu type
+  -mllvm=: Specify an argument to LLVM's CommandLine library
+  --no-leading-addr: Do not print leading addresses
+  --no-print-imm-hex: Do not use hex format for immediate values
+  --predicate-hex: Display predicates in hex format
+  --print-imm-hex: Use hex format for immediate values
+  --private-headers: Display the format specific file headers
+  -p: Alias for --private-headers
+  --rawclauses: Show raw clauses in disassembly
+  --reloc: Display the relocation entries
+  -r: Alias for --reloc
+  --section=: Only dump information from this section
+  -j=: Alias for --section
+  --source: Display source intermixed with disassembly
+  -S: Alias for --source
+  --start-address=: Disassemble starting at this address
+  --stop-address=: Stop disassembly at this address
+  --triple=: Target triple to disassemble for
+  --unwind-info: Display unwind info
+  -u: Alias for --unwind-info
+  --version: Display the version of this program
+  -V: Alias for --version
+  -h, --help: Display available options
+completion:
+  flag:
+    disassembler-color:
+      - on
+      - off
+      - terminal
+    debug-vars:
+      - ascii
+      - unicode
+    dwarf:
+      - frames
+    arch-name:
+      - x86-64
+      - x86_64
+      - i386
+      - aarch64
+    triple:
+      - x86_64-pc-windows-msvc
+      - x86_64-unknown-linux-gnu
+      - aarch64-unknown-linux-gnu
+    section:
+      - $files
+  positionalany:
+    - $files

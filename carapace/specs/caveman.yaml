@@ -1,0 +1,33 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: caveman Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: caveman
+description: Agentic coding layer that runs multiple AI agents
+flags:
+  -h, --help: Show help
+commands:
+  - name: run
+    description: Run an agent on the layer
+    flags:
+      --model=: Model to use
+      --verbose: Verbose output
+    completion:
+      positional:
+        - [aider, claude, codex, gemini, hermes, kilo, openclaw, opencode]
+  - name: learn
+    description: Short setup score and top moves
+  - name: status
+    description: What the layer did today
+  - name: login
+    description: Free account login
+  - name: logout
+    description: Log out of account
+  - name: tools
+    description: Local, no account tools
+  - name: cloud
+    description: Connected cloud tools
+  - name: help
+    description: Show help for given commands

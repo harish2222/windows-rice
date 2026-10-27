@@ -1,0 +1,30 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: 9router Carapace Completion Specification
+# ============================================================================
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: 9router
+description: LLM request router gateway
+flags:
+  -p, --port=: Port to run the server
+  -H, --host=: Host to bind
+  -n, --no-browser: Don't open browser automatically
+  -l, --log: Show server logs
+  -t, --tray: Run in system tray mode (background)
+  --skip-update: Skip auto-update check
+  -h, --help: Show help message
+  -v, --version: Show version
+commands:
+  - name: xai
+    description: Generate a Grok Imagine video via the gateway
+    commands:
+      - name: video
+        description: Generate a Grok Imagine video
+        flags:
+          --prompt=: Video prompt
+          --output=: Output video file
+        completion:
+          flag:
+            output:
+              - $files
