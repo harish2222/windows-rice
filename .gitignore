@@ -91,3 +91,6 @@ yasb/saka-state.json
 # Alarm schedule: written by the bar at runtime, and entirely personal (it is
 # the user's own daily routine). Never belongs in a published repo.
 yasb/alarms.json
+# Otty re-seeds its vendored default themes into this dir on every launch, so it
+# is otty-managed state rather than config (custom themes are backed up only).
+otty/themes/
