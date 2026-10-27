@@ -23,7 +23,7 @@
 
 [CmdletBinding()]
 param(
-    [string]$Tag = "v1.0.1",
+    [string]$Tag = "v1.0.2",
     [switch]$Verify,
     [switch]$LinkAll,
     [switch]$Unlink,

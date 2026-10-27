@@ -116,3 +116,18 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File tests/e2e/tier4_real_world.Tests.p
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File tests/e2e/run_all.ps1 -Verbose
 ```
+
+---
+
+## 6. v1.0.2 Addendum — Docker-Based Execution Policy & Async Worker Coverage
+
+### Execution Policy (effective v1.0.2)
+All test suites — cargo unit tests and the 4-tier E2E suite — MUST execute inside Docker containers, never directly on the host desktop:
+
+1. **Rationale**: The host doubles as the live rice desktop. Sandbox isolation (`USERPROFILE`/`RICE_BACKUP_DIR` overrides) prevents most side effects, but containerization guarantees no test can alter or destroy master records.
+2. **Container Baseline**: The suite is PowerShell 7-native (Rust + pwsh), so execution targets Docker Desktop **Windows containers** running the repo context; the working tree is mounted read-only where practical, and `RICE_BACKUP_DIR` / `$HOME` are redirected into container scratch space.
+3. **Wallpaper Guard Preserved**: Flow code retains the `RICE_BACKUP_DIR` guard so wallpaper flows never touch the real `Z:\HK\8K Wallpaper\_Organized` source outside an explicit user launch.
+4. **Evidence Policy**: Test evidence in release notes must cite container provenance (image/OS, tag, timestamp) alongside pass counts.
+
+### Async Worker Coverage (new surface in v1.0.2)
+The v1.0.2 async action worker extends the R1 contract (cancellation: `Esc` cancels, `q` cancels-and-quits) and the R5 contract (streamed `[OUT]` install logging, panic-safe task completion), and adds log-pane scrolling (`[` / `]`, ±10 rows clamped). Current verification: 25/25 cargo tests including `test_async_worker_guards` and `test_async_worker_state_machine` (host run 2026-10-27, pre-policy — all subsequent runs must be containerized).

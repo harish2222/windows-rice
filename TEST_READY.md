@@ -105,7 +105,7 @@ E2E SUITE STATUS: ALL TESTS PASSED [100% VERIFIED]
 - [x] **Timestamp Format**: Log entries formatted with structured timestamp prefixes `[<timestamp>] <message>`.
 - [x] **System Health Check**: CLI `--verify` outputs comprehensive system health report listing 8 package managers, 23 components, and 63 Carapace autocompletion specs.
 - [x] **Full Unit Test Execution**:
-  * `cargo test --manifest-path installer/Cargo.toml`: 10 passed, 0 failed.
+  * `cargo test --manifest-path installer/Cargo.toml`: 25 passed, 0 failed (v1.0.2 suite, see §5 addendum).
   * `cargo test --manifest-path yasb/Cargo.toml`: 100+ passed across 9 crates, 0 failed.
 
 ---
@@ -122,3 +122,27 @@ E2E SUITE STATUS: ALL TESTS PASSED [100% VERIFIED]
 | `tests/e2e/run_all.ps1` | Master test runner orchestrating all tiers with structured exit codes | 73 (total) |
 | `TEST_INFRA.md` | Formal specification of test philosophy, coverage matrix & methodology | N/A |
 | `TEST_READY.md` | Test execution commands, summary tables, and acceptance criteria verification | N/A |
+
+---
+
+## 5. v1.0.2 Release Verification Addendum (2026-10-27)
+
+The v1.0.2 release adds the asynchronous action worker and repackages the release binary. Verification status:
+
+### Async Action Worker (new in v1.0.2)
+- **Worker Architecture**: Every TUI action (`i`, `r`, `c`, `w`, `b`, `v`, `u`, `x`, wallpaper flows) now runs on a dedicated worker thread, driven by `WorkerTask` → `WorkerMessage` events (`Log`, `Progress`, `PmStatus`, `GitStatus`, `TaskFinished`). The UI thread stays responsive on a 50 ms event poll.
+- **Streaming Output**: Package installs stream live `[OUT]` log lines through `run_streaming_command` with `ensure_package_manager_ready` preflight and non-interactive flag injection (`prepare_install_command`). TUI-only behavior — CLI flows (`--verify`, `--update`) and tests remain synchronous.
+- **Cancellation**: `Esc` cancels the running task; `q` cancels and quits. Cancel flags are checked between package steps; a task completes its current package before aborting (no partial linking without logging).
+- **Log Scrolling**: `[` / `]` scroll the log pane ±10 rows, clamped to content bounds. While busy, navigation/selection stays active and other action hotkeys are ignored.
+- **Panic Safety Net**: Worker panics are absorbed by the event-polling loop and surfaced as `[FAILED]` log entries without destabilizing the TUI.
+
+### Unit Test Evidence (host run, before the Docker-only policy)
+- `cargo check` (lib + tests): 0 warnings.
+- `cargo test --manifest-path installer/Cargo.toml`: **25 passed, 0 failed**, including new `test_log_scroll_keys_and_caps`, `test_async_worker_guards`, and `test_async_worker_state_machine`.
+
+### Execution Policy Change
+- Starting with v1.0.2, all future test suites (cargo units and the 4-tier E2E) execute **inside Docker only** — see `TEST_INFRA.md` §6. The unit suite above ran on the host on 2026-10-27, before this policy took effect; no further host runs are scheduled.
+- The 73-test E2E suite rerun against v1.0.2 is pending Docker engine bring-up.
+
+### Release Artifact
+- `bin/rice-installer.exe` repackaged from the v1.0.2 release build (static CRT). Authenticode signing must be re-applied with the project certificate before publishing the GitHub Release.
