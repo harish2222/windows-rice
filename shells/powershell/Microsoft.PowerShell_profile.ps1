@@ -1061,7 +1061,19 @@ if (Test-Path $carapacePath) {
         }
         if (-not $cacheItem -or $cacheItem.LastWriteTimeUtc -lt $exeTime -or ($specLatest -and $cacheItem.LastWriteTimeUtc -lt $specLatest)) {
             $null = New-Item -ItemType Directory -Path (Split-Path -Parent $script:CarapaceCache) -Force
-            & $carapacePath _carapace powershell | Set-Content -LiteralPath $script:CarapaceCache -Encoding UTF8
+            # Carapace surfaces upstream action failures (npm registry rejects 1-char
+            # search prefixes with E400, package.json missing for run-scripts, unknown
+            # flags) as red 'ERR'/'_' menu items in every shell. The generated init
+            # parses every completer through ONE shared pipeline, so drop those two
+            # sentinel entries right there - valid completions survive untouched.
+            # Capture with -join, not Out-String: Out-String wraps long lines at the
+            # console width and corrupts the generated script mid-token. Use
+            # String.Replace, not -replace: literal match, no regex $-substitution.
+            $carapaceInit = ((& $carapacePath _carapace powershell) -join "`n").Replace(
+                '| ConvertFrom-Json | ForEach-Object ',
+                "| ConvertFrom-Json | Where-Object { `$_.CompletionText -ne 'ERR' -and `$_.CompletionText -ne '_' } | ForEach-Object "
+            )
+            $carapaceInit | Set-Content -LiteralPath $script:CarapaceCache -Encoding UTF8
         }
         Invoke-Expression (Get-Content -LiteralPath $script:CarapaceCache -Raw)
     }

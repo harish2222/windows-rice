@@ -159,7 +159,7 @@ $env.config = {
                 } else {
                     $spans | skip 1 | prepend ($spans.0 | str replace --regex '\.exe$' '')
                 }
-                carapace $spans.0 nushell ...$spans | from json
+                carapace $spans.0 nushell ...$spans | from json | where {|item| $item.value? != 'ERR' and $item.value? != '_'}
             }
         }
     }
