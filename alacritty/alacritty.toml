@@ -7,12 +7,14 @@
 #  Alacritty — visually uniform with Windows Terminal, Otty, and WezTerm
 #  Docs: https://alacritty.org/config-alacritty.html
 #  Theme: Catppuccin Mocha
+#  Window treatment mirrors the otty clear theme: opacity 0.5, no decorations,
+#  launched maximized (GlazeWM: Win+Shift+Return).
 # =============================================================================
 
 [window]
 startup_mode = "Maximized"
-opacity = 0.95
-decorations = "full"
+opacity = 0.5
+decorations = "None"
 dynamic_padding = true
 padding = { x = 8, y = 8 }
 
@@ -21,8 +23,8 @@ history = 50000
 multiplier = 3
 
 [terminal.shell]
-# Uniform default shell with Otty / WezTerm / Nushell
-program = "nu"
+# Uniform default shell with Otty - xonsh loads the full rice rc
+program = "C:\\Users\\haris\\AppData\\Roaming\\Python\\Python314\\Scripts\\xonsh.exe"
 args = []
 
 [font]

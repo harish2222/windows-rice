@@ -86,9 +86,10 @@ pub fn all_keybinds() -> Vec<Keybind> {
 
         // Launchers & Apps
         Keybind { keys: "Win + K", desc: "Toggle Keybindings cheatsheet (Omarchy style)", category: "Launchers", cmd: "" },
-        Keybind { keys: "Alt + Return", desc: "Launch Otty terminal", category: "Launchers", cmd: "otty" },
+        Keybind { keys: "Alt + Return", desc: "Launch Otty terminal (maximized + focused)", category: "Launchers", cmd: "bin/otty-launch.ps1" },
         Keybind { keys: "Win + Return", desc: "Launch Windows Terminal (wt.exe)", category: "Launchers", cmd: "wt.exe" },
         Keybind { keys: "Alt + Shift + Return", desc: "Launch Windows Terminal (wt.exe)", category: "Launchers", cmd: "wt.exe" },
+        Keybind { keys: "Win + Shift + Return", desc: "Launch Alacritty terminal", category: "Launchers", cmd: "alacritty" },
         Keybind { keys: "Alt + Z", desc: "Launch Zen Browser (quick)", category: "Launchers", cmd: "cmd /c start zen" },
         Keybind { keys: "Alt + Shift + B", desc: "Launch Zen Browser", category: "Launchers", cmd: "cmd /c start zen" },
         Keybind { keys: "Alt + O", desc: "Launch Visual Studio Code", category: "Launchers", cmd: "code" },
