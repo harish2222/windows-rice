@@ -17,6 +17,7 @@ flags:
   -x, --unlink: Unlink selected configs cleanly and restore backups
   --unlink-selected: Unlink selected configs cleanly and restore backups
   --unlink-all: Unlink all configs cleanly without trace and restore backups
+  --uninstall-all: FULL REVOKE: remove every rice-installed config & wallpaper entry (binaries stay)
   --install-missing: Install missing packages and link corresponding configs
   -b, --bootstrap: Bootstrap Scoop, Chocolatey, UV, and Vcpkg if missing
   -h, --help: Show help message
