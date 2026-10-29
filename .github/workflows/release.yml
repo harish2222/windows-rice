@@ -30,6 +30,9 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Run installer unit tests (release gate)
+        run: cargo test --manifest-path installer/Cargo.toml --verbose
+
       - name: Build release binary
         run: cargo build --release --manifest-path installer/Cargo.toml
 

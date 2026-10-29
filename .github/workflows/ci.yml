@@ -178,3 +178,58 @@ jobs:
             }
             Write-Host "[PASS] $weztermPath valid" -ForegroundColor Green
           }
+
+  e2e-suite:
+    name: E2E Multi-Tier Suite (Tiers 1-4)
+    needs: rust-installer
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            installer/target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('installer/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Build installer binaries (debug + release)
+        run: |
+          cargo build --manifest-path installer/Cargo.toml
+          cargo build --release --manifest-path installer/Cargo.toml
+
+      - name: Install carapace completer
+        shell: pwsh
+        run: |
+          $carapaceZip = "$env:TEMP\carapace.zip"
+          Invoke-RestMethod -Uri "https://github.com/carapace-sh/carapace-bin/releases/latest/download/carapace-bin_windows_amd64.zip" -OutFile $carapaceZip -TimeoutSec 60
+          Expand-Archive -Path $carapaceZip -DestinationPath "$env:TEMP\carapace-bin" -Force
+          $exe = Get-ChildItem "$env:TEMP\carapace-bin" -Recurse -Filter "carapace.exe" | Select-Object -First 1
+          if ($exe) {
+            $binDir = Split-Path -Parent $exe.FullName
+            "CARGO_CARAPACE_DIR=$binDir" | Out-File -FilePath $env:GITHUB_ENV -Append
+            Write-Host "carapace available at $binDir"
+          } else {
+            Write-Host "::error::carapace.exe not found inside the downloaded archive"
+            exit 1
+          }
+
+      - name: Run E2E suite (tiers 1-4)
+        shell: pwsh
+        run: |
+          $env:PATH = "${{ env.CARGO_CARAPACE_DIR }};$env:PATH"
+          & pwsh -NoProfile -ExecutionPolicy Bypass -File "tests/e2e/run_all.ps1" -Tier All
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "::error::E2E suite reported failures"
+            exit 1
+          }
