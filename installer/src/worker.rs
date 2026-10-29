@@ -608,6 +608,11 @@ pub fn flow_uninstall_all(ctx: &TaskContext, notify: Notify) -> TaskResult {
     // The machine is clean of rice links: reset the tracking ledger.
     crate::ledger::clear_all();
     emit_progress(notify, 100, "Done", summary.clone());
+    // CLI parity: surface the counting contract the same way flow_link and
+    // flow_check_updates do - the TUI status bar already shows it, but a
+    // non-interactive `--uninstall-all` caller only ever sees app.logs, so the
+    // summary line must be a log message too.
+    send_log(notify, summary.clone());
     TaskResult { summary, success }
 }
 
