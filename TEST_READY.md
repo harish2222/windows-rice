@@ -141,7 +141,7 @@ The v1.0.2 release adds the asynchronous action worker and repackages the releas
 ### Unit Test Evidence (host run, before the Docker-only policy)
 - `cargo check` (lib + tests): 0 warnings.
 - `cargo test --manifest-path installer/Cargo.toml`: **25 passed, 0 failed**, including new `test_log_scroll_keys_and_caps`, `test_async_worker_guards`, and `test_async_worker_state_machine`.
-- v1.0.3 additions (ownership ledger engine): `ledger.rs` contributes 3 ledger unit tests and the symlink-restore guard regression adds a 4th engine test → statically verified suite total is **34 units** (11 linker + 4 catalog + 3 ledger + 16 app). Container run evidence for v1.0.3 is recorded in §5.1 below. Container run evidence for v1.0.3 is recorded in §5.1 below.
+- v1.0.3 additions (ownership ledger engine): `ledger.rs` contributes 3 ledger unit tests and the symlink-restore guard regression adds a 4th engine test → statically verified suite total is **34 units** (11 linker + 4 catalog + 3 ledger + 16 app). Container run evidence for v1.0.3 is recorded in §5.1 below.
 
 ### Execution Policy Change
 - Starting with v1.0.2, all future test suites (cargo units and the 4-tier E2E) execute **inside Docker only** — see `TEST_INFRA.md` §6. The unit suite above ran on the host on 2026-10-27, before this policy took effect; no further host runs are scheduled.
@@ -176,3 +176,33 @@ The v1.0.2 release adds the asynchronous action worker and repackages the releas
 | Image ID | recorded by runner output header |
 | Commit | recorded by runner output header |
 | Host exec count | **0** — no installer/cargo execution on the live host |
+
+### §5.1a Podman verification cycle for v1.0.3 (filled 2026-10-29)
+Verification split used for this cycle: **podman (Linux containers)** for every cross-platform
+surface + **CI windows runners** for the Windows-bound suites (MSVC + junction-based e2e).
+The Windows Docker engine on the host was installation-disabled this cycle, so no
+Windows-container execution was attempted on the node.
+
+- **Conformance image** (`docker/Conformance.Containerfile`, pwsh:ubuntu-22.04 + git + curl
+  + build-essential + rustfmt + PowerShell-YAML; repo baked at `/repo`, `479` tracked files):
+  ALL CHECKS PASSED — 11 pwsh surfaces AST-clean, 112 carapace specs parse under strict YAML
+  (both entrypoints document `--uninstall-all`), CI gates present, doc-count parity
+  (tiers 34/34/6/7 = 81; units 34; release tag v1.0.3).
+- **Behavioral verifier** (`docker/run-revoke-behavior.ps1`, in-podman, zero host exec,
+  zero host junctions): ALL CHECKS PASSED —
+    1. `cargo build` (linux) of the engine;
+    2. `cargo test` unit suite: **34 passed, 0 failed**;
+    3. T1-R6 trio: clean-machine `--uninstall-all` prints the banner + the
+       `Full revoke complete: 0 restored, 0 cleaned, 0 preserved (user-modified),
+       0 repo-native skipped, 29 no-op, 0 failed` summary contract on stdout
+       (verifies the CLI-parity log fix);
+    4. T4-SCEN-07 lifecycle with native symlinks: seed user config → `--link-all`
+       (ledger records the catalog, `.wezterm.lua` mode **Symlink**) → `--uninstall-all`
+       → `[RESTORED] -> Restored backup: /ricebackups/wezterm/<ts>/.wezterm.lua`,
+       user content restored byte-for-byte, ledger emptied, repo untouched, 0 failed.
+       Same run exposed (and validated the fix for) the collateral-collapse bug where
+       symlink targets were classified repo-native and never unlinked.
+- **CI**: run `40839793398` — all 4 jobs success (`rust-installer` windows + ubuntu 34/34, shell/config validation, `e2e-suite`: **81 total, 78 passed, 3 skipped, 0 failed**).
+  Release tag `v1.0.3` pushed after; `release.yml` gates the package on the installer unit suite.
+- Provenance: engine podman-linux (client 6.1.4 / server 6.0.2); commit when conformance ran
+  `118abc5` lineage; host exec count for installer/cargo: **0**.
