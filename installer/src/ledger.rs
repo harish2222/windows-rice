@@ -198,6 +198,10 @@ pub(crate) mod tests {
 
     #[test]
     fn test_record_and_dedup() {
+        // Serialize with the linker/app env tests: this suite mutates the
+        // process-wide RICE_BACKUP_DIR, so parallel env flips would race the
+        // ledger file under test (CI hit exactly that on the linux runner).
+        let _guard = crate::linker::tests::TEST_MUTEX.lock().unwrap_or_else(|p| p.into_inner());
         let dir = temp_ledger_dir("dedup");
         let src = dir.join("repo-src");
         let tgt = dir.join("tgt");
@@ -215,6 +219,8 @@ pub(crate) mod tests {
 
     #[test]
     fn test_remove_record_and_clear() {
+        // Same shared-env gate as test_record_and_dedup - see rationale above.
+        let _guard = crate::linker::tests::TEST_MUTEX.lock().unwrap_or_else(|p| p.into_inner());
         let dir = temp_ledger_dir("remove");
         let src = dir.join("repo-src");
         record_installed("p1", &src, &dir.join("a"), LinkMode::Copy, true);
@@ -241,6 +247,8 @@ pub(crate) mod tests {
 
     #[test]
     fn test_wallpaper_entries_for_filters_by_dest() {
+        // Same shared-env gate as test_record_and_dedup - see rationale above.
+        let _guard = crate::linker::tests::TEST_MUTEX.lock().unwrap_or_else(|p| p.into_inner());
         let dir = temp_ledger_dir("filter");
         let d1 = dir.join("pictures");
         let d2 = dir.join("other");
