@@ -23,7 +23,7 @@
 
 [CmdletBinding()]
 param(
-    [string]$Tag = "v1.0.2",
+    [string]$Tag = "v1.0.3",
     [switch]$Verify,
     [switch]$LinkAll,
     [switch]$Unlink,
@@ -75,6 +75,7 @@ Options:
     -LinkAll              Link all configuration files without prompt (backs up user configs)
     -Unlink               Unlink selected/installed configurations cleanly and restore backups
     -UnlinkAll            Unlink all configurations cleanly without trace and restore backups
+    -UninstallAll         FULL REVOKE: remove every rice-installed config & wallpaper entry (binaries stay)
     -Install              Install missing binaries and link configs (with automated tests)
     -InstallMissing       Install missing binaries and link configs (alias for -Install)
     -Bootstrap            Bootstrap Scoop, Chocolatey, UV, and Vcpkg
