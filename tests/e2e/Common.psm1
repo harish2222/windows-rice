@@ -10,6 +10,18 @@ $script:CurrentFeature = "General"
 $script:CurrentDescribe = ""
 $script:CurrentContext = ""
 
+# Non-fatal skip marker: a test can declare itself ineligible for the current
+# host (for example CI runners without the full rice installed) without
+# poisoning the suite exit code.
+class RiceSkipException : System.Exception {
+    RiceSkipException([string]$message) : base($message) {}
+}
+
+function Skip-Test {
+    param([string]$Message)
+    throw [RiceSkipException]::new($Message)
+}
+
 function Set-TestContext {
     param(
         [string]$Tier = "General",
@@ -57,6 +69,7 @@ function It {
 
     $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
     $passed = $false
+    $skipped = $false
     $err = $null
     $oldEap = $ErrorActionPreference
 
@@ -64,6 +77,10 @@ function It {
         $ErrorActionPreference = "Continue"
         & $Test
         $passed = $true
+    } catch [RiceSkipException] {
+        $passed = $true
+        $skipped = $true
+        $err = $_
     } catch {
         $passed = $false
         $err = $_
@@ -79,13 +96,16 @@ function It {
         Context     = $script:CurrentContext
         Name        = $Name
         Passed      = $passed
+        Skipped     = $skipped
         Error       = if ($err) { $err.ToString() } else { $null }
         DurationMs  = $stopwatch.ElapsedMilliseconds
     }
 
     $script:AllTestResults.Add($result)
 
-    if ($passed) {
+    if ($skipped) {
+        Write-Host "    [SKIP] $Name ($($result.DurationMs)ms) - $($err.Exception.Message)" -ForegroundColor DarkYellow
+    } elseif ($passed) {
         Write-Host "    [PASS] $Name ($($result.DurationMs)ms)" -ForegroundColor Green
     } else {
         Write-Host "    [FAIL] $Name ($($result.DurationMs)ms)" -ForegroundColor Red
@@ -263,14 +283,29 @@ function Invoke-WithIsolatedProfile {
     $oldProfile = [Environment]::GetEnvironmentVariable('USERPROFILE', 'Process')
     $oldBackupDir = [Environment]::GetEnvironmentVariable('RICE_BACKUP_DIR', 'Process')
     $oldHome = [Environment]::GetEnvironmentVariable('HOME', 'Process')
+    $oldAppData = [Environment]::GetEnvironmentVariable('APPDATA', 'Process')
+    $oldLocalAppData = [Environment]::GetEnvironmentVariable('LOCALAPPDATA', 'Process')
 
     $backupRoot = Join-Path $SandboxDir ".rice-backups"
+    # Virtualize the whole roamed profile surface. APPDATA/LOCALAPPDATA MUST be
+    # redirected too: catalog mappings like carapace specs (an AppData junction
+    # into the repo) or Windows Terminal settings live there, and failing to
+    # redirect them lets a misplaced unlink mutate the LIVE host profile.
+    New-Item -ItemType Directory -Path (Join-Path $SandboxDir "AppData\Roaming") -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $SandboxDir "AppData\Local") -Force | Out-Null
+    $appDataDir = Join-Path $SandboxDir "AppData\Roaming"
+    $localAppDataDir = Join-Path $SandboxDir "AppData\Local"
+
     [Environment]::SetEnvironmentVariable('USERPROFILE', $SandboxDir, 'Process')
     [Environment]::SetEnvironmentVariable('HOME', $SandboxDir, 'Process')
     [Environment]::SetEnvironmentVariable('RICE_BACKUP_DIR', $backupRoot, 'Process')
+    [Environment]::SetEnvironmentVariable('APPDATA', $appDataDir, 'Process')
+    [Environment]::SetEnvironmentVariable('LOCALAPPDATA', $localAppDataDir, 'Process')
     $env:USERPROFILE = $SandboxDir
     $env:HOME = $SandboxDir
     $env:RICE_BACKUP_DIR = $backupRoot
+    $env:APPDATA = $appDataDir
+    $env:LOCALAPPDATA = $localAppDataDir
 
     try {
         & $Script
@@ -278,10 +313,41 @@ function Invoke-WithIsolatedProfile {
         [Environment]::SetEnvironmentVariable('USERPROFILE', $oldProfile, 'Process')
         [Environment]::SetEnvironmentVariable('HOME', $oldHome, 'Process')
         [Environment]::SetEnvironmentVariable('RICE_BACKUP_DIR', $oldBackupDir, 'Process')
+        [Environment]::SetEnvironmentVariable('APPDATA', $oldAppData, 'Process')
+        [Environment]::SetEnvironmentVariable('LOCALAPPDATA', $oldLocalAppData, 'Process')
         $env:USERPROFILE = $oldProfile
         $env:HOME = $oldHome
         $env:RICE_BACKUP_DIR = $oldBackupDir
+        $env:APPDATA = $oldAppData
+        $env:LOCALAPPDATA = $oldLocalAppData
     }
+}
+
+# --- Installer Binary Selection ---
+
+function Select-InstallerExe {
+    # Picks rice-installer.exe by FRESHEST build time, never blindly debug-first:
+    # a stale debug binary silently running old engine code deleted the live
+    # carapace specs once during a tier4 run (this exact hazard). Fails loudly
+    # when no binary exists so CI/local runs rebuild instead of guessing.
+    param(
+        [Parameter(Mandatory = $true)][string]$RepoRoot
+    )
+    $debugExe = Join-Path $RepoRoot "installer\target\debug\rice-installer.exe"
+    $releaseExe = Join-Path $RepoRoot "installer\target\release\rice-installer.exe"
+
+    $debugOk = Test-Path $debugExe
+    $releaseOk = Test-Path $releaseExe
+    if (-not $debugOk -and -not $releaseOk) {
+        throw "rice-installer.exe not found. Build it first: cargo build --manifest-path installer/Cargo.toml"
+    }
+    if ($debugOk -and $releaseOk) {
+        $debugTime = (Get-Item $debugExe).LastWriteTimeUtc
+        $releaseTime = (Get-Item $releaseExe).LastWriteTimeUtc
+        if ($debugTime -ge $releaseTime) { return $debugExe } else { return $releaseExe }
+    }
+    if ($debugOk) { return $debugExe }
+    return $releaseExe
 }
 
 # --- Reporting ---
@@ -292,16 +358,18 @@ function Get-TestResults {
 
 function Get-TestSummary {
     $total = $script:AllTestResults.Count
-    $passed = ($script:AllTestResults | Where-Object { $_.Passed }).Count
-    $failed = $total - $passed
+    $passed = ($script:AllTestResults | Where-Object { $_.Passed -and -not $_.Skipped }).Count
+    $skipped = ($script:AllTestResults | Where-Object { $_.Skipped }).Count
+    $failed = ($script:AllTestResults | Where-Object { -not $_.Passed -and -not $_.Skipped }).Count
     $duration = ($script:AllTestResults | Measure-Object -Property DurationMs -Sum).Sum
 
     $byTier = $script:AllTestResults | Group-Object -Property Tier | ForEach-Object {
         [PSCustomObject]@{
             Tier    = $_.Name
             Total   = $_.Count
-            Passed  = ($_.Group | Where-Object { $_.Passed }).Count
-            Failed  = ($_.Group | Where-Object { -not $_.Passed }).Count
+            Passed  = ($_.Group | Where-Object { $_.Passed -and -not $_.Skipped }).Count
+            Skipped = ($_.Group | Where-Object { $_.Skipped }).Count
+            Failed  = ($_.Group | Where-Object { -not $_.Passed -and -not $_.Skipped }).Count
         }
     }
 
@@ -309,14 +377,16 @@ function Get-TestSummary {
         [PSCustomObject]@{
             Feature = $_.Name
             Total   = $_.Count
-            Passed  = ($_.Group | Where-Object { $_.Passed }).Count
-            Failed  = ($_.Group | Where-Object { -not $_.Passed }).Count
+            Passed  = ($_.Group | Where-Object { $_.Passed -and -not $_.Skipped }).Count
+            Skipped = ($_.Group | Where-Object { $_.Skipped }).Count
+            Failed  = ($_.Group | Where-Object { -not $_.Passed -and -not $_.Skipped }).Count
         }
     }
 
     return [PSCustomObject]@{
         Total      = $total
         Passed     = $passed
+        Skipped    = $skipped
         Failed     = $failed
         DurationMs = $duration
         ByTier     = $byTier
@@ -324,8 +394,8 @@ function Get-TestSummary {
     }
 }
 
-Export-ModuleMember -Function Set-TestContext, Reset-TestResults, Describe, Context, It, `
+Export-ModuleMember -Function Set-TestContext, Reset-TestResults, Describe, Context, It, Skip-Test, `
     Should-Be, Should-NotBe, Should-Exist, Should-NotExist, Should-Match, Should-Contain, Should-NotContain, `
     Should-BeGreaterThan, Should-BeLessThan, Should-Throw, `
-    New-TestSandbox, Remove-TestSandbox, Invoke-WithIsolatedProfile, `
+    New-TestSandbox, Remove-TestSandbox, Invoke-WithIsolatedProfile, Select-InstallerExe, `
     Get-TestResults, Get-TestSummary

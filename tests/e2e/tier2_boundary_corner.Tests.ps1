@@ -10,10 +10,7 @@ if (-not (Get-Module Common)) {
 }
 
 $RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
-$InstallerExe = Join-Path $RepoRoot "installer\target\debug\rice-installer.exe"
-if (-not (Test-Path $InstallerExe)) {
-    $InstallerExe = Join-Path $RepoRoot "installer\target\release\rice-installer.exe"
-}
+$InstallerExe = Select-InstallerExe -RepoRoot $RepoRoot
 $CargoToml = Join-Path $RepoRoot "installer\Cargo.toml"
 
 # ============================================================================
@@ -353,5 +350,96 @@ Describe "R5 - Logging Boundary & Verification Robustness" {
         $outLong = & $InstallerExe --help 2>&1 | Out-String
         Should-Contain $outLong "WINDOW-RICE INSTALLER" "--help must print help banner"
         Should-Contain $outLong "Interactive TUI Controls:" "--help must document controls"
+    }
+}
+
+# ============================================================================
+# R6: Ownership Ledger & Full Revoke (Boundary & Corner Cases)
+# ============================================================================
+Set-TestContext -Tier "Tier 2" -Feature "R6: Ownership Ledger & Full Revoke"
+
+Describe "R6 - Full Revoke Ownership Boundaries" {
+    It "T2-R6-01: user-modified copy-fallback config is PRESERVED on disk and archived, never deleted" {
+        $sandbox = New-TestSandbox
+        try {
+            Invoke-WithIsolatedProfile -SandboxDir $sandbox -Script {
+                # Simulate a copy-fallback install the user later customized:
+                # real file at target, no manifest record, content diverged.
+                $userTarget = Join-Path $sandbox ".wezterm.lua"
+                Set-Content -Path $userTarget -Value "USER_CUSTOMIZED_THEME = 'winedark'" -Encoding utf8
+                Should-Exist $userTarget "User-modified copy must exist before revoke"
+
+                $backupRoot = Join-Path $sandbox ".rice-backups"
+                $out = & $InstallerExe --uninstall-all 2>&1 | Out-String
+                Should-Contain $out "[PRESERVED]" "Revoke must report the preserved user-modified config"
+                Should-Contain $out "[ARCHIVED]" "Revoke must archive a copy into .rice-backups"
+
+                $after = (Get-Content $userTarget -Raw).Trim()
+                Should-Be $after "USER_CUSTOMIZED_THEME = 'winedark'" "User-modified file must remain byte-identical on disk"
+
+                $archives = Get-ChildItem -Path (Join-Path $backupRoot "wezterm") -Directory -Filter "preserved-*" -ErrorAction SilentlyContinue
+                Should-Be $archives.Count 1 "Exactly one preserved archive stamp must be created under backups/wezterm"
+                $archivedFile = Join-Path $archives[0].FullName ".wezterm.lua"
+                Should-Exist $archivedFile "Archived copy of the user config must exist"
+            }
+        } finally {
+            Remove-TestSandbox $sandbox
+        }
+    }
+
+    It "T2-R6-02: pure-copy equivalent config is removed cleanly by full revoke" {
+        $sandbox = New-TestSandbox
+        try {
+            Invoke-WithIsolatedProfile -SandboxDir $sandbox -Script {
+                # Copy the exact repo payload to the target: identical content,
+                # no manifest record -> pure rice data, safe to remove.
+                $pureCopy = Join-Path $sandbox ".wezterm.lua"
+                Copy-Item (Join-Path $RepoRoot "wezterm\wezterm.lua") $pureCopy -Force
+                Should-Exist $pureCopy "Exact rice copy must exist before revoke"
+
+                $out = & $InstallerExe --uninstall-all 2>&1 | Out-String
+                Should-Contain $out "[CLEAN]" "Revoke must report cleanly removed pure-rice copies"
+                Should-NotExist $pureCopy "Exact rice copy must be removed by full revoke"
+            }
+        } finally {
+            Remove-TestSandbox $sandbox
+        }
+    }
+
+    It "T2-R6-03: repo-native junction targets are never touched by full revoke" {
+        $sandbox = New-TestSandbox
+        try {
+            Invoke-WithIsolatedProfile -SandboxDir $sandbox -Script {
+                # Map the sandbox .config/carapace onto the LIVE repo directory
+                # through a junction: source and target are canonically the same
+                # file, so the revoke must report NATIVE and never write there.
+                New-Item -ItemType Directory -Path (Join-Path $sandbox ".config") -Force | Out-Null
+                $junction = Join-Path $sandbox ".config\carapace"
+                New-Item -ItemType Junction -Path $junction -Target (Join-Path $RepoRoot "carapace") | Out-Null
+                Should-Exist $junction "Junction into the repo carapace dir must exist"
+
+                $specFile = Join-Path $RepoRoot "carapace\specs\window-rice.yaml"
+                $hashBefore = (Get-FileHash $specFile -Algorithm SHA256).Hash
+
+                $out = & $InstallerExe --uninstall-all 2>&1 | Out-String
+                Should-Contain $out "[NATIVE]" "Revoke must report repo-native targets as never touched"
+                Should-Exist $junction "Junction must survive the revoke"
+                $hashAfter = (Get-FileHash $specFile -Algorithm SHA256).Hash
+                Should-Be $hashAfter $hashBefore "Live repo carapace spec must be byte-identical after the revoke"
+
+                # Tear the junction down explicitly BEFORE the sandbox removal,
+                # so recursive sandbox cleanup can never walk into the live repo
+                # through the junction on any PowerShell version.
+                [System.IO.Directory]::Delete($junction, $false)
+                Should-NotExist $junction "Junction must be removed from the sandbox after the audit"
+            }
+        } finally {
+            Remove-TestSandbox $sandbox
+        }
+    }
+
+    It "T2-R6-04: --help documents the full revoke flag with its guarantees" {
+        $help = & $InstallerExe --help | Out-String
+        Should-Contain $help "--uninstall-all" "Help must document the --uninstall-all flag"
     }
 }

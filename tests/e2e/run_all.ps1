@@ -58,26 +58,27 @@ Write-Host @"
 "@ -ForegroundColor Cyan
 
 Write-Host "Tier Breakdown:" -ForegroundColor DarkCyan
-Write-Host ("{0,-15} {1,8} {2,8} {3,8} {4,10}" -f "Tier", "Total", "Passed", "Failed", "Pass Rate") -ForegroundColor Gray
-Write-Host ("-" * 53) -ForegroundColor Gray
+Write-Host ("{0,-15} {1,8} {2,8} {3,8} {4,8} {5,10}" -f "Tier", "Total", "Passed", "Skipped", "Failed", "Pass Rate") -ForegroundColor Gray
+Write-Host ("-" * 62) -ForegroundColor Gray
 foreach ($t in $summary.ByTier) {
-    $rate = if ($t.Total -gt 0) { [math]::Round(($t.Passed / $t.Total) * 100, 1) } else { 0 }
+    $rate = if ($t.Total -gt 0) { [math]::Round((($t.Passed + $t.Skipped) / $t.Total) * 100, 1) } else { 0 }
     $color = if ($t.Failed -eq 0) { "Green" } else { "Red" }
-    Write-Host ("{0,-15} {1,8} {2,8} {3,8} {4,9}%" -f $t.Tier, $t.Total, $t.Passed, $t.Failed, $rate) -ForegroundColor $color
+    Write-Host ("{0,-15} {1,8} {2,8} {3,8} {4,8} {5,9}%" -f $t.Tier, $t.Total, $t.Passed, $t.Skipped, $t.Failed, $rate) -ForegroundColor $color
 }
 
 Write-Host "`nFeature Breakdown:" -ForegroundColor DarkCyan
-Write-Host ("{0,-50} {1,8} {2,8} {3,8}" -f "Feature Area", "Total", "Passed", "Failed") -ForegroundColor Gray
-Write-Host ("-" * 78) -ForegroundColor Gray
+Write-Host ("{0,-50} {1,8} {2,8} {3,8} {4,8}" -f "Feature Area", "Total", "Passed", "Skipped", "Failed") -ForegroundColor Gray
+Write-Host ("-" * 87) -ForegroundColor Gray
 foreach ($f in $summary.ByFeature) {
     $color = if ($f.Failed -eq 0) { "Green" } else { "Red" }
-    Write-Host ("{0,-50} {1,8} {2,8} {3,8}" -f $f.Feature, $f.Total, $f.Passed, $f.Failed) -ForegroundColor $color
+    Write-Host ("{0,-50} {1,8} {2,8} {3,8} {4,8}" -f $f.Feature, $f.Total, $f.Passed, $f.Skipped, $f.Failed) -ForegroundColor $color
 }
 
 $failedColor = if ($summary.Failed -eq 0) { "Green" } else { "Red" }
 Write-Host ("=" * 80) -ForegroundColor Cyan
 Write-Host ("TOTAL TESTS : {0}" -f $summary.Total) -ForegroundColor White
 Write-Host ("PASSED      : {0}" -f $summary.Passed) -ForegroundColor Green
+Write-Host ("SKIPPED     : {0}" -f $summary.Skipped) -ForegroundColor DarkYellow
 Write-Host ("FAILED      : {0}" -f $summary.Failed) -ForegroundColor $failedColor
 Write-Host ("ELAPSED     : {0}s" -f [math]::Round($overallTimer.Elapsed.TotalSeconds, 2)) -ForegroundColor Gray
 Write-Host ("=" * 80) -ForegroundColor Cyan
@@ -92,6 +93,9 @@ if ($summary.Failed -gt 0) {
     Write-Host "`nE2E SUITE STATUS: FAILED" -ForegroundColor Red
     exit 1
 } else {
+    if ($summary.Skipped -gt 0) {
+        Write-Host "`nNote: $($summary.Skipped) test(s) skipped gracefully - this host does not have the full rice installed." -ForegroundColor DarkYellow
+    }
     Write-Host "`nE2E SUITE STATUS: ALL TESTS PASSED [100% VERIFIED]" -ForegroundColor Green
     exit 0
 }

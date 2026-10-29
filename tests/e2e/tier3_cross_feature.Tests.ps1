@@ -10,10 +10,7 @@ if (-not (Get-Module Common)) {
 }
 
 $RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
-$InstallerExe = Join-Path $RepoRoot "installer\target\debug\rice-installer.exe"
-if (-not (Test-Path $InstallerExe)) {
-    $InstallerExe = Join-Path $RepoRoot "installer\target\release\rice-installer.exe"
-}
+$InstallerExe = Select-InstallerExe -RepoRoot $RepoRoot
 $CargoToml = Join-Path $RepoRoot "installer\Cargo.toml"
 
 Set-TestContext -Tier "Tier 3" -Feature "Cross-Feature Integration"
@@ -40,14 +37,34 @@ Describe "Tier 3 - Cross-Feature Pairwise Integrations" {
     }
 
     It "T3-COMB-02: Shell Function to CLI Execution: window-rice -Verify invocation (R4 + R5)" {
-        $profilePath = Join-Path $RepoRoot "shells\powershell\profile.ps1"
-        $scriptContent = Get-Content $profilePath -Raw
-        
-        # Test executing window-rice definition within a private scope
-        $sb = [ScriptBlock]::Create($scriptContent + "`n" + 'window-rice -Verify')
-        $out = & $sb 2>&1 | Out-String
-        Should-Contain $out "WINDOWS RICE SYSTEM HEALTH CHECK REPORT" "Shell function must invoke CLI verifier"
-        Should-Contain $out "Summary:" "Shell function must print health check summary"
+        $hostConfig = Join-Path $HOME ".config"
+        # CI checks the repo out at a workspace path, not $HOME\.config, so the
+        # shell function cannot resolve the installer. Bridge the gap with a
+        # junction for the duration of the test; on real rice hosts the config
+        # already is the repo and nothing is changed.
+        $junctionCreated = $false
+        try {
+            if (-not (Test-Path $hostConfig)) {
+                New-Item -ItemType Junction -Path $hostConfig -Target $RepoRoot | Out-Null
+                $junctionCreated = $true
+            } elseif (-not (Test-Path (Join-Path $hostConfig "install.ps1"))) {
+                Skip-Test "Host profile .config exists but is not this rice repo; bridging would disturb foreign profiles"
+                return
+            }
+
+            $profilePath = Join-Path $RepoRoot "shells\powershell\profile.ps1"
+            $scriptContent = Get-Content $profilePath -Raw
+
+            # Test executing window-rice definition within a private scope
+            $sb = [ScriptBlock]::Create($scriptContent + "`n" + 'window-rice -Verify')
+            $out = & $sb 2>&1 | Out-String
+            Should-Contain $out "WINDOWS RICE SYSTEM HEALTH CHECK REPORT" "Shell function must invoke CLI verifier"
+            Should-Contain $out "Summary:" "Shell function must print health check summary"
+        } finally {
+            if ($junctionCreated -and (Test-Path $hostConfig)) {
+                [System.IO.Directory]::Delete($hostConfig, $false)
+            }
+        }
     }
 
     It "T3-COMB-03: Navigation Bounds and Selection Consistency under List Cycling (R1 + R2)" {
@@ -70,7 +87,7 @@ Describe "Tier 3 - Cross-Feature Pairwise Integrations" {
         $help = & $InstallerExe --help | Out-String
 
         # Every flag in carapace spec must be documented in CLI help
-        $flagsToVerify = @("--reload", "--update", "--wallpapers", "--verify", "--link-all", "--unlink", "--bootstrap", "--help")
+        $flagsToVerify = @("--reload", "--update", "--wallpapers", "--verify", "--link-all", "--unlink", "--uninstall-all", "--bootstrap", "--help")
         foreach ($flag in $flagsToVerify) {
             Should-Contain $spec $flag "Carapace spec must contain $flag"
             Should-Contain $help $flag "Installer help must contain $flag"
@@ -82,7 +99,7 @@ Describe "Tier 3 - Cross-Feature Pairwise Integrations" {
         $carapace = Get-Content (Join-Path $RepoRoot "carapace\specs\window-rice.yaml") -Raw
 
         # Flags must be aligned between PowerShell profile and Carapace spec
-        $aliases = @("Verify", "Unlink", "Reload", "Update", "Wallpapers", "Bootstrap")
+        $aliases = @("Verify", "Unlink", "UnlinkAll", "UninstallAll", "Reload", "Update", "Wallpapers", "UninstallWallpapers", "Bootstrap")
         foreach ($alias in $aliases) {
             Should-Contain $profile "[switch]`$$alias" "PowerShell profile must have parameter `$$alias"
         }
