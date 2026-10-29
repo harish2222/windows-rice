@@ -398,16 +398,29 @@ pub fn unlink_config_mapping(repo_root: &Path, mapping: &ConfigMapping, package_
     let source = repo_root.join(mapping.source_rel);
     let target = resolve_target_path(mapping.target_pattern);
 
+    let symlink_meta = target.symlink_metadata().ok();
+    let is_symlink = symlink_meta.as_ref().map_or(false, |m| m.file_type().is_symlink());
+
     // --- 1. Repo-native guard: source and target are the same file ------ //
-    let same_canon = source == target
-        || (source.canonicalize().is_ok()
-            && source.canonicalize().ok() == target.canonicalize().ok());
+    // The canonical comparison must only collapse REAL files/dirs (the layout
+    // where ~ IS the repo). A symlink target canonicalizes INTO the repo, but
+    // that link is a rice-installed ownership artifact: the canonical trap
+    // previously swallowed it as "repo-native", so symlink-mode installs were
+    // never unlinked and backup restores never fired. File-level reparse
+    // targets take the symlink branch below (remove link -> restore backup).
+    // Dir-level junction/symlink layouts (AppData junction into the repo)
+    // stay repo-native: removing the mount would disturb the repo mapping.
+    let same_canon = if is_symlink {
+        mapping.is_dir
+    } else {
+        source == target
+            || (source.canonicalize().is_ok()
+                && source.canonicalize().ok() == target.canonicalize().ok())
+    };
     if same_canon {
         return UnlinkOutcome::RepoNativeNotTouched(target);
     }
 
-    let symlink_meta = target.symlink_metadata().ok();
-    let is_symlink = symlink_meta.as_ref().map_or(false, |m| m.file_type().is_symlink());
     let had_target = target.exists() || symlink_meta.is_some();
 
     if had_target && !is_symlink {
@@ -879,6 +892,83 @@ pub(crate) mod tests {
         );
         unsafe { std::env::remove_var("RICE_BACKUP_DIR") };
         let _ = fs::remove_dir_all(&temp_dir);
+    }
+
+    #[test]
+    fn test_unlink_symlink_to_source_restores_user_backup() {
+        let _guard = TEST_MUTEX.lock().unwrap_or_else(|p| p.into_inner());
+        let result = (|| -> Result<(), String> {
+            let temp_dir = std::env::temp_dir().join("rice_test_unlink_symlink_restore");
+            let _ = fs::remove_dir_all(&temp_dir);
+            fs::create_dir_all(&temp_dir).unwrap();
+
+            let backup_root = temp_dir.join(".rice-backups");
+            fs::create_dir_all(&backup_root).unwrap();
+            unsafe { std::env::set_var("RICE_BACKUP_DIR", &backup_root) }
+
+            // Repo-owned source file
+            let repo = temp_dir.join("repo");
+            fs::create_dir_all(&repo).unwrap();
+            let source = repo.join("wezterm.lua");
+            fs::write(&source, "rice theme").unwrap();
+
+            // 1. The user's original file exists; the installer backs it up
+            //    before displacing it with a symlink-mode link.
+            let target_file = temp_dir.join(".wezterm.lua");
+            fs::write(&target_file, "user original").unwrap();
+            let backup = super::backup_existing_target("wezterm", &target_file, false).unwrap();
+            assert!(backup.is_some(), "displacement must archive the user file");
+
+            // 2. The installer links: target is a symlink pointing at the
+            //    source. Its canonical form resolves INTO the repo, which the
+            //    old guard collapsed into "repo-native" (never unlink, never
+            //    restore) - the exact CI-lifecycle regression this test locks.
+            let link_created = {
+                // cfg! (a runtime bool) unifies both branches at typecheck -
+                // `#[cfg]` attributes keep the platform-specific paths
+                // compiled per-target only.
+                #[cfg(windows)]
+                { std::os::windows::fs::symlink_file(&source, &target_file) }
+                #[cfg(not(windows))]
+                { std::os::unix::fs::symlink(&source, &target_file) }
+            };
+            if let Err(e) = link_created {
+                println!("symlink creation unavailable on this host ({}); skipping", e);
+                unsafe { std::env::remove_var("RICE_BACKUP_DIR") };
+                let _ = fs::remove_dir_all(&temp_dir);
+                return Ok(());
+            }
+            assert!(
+                target_file.symlink_metadata().unwrap().file_type().is_symlink(),
+                "target must be a symlink before the revoke"
+            );
+
+            // 3. Revoke must classify the symlink as rice-owned: remove the
+            //    link and restore the user's original content byte-for-byte.
+            let mapping = crate::catalog::ConfigMapping {
+                source_rel: "wezterm.lua",
+                target_pattern: leak_path(&target_file),
+                is_dir: false,
+            };
+            let outcome = super::unlink_config_mapping(&repo, &mapping, "wezterm");
+            assert!(
+                matches!(outcome, super::UnlinkOutcome::UnlinkedAndRestored { .. }),
+                "symlink-to-source targets must unlink & restore, got {:?}",
+                outcome
+            );
+            assert_eq!(
+                fs::read_to_string(&target_file).unwrap(),
+                "user original",
+                "the displaced user file must be restored by full revoke"
+            );
+
+            unsafe { std::env::remove_var("RICE_BACKUP_DIR") };
+            let _ = fs::remove_dir_all(&temp_dir);
+            Ok(())
+        })();
+        if let Err(e) = result {
+            panic!("{}", e);
+        }
     }
 
     #[test]
