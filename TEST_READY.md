@@ -16,16 +16,16 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File C:\Users\haris\.config\tests\e2e\r
 
 ### Targeted Tier Execution Commands
 ```powershell
-# Run Tier 1: Feature Coverage Only (31 tests)
+# Run Tier 1: Feature Coverage Only (34 tests)
 pwsh -NoProfile -ExecutionPolicy Bypass -File C:\Users\haris\.config\tests\e2e\tier1_feature_coverage.Tests.ps1
 
-# Run Tier 2: Boundary & Corner Cases Only (30 tests)
+# Run Tier 2: Boundary & Corner Cases Only (34 tests)
 pwsh -NoProfile -ExecutionPolicy Bypass -File C:\Users\haris\.config\tests\e2e\tier2_boundary_corner.Tests.ps1
 
 # Run Tier 3: Cross-Feature Combinations Only (6 tests)
 pwsh -NoProfile -ExecutionPolicy Bypass -File C:\Users\haris\.config\tests\e2e\tier3_cross_feature.Tests.ps1
 
-# Run Tier 4: Real-World Scenarios Only (6 tests)
+# Run Tier 4: Real-World Scenarios Only (7 tests)
 pwsh -NoProfile -ExecutionPolicy Bypass -File C:\Users\haris\.config\tests\e2e\tier4_real_world.Tests.ps1
 ```
 
@@ -38,26 +38,28 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File C:\Users\haris\.config\tests\e2e\t
                            E2E TEST EXECUTION SUMMARY                           
 ================================================================================
 Tier Breakdown:
-Tier               Total   Passed   Failed  Pass Rate
------------------------------------------------------
-Tier 1                31       31        0       100%
-Tier 2                30       30        0       100%
-Tier 3                 6        6        0       100%
-Tier 4                 6        6        0       100%
+Tier               Total   Passed  Skipped   Failed  Pass Rate
+------------------------------------------------------------
+Tier 1                34       33        1        0       100%
+Tier 2                34       34        0        0       100%
+Tier 3                 6        6        0        0       100%
+Tier 4                 7        6        1        0       100%
 
 Feature Breakdown:
-Feature Area                                          Total   Passed   Failed
+Feature Area                                          Total   Passed  Skipped   Failed
 ------------------------------------------------------------------------------
-R1: TUI Input Handling & Navigation                      12       12        0
-R2: Non-Destructive Config Unlinking & Backup Restoration       12       12        0
-R3: Functional Purpose-Based Credit Attribution          12       12        0
-R4: Multi-Shell Integration & Carapace Autocompletions       13       13        0
-R5: Persistent Diagnostic Logging & Verification Suite       12       12        0
-Cross-Feature Integration                                 6        6        0
-Real-World Application Scenarios                          6        6        0
+R1: TUI Input Handling & Navigation                      12       12        0        0
+R2: Non-Destructive Config Unlinking & Backup Restoration       12       12        0        0
+R3: Functional Purpose-Based Credit Attribution          12       12        0        0
+R4: Multi-Shell Integration & Carapace Autocompletions       13       13        0        0
+R5: Persistent Diagnostic Logging & Verification Suite       12       11        1        0
+R6: Ownership Ledger & Full Revoke                        7        7        0        0
+Cross-Feature Integration                                 6        6        0        0
+Real-World Application Scenarios                          7        6        1        0
 ================================================================================
-TOTAL TESTS : 73
-PASSED      : 73
+TOTAL TESTS : 81
+PASSED      : 79
+SKIPPED     : 2
 FAILED      : 0
 ELAPSED     : 59.86s
 ================================================================================
@@ -114,12 +116,12 @@ E2E SUITE STATUS: ALL TESTS PASSED [100% VERIFIED]
 
 | File Path | Description | Test Count |
 |---|---|---|
-| `tests/e2e/Common.psm1` | Core test harness module, assertion DSL, sandboxing, timing & reporting | N/A |
-| `tests/e2e/tier1_feature_coverage.Tests.ps1` | Tier 1: Isolated happy-path feature coverage across R1 through R5 | 31 |
-| `tests/e2e/tier2_boundary_corner.Tests.ps1` | Tier 2: Boundary conditions, extremes, limits, error paths & stress | 30 |
+| `tests/e2e/Common.psm1` | Core test harness module, assertion DSL, sandboxing, skip markers, timing & reporting | N/A |
+| `tests/e2e/tier1_feature_coverage.Tests.ps1` | Tier 1: Isolated happy-path feature coverage across R1 through R6 | 34 |
+| `tests/e2e/tier2_boundary_corner.Tests.ps1` | Tier 2: Boundary conditions, extremes, limits, error paths & stress | 34 |
 | `tests/e2e/tier3_cross_feature.Tests.ps1` | Tier 3: Cross-feature pairwise interactions & integration workflows | 6 |
-| `tests/e2e/tier4_real_world.Tests.ps1` | Tier 4: Real-world turnkey user scenarios & repository-wide audits | 6 |
-| `tests/e2e/run_all.ps1` | Master test runner orchestrating all tiers with structured exit codes | 73 (total) |
+| `tests/e2e/tier4_real_world.Tests.ps1` | Tier 4: Real-world turnkey user scenarios & repository-wide audits | 7 |
+| `tests/e2e/run_all.ps1` | Master test runner orchestrating all tiers with structured exit codes | 81 (total) |
 | `TEST_INFRA.md` | Formal specification of test philosophy, coverage matrix & methodology | N/A |
 | `TEST_READY.md` | Test execution commands, summary tables, and acceptance criteria verification | N/A |
 
@@ -139,6 +141,7 @@ The v1.0.2 release adds the asynchronous action worker and repackages the releas
 ### Unit Test Evidence (host run, before the Docker-only policy)
 - `cargo check` (lib + tests): 0 warnings.
 - `cargo test --manifest-path installer/Cargo.toml`: **25 passed, 0 failed**, including new `test_log_scroll_keys_and_caps`, `test_async_worker_guards`, and `test_async_worker_state_machine`.
+- v1.0.3 additions (ownership ledger engine): `ledger.rs` contributes 3 ledger unit tests → statically verified suite total is now **33 units** (10 linker + 4 catalog + 3 ledger + 16 app). Container run evidence for v1.0.3 is recorded in §5.1 below.
 
 ### Execution Policy Change
 - Starting with v1.0.2, all future test suites (cargo units and the 4-tier E2E) execute **inside Docker only** — see `TEST_INFRA.md` §6. The unit suite above ran on the host on 2026-10-27, before this policy took effect; no further host runs are scheduled.
@@ -146,3 +149,30 @@ The v1.0.2 release adds the asynchronous action worker and repackages the releas
 
 ### Release Artifact
 - `bin/rice-installer.exe` repackaged from the v1.0.2 release build (static CRT). Authenticode signing must be re-applied with the project certificate before publishing the GitHub Release.
+
+---
+
+## 5.1 v1.0.3 Containerized Verification Addendum (2026-10-29)
+
+<!-- Author -: HKDEVS / Project -: Window-Rice -->
+
+### What ships in v1.0.3
+- **Ownership ledger & full revoke** (`installer/src/ledger.rs`, `--uninstall-all`): every rice-installed config & wallpaper entry is recorded in `installed.json` at the backup root; full revoke restores displaced user configs byte-for-byte, archives user-modified copies under `preserved-*`, removes pure rice copies, and never touches repo-native targets or binaries.
+- **Test hardening**: skip markers (`Skip-Test` / `RiceSkipException`) for hosts without the full rice, APPDATA/LOCALAPPDATA sandbox virtualization, freshest-binary selection (`Select-InstallerExe`), CI junction bridge for `T3-COMB-02`.
+- **E2E growth**: 73 → **81 tests** (Tier 1: 34, Tier 2: 34, Tier 3: 6, Tier 4: 7); R6 ledger coverage = 7 scenarios (T1-R6-01..03, T2-R6-01..04, T4-SCEN-07). Units: 25 → **33**.
+- **CI/CD**: `ci.yml` gains an `e2e-suite` job (windows runner, tiers 1–4); `release.yml` gains a `cargo test` gate before packaging.
+- **Docs**: README carapace spec count corrected to 112; installer help documents `-UninstallAll` / `--uninstall-all` in every surface (install.ps1, carapace specs, CLI help).
+
+### Containerized execution (per TEST_INFRA.md §6 — image `window-rice-testenv`)
+- Image: `mcr.microsoft.com/powershell:windowsservercore-ltsc2022` + MinGit + carapace + VS BuildTools 2022 (VCTools) + Rust stable-msvc; repo baked at `C:\repo`, scratch at `C:\scratch`.
+- Suites run: `cargo test --manifest-path installer/Cargo.toml` (33 units) and `tests/e2e/run_all.ps1 -Tier All` (81 scenarios).
+- Expected container result: 33/33 units, e2e 79 pass + 2 skip (`T1-R5-04`, `T4-SCEN-06` — no 23 binaries inside the container), 0 failures.
+- Windows containers are mandatory for these suites (MSVC build + Windows junction/profile isolation); Linux-only engines (podman on Windows runs Linux containers) cannot execute them. Runner recipe: `docker/run-in-container.ps1`, image spec: `docker/Dockerfile`.
+
+### Provenance stamp (filled at run time by the container runner)
+| Field | Value |
+|---|---|
+| Engine | recorded by `docker/run-in-container.ps1` output header |
+| Image ID | recorded by runner output header |
+| Commit | recorded by runner output header |
+| Host exec count | **0** — no installer/cargo execution on the live host |

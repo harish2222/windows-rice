@@ -133,7 +133,7 @@ iwr -useb https://raw.githubusercontent.com/harish2222/windows-rice/main/install
 2. **Git Installation:** Automatically installs Git via Scoop (`scoop install git`) to ensure git commands and tools are immediately available in `$env:PATH`.
 3. **Repository Clone via Tag:** Clones the repository using the repository URL:
    ```bash
-   git clone --branch v1.0.2 --depth 1 https://github.com/harish2222/windows-rice.git ~/.config
+   git clone --branch v1.0.3 --depth 1 https://github.com/harish2222/windows-rice.git ~/.config
    ```
    > [!IMPORTANT]
    > Always clone the repository URL `https://github.com/harish2222/windows-rice.git`, NOT a release asset download URL (e.g. `.../releases/download/.../rice-installer.exe`). Git requires a repository endpoint; passing a binary download URL causes Git to fail with `fatal: unable to access ... Could not connect to server`.
@@ -286,7 +286,7 @@ All three primary shells are unified under `shells/` with complete parity for au
 
 ## ⚡ Carapace Autocompletion Catalog
 
-Windows Rice includes **63 custom, syntax-checked Carapace completion specifications** located in `carapace/specs/` and synced to `%APPDATA%\carapace\specs\`:
+Windows Rice includes **112 custom, syntax-checked Carapace completion specifications** located in `carapace/specs/` and synced to `%APPDATA%\carapace\specs\`:
 - Supports subcommands, flags, flag values, and help probes for developer tools: `cargo`, `rustc`, `rustup`, `node`, `npm`, `pnpm`, `bun`, `deno`, `zig`, `python`, `pymanager`, `docker`, `podman`, `terraform`, `claude`, `claude-code`, `codex`, `opencode`, `kilocode`, `cline`, `hermes`, `freebuff`, `scoop`, `winget`, `choco`, `yazi`, `zellij`, `fastboot`, `cava`, `kew`, `cliamp`, `mpd`, `komorebi`, `glazewm`, `yasb`, and more.
 
 ---
