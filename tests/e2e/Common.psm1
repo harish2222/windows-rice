@@ -191,7 +191,10 @@ function Should-Contain {
     }
     if (-not $contains) {
         $msg = if ($Message) { "$Message - " } else { "" }
-        throw "${msg}Expected collection/string to contain '$Item'"
+        if ($Collection -is [string]) {
+            throw "${msg}Expected string to contain '$Item', but got: '$Collection'"
+        }
+        throw "${msg}Expected collection to contain '$Item'"
     }
 }
 
@@ -285,6 +288,17 @@ function Invoke-WithIsolatedProfile {
     $oldHome = [Environment]::GetEnvironmentVariable('HOME', 'Process')
     $oldAppData = [Environment]::GetEnvironmentVariable('APPDATA', 'Process')
     $oldLocalAppData = [Environment]::GetEnvironmentVariable('LOCALAPPDATA', 'Process')
+    $oldRustupHome = [Environment]::GetEnvironmentVariable('RUSTUP_HOME', 'Process')
+    $oldCargoHome = [Environment]::GetEnvironmentVariable('CARGO_HOME', 'Process')
+
+    # Pin the Rust toolchain homes BEFORE the process env is redirected. cargo
+    # (run by R2 cargo-cycle tests) resolves its toolchains through rustup, which
+    # defaults to %USERPROFILE%\.rustup - once USERPROFILE/HOME point into the
+    # sandbox that default goes missing and rustup reports "no default is
+    # configured" (CI hit exactly this on the windows runner). Pin the real
+    # homes explicitly so the sandbox redirect never degrades them.
+    $rustupHome = if ($oldRustupHome) { $oldRustupHome } else { Join-Path $oldProfile ".rustup" }
+    $cargoHome = if ($oldCargoHome) { $oldCargoHome } else { Join-Path $oldProfile ".cargo" }
 
     $backupRoot = Join-Path $SandboxDir ".rice-backups"
     # Virtualize the whole roamed profile surface. APPDATA/LOCALAPPDATA MUST be
@@ -301,11 +315,15 @@ function Invoke-WithIsolatedProfile {
     [Environment]::SetEnvironmentVariable('RICE_BACKUP_DIR', $backupRoot, 'Process')
     [Environment]::SetEnvironmentVariable('APPDATA', $appDataDir, 'Process')
     [Environment]::SetEnvironmentVariable('LOCALAPPDATA', $localAppDataDir, 'Process')
+    [Environment]::SetEnvironmentVariable('RUSTUP_HOME', $rustupHome, 'Process')
+    [Environment]::SetEnvironmentVariable('CARGO_HOME', $cargoHome, 'Process')
     $env:USERPROFILE = $SandboxDir
     $env:HOME = $SandboxDir
     $env:RICE_BACKUP_DIR = $backupRoot
     $env:APPDATA = $appDataDir
     $env:LOCALAPPDATA = $localAppDataDir
+    $env:RUSTUP_HOME = $rustupHome
+    $env:CARGO_HOME = $cargoHome
 
     try {
         & $Script
@@ -315,11 +333,15 @@ function Invoke-WithIsolatedProfile {
         [Environment]::SetEnvironmentVariable('RICE_BACKUP_DIR', $oldBackupDir, 'Process')
         [Environment]::SetEnvironmentVariable('APPDATA', $oldAppData, 'Process')
         [Environment]::SetEnvironmentVariable('LOCALAPPDATA', $oldLocalAppData, 'Process')
+        [Environment]::SetEnvironmentVariable('RUSTUP_HOME', $oldRustupHome, 'Process')
+        [Environment]::SetEnvironmentVariable('CARGO_HOME', $oldCargoHome, 'Process')
         $env:USERPROFILE = $oldProfile
         $env:HOME = $oldHome
         $env:RICE_BACKUP_DIR = $oldBackupDir
         $env:APPDATA = $oldAppData
         $env:LOCALAPPDATA = $oldLocalAppData
+        $env:RUSTUP_HOME = $oldRustupHome
+        $env:CARGO_HOME = $oldCargoHome
     }
 }
 
