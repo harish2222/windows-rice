@@ -18,10 +18,11 @@
 
 FROM mcr.microsoft.com/powershell:ubuntu-22.04
 
-# apt layer: git (repo integrity + ls-files audits), curl for rustup
+# apt layer: git (repo integrity + ls-files audits), curl for rustup,
+# build-essential for a native C linker (cargo build jobs link with cc)
 RUN set -eux; \
     apt-get update; \
-    apt-get install -y --no-install-recommends git curl ca-certificates; \
+    apt-get install -y --no-install-recommends git curl ca-certificates build-essential; \
     rm -rf /var/lib/apt/lists/*
 
 # rustup minimal + rustfmt (format conformance without any cross-build attempt)

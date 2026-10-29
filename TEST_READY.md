@@ -141,7 +141,7 @@ The v1.0.2 release adds the asynchronous action worker and repackages the releas
 ### Unit Test Evidence (host run, before the Docker-only policy)
 - `cargo check` (lib + tests): 0 warnings.
 - `cargo test --manifest-path installer/Cargo.toml`: **25 passed, 0 failed**, including new `test_log_scroll_keys_and_caps`, `test_async_worker_guards`, and `test_async_worker_state_machine`.
-- v1.0.3 additions (ownership ledger engine): `ledger.rs` contributes 3 ledger unit tests → statically verified suite total is now **33 units** (10 linker + 4 catalog + 3 ledger + 16 app). Container run evidence for v1.0.3 is recorded in §5.1 below.
+- v1.0.3 additions (ownership ledger engine): `ledger.rs` contributes 3 ledger unit tests and the symlink-restore guard regression adds a 4th engine test → statically verified suite total is **34 units** (11 linker + 4 catalog + 3 ledger + 16 app). Container run evidence for v1.0.3 is recorded in §5.1 below. Container run evidence for v1.0.3 is recorded in §5.1 below.
 
 ### Execution Policy Change
 - Starting with v1.0.2, all future test suites (cargo units and the 4-tier E2E) execute **inside Docker only** — see `TEST_INFRA.md` §6. The unit suite above ran on the host on 2026-10-27, before this policy took effect; no further host runs are scheduled.
@@ -159,14 +159,14 @@ The v1.0.2 release adds the asynchronous action worker and repackages the releas
 ### What ships in v1.0.3
 - **Ownership ledger & full revoke** (`installer/src/ledger.rs`, `--uninstall-all`): every rice-installed config & wallpaper entry is recorded in `installed.json` at the backup root; full revoke restores displaced user configs byte-for-byte, archives user-modified copies under `preserved-*`, removes pure rice copies, and never touches repo-native targets or binaries.
 - **Test hardening**: skip markers (`Skip-Test` / `RiceSkipException`) for hosts without the full rice, APPDATA/LOCALAPPDATA sandbox virtualization, freshest-binary selection (`Select-InstallerExe`), CI junction bridge for `T3-COMB-02`.
-- **E2E growth**: 73 → **81 tests** (Tier 1: 34, Tier 2: 34, Tier 3: 6, Tier 4: 7); R6 ledger coverage = 7 scenarios (T1-R6-01..03, T2-R6-01..04, T4-SCEN-07). Units: 25 → **33**.
+- **E2E growth**: 73 → **81 tests** (Tier 1: 34, Tier 2: 34, Tier 3: 6, Tier 4: 7); R6 ledger coverage = 7 scenarios (T1-R6-01..03, T2-R6-01..04, T4-SCEN-07). Units: 25 → **34**.
 - **CI/CD**: `ci.yml` gains an `e2e-suite` job (windows runner, tiers 1–4); `release.yml` gains a `cargo test` gate before packaging.
 - **Docs**: README carapace spec count corrected to 112; installer help documents `-UninstallAll` / `--uninstall-all` in every surface (install.ps1, carapace specs, CLI help).
 
 ### Containerized execution (per TEST_INFRA.md §6 — image `window-rice-testenv`)
 - Image: `mcr.microsoft.com/powershell:windowsservercore-ltsc2022` + MinGit + carapace + VS BuildTools 2022 (VCTools) + Rust stable-msvc; repo baked at `C:\repo`, scratch at `C:\scratch`.
-- Suites run: `cargo test --manifest-path installer/Cargo.toml` (33 units) and `tests/e2e/run_all.ps1 -Tier All` (81 scenarios).
-- Expected container result: 33/33 units, e2e 79 pass + 2 skip (`T1-R5-04`, `T4-SCEN-06` — no 23 binaries inside the container), 0 failures.
+- Suites run: `cargo test --manifest-path installer/Cargo.toml` (34 units) and `tests/e2e/run_all.ps1 -Tier All` (81 scenarios).
+- Expected container/CI result: 34/34 units, e2e 78 pass + 3 skip (`T1-R5-04`, `T4-SCEN-06` — no 23 binaries inside the container; `T2-R4-03` — host-local `powershell/profile.ps1` is untracked), 0 failures. On the live master (which carries the untracked host-local surface) a run posts 79 pass + 2 skip.
 - Windows containers are mandatory for these suites (MSVC build + Windows junction/profile isolation); Linux-only engines (podman on Windows runs Linux containers) cannot execute them. Runner recipe: `docker/run-in-container.ps1`, image spec: `docker/Dockerfile`.
 
 ### Provenance stamp (filled at run time by the container runner)

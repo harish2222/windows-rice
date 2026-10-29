@@ -114,7 +114,7 @@ try {
     if ($tierCounts.tier3_cross_feature -ne 6)    { throw "tier3 count drifted: $($tierCounts.tier3_cross_feature) != 6" }
     if ($tierCounts.tier4_real_world   -ne 7)    { throw "tier4 count drifted: $($tierCounts.tier4_real_world) != 7" }
     $units = (Select-String -Path "installer/src/*.rs" -Pattern '#\[(test|tokio::test)' -AllMatches | ForEach-Object { $_.Matches.Count } | Measure-Object -Sum).Sum
-    if ($units -ne 33) { throw "unit count drifted: $units != 33" }
+    if ($units -ne 34) { throw "unit count drifted: $units != 34" }
     if ((Get-Content TEST_READY.md -Raw) -notmatch '81 \(total\)') { throw "TEST_READY.md total row must read 81 (total)" }
     if ((Get-Content README.md -Raw) -notmatch '112 custom') { throw "README.md must declare 112 custom specs" }
     if ((Get-Content README.md -Raw) -notmatch '--branch v1\.0\.3') { throw "README.md clone line must reference v1.0.3" }
