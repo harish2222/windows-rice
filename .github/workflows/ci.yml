@@ -211,8 +211,17 @@ jobs:
       - name: Install carapace completer
         shell: pwsh
         run: |
+          # carapace assets are versioned; resolve the real name via the API
+          # instead of guessing a stable-name release asset (which 404s).
+          $rel = Invoke-RestMethod -Uri "https://api.github.com/repos/carapace-sh/carapace-bin/releases/latest" -TimeoutSec 120
+          $asset = $rel.assets | Where-Object { $_.name -match '^carapace-bin_[0-9\.]+_windows_amd64\.zip$' } | Select-Object -First 1
+          if (-not $asset) {
+            Write-Host "::error::no carapace-bin windows_amd64 asset in latest release"
+            exit 1
+          }
+          Write-Host "Fetching $($asset.name)"
           $carapaceZip = "$env:TEMP\carapace.zip"
-          Invoke-RestMethod -Uri "https://github.com/carapace-sh/carapace-bin/releases/latest/download/carapace-bin_windows_amd64.zip" -OutFile $carapaceZip -TimeoutSec 60
+          Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $carapaceZip -TimeoutSec 300
           Expand-Archive -Path $carapaceZip -DestinationPath "$env:TEMP\carapace-bin" -Force
           $exe = Get-ChildItem "$env:TEMP\carapace-bin" -Recurse -Filter "carapace.exe" | Select-Object -First 1
           if ($exe) {

@@ -48,7 +48,13 @@ RUN $rel = $null; \
 
 # --- carapace completions binary ---------------------------------------------
 # Required by the R4 tier tests (spec parity checks invoke carapace probes).
-RUN Invoke-WebRequest -Uri 'https://github.com/carapace-sh/carapace-bin/releases/latest/download/carapace-bin_windows_amd64.zip' -OutFile C:\tools\carapace.zip -TimeoutSec 600; \
+# Assets are versioned: resolve the real name via the GitHub API instead of
+# guessing a stable-name release asset (which 404s).
+RUN $rel = Invoke-RestMethod -Uri 'https://api.github.com/repos/carapace-sh/carapace-bin/releases/latest' -TimeoutSec 120; \
+    $asset = $rel.assets | Where-Object { $_.name -match '^carapace-bin_[0-9\.]+_windows_amd64\.zip$' } | Select-Object -First 1; \
+    if ($null -eq $asset) { throw 'no carapace-bin windows_amd64 asset in latest release' }; \
+    Write-Host "Downloading $($asset.name)"; \
+    Invoke-WebRequest -Uri $asset.browser_download_url -OutFile C:\tools\carapace.zip -TimeoutSec 600; \
     Expand-Archive -Path C:\tools\carapace.zip -DestinationPath C:\tools\carapace-bin -Force; \
     $exe = Get-ChildItem C:\tools\carapace-bin -Recurse -Filter carapace.exe | Select-Object -First 1; \
     if ($null -eq $exe) { throw 'carapace.exe missing from archive' }; \
