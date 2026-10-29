@@ -1,0 +1,43 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: WINDOW-RICE Container Testenv Build Context Filters
+# ============================================================================
+# Keeps the window-rice/testenv build context small WITHOUT dropping anything
+# the test suites read:
+#   - .git STAYS in the context (tier tests run `git ls-files`)
+#   - tracked config payloads (bin/, carapace/, shells/, yasb src+assets+themes
+#     +screenshot, installer src, tests/, docker/) all stay
+#   - pulse/, rio/, .cargo each carry ONE tracked test-audit target
+#     (`pulse/cookie`, `rio/config...`, `.cargo/config.toml`) so they stay
+# Excluded = generated build output and untracked local-only third-party dirs.
+# ============================================================================
+
+# --- Cargo build output: rebuilt inside the container from scratch ------------
+**/target
+
+# --- Accidental backup roots (must never leak host restore data into an image)
+.rice-backups
+**/.rice-backups
+
+# --- Untracked local-only tool/session data (0 tracked files, heavy) ----------
+# Verified via `git ls-files` on 2026-10-29: each of these directories has ZERO
+# tracked files, so excluding them cannot break any test audit.
+manicode/
+kilo/
+.agents/
+.android/
+containers/
+opencode/
+agents/
+forgum/
+higgsfield/
+omnirush/
+raycast/
+
+# --- Untracked shell/terminal runtime state (tracked shell configs live in shells/)
+powershell/
+
+# --- Noise ---------------------------------------------------------------------
+*.log
+*.tmp
