@@ -117,9 +117,9 @@ try {
     if ($units -ne 34) { throw "unit count drifted: $units != 34" }
     if ((Get-Content TEST_READY.md -Raw) -notmatch '81 \(total\)') { throw "TEST_READY.md total row must read 81 (total)" }
     if ((Get-Content README.md -Raw) -notmatch '112 custom') { throw "README.md must declare 112 custom specs" }
-    if ((Get-Content README.md -Raw) -notmatch '--branch v1\.0\.3') { throw "README.md clone line must reference v1.0.3" }
-    if ((Get-Content install.ps1 -Raw) -notmatch '\$Tag = "v1\.0\.3"') { throw "install.ps1 default Tag must be v1.0.3" }
-    Write-Host "DOC_PARITY PASSED (tiers 34/34/6/7 = $total; units $units; spec count 112; release tag v1.0.3)" -ForegroundColor Green
+    if ((Get-Content README.md -Raw) -notmatch '--branch v1\.0\.4') { throw "README.md clone line must reference v1.0.4" }
+    if ((Get-Content install.ps1 -Raw) -notmatch '\$Tag = "v1\.0\.4"') { throw "install.ps1 default Tag must be v1.0.4" }
+    Write-Host "DOC_PARITY PASSED (tiers 34/34/6/7 = $total; units $units; spec count 112; release tag v1.0.4)" -ForegroundColor Green
 } catch {
     Write-Host "DOC_PARITY FAILED: $($_.Exception.Message)" -ForegroundColor Red
     $failures++

@@ -184,7 +184,8 @@ The Windows Docker engine on the host was installation-disabled this cycle, so n
 Windows-container execution was attempted on the node.
 
 - **Conformance image** (`docker/Conformance.Containerfile`, pwsh:ubuntu-22.04 + git + curl
-  + build-essential + rustfmt + PowerShell-YAML; repo baked at `/repo`, `479` tracked files):
+  + build-essential + rustfmt + PowerShell-YAML; repo baked at `/repo`, `479` tracked files
+  (measured `478` at the v1.0.4 bake: `bin/*.exe` untracked per the security review)):
   ALL CHECKS PASSED — 11 pwsh surfaces AST-clean, 112 carapace specs parse under strict YAML
   (both entrypoints document `--uninstall-all`), CI gates present, doc-count parity
   (tiers 34/34/6/7 = 81; units 34; release tag v1.0.3).
@@ -206,3 +207,39 @@ Windows-container execution was attempted on the node.
   Release tag `v1.0.3` pushed after; `release.yml` gates the package on the installer unit suite.
 - Provenance: engine podman-linux (client 6.1.4 / server 6.0.2); commit when conformance ran
   `118abc5` lineage; host exec count for installer/cargo: **0**.
+
+## §5.2 v1.0.4 Security Fix-Forward Addendum (2026-10-30)
+
+Detection-only security review run `b3fff0fe-4d89-471e-a1ba-b3c67a57776a` (base `45fd6f9` → HEAD)
+verdict **FAIL** at the iac HIGH threshold; three HIGH findings fixed forward in v1.0.4 with
+operator approval (operator chose: apply all three HIGH fixes, untrack binaries, commit
+review artifacts, spawn the multi-agent roster for post-fix verification):
+
+1. **CI-ACTIONS-NOT-SHA-PINNED** — all 10 workflow `uses:` refs SHA-pinned with the
+   commit the tag currently resolves to (GitHub-API cross-verified):
+   `actions/checkout@11d5960a…`, `actions/cache@0057852b…`,
+   `actions/upload-artifact@ea165f8d…`, `dtolnay/rust-toolchain@b725eda5…`
+   (stable branch snapshot), `softprops/action-gh-release@3bb12739…`.
+   Release-tag input additionally validated against `^v\d+\.\d+\.\d+$`.
+2. **BS-REMOTE-EVAL-UNPINNED** — bootstrap one-liners/documentation now point at the
+   immutable `releases/latest/download/install.ps1` asset (never `raw.githubusercontent/main`);
+   release workflow publishes `install.ps1` as its own asset; archive fallback resolves the
+   latest release **tag** via the GitHub API instead of `archive/refs/heads/main.zip`.
+   `installer/src/bootstrap.rs` vendor-package-manager endpoints (get.scoop.sh /
+   community.chocolatey.org / astral.sh) stay as documented vendor-pattern risk-acceptance
+   (vendor-owned canonical domains, unchanged this cycle).
+3. **ARTIFACT-ZIP-NO-HASH-CHECK** — release `SHA256SUMS.txt` now carries the exe **and**
+   install.ps1 hashes; `install.ps1` hash-verifies a release-downloaded `rice-installer.exe`
+   against `SHA256SUMS.txt` before launch (fail-closed on mismatch; legacy releases whose
+   SUMS lack the exe line downgrade to a visible notice).
+4. **BIN-TRACKED-EXES** (LOW camp, operator-approved) — `bin/rice-installer.exe` +
+   `bin/term-launch.exe` untracked (`git rm --cached`), `*.exe` ignore doctrine updated;
+   remote flow falls through to the now hash-verified release download.
+
+Artifacts: `.mcp/reviews/b3fff0fe-4d89-471e-a1ba-b3c67a57776a/` (findings.json, gate-result.md,
+threat-model.md, taint-map.json, coverage-manifest.json, remediation-templates.md, chain.json +
+chain-verify.json — SHA-256 attestation chain valid=true, 4 links) and `.mcp/policies/security-policy.json`.
+Tooling note: the security-mcp `security_run_pr_gate` recent_changes run crashed the MCP server
+(exit 134, heap OOM) on the tracked-binary diff; the gate was completed via operator-directed
+local detectors over 31 code targets (file_by_file scope) with thresholds unchanged — re-run gate
+in file_by_file mode while binaries stay untracked.
