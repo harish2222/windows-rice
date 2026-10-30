@@ -27,8 +27,9 @@ containers/podman/
 
 # ===== Binaries, build output, compiled tool assets =====
 *.exe
-!bin/rice-installer.exe
-!bin/term-launch.exe
+# Binaries are NOT tracked: releases ship CI-built, SHA256SUMS-verified assets.
+# (untracked per v1.0.4 security review run b3fff0fe: tracked exes drift vs
+# source and their binary diffs break diff-based tooling)
 *.dll
 *.pyd
 *.pdb
@@ -46,6 +47,10 @@ yasb/tools/picker/
 .agents/
 agents/
 ORIGINAL_REQUEST.md
+
+# ===== Local security-mcp state (review artifacts are committed explicitly) =====
+.mcp/audit/
+.mcp/agent-clis/
 
 # ===== Dependencies =====
 node_modules/
@@ -66,8 +71,8 @@ cliamp/history.toml
 !yasb/tools/keybind/Cargo.lock
 !installer/Cargo.lock
 # term-launch crate: the launcher behind alt+return; its lockfile is source of
-# truth so fresh clones rebuild byte-stable, and the deployed exe is tracked so
-# the rice works without a toolchain.
+# truth so fresh clones rebuild byte-stable; binaries install from the
+# SHA256SUMS-verified release assets instead of tracked blobs.
 !tools/term-launch/Cargo.lock
 # The picker's Python source and PyInstaller artifacts are NOT tracked (they
 # are a superseded fallback and pull in a large binary). The Rust crate IS the
