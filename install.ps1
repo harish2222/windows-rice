@@ -8,13 +8,14 @@
     Windows Rice Bootstrap & Interactive Installer Launcher
 .DESCRIPTION
     Supports both local execution and single-command remote execution via iwr / irm:
-        irm https://raw.githubusercontent.com/harish2222/windows-rice/main/install.ps1 | iex
-        iwr -useb https://raw.githubusercontent.com/harish2222/windows-rice/main/install.ps1 | iex
+        irm https://github.com/harish2222/windows-rice/releases/latest/download/install.ps1 | iex
+        iwr -useb https://github.com/harish2222/windows-rice/releases/latest/download/install.ps1 | iex
+    (remote origin is the immutable latest-release asset - never a mutable branch ref)
 
     Launches the Rust-powered Ratatui TUI installer (rice-installer), or provides
     automated bootstrapping for package managers (Scoop, Winget, Chocolatey, Cargo).
 .EXAMPLE
-    irm https://raw.githubusercontent.com/harish2222/windows-rice/main/install.ps1 | iex
+    irm https://github.com/harish2222/windows-rice/releases/latest/download/install.ps1 | iex
     .\install.ps1
     .\install.ps1 -Verify
     .\install.ps1 -LinkAll
@@ -23,7 +24,7 @@
 
 [CmdletBinding()]
 param(
-    [string]$Tag = "v1.0.3",
+    [string]$Tag = "v1.0.4",
     [switch]$Verify,
     [switch]$LinkAll,
     [switch]$Unlink,
@@ -60,8 +61,8 @@ if ($Help) {
 WINDOW-RICE INSTALLER LAUNCHER
 ==============================
 Remote Web One-Liner (iwr / irm):
-    irm https://raw.githubusercontent.com/harish2222/windows-rice/main/install.ps1 | iex
-    iwr -useb https://raw.githubusercontent.com/harish2222/windows-rice/main/install.ps1 | iex
+    irm https://github.com/harish2222/windows-rice/releases/latest/download/install.ps1 | iex
+    iwr -useb https://github.com/harish2222/windows-rice/releases/latest/download/install.ps1 | iex
 
 Local Usage:
     .\install.ps1 [OPTIONS]
@@ -243,8 +244,12 @@ if ($isRemote) {
             Invoke-WebRequest -Uri $zipUrl -OutFile $tempZip -UseBasicParsing -ErrorAction Stop
         } catch {
             try {
-                $zipUrl = "https://github.com/harish2222/windows-rice/archive/refs/heads/main.zip"
-                Invoke-WebRequest -Uri $zipUrl -OutFile $tempZip -UseBasicParsing -ErrorAction Stop
+                # fallback: resolve the latest RELEASE tag via the API (never mutable main branch)
+                $latestRelease = Invoke-RestMethod -Uri "https://api.github.com/repos/harish2222/windows-rice/releases/latest" -TimeoutSec 60
+                if ($latestRelease.tag_name) {
+                    $zipUrl = "https://github.com/harish2222/windows-rice/archive/refs/tags/$($latestRelease.tag_name).zip"
+                    Invoke-WebRequest -Uri $zipUrl -OutFile $tempZip -UseBasicParsing -ErrorAction Stop
+                }
             } catch {}
         }
 
@@ -285,6 +290,36 @@ if ($isRemote) {
                     }
                 }
             }
+        }
+    }
+
+    # Step 4b: Hash-verify release-downloaded binary against SHA256SUMS.txt (fail closed on mismatch)
+    if ((Test-Path $tempInstaller) -and (-not (Test-Path $repoBin))) {
+        $expectedExeHash = $null
+        $sumsUrls = @(
+            "https://github.com/harish2222/windows-rice/releases/download/$Tag/SHA256SUMS.txt",
+            "https://github.com/harish2222/windows-rice/releases/latest/download/SHA256SUMS.txt"
+        )
+        foreach ($sumsUrl in $sumsUrls) {
+            try {
+                $sumsContent = Invoke-WebRequest -Uri $sumsUrl -UseBasicParsing -ErrorAction Stop
+                $sumsLine = ($sumsContent.Content -split "`r?`n") | Where-Object { $_ -match 'rice-installer\.exe\s*$' } | Select-Object -First 1
+                if ($sumsLine) {
+                    $expectedExeHash = ($sumsLine -split '\s+')[0].ToLowerInvariant()
+                    break
+                }
+            } catch {}
+        }
+        if ($expectedExeHash) {
+            $actualExeHash = (Get-FileHash -Path $tempInstaller -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($actualExeHash -ne $expectedExeHash) {
+                Remove-Item $tempInstaller -Force -ErrorAction SilentlyContinue
+                Write-Host "[Windows Rice] FATAL: downloaded rice-installer.exe hash mismatch (expected $expectedExeHash, got $actualExeHash). Aborting." -ForegroundColor Red
+                exit 1
+            }
+            Write-Host "[Windows Rice] Binary integrity verified against release SHA256SUMS.txt." -ForegroundColor Green
+        } else {
+            Write-Host "[Windows Rice] Integrity notice: no rice-installer.exe line in release SHA256SUMS.txt (pre-v1.0.4 asset). Skipping verify." -ForegroundColor Yellow
         }
     }
 
