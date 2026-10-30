@@ -268,5 +268,70 @@ in file_by_file mode while binaries stay untracked.
   new fail-closed verification path is exercised against the real release).
 - **Post-fix roster sweep**: security-mcp review `ed156b73-7fb1-41a2-a219-890a61b1554a`,
   agent run `5f03e566b8ea8a032e349caac20ec88d` (26-agent auto-roster, detection_only,
-  concurrency 6, supervisor providers codex/gemini/ollama) launched right after the push;
-  results to be merged via `orchestration_merge_agent_findings` when terminal.
+  concurrency 6, supervisor providers codex/gemini/ollama) launched right after the push.
+  **Final result (2026-10-30): PASS-free honest FAIL — completed by operator manual takeover.**
+  The in-band supervisor orphaned itself at 69% (18/26 terminal, providers healthy but scheduler
+  idle); the 11 unfinished lanes (3 failed in-band + 8 never scheduled) were completed manually
+  with full file-read access; attestation chain grew 11→**25 links, valid=true**;
+  `orchestration_assert_run_complete` = 26/26 terminal, blocker=null; skill coverage **64% (WARN,
+  honest NA lanes)**. `orchestration_merge_agent_findings` merged 28 findings (server-bucketed
+  1 critical / 11 high / 16 medium) and recorded the run gate as **FAIL**: substantive finding
+  **APS-001 CRITICAL — a live 64-char VirusTotal API key sits inside the tracked, committed,
+  pushed `scoop/config.json`** (verified via committed-blob property probe; value never emitted);
+  residual decisions open for EXEC-POLICY-WIDEN + EXT-TOOL-REMOTE-EVAL-WINUTIL; process drivers
+  (coverage floor, manual-adapter capability flags) documented. `security_attest_review` correctly
+  refused to attest a FAIL gate (non-compliant force-outs were not used). SOC2 report generated
+  (8 satisfied / 0 missing / 1 unverified self_heal_loop). Evidence committed under
+  `.mcp/reviews/ed156b73-…/` (gate-result.md, merged-findings.json copy, attestation-chain.json
+  copy) + `.mcp/reports/`. Tooling caveats to report upstream (AbrahamOO/security-mcp):
+  (a) supervisor scheduler stalls when providers are healthy ⇒ orphan, (b) parallel
+  `orchestration_update_agent_status` calls corrupt `manifest.json` (full-file rewrite race —
+  call sequentially), (c) `payload-mismatch` rejections for supervisor-authored agent files.
+
+## §5.3 v1.0.4 post-roster fix round (2026-10-30, operator-approved)
+
+Roster takeover surfaced the CRITICAL `APS-001` and residuals; operator chose: purge + untrack
+the leaked live-desktop config, harden CI token scope, apply both remaining MEDIUM fixes, then
+commit the suite evidence. Applied set (pre-force-push state):
+
+1. **APS-001 (CRITICAL)** — `scoop/config.json` (carried a live 64-char VirusTotal API key;
+   rotate/revoke on the VT console remains the operator's action item) and `glazewm/config.yaml`
+   (user's live master) untracked via `git rm --cached` + `.gitignore` Never-commit entries;
+   **both removed from all git history by force-push purge** (see §5.3a). Product continuity:
+   `glazewm/config.template.yaml` (canonical copy of the last committed rice config) is tracked,
+   and `install.ps1` deploys it to `~\.glzr\glazewm\config.yaml` post-TUI when the target lacks a
+   config (both remote-clone and local flows).
+2. **CLD-001** — ci.yml gains a top-level `permissions: { contents: read }` block (no more
+   default-scope GITHUB_TOKEN on CI runs; release.yml keeps its dedicated `contents: write`).
+3. **GAP-002 / EXT-TOOL-REMOTE-EVAL-WINUTIL** — both xonsh copies (`shells/xonsh/rc.xsh`,
+   `xonsh/rc.xsh`) and both nushell wrappers (`shells/nushell/config-additions.nu`) now ask for
+   explicit confirmation before `irm|iex` of christitus.com (y/N; default skip printed).
+4. **GAP-002 / EXEC-POLICY-WIDEN** — `install.ps1` records the prior CurrentUser ExecutionPolicy
+   into `.config\.rice\execution-policy-previous.txt` before switching to RemoteSigned;
+   `tools\restore-exec-policy.ps1` restores it (`-Show` to inspect only).
+5. **Evidence commit** — `.mcp/reviews/ed156b73-…/` (review record, takeover gate-result.md,
+   merged-findings.json copy, attestation-chain.json copy, byte-verbatim per
+   `.gitattributes .mcp/** -text`) + `.mcp/reports/` SOC2 report + this section.
+
+### §5.3a History purge + force-push (carried out after the evidence commit)
+
+- `git filter-branch --index-filter "git rm --cached --ignore-unmatch scoop/config.json
+  glazewm/config.yaml"` executed in a temp mirror clone (`git clone --mirror`), not on the live
+  working tree (filter-branch/reset hygiene vs. operator's live desktop).
+  NOTE: git-filter-repo was available via scoop but rejected as a Python-script tool per the
+  operator's tooling rules; git's built-in filter-branch (POSIX shell) was used instead.
+- Mirror force-pushed: `git push --force origin` (rewritten main + rewritten tags v1.0.3/v1.0.4).
+- Local reconciliation: stashed the two live-master files (their uncommitted edits preserved),
+  fetched the rewritten refs, `git reset --hard` to the rewritten head, stash-applied back;
+  both files remain on disk, untracked + ignored.
+- Post-condition verified: `git log -p --all -- scoop/config.json` returns nothing (linear),
+  the only remaining VT-key bytes live in the local untracked working file and in remote reflog
+  reflogs pre-gc (documented; GitHub-side history no longer contains the file).
+- Commit IDs referenced throughout TEST_READY (a998c55, e782570, c8dac2f, ef6d417..d25f93c)
+  refer to PRE-PURGE history; the rewritten lineage carries the same content (minus the two
+  purged paths) — hashes shifted by design; the last rewritten code commit pre-purge was
+  `d25f93c` family. Numeric/byte-attestation chains bind FILE BYTES, not commit IDs — intact.
+- Release assets: unchanged (v1.0.3/v1.0.4 assets were built from installer sources; no configs
+  ever shipped in release bundles).
+- CHANGE OF HASHES may break external clones; fresh `git clone --branch v1.0.4 --depth 1 …`
+  remains valid (README flow), while older clones should re-clone.

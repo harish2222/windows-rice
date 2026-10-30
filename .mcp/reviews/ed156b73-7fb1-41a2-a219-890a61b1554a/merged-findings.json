@@ -1,0 +1,491 @@
+{
+  "agentRunId": "5f03e566b8ea8a032e349caac20ec88d",
+  "runId": "ed156b73-7fb1-41a2-a219-890a61b1554a",
+  "mergedAt": "2026-10-30T10:58:22.548Z",
+  "agentsCovered": [],
+  "agentsPartial": [
+    "appsec-code-auditor",
+    "cloud-infra-specialist",
+    "compliance-gap-analyst",
+    "compliance-grc",
+    "key-management-lifecycle-analyst",
+    "pentest-social",
+    "serialization-memory-attacker"
+  ],
+  "totalFindings": 28,
+  "critical": 1,
+  "high": 11,
+  "medium": 16,
+  "low": 0,
+  "skillMdSectionsCovered": [],
+  "uncoveredSections": [
+    "§1",
+    "§2",
+    "§3",
+    "§4",
+    "§5",
+    "§6",
+    "§7",
+    "§8",
+    "§9",
+    "§10",
+    "§11",
+    "§12",
+    "§13",
+    "§14",
+    "§15",
+    "§16",
+    "§17",
+    "§18",
+    "§19",
+    "§20",
+    "§21",
+    "§22",
+    "§23",
+    "§24",
+    "§EDGE-CASE-MATRIX",
+    "§TEMPORAL-THREATS",
+    "§DETECTION-GAP",
+    "§ZERO-MISS-MANDATE"
+  ],
+  "findings": [
+    {
+      "id": "CAPABILITY_FLOOR_NOT_MET",
+      "title": "Capability floor not met: 11 agent(s) operated below full power — threat-modeler, appsec-code-auditor, serialization-memory-attacker, crypto-pki-specialist, key-management-lifecycle-analyst, cloud-infra-specialist, pentest-social, compliance-grc, evidence-collector, compliance-gap-analyst, skill-coverage. The \"all agents at fullest capability\" mandate is violated; gate must FAIL.",
+      "severity": "CRITICAL",
+      "evidence": [
+        "Degraded agent: threat-modeler",
+        "Degraded agent: appsec-code-auditor",
+        "Degraded agent: serialization-memory-attacker",
+        "Degraded agent: crypto-pki-specialist",
+        "Degraded agent: key-management-lifecycle-analyst",
+        "Degraded agent: cloud-infra-specialist",
+        "Degraded agent: pentest-social",
+        "Degraded agent: compliance-grc",
+        "Degraded agent: evidence-collector",
+        "Degraded agent: compliance-gap-analyst",
+        "Degraded agent: skill-coverage"
+      ],
+      "remediated": false,
+      "requiredActions": [
+        "Do not pass this gate until every degraded agent is re-run at its required capability tier.",
+        "Investigate why full-power routing was not applied (budget valve misconfiguration, forced-standard policy, circuit-breaker fallback, or missing tools).",
+        "Protected max-power tasks (exploit_chain, pentest, ai_redteam, crypto_analysis, auth_analysis, threat_model, remediation) must never be downgraded — verify none were."
+      ]
+    },
+    {
+      "id": "CAPABILITY_DEGRADED::threat-modeler",
+      "title": "Agent \"threat-modeler\" operated below its capability floor (task \"threat_model\", required tier \"advanced\"): evidence depth: completed with no findings file and no clean attestation (high-risk lead)",
+      "severity": "HIGH",
+      "evidence": [
+        "MISSED — evidence depth: completed with no findings file and no clean attestation (high-risk lead)",
+        "UNVERIFIED — model tier: no modelUsed/capabilityTierUsed recorded for this agent (orchestration does not yet persist the model an agent executed under)",
+        "UNVERIFIED — tool floor: SKILL.md requires security-critical tools [Read, Glob, Grep, Bash] but no toolsUsed/toolsAvailable were recorded for this agent"
+      ],
+      "remediated": false,
+      "requiredActions": [
+        "Re-run agent \"threat-modeler\" at its required \"advanced\" capability tier (this is a protected max-power task — downgrade is never permitted).",
+        "Ensure the agent has every security-critical tool declared in its SKILL.md allowed-tools before re-running.",
+        "Confirm the agent produces non-empty findings or an explicit, justified clean attestation."
+      ]
+    },
+    {
+      "id": "CAPABILITY_UNVERIFIED::stride-pasta-analyst",
+      "title": "Capability floor for agent \"stride-pasta-analyst\" could not be fully verified (2 floor(s) lack recorded metadata)",
+      "severity": "MEDIUM",
+      "evidence": [
+        "UNVERIFIED — model tier: no modelUsed/capabilityTierUsed recorded for this agent (orchestration does not yet persist the model an agent executed under)",
+        "UNVERIFIED — tool floor: SKILL.md requires security-critical tools [Read, Glob, Grep, Bash] but no toolsUsed/toolsAvailable were recorded for this agent"
+      ],
+      "remediated": false,
+      "requiredActions": [
+        "Have orchestration record per-agent capability metadata (modelUsed, taskType, toolsUsed) so the model and tool floors can be enforced rather than advised.",
+        "See AgentCapabilityMetadataSchema in capability-enforcer.ts for the exact fields expected."
+      ]
+    },
+    {
+      "id": "CAPABILITY_UNVERIFIED::attack-navigator",
+      "title": "Capability floor for agent \"attack-navigator\" could not be fully verified (3 floor(s) lack recorded metadata)",
+      "severity": "MEDIUM",
+      "evidence": [
+        "UNVERIFIED — model tier: no modelUsed/capabilityTierUsed recorded for this agent (orchestration does not yet persist the model an agent executed under)",
+        "UNVERIFIED — tool floor: SKILL.md requires security-critical tools [Read, Glob, Grep, Bash] but no toolsUsed/toolsAvailable were recorded for this agent",
+        "UNVERIFIED — evidence depth: completed but no findings file was found for this agent"
+      ],
+      "remediated": false,
+      "requiredActions": [
+        "Have orchestration record per-agent capability metadata (modelUsed, taskType, toolsUsed) so the model and tool floors can be enforced rather than advised.",
+        "See AgentCapabilityMetadataSchema in capability-enforcer.ts for the exact fields expected."
+      ]
+    },
+    {
+      "id": "CAPABILITY_UNVERIFIED::business-logic-attacker",
+      "title": "Capability floor for agent \"business-logic-attacker\" could not be fully verified (3 floor(s) lack recorded metadata)",
+      "severity": "MEDIUM",
+      "evidence": [
+        "UNVERIFIED — model tier: no modelUsed/capabilityTierUsed recorded for this agent (orchestration does not yet persist the model an agent executed under)",
+        "UNVERIFIED — tool floor: SKILL.md requires security-critical tools [Read, Glob, Grep, Bash] but no toolsUsed/toolsAvailable were recorded for this agent",
+        "UNVERIFIED — evidence depth: agent status is \"completed_na\" (not a terminal completion) — evidence not assessed here"
+      ],
+      "remediated": false,
+      "requiredActions": [
+        "Have orchestration record per-agent capability metadata (modelUsed, taskType, toolsUsed) so the model and tool floors can be enforced rather than advised.",
+        "See AgentCapabilityMetadataSchema in capability-enforcer.ts for the exact fields expected."
+      ]
+    },
+    {
+      "id": "CAPABILITY_UNVERIFIED::privacy-flow-analyst",
+      "title": "Capability floor for agent \"privacy-flow-analyst\" could not be fully verified (3 floor(s) lack recorded metadata)",
+      "severity": "MEDIUM",
+      "evidence": [
+        "UNVERIFIED — model tier: no modelUsed/capabilityTierUsed recorded for this agent (orchestration does not yet persist the model an agent executed under)",
+        "UNVERIFIED — tool floor: SKILL.md requires security-critical tools [Read, Glob, Grep, Bash] but no toolsUsed/toolsAvailable were recorded for this agent",
+        "UNVERIFIED — evidence depth: agent status is \"completed_na\" (not a terminal completion) — evidence not assessed here"
+      ],
+      "remediated": false,
+      "requiredActions": [
+        "Have orchestration record per-agent capability metadata (modelUsed, taskType, toolsUsed) so the model and tool floors can be enforced rather than advised.",
+        "See AgentCapabilityMetadataSchema in capability-enforcer.ts for the exact fields expected."
+      ]
+    },
+    {
+      "id": "CAPABILITY_DEGRADED::appsec-code-auditor",
+      "title": "Agent \"appsec-code-auditor\" operated below its capability floor (task \"code_review\", required tier \"advanced\"): tool floor: missing security-critical tool(s) [Read, Glob, Grep, Bash] the SKILL.md declares as required",
+      "severity": "HIGH",
+      "evidence": [
+        "MISSED — tool floor: missing security-critical tool(s) [Read, Glob, Grep, Bash] the SKILL.md declares as required"
+      ],
+      "remediated": false,
+      "requiredActions": [
+        "Re-run agent \"appsec-code-auditor\" at its required \"advanced\" capability tier.",
+        "Ensure the agent has every security-critical tool declared in its SKILL.md allowed-tools before re-running.",
+        "Confirm the agent produces non-empty findings or an explicit, justified clean attestation."
+      ]
+    },
+    {
+      "id": "CAPABILITY_UNVERIFIED::injection-specialist",
+      "title": "Capability floor for agent \"injection-specialist\" could not be fully verified (3 floor(s) lack recorded metadata)",
+      "severity": "MEDIUM",
+      "evidence": [
+        "UNVERIFIED — model tier: no modelUsed/capabilityTierUsed recorded for this agent (orchestration does not yet persist the model an agent executed under)",
+        "UNVERIFIED — tool floor: SKILL.md requires security-critical tools [Read, Glob, Grep, Bash] but no toolsUsed/toolsAvailable were recorded for this agent",
+        "UNVERIFIED — evidence depth: completed but no findings file was found for this agent"
+      ],
+      "remediated": false,
+      "requiredActions": [
+        "Have orchestration record per-agent capability metadata (modelUsed, taskType, toolsUsed) so the model and tool floors can be enforced rather than advised.",
+        "See AgentCapabilityMetadataSchema in capability-enforcer.ts for the exact fields expected."
+      ]
+    },
+    {
+      "id": "CAPABILITY_UNVERIFIED::auth-session-hacker",
+      "title": "Capability floor for agent \"auth-session-hacker\" could not be fully verified (3 floor(s) lack recorded metadata)",
+      "severity": "MEDIUM",
+      "evidence": [
+        "UNVERIFIED — model tier: no modelUsed/capabilityTierUsed recorded for this agent (orchestration does not yet persist the model an agent executed under)",
+        "UNVERIFIED — tool floor: SKILL.md requires security-critical tools [Read, Glob, Grep, Bash] but no toolsUsed/toolsAvailable were recorded for this agent",
+        "UNVERIFIED — evidence depth: agent status is \"completed_na\" (not a terminal completion) — evidence not assessed here"
+      ],
+      "remediated": false,
+      "requiredActions": [
+        "Have orchestration record per-agent capability metadata (modelUsed, taskType, toolsUsed) so the model and tool floors can be enforced rather than advised.",
+        "See AgentCapabilityMetadataSchema in capability-enforcer.ts for the exact fields expected."
+      ]
+    },
+    {
+      "id": "CAPABILITY_UNVERIFIED::logic-race-fuzzer",
+      "title": "Capability floor for agent \"logic-race-fuzzer\" could not be fully verified (3 floor(s) lack recorded metadata)",
+      "severity": "MEDIUM",
+      "evidence": [
+        "UNVERIFIED — model tier: no modelUsed/capabilityTierUsed recorded for this agent (orchestration does not yet persist the model an agent executed under)",
+        "UNVERIFIED — tool floor: SKILL.md requires security-critical tools [Read, Glob, Grep, Bash] but no toolsUsed/toolsAvailable were recorded for this agent",
+        "UNVERIFIED — evidence depth: agent status is \"completed_na\" (not a terminal completion) — evidence not assessed here"
+      ],
+      "remediated": false,
+      "requiredActions": [
+        "Have orchestration record per-agent capability metadata (modelUsed, taskType, toolsUsed) so the model and tool floors can be enforced rather than advised.",
+        "See AgentCapabilityMetadataSchema in capability-enforcer.ts for the exact fields expected."
+      ]
+    },
+    {
+      "id": "CAPABILITY_DEGRADED::serialization-memory-attacker",
+      "title": "Agent \"serialization-memory-attacker\" operated below its capability floor (task \"exploit_chain\", required tier \"advanced\"): tool floor: missing security-critical tool(s) [Read, Glob, Grep, Bash] the SKILL.md declares as required",
+      "severity": "HIGH",
+      "evidence": [
+        "MISSED — tool floor: missing security-critical tool(s) [Read, Glob, Grep, Bash] the SKILL.md declares as required"
+      ],
+      "remediated": false,
+      "requiredActions": [
+        "Re-run agent \"serialization-memory-attacker\" at its required \"advanced\" capability tier (this is a protected max-power task — downgrade is never permitted).",
+        "Ensure the agent has every security-critical tool declared in its SKILL.md allowed-tools before re-running.",
+        "Confirm the agent produces non-empty findings or an explicit, justified clean attestation."
+      ]
+    },
+    {
+      "id": "CAPABILITY_UNVERIFIED::supply-chain-devsecops",
+      "title": "Capability floor for agent \"supply-chain-devsecops\" could not be fully verified (2 floor(s) lack recorded metadata)",
+      "severity": "MEDIUM",
+      "evidence": [
+        "UNVERIFIED — model tier: no modelUsed/capabilityTierUsed recorded for this agent (orchestration does not yet persist the model an agent executed under)",
+        "UNVERIFIED — tool floor: SKILL.md requires security-critical tools [Read, Glob, Grep, Bash] but no toolsUsed/toolsAvailable were recorded for this agent"
+      ],
+      "remediated": false,
+      "requiredActions": [
+        "Have orchestration record per-agent capability metadata (modelUsed, taskType, toolsUsed) so the model and tool floors can be enforced rather than advised.",
+        "See AgentCapabilityMetadataSchema in capability-enforcer.ts for the exact fields expected."
+      ]
+    },
+    {
+      "id": "CAPABILITY_UNVERIFIED::dependency-confusion-attacker",
+      "title": "Capability floor for agent \"dependency-confusion-attacker\" could not be fully verified (3 floor(s) lack recorded metadata)",
+      "severity": "MEDIUM",
+      "evidence": [
+        "UNVERIFIED — model tier: no modelUsed/capabilityTierUsed recorded for this agent (orchestration does not yet persist the model an agent executed under)",
+        "UNVERIFIED — tool floor: SKILL.md requires security-critical tools [Read, Glob, Grep, Bash] but no toolsUsed/toolsAvailable were recorded for this agent",
+        "UNVERIFIED — evidence depth: completed but no findings file was found for this agent"
+      ],
+      "remediated": false,
+      "requiredActions": [
+        "Have orchestration record per-agent capability metadata (modelUsed, taskType, toolsUsed) so the model and tool floors can be enforced rather than advised.",
+        "See AgentCapabilityMetadataSchema in capability-enforcer.ts for the exact fields expected."
+      ]
+    },
+    {
+      "id": "CAPABILITY_UNVERIFIED::cicd-pipeline-hijacker",
+      "title": "Capability floor for agent \"cicd-pipeline-hijacker\" could not be fully verified (3 floor(s) lack recorded metadata)",
+      "severity": "MEDIUM",
+      "evidence": [
+        "UNVERIFIED — model tier: no modelUsed/capabilityTierUsed recorded for this agent (orchestration does not yet persist the model an agent executed under)",
+        "UNVERIFIED — tool floor: SKILL.md requires security-critical tools [Read, Glob, Grep, Bash] but no toolsUsed/toolsAvailable were recorded for this agent",
+        "UNVERIFIED — evidence depth: completed but no findings file was found for this agent"
+      ],
+      "remediated": false,
+      "requiredActions": [
+        "Have orchestration record per-agent capability metadata (modelUsed, taskType, toolsUsed) so the model and tool floors can be enforced rather than advised.",
+        "See AgentCapabilityMetadataSchema in capability-enforcer.ts for the exact fields expected."
+      ]
+    },
+    {
+      "id": "CAPABILITY_UNVERIFIED::artifact-integrity-analyst",
+      "title": "Capability floor for agent \"artifact-integrity-analyst\" could not be fully verified (3 floor(s) lack recorded metadata)",
+      "severity": "MEDIUM",
+      "evidence": [
+        "UNVERIFIED — model tier: no modelUsed/capabilityTierUsed recorded for this agent (orchestration does not yet persist the model an agent executed under)",
+        "UNVERIFIED — tool floor: SKILL.md requires security-critical tools [Read, Glob, Grep, Bash] but no toolsUsed/toolsAvailable were recorded for this agent",
+        "UNVERIFIED — evidence depth: completed but no findings file was found for this agent"
+      ],
+      "remediated": false,
+      "requiredActions": [
+        "Have orchestration record per-agent capability metadata (modelUsed, taskType, toolsUsed) so the model and tool floors can be enforced rather than advised.",
+        "See AgentCapabilityMetadataSchema in capability-enforcer.ts for the exact fields expected."
+      ]
+    },
+    {
+      "id": "CAPABILITY_DEGRADED::crypto-pki-specialist",
+      "title": "Agent \"crypto-pki-specialist\" operated below its capability floor (task \"crypto_analysis\", required tier \"advanced\"): evidence depth: completed with no findings file and no clean attestation (high-risk lead)",
+      "severity": "HIGH",
+      "evidence": [
+        "MISSED — evidence depth: completed with no findings file and no clean attestation (high-risk lead)",
+        "UNVERIFIED — model tier: no modelUsed/capabilityTierUsed recorded for this agent (orchestration does not yet persist the model an agent executed under)",
+        "UNVERIFIED — tool floor: SKILL.md requires security-critical tools [Read, Glob, Grep, Bash] but no toolsUsed/toolsAvailable were recorded for this agent"
+      ],
+      "remediated": false,
+      "requiredActions": [
+        "Re-run agent \"crypto-pki-specialist\" at its required \"advanced\" capability tier (this is a protected max-power task — downgrade is never permitted).",
+        "Ensure the agent has every security-critical tool declared in its SKILL.md allowed-tools before re-running.",
+        "Confirm the agent produces non-empty findings or an explicit, justified clean attestation."
+      ]
+    },
+    {
+      "id": "CAPABILITY_UNVERIFIED::tls-certificate-auditor",
+      "title": "Capability floor for agent \"tls-certificate-auditor\" could not be fully verified (3 floor(s) lack recorded metadata)",
+      "severity": "MEDIUM",
+      "evidence": [
+        "UNVERIFIED — model tier: no modelUsed/capabilityTierUsed recorded for this agent (orchestration does not yet persist the model an agent executed under)",
+        "UNVERIFIED — tool floor: SKILL.md requires security-critical tools [Read, Glob, Grep, Bash] but no toolsUsed/toolsAvailable were recorded for this agent",
+        "UNVERIFIED — evidence depth: agent status is \"completed_na\" (not a terminal completion) — evidence not assessed here"
+      ],
+      "remediated": false,
+      "requiredActions": [
+        "Have orchestration record per-agent capability metadata (modelUsed, taskType, toolsUsed) so the model and tool floors can be enforced rather than advised.",
+        "See AgentCapabilityMetadataSchema in capability-enforcer.ts for the exact fields expected."
+      ]
+    },
+    {
+      "id": "CAPABILITY_UNVERIFIED::algorithm-implementation-reviewer",
+      "title": "Capability floor for agent \"algorithm-implementation-reviewer\" could not be fully verified (2 floor(s) lack recorded metadata)",
+      "severity": "MEDIUM",
+      "evidence": [
+        "UNVERIFIED — model tier: no modelUsed/capabilityTierUsed recorded for this agent (orchestration does not yet persist the model an agent executed under)",
+        "UNVERIFIED — tool floor: SKILL.md requires security-critical tools [Read, Glob, Grep, Bash] but no toolsUsed/toolsAvailable were recorded for this agent"
+      ],
+      "remediated": false,
+      "requiredActions": [
+        "Have orchestration record per-agent capability metadata (modelUsed, taskType, toolsUsed) so the model and tool floors can be enforced rather than advised.",
+        "See AgentCapabilityMetadataSchema in capability-enforcer.ts for the exact fields expected."
+      ]
+    },
+    {
+      "id": "CAPABILITY_DEGRADED::key-management-lifecycle-analyst",
+      "title": "Agent \"key-management-lifecycle-analyst\" operated below its capability floor (task \"crypto_analysis\", required tier \"advanced\"): tool floor: missing security-critical tool(s) [Read, Glob, Grep, Bash] the SKILL.md declares as required",
+      "severity": "HIGH",
+      "evidence": [
+        "MISSED — tool floor: missing security-critical tool(s) [Read, Glob, Grep, Bash] the SKILL.md declares as required"
+      ],
+      "remediated": false,
+      "requiredActions": [
+        "Re-run agent \"key-management-lifecycle-analyst\" at its required \"advanced\" capability tier (this is a protected max-power task — downgrade is never permitted).",
+        "Ensure the agent has every security-critical tool declared in its SKILL.md allowed-tools before re-running.",
+        "Confirm the agent produces non-empty findings or an explicit, justified clean attestation."
+      ]
+    },
+    {
+      "id": "CAPABILITY_DEGRADED::cloud-infra-specialist",
+      "title": "Agent \"cloud-infra-specialist\" operated below its capability floor (task \"code_review\", required tier \"advanced\"): tool floor: missing security-critical tool(s) [Read, Glob, Grep, Bash] the SKILL.md declares as required",
+      "severity": "HIGH",
+      "evidence": [
+        "MISSED — tool floor: missing security-critical tool(s) [Read, Glob, Grep, Bash] the SKILL.md declares as required"
+      ],
+      "remediated": false,
+      "requiredActions": [
+        "Re-run agent \"cloud-infra-specialist\" at its required \"advanced\" capability tier.",
+        "Ensure the agent has every security-critical tool declared in its SKILL.md allowed-tools before re-running.",
+        "Confirm the agent produces non-empty findings or an explicit, justified clean attestation."
+      ]
+    },
+    {
+      "id": "CAPABILITY_UNVERIFIED::pentest-team",
+      "title": "Capability floor for agent \"pentest-team\" could not be fully verified (3 floor(s) lack recorded metadata)",
+      "severity": "MEDIUM",
+      "evidence": [
+        "UNVERIFIED — model tier: no modelUsed/capabilityTierUsed recorded for this agent (orchestration does not yet persist the model an agent executed under)",
+        "UNVERIFIED — tool floor: SKILL.md requires security-critical tools [Read, Glob, Grep, Bash] but no toolsUsed/toolsAvailable were recorded for this agent",
+        "UNVERIFIED — evidence depth: agent status is \"completed_na\" (not a terminal completion) — evidence not assessed here"
+      ],
+      "remediated": false,
+      "requiredActions": [
+        "Have orchestration record per-agent capability metadata (modelUsed, taskType, toolsUsed) so the model and tool floors can be enforced rather than advised.",
+        "See AgentCapabilityMetadataSchema in capability-enforcer.ts for the exact fields expected."
+      ]
+    },
+    {
+      "id": "CAPABILITY_UNVERIFIED::pentest-web-api",
+      "title": "Capability floor for agent \"pentest-web-api\" could not be fully verified (3 floor(s) lack recorded metadata)",
+      "severity": "MEDIUM",
+      "evidence": [
+        "UNVERIFIED — model tier: no modelUsed/capabilityTierUsed recorded for this agent (orchestration does not yet persist the model an agent executed under)",
+        "UNVERIFIED — tool floor: SKILL.md requires security-critical tools [Read, Glob, Grep, Bash] but no toolsUsed/toolsAvailable were recorded for this agent",
+        "UNVERIFIED — evidence depth: agent status is \"completed_na\" (not a terminal completion) — evidence not assessed here"
+      ],
+      "remediated": false,
+      "requiredActions": [
+        "Have orchestration record per-agent capability metadata (modelUsed, taskType, toolsUsed) so the model and tool floors can be enforced rather than advised.",
+        "See AgentCapabilityMetadataSchema in capability-enforcer.ts for the exact fields expected."
+      ]
+    },
+    {
+      "id": "CAPABILITY_UNVERIFIED::pentest-infra",
+      "title": "Capability floor for agent \"pentest-infra\" could not be fully verified (3 floor(s) lack recorded metadata)",
+      "severity": "MEDIUM",
+      "evidence": [
+        "UNVERIFIED — model tier: no modelUsed/capabilityTierUsed recorded for this agent (orchestration does not yet persist the model an agent executed under)",
+        "UNVERIFIED — tool floor: SKILL.md requires security-critical tools [Read, Glob, Grep, Bash] but no toolsUsed/toolsAvailable were recorded for this agent",
+        "UNVERIFIED — evidence depth: agent status is \"completed_na\" (not a terminal completion) — evidence not assessed here"
+      ],
+      "remediated": false,
+      "requiredActions": [
+        "Have orchestration record per-agent capability metadata (modelUsed, taskType, toolsUsed) so the model and tool floors can be enforced rather than advised.",
+        "See AgentCapabilityMetadataSchema in capability-enforcer.ts for the exact fields expected."
+      ]
+    },
+    {
+      "id": "CAPABILITY_DEGRADED::pentest-social",
+      "title": "Agent \"pentest-social\" operated below its capability floor (task \"pentest\", required tier \"advanced\"): tool floor: missing security-critical tool(s) [Read, Glob, Grep, Bash] the SKILL.md declares as required",
+      "severity": "HIGH",
+      "evidence": [
+        "MISSED — tool floor: missing security-critical tool(s) [Read, Glob, Grep, Bash] the SKILL.md declares as required"
+      ],
+      "remediated": false,
+      "requiredActions": [
+        "Re-run agent \"pentest-social\" at its required \"advanced\" capability tier (this is a protected max-power task — downgrade is never permitted).",
+        "Ensure the agent has every security-critical tool declared in its SKILL.md allowed-tools before re-running.",
+        "Confirm the agent produces non-empty findings or an explicit, justified clean attestation."
+      ]
+    },
+    {
+      "id": "CAPABILITY_DEGRADED::compliance-grc",
+      "title": "Agent \"compliance-grc\" operated below its capability floor (task \"compliance_analysis\", required tier \"advanced\"): tool floor: missing security-critical tool(s) [Read, Glob, Grep, Bash] the SKILL.md declares as required",
+      "severity": "HIGH",
+      "evidence": [
+        "MISSED — tool floor: missing security-critical tool(s) [Read, Glob, Grep, Bash] the SKILL.md declares as required"
+      ],
+      "remediated": false,
+      "requiredActions": [
+        "Re-run agent \"compliance-grc\" at its required \"advanced\" capability tier.",
+        "Ensure the agent has every security-critical tool declared in its SKILL.md allowed-tools before re-running.",
+        "Confirm the agent produces non-empty findings or an explicit, justified clean attestation."
+      ]
+    },
+    {
+      "id": "CAPABILITY_DEGRADED::evidence-collector",
+      "title": "Agent \"evidence-collector\" operated below its capability floor (task \"evidence_collection\", required tier \"light\"): tool floor: missing security-critical tool(s) [Read, Glob, Grep, Bash] the SKILL.md declares as required",
+      "severity": "HIGH",
+      "evidence": [
+        "MISSED — tool floor: missing security-critical tool(s) [Read, Glob, Grep, Bash] the SKILL.md declares as required",
+        "UNVERIFIED — evidence depth: completed with zero findings and no explicit clean attestation"
+      ],
+      "remediated": false,
+      "requiredActions": [
+        "Re-run agent \"evidence-collector\" at its required \"light\" capability tier.",
+        "Ensure the agent has every security-critical tool declared in its SKILL.md allowed-tools before re-running.",
+        "Confirm the agent produces non-empty findings or an explicit, justified clean attestation."
+      ]
+    },
+    {
+      "id": "CAPABILITY_DEGRADED::compliance-gap-analyst",
+      "title": "Agent \"compliance-gap-analyst\" operated below its capability floor (task \"compliance_analysis\", required tier \"advanced\"): tool floor: missing security-critical tool(s) [Read, Glob, Grep, Bash] the SKILL.md declares as required",
+      "severity": "HIGH",
+      "evidence": [
+        "MISSED — tool floor: missing security-critical tool(s) [Read, Glob, Grep, Bash] the SKILL.md declares as required"
+      ],
+      "remediated": false,
+      "requiredActions": [
+        "Re-run agent \"compliance-gap-analyst\" at its required \"advanced\" capability tier.",
+        "Ensure the agent has every security-critical tool declared in its SKILL.md allowed-tools before re-running.",
+        "Confirm the agent produces non-empty findings or an explicit, justified clean attestation."
+      ]
+    },
+    {
+      "id": "CAPABILITY_COVERAGE_INCOMPLETE",
+      "title": "SKILL.md coverage incomplete at 64% (10 section(s) uncovered) — agents did not exercise full skill depth",
+      "severity": "HIGH",
+      "evidence": [
+        "Uncovered sections: §1, §3, §7, §9, §11, §12, §14, §15, §20, §24"
+      ],
+      "remediated": false,
+      "requiredActions": [
+        "Ensure every spawned agent reports the SKILL.md sections it covered so coverage reaches the required threshold.",
+        "Re-run the uncovered surfaces at full capability before passing the gate."
+      ]
+    }
+  ],
+  "signatureVerification": {
+    "mode": "enforced",
+    "chainValid": true,
+    "attestedAgents": [],
+    "rejectedAgents": [
+      "algorithm-implementation-reviewer (payload-mismatch)",
+      "artifact-integrity-analyst (payload-mismatch)",
+      "attack-navigator (payload-mismatch)",
+      "cicd-pipeline-hijacker (payload-mismatch)",
+      "crypto-pki-specialist (payload-mismatch)",
+      "dependency-confusion-attacker (payload-mismatch)",
+      "evidence-collector (payload-mismatch)",
+      "injection-specialist (payload-mismatch)",
+      "stride-pasta-analyst (payload-mismatch)",
+      "supply-chain-devsecops (payload-mismatch)",
+      "threat-modeler (payload-mismatch)"
+    ],
+    "warning": "Chain integrity is hash-only, not cryptographically signed. Set SECURITY_AUDIT_HMAC_KEY for tamper protection. 11 agent finding file(s) rejected before merge: algorithm-implementation-reviewer (payload-mismatch), artifact-integrity-analyst (payload-mismatch), attack-navigator (payload-mismatch), cicd-pipeline-hijacker (payload-mismatch), crypto-pki-specialist (payload-mismatch), dependency-confusion-attacker (payload-mismatch), evidence-collector (payload-mismatch), injection-specialist (payload-mismatch), stride-pasta-analyst (payload-mismatch), supply-chain-devsecops (payload-mismatch), threat-modeler (payload-mismatch). Skill-section coverage 64% is below the required 90% — 10 section(s) uncovered: §1, §3, §7, §9, §11, §12, §14, §15, §20, §24. Gate forced to FAIL. Agent(s) exhausted retries and require escalation: appsec-code-auditor, serialization-memory-attacker, key-management-lifecycle-analyst. Gate forced to FAIL. CAPABILITY_FLOOR_NOT_MET: agent(s) did not run at full capability: threat-modeler, appsec-code-auditor, serialization-memory-attacker, crypto-pki-specialist, key-management-lifecycle-analyst, cloud-infra-specialist, pentest-social, compliance-grc, evidence-collector, compliance-gap-analyst, skill-coverage. Gate forced to FAIL."
+  }
+}
