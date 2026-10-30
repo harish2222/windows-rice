@@ -243,3 +243,30 @@ Tooling note: the security-mcp `security_run_pr_gate` recent_changes run crashed
 (exit 134, heap OOM) on the tracked-binary diff; the gate was completed via operator-directed
 local detectors over 31 code targets (file_by_file scope) with thresholds unchanged — re-run gate
 in file_by_file mode while binaries stay untracked.
+
+### §5.2a v1.0.4 verification evidence (filled 2026-10-30)
+
+- **Podman conformance** (image `5f3def3d9e05…`, engine podman-linux): ALL 7 CHECKS PASSED —
+  PWSCRIPT 11 surfaces AST-clean; SPEC 112 parsed; CI_CONFORMANCE ok; DOC_PARITY
+  tiers 34/34/6/7 = 81, units 34, release tag v1.0.4; REPO_INTEGRITY 478 tracked files.
+  (Host-side invocation of the two container-inner runners is a mis-use — `/repo` only exists
+  inside the baked image; correct drivers are `podman build` + `podman run window-rice/conformance`
+  and `podman run --entrypoint pwsh window-rice/conformance -File /repo/docker/run-revoke-behavior.ps1`.)
+- **Behavioral verifier** (same image, entrypoint override): ALL 4 CHECKS PASSED — cargo build
+  (linux) of rice-installer v1.0.4; unit suite **34 passed, 0 failed** (incl.
+  `test_unlink_symlink_to_source_restores_user_backup`); T1-R6 summary contract printed;
+  T4-SCEN-07 lifecycle byte-exact restore + ledger cleared. One accidental host-side invocation
+  briefly compiled on the host; `installer/target` was deleted afterward — host exec count at
+  commit time: **0** (container-only mandate restored).
+- **CI**: run `41040735091` — all 4 jobs success (`rust-installer` windows + ubuntu, shell/config
+  validation, `e2e-suite`: **81 total, 78 passed, 3 skipped, 0 failed** — same three skippers as
+  v1.0.3: T1-R5-04, T4-SCEN-06, T2-R4-03).
+- **Release**: run `41040750563` success; tag `v1.0.4`; assets `rice-installer-windows-x64.zip`,
+  `rice-installer.exe`, `install.ps1`, `SHA256SUMS.txt` (3 lines: zip + exe + script).
+- **Integrity end-to-end**: downloaded release `rice-installer.exe` and `install.ps1` from the
+  published assets and matched both against `SHA256SUMS.txt` — **MATCH / MATCH** (the bootstrap's
+  new fail-closed verification path is exercised against the real release).
+- **Post-fix roster sweep**: security-mcp review `ed156b73-7fb1-41a2-a219-890a61b1554a`,
+  agent run `5f03e566b8ea8a032e349caac20ec88d` (26-agent auto-roster, detection_only,
+  concurrency 6, supervisor providers codex/gemini/ollama) launched right after the push;
+  results to be merged via `orchestration_merge_agent_findings` when terminal.
