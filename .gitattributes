@@ -1,0 +1,8 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: Git Attributes
+# ============================================================================
+# Security evidence artifacts bind hash attestation chains to exact bytes;
+# they must never be line-ending normalized on commit or checkout.
+.mcp/** -text
