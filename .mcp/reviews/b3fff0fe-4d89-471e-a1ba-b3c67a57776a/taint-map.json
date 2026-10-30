@@ -1,0 +1,99 @@
+{
+  "runId": "b3fff0fe-4d89-471e-a1ba-b3c67a57776a",
+  "baseRef": "45fd6f9",
+  "headRef": "HEAD",
+  "note": "Taint flows for the windows-rice bootstrap/installer surface. Detection-only analysis; remediation gated on user approval. Live desktop config (glazewm/config.yaml, scoop/config.json) is user-owned and excluded.",
+  "sources": [
+    {
+      "id": "S1",
+      "kind": "remote-payload",
+      "desc": "irm/iex download of install.ps1 from raw.githubusercontent.com main branch (unpinned, non-versioned)",
+      "sites": ["install.ps1:11", "install.ps1:12", "install.ps1:17", "install.ps1:63", "install.ps1:64"]
+    },
+    {
+      "id": "S2",
+      "kind": "remote-payload",
+      "desc": "scoop installer script downloaded and piped straight into Invoke-Expression",
+      "sites": ["install.ps1:115", "install.ps1:119", "install.ps1:181", "install.ps1:405"]
+    },
+    {
+      "id": "S3",
+      "kind": "downloaded-archive",
+      "desc": "Browser-downloaded artifact zip extracted with Expand-Archive -Force; no SHA256/Get-FileHash validation found anywhere in install.ps1",
+      "sites": ["install.ps1:252"]
+    },
+    {
+      "id": "S4",
+      "kind": "env-and-path",
+      "desc": "PATH augmentation and CARGO/RUSTUP home env vars consumed by installer bootstrap",
+      "sites": ["installer/src/bootstrap.rs:112", "installer/src/bootstrap.rs (augment_command_path)"]
+    },
+    {
+      "id": "S5",
+      "kind": "ci-event-data",
+      "desc": "workflow_dispatch self-input interpolated into git ref context (release.yml); asset browser_download_url-derived string written to GITHUB_ENV (ci.yml L229)",
+      "sites": [".github/workflows/release.yml:62", ".github/workflows/ci.yml:229"]
+    }
+  ],
+  "sinks": [
+    {
+      "id": "K1",
+      "kind": "direct-eval",
+      "desc": "Invoke-Expression on downloaded remote content — taint reaches execution unvalidated",
+      "citedEvidence": ["install.ps1:115", "install.ps1:119", "install.ps1:181", "install.ps1:405", "install.ps1:11", "install.ps1:63"]
+    },
+    {
+      "id": "K2",
+      "kind": "archive-extract",
+      "desc": "Expand-Archive -Force of downloaded zip into temp dir before running installer",
+      "citedEvidence": ["install.ps1:252"]
+    },
+    {
+      "id": "K3",
+      "kind": "process-spawn",
+      "desc": "powershell.exe -Command <string> runner; fixed-string commands with CI=1, no user-data interpolation found this cycle (hardened in v1.0.2)",
+      "citedEvidence": ["installer/src/bootstrap.rs:120-138", "installer/src/bootstrap.rs:146"]
+    },
+    {
+      "id": "K4",
+      "kind": "process-spawn",
+      "desc": "worker.rs fixed-arg subprocess spawns: komorebic / glazewm / pwsh / powershell / git status -uno (no argument injection paths observed)",
+      "citedEvidence": ["installer/src/worker.rs"]
+    },
+    {
+      "id": "K5",
+      "kind": "fs-removal",
+      "desc": "remove_dir_all / remove_file in revoke engine — R6 cycle hardened real-file vs symlink-vs-junction classification; unit test test_unlink_symlink_to_source_restores_user_backup covers the fixed guard",
+      "citedEvidence": ["installer/src/linker.rs (42 refs)", "installer/src/worker.rs (5 refs)"]
+    },
+    {
+      "id": "K6",
+      "kind": "fs-link",
+      "desc": "symlink/junction creation and unlink+restore in linker resolve_target_path logic",
+      "citedEvidence": ["installer/src/linker.rs"]
+    },
+    {
+      "id": "K7",
+      "kind": "ci-env-write",
+      "desc": "Out-File to GITHUB_ENV from property-derived string in CI runner (no shell interpolation; low)",
+      "citedEvidence": [".github/workflows/ci.yml:229"]
+    },
+    {
+      "id": "K8",
+      "kind": "policy-change",
+      "desc": "Set-ExecutionPolicy RemoteSigned CurrentUser during install (requires user consent dialog policy; medium)",
+      "citedEvidence": ["install.ps1:395"]
+    }
+  ],
+  "flows": [
+    {"source": "S1", "sink": "K1", "validated": false, "severity": "HIGH", "note": "Remote script = local code execution by design of the bootstrap pattern; unpinned main branch is mutable"},
+    {"source": "S2", "sink": "K1", "validated": false, "severity": "HIGH", "note": "get.scoop.sh is vendor-recommended pattern but still eval-of-remote"},
+    {"source": "S3", "sink": "K2", "validated": false, "severity": "MEDIUM", "note": "No hash check on downloaded artifact before extraction/execution"},
+    {"source": "S4", "sink": "K3", "validated": true, "severity": "LOW", "note": "Commands are fixed literals; taint limited to PATH ordering"},
+    {"source": "S4", "sink": "K4", "validated": true, "severity": "LOW", "note": "Fixed-arg spawns only"},
+    {"source": "S4", "sink": "K5", "validated": true, "severity": "MEDIUM", "note": "Re-engineered this cycle with symlink-aware guard + regression test"},
+    {"source": "S4", "sink": "K6", "validated": true, "severity": "MEDIUM", "note": "Same resolution logic as K5"},
+    {"source": "S5", "sink": "K7", "validated": true, "severity": "LOW", "note": "Property-based string write; no command expansion in workflow context"},
+    {"source": "S5", "sink": null, "validated": true, "severity": "LOW", "note": "release.yml self-input is main-only workflow_dispatch, trusted-event scope"}
+  ]
+}

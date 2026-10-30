@@ -1,0 +1,192 @@
+{
+  "runId": "b3fff0fe-4d89-471e-a1ba-b3c67a57776a",
+  "mode": "recent_changes",
+  "baseRef": "45fd6f9",
+  "headRef": "HEAD",
+  "generatedAt": "2026-10-30T00:00:00Z",
+  "totalChangedFiles": 139,
+  "categories": [
+    {
+      "name": "bootstrap-script",
+      "riskTier": 1,
+      "note": "Direct remote-code-execution surface: irm|iex bootstrap, scoop IEX, Expand-Archive of downloaded zip, Set-ExecutionPolicy, zero checksum validation",
+      "files": ["install.ps1"]
+    },
+    {
+      "name": "rust-installer",
+      "riskTier": 1,
+      "note": "Process spawning (powershell.exe -Command, komorebic/glazewm/pwsh/git), filesystem revoke engine (remove_dir_all/remove_file/symlink unlink+restore)",
+      "files": [
+        "installer/src/main.rs",
+        "installer/src/app.rs",
+        "installer/src/ui.rs",
+        "installer/src/worker.rs",
+        "installer/src/bootstrap.rs",
+        "installer/src/linker.rs",
+        "installer/src/ledger.rs",
+        "installer/Cargo.toml",
+        "installer/Cargo.lock"
+      ]
+    },
+    {
+      "name": "shipped-binaries",
+      "riskTier": 1,
+      "note": "Distributable EXEs in-repo (release assets); supply-chain integrity surface",
+      "files": ["bin/rice-installer.exe", "bin/term-launch.exe"]
+    },
+    {
+      "name": "term-launch-tool",
+      "riskTier": 2,
+      "note": "Auxiliary convenience binary spawning terminals",
+      "files": ["tools/term-launch/src/main.rs", "tools/term-launch/Cargo.toml", "tools/term-launch/Cargo.lock"]
+    },
+    {
+      "name": "ci-workflows",
+      "riskTier": 1,
+      "note": "Actions pinned by tag not SHA; GITHUB_ENV write from asset URL data (ci.yml L229); workflow_dispatch input interpolated in release.yml L62; no pull_request_target/head_ref usage",
+      "files": [".github/workflows/ci.yml", ".github/workflows/release.yml"]
+    },
+    {
+      "name": "docker-test-harness",
+      "riskTier": 3,
+      "note": "Container-based verification stack; host-exec-free per mandate (verified 0 host exec); mount/privilege review only",
+      "files": [
+        "docker/Dockerfile",
+        "docker/Conformance.Containerfile",
+        "docker/run-conformance-in-container.ps1",
+        "docker/run-in-container.ps1",
+        "docker/run-revoke-behavior.ps1",
+        "docker/run-rice-tests.ps1"
+      ]
+    },
+    {
+      "name": "e2e-tests",
+      "riskTier": 3,
+      "note": "Sandbox harness (USERPROFILE/HOME redirect, rustup/cargo pinning); runs only against temp sandboxes",
+      "files": [
+        "tests/e2e/Common.psm1",
+        "tests/e2e/run_all.ps1",
+        "tests/e2e/tier1_feature_coverage.Tests.ps1",
+        "tests/e2e/tier2_boundary_corner.Tests.ps1",
+        "tests/e2e/tier3_cross_feature.Tests.ps1",
+        "tests/e2e/tier4_real_world.Tests.ps1"
+      ]
+    },
+    {
+      "name": "docs",
+      "riskTier": 4,
+      "note": "No executable content; provenance evidence recorded in TEST_READY §5.1a",
+      "files": ["README.md", "TEST_INFRA.md", "TEST_READY.md"]
+    },
+    {
+      "name": "repo-meta",
+      "riskTier": 4,
+      "files": [".dockerignore", ".gitignore"]
+    },
+    {
+      "name": "shell-configs",
+      "riskTier": 2,
+      "note": "Dotfile payloads the installer renders/symlinks; static content, reviewed for injected loaders",
+      "files": [
+        "shells/powershell/Microsoft.PowerShell_profile.ps1",
+        "shells/powershell/profile.ps1",
+        "shells/nushell/config.nu",
+        "shells/xonsh/rc.xsh",
+        "xonsh/rc.xsh"
+      ]
+    },
+    {
+      "name": "terminal-emulator-config",
+      "riskTier": 4,
+      "note": "otty profiles/themes — declarative theme data",
+      "files": [
+        "otty/config.toml",
+        "otty/profiles/18dfa98576390b5000000000.toml",
+        "otty/profiles/18dfa985769e6d9c00000001.toml",
+        "otty/profiles/18dfa98576ec04e400000002.toml",
+        "otty/profiles/18dfa9857738af7400000003.toml",
+        "otty/profiles/18dfa98577864a4000000004.toml",
+        "otty/profiles/18dfa98577d5a25c00000005.toml",
+        "otty/profiles/18dfa9857825984800000006.toml",
+        "otty/profiles/18dfa985787daa6000000007.toml",
+        "otty/profiles/18dfa98578d4933400000008.toml",
+        "otty/profiles/hkdevs-pwsh7.toml",
+        "otty/profiles/hkdevs-xonsh.toml",
+        "otty/themes/acrylic-dark.ottytheme",
+        "otty/themes/april-dark.ottytheme",
+        "otty/themes/april.ottytheme",
+        "otty/themes/ayu-dark.ottytheme",
+        "otty/themes/ayu-light.ottytheme",
+        "otty/themes/catppuccin-mocha-acrylic.ottytheme",
+        "otty/themes/catppuccin-mocha-glass.ottytheme",
+        "otty/themes/catppuccin-mocha.ottytheme",
+        "otty/themes/clear.ottytheme",
+        "otty/themes/dracula.ottytheme",
+        "otty/themes/floating-card.ottytheme",
+        "otty/themes/glass-dark.ottytheme",
+        "otty/themes/glass-light.ottytheme",
+        "otty/themes/gruvbox-dark.ottytheme",
+        "otty/themes/monokai-classic.ottytheme",
+        "otty/themes/newsprint.ottytheme",
+        "otty/themes/night.ottytheme",
+        "otty/themes/nord.ottytheme",
+        "otty/themes/one-dark.ottytheme",
+        "otty/themes/one-light.ottytheme",
+        "otty/themes/owl.ottytheme",
+        "otty/themes/paper.ottytheme",
+        "otty/themes/pink.ottytheme",
+        "otty/themes/rose-pine.ottytheme",
+        "otty/themes/seafoam-pastel.ottytheme",
+        "otty/themes/solarized-dark.ottytheme",
+        "otty/themes/solarized-light.ottytheme",
+        "otty/themes/tokyo-night.ottytheme"
+      ]
+    },
+    {
+      "name": "window-manager-config",
+      "riskTier": 2,
+      "note": " glazewm/config.yaml + scoop/config.json are USER-OWNED uncommitted worktree edits — excluded from remediation/commit; scan reported only",
+      "files": ["komorebi/komorebi.json", "glazewm/config.yaml"]
+    },
+    {
+      "name": "statusbar",
+      "riskTier": 3,
+      "files": ["yasb/config.yaml", "yasb/styles.css", "yasb/tools/keybind/src/model.rs"]
+    },
+    {
+      "name": "prompt-theme",
+      "riskTier": 4,
+      "files": ["oh-my-posh/half-life.omp.json"]
+    },
+    {
+      "name": "completion-specs",
+      "riskTier": 4,
+      "note": "52 declarative carapace YAML completion specs; no exec logic",
+      "files": [
+        "carapace/specs/9remote.yaml", "carapace/specs/9router.yaml", "carapace/specs/aqt.yaml",
+        "carapace/specs/ast-grep.yaml", "carapace/specs/caveman.yaml", "carapace/specs/chafa.yaml",
+        "carapace/specs/clang++.yaml", "carapace/specs/clang-format.yaml", "carapace/specs/clang-tidy.yaml",
+        "carapace/specs/clang.yaml", "carapace/specs/clippy-driver.yaml", "carapace/specs/code-tunnel.yaml",
+        "carapace/specs/command-code.yaml", "carapace/specs/corepack.yaml", "carapace/specs/cursor-agent.yaml",
+        "carapace/specs/dark.yaml", "carapace/specs/docker.yaml", "carapace/specs/exiftool.yaml",
+        "carapace/specs/ffmpeg.yaml", "carapace/specs/forgum.yaml", "carapace/specs/g++.yaml",
+        "carapace/specs/gcc.yaml", "carapace/specs/git-lfs.yaml", "carapace/specs/higgsfield.yaml",
+        "carapace/specs/impeccable.yaml", "carapace/specs/lighthouse.yaml", "carapace/specs/lldb.yaml",
+        "carapace/specs/llvm-ar.yaml", "carapace/specs/llvm-nm.yaml", "carapace/specs/llvm-objcopy.yaml",
+        "carapace/specs/llvm-objdump.yaml", "carapace/specs/llvm-strip.yaml", "carapace/specs/mcp.yaml",
+        "carapace/specs/moc.yaml", "carapace/specs/mvn.yaml", "carapace/specs/nasm.yaml",
+        "carapace/specs/nvidia-smi.yaml", "carapace/specs/omnirush.yaml", "carapace/specs/openocd.yaml",
+        "carapace/specs/qmake.yaml", "carapace/specs/rcc.yaml", "carapace/specs/rice-installer.yaml",
+        "carapace/specs/rustfmt.yaml", "carapace/specs/semgrep.yaml", "carapace/specs/sg.yaml",
+        "carapace/specs/spf.yaml", "carapace/specs/tailscale.yaml", "carapace/specs/testsprite.yaml",
+        "carapace/specs/tree-sitter.yaml", "carapace/specs/windeployqt.yaml",
+        "carapace/specs/window-rice.yaml", "carapace/specs/yarnpkg.yaml"
+      ]
+    },
+    {
+      "name": "other-config",
+      "riskTier": 4,
+      "files": ["alacritty/alacritty.toml", "scoop/config.json"]
+    }
+  ]
+}

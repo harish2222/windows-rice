@@ -1,0 +1,86 @@
+{
+  "name": "security-policy",
+  "version": "1.0.0",
+  "required_checks": {
+    "secrets_scan": {
+      "severity_block": [
+        "HIGH",
+        "CRITICAL"
+      ]
+    },
+    "dependency_scan": {
+      "severity_block": [
+        "CRITICAL"
+      ]
+    },
+    "sast": {
+      "severity_block": [
+        "CRITICAL"
+      ]
+    },
+    "iac_scan": {
+      "severity_block": [
+        "HIGH",
+        "CRITICAL"
+      ]
+    }
+  },
+  "requirements": [
+    {
+      "id": "SECRET_MANAGER_ONLY",
+      "type": "gate",
+      "evidence": [
+        "no_hardcoded_secrets"
+      ]
+    },
+    {
+      "id": "SUPPLY_CHAIN_INTEGRITY",
+      "type": "gate",
+      "evidence": [
+        "bootstrap_origin_pinned_or_hashed",
+        "action_sha_pinning",
+        "artifact_hash_validation"
+      ]
+    },
+    {
+      "id": "DANGEROUS_CODE_EXEC",
+      "type": "gate",
+      "evidence": [
+        "no_remote_eval_without_isolation",
+        "argument_injection_reviewed"
+      ]
+    },
+    {
+      "id": "FS_SAFETY",
+      "type": "gate",
+      "evidence": [
+        "deletion_guard_tested"
+      ]
+    }
+  ],
+  "artifacts_required": [
+    {
+      "pattern": ".mcp/reviews/*/threat-model.md",
+      "on_changes": [
+        "install.ps1",
+        "installer/**"
+      ]
+    }
+  ],
+  "exceptions": {
+    "require_ticket": true,
+    "approval_roles": [
+      "SecurityLead",
+      "Owner"
+    ]
+  },
+  "_meta": {
+    "generated_by": "security-mcp",
+    "customized_for": "desktop installer / dotfile ecosystem (no web server, no cloud) — web-app gates (CSP/CSRF/SSRF/TLS) intentionally omitted; severity thresholds unchanged",
+    "surfaces": [
+      "web",
+      "infra"
+    ],
+    "cloud": "none"
+  }
+}

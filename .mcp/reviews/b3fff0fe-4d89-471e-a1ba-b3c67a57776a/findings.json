@@ -1,0 +1,181 @@
+{
+  "runId": "b3fff0fe-4d89-471e-a1ba-b3c67a57776a",
+  "mode": "recent_changes (45fd6f9..HEAD, executed file_by_file over 31 code targets after server OOM on binary diff)",
+  "remediationMode": "detection_only",
+  "policyPath": ".mcp/policies/security-policy.json",
+  "generatedAt": "2026-10-30T07:05:00Z",
+  "scans": {
+    "sast": { "status": "run", "blockThreshold": "CRITICAL", "criticals": 0 },
+    "iac": { "status": "run", "blockThreshold": "HIGH", "criticals": 0, "highs": 1 },
+    "secrets": { "status": "run", "blockThreshold": "HIGH", "result": "clean", "method": "rg token-pattern sweep over repo excl. bin/.git/.mcp (ghp_/github_pat_/AKIA/PRIVATE KEY/sk-/xox/AIza/client_secret)" },
+    "dependency": { "status": "run", "blockThreshold": "CRITICAL", "result": "clean", "method": "OSV v1 API queries; ratatui 0.29.0 = 0 advisories, crossterm 0.28.1 = 0 advisories; OSV control case (time 0.1.42) returned RUSTSEC-2020-0071 confirming the empty-means-clean path; lockfile has 78 packages, runtime deps ratatui/crossterm/serde/serde_json/anyhow" },
+    "artifacts_required": { "status": "satisfied", "evidence": ".mcp/reviews/b3fff0fe-4d89-471e-a1ba-b3c67a57776a/threat-model.md exists for install.ps1+installer/** changes" }
+  },
+  "verdict": "FAIL",
+  "verdictReason": "policy iac_scan severity_block=HIGH tripped by CI-ACTIONS-NOT-SHA-PINNED (HIGH). sast found no CRITICAL; secrets and dependency scans clean.",
+  "counts": { "critical": 0, "high": 3, "medium": 2, "low": 8 },
+  "findings": [
+    {
+      "id": "BS-REMOTE-EVAL-UNPINNED",
+      "severity": "HIGH",
+      "scan": "sast",
+      "title": "Bootstrap downloads and evaluates remote scripts from mutable, unpinend endpoints without hash validation",
+      "files": [
+        "install.ps1:11", "install.ps1:12", "install.ps1:17",
+        "install.ps1:63", "install.ps1:64",
+        "installer/src/bootstrap.rs:16",
+        "installer/src/bootstrap.rs:21",
+        "installer/src/bootstrap.rs:26"
+      ],
+      "evidence": [
+        "install.ps1:11  irm https://raw.githubusercontent.com/harish2222/windows-rice/main/install.ps1 | iex",
+        "install.ps1:115 Invoke-RestMethod -Uri https://get.scoop.sh -UseBasicParsing | Invoke-Expression",
+        "install.ps1:405 Invoke-Expression (Invoke-RestMethod -Uri https://get.scoop.sh -UseBasicParsing)",
+        "installer/src/bootstrap.rs:16 scoop installer via irm|iex (Get.scoop.sh)",
+        "installer/src/bootstrap.rs:21 chocolatey via iex WebClient.DownloadString('https://community.chocolatey.org/install.ps1')",
+        "installer/src/bootstrap.rs:26 uv installer via irm|iex (astral.sh/uv/install.ps1)"
+      ],
+      "attack": "T1195.002 supply-chain compromise mutable main branch; T1059.001 PowerShell eval-of-remote",
+      "analysis": "Origin is the project's own repo (trust implied by choosing to install), but the endpoint is a mutable branch with no commit/tag pin and no hash check: repository takeover, CDN/cache tamper, or an errant merge lands instant code execution on every bootstrapping machine. Same pattern is vendor-recommended for scoop/choco/uv, which raises the bar but does not remove the mutable-origin issue.",
+      "remediation": "Pin bootstrap to the release tag (e.g. /v1.0.3 path or  redirect through latest GH release asset) and verify the script hash against SHA256SUMS.txt before iex; keep an -Unpinned opt-in for canary testing."
+    },
+    {
+      "id": "CI-ACTIONS-NOT-SHA-PINNED",
+      "severity": "HIGH",
+      "scan": "iac",
+      "title": "GitHub Actions pinned by tag, not commit SHA (incl. third-party action dtolnay/rust-toolchain@stable)",
+      "files": [
+        ".github/workflows/ci.yml:25",
+        ".github/workflows/ci.yml:28",
+        ".github/workflows/ci.yml:31",
+        ".github/workflows/ci.yml:58",
+        ".github/workflows/ci.yml:188",
+        ".github/workflows/ci.yml:191",
+        ".github/workflows/ci.yml:194",
+        ".github/workflows/release.yml (uses: blocks)"
+      ],
+      "evidence": [
+        "uses: actions/checkout@v4",
+        "uses: dtolnay/rust-toolchain@stable",
+        "uses: actions/cache@v4",
+        "uses: actions/upload-artifact@v4"
+      ],
+      "attack": "Tag retarget on third-party action → arbitrary workflow code → GITHUB_TOKEN exfil (detection_only finding, fix requires approval)",
+      "analysis": "actions/* are GitHub first-party (lower risk but still non-immutable), dtolnay/rust-toolchain is third-party pinned at a mutable tag `stable`. Scorecard Pinned-Dependencies is the accepted control.",
+      "remediation": "Pin every uses: to a full commit SHA with the version kept as a comment (actions/checkout@<sha> # v4.x). Add a CI check or dependabot config to keep SHAs refreshed."
+    },
+    {
+      "id": "ARTIFACT-ZIP-NO-HASH-CHECK",
+      "severity": "HIGH",
+      "scan": "sast",
+      "title": "Downloaded installer zip extracted and executed without SHA256 verification",
+      "files": ["install.ps1:252"],
+      "evidence": [
+        "install.ps1:252 Expand-Archive -Path $tempZip -DestinationPath $tempExtract -Force",
+        "no matches for SHA256|Get-FileHash|checksum|hash in install.ps1 (verified by sweep)"
+      ],
+      "attack": "T1553.002 hash/context validation bypass on the artifact download path",
+      "analysis": "The release already publishes SHA256SUMS.txt (v1.0.3 asset), so verification is one fetch + one compare away; today the zip's bytes are trusted whatever arrives.",
+      "remediation": "After download, fetch SHA256SUMS.txt from the same release, Get-FileHash the zip, compare, fail closed with a printed mismatch; add -SkipHashCheck escape hatch for off-release local testing."
+    },
+    {
+      "id": "EXT-TOOL-REMOTE-EVAL-WINUTIL",
+      "severity": "MEDIUM",
+      "scan": "sast",
+      "title": "Interactive shell functions eval remote WinUtil script (christitus.com/win) via irm|iex",
+      "files": ["shells/xonsh/rc.xsh:399", "shells/xonsh/rc.xsh:402", "xonsh/rc.xsh:399", "xonsh/rc.xsh:402 (duplicate path)"],
+      "evidence": "subprocess.run([\"powershell\", \"-NoProfile\", \"-Command\", \"irm https://christitus.com/win | iex\"])",
+      "analysis": "Vendor-recommended invocation for Chris Titus Tech WinUtil, but it is unpinned remote eval reachable from a one-word shell alias. Adjacent (unchanged) copies exist in shells/nushell/config-additions.nu:531-532 — out of recent-changes scope, flagged for awareness.",
+      "remediation": "Optional: front the command with a confirmation prompt, or pin a released version/hash; alternatively keep as user-choice risk acceptance (documented vendor pattern)."
+    },
+    {
+      "id": "EXEC-POLICY-WIDEN",
+      "severity": "MEDIUM",
+      "scan": "sast",
+      "title": "Installer hardens-then-widens script execution policy (RemoteSigned, CurrentUser)",
+      "files": ["install.ps1:395"],
+      "evidence": "Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force",
+      "analysis": "RemoteSigned at CurrentUser scope is the pragmatic standard for developer machines and only permits local scripts to run unsigned, but it is a persistent policy change on the user profile without revert.",
+      "remediation": "Document the change in install.ps1 output (it likely is), or restore prior policy value on uninstall path (installer revoke flow)."
+    },
+    {
+      "id": "CI-GHENV-ASSET-URL-WRITE",
+      "severity": "LOW",
+      "scan": "iac",
+      "title": "GITHUB_ENV write from release-asset URL-derived string",
+      "files": [".github/workflows/ci.yml:229"],
+      "evidence": "\"CARGO_CARAPACE_DIR=$binDir\" | Out-File -FilePath $env:GITHUB_ENV -Append",
+      "analysis": "Property/variable-based string, Bash-style interpolation not applicable (pwsh runner); value derives from CI-built paths, not attacker-controlled input. No command-injection sink found.",
+      "remediation": "None required; optionally tag with a step-scoped env file instead of the global GITHUB_ENV."
+    },
+    {
+      "id": "REL-DISPATCH-TAG-INPUT",
+      "severity": "LOW",
+      "scan": "iac",
+      "title": "workflow_dispatch self-input interpolated into release flow",
+      "files": [".github/workflows/release.yml:62"],
+      "evidence": "${{ github.event.inputs.tag_name }}",
+      "analysis": "workflow_dispatch on main is a trusted event; no pull_request_target or untrusted head_ref found in either workflow.",
+      "remediation": "Add an input pattern validation (refs/tags/v1.*.*) to fail fast on typos."
+    },
+    {
+      "id": "FS-REVOKE-RESIDUAL",
+      "severity": "LOW",
+      "scan": "sast",
+      "title": "Revoke engine filesystem removal surface — control verified this cycle",
+      "files": ["installer/src/linker.rs (42 remove_dir_all/remove_file refs)", "installer/src/worker.rs (5 refs)"],
+      "evidence": [
+        "v1.0.3 guard: real files keep canonicalize-collapse; file-symlink targets take unlink+restore branch; dir-junctions stay [NATIVE] (T2-R6-03 doctrine)",
+        "regression test present: test_unlink_symlink_to_source_restores_user_backup (linker.rs, cfg-gated, verified 1 match)",
+        "podman behavioral verifier T4-SCEN-07 symlink lifecycle byte-exact + ledger clear (commit 8bdd188)"
+      ],
+      "analysis": "The historical root-cause (junction-collapse swallowing symlink targets) is fixed forward with tests. Residual risk: junction-dir layouts consciously classified NATIVE (documented doctrine).",
+      "remediation": "Keep the regression test privileged-gated; no further code change required for v1.0.3."
+    },
+    {
+      "id": "SUBPROC-ARGV-FIXED",
+      "severity": "LOW",
+      "scan": "sast",
+      "title": "Subprocess spawns use fixed-string commands (no user taint in argv)",
+      "files": ["installer/src/bootstrap.rs:120-138", "installer/src/worker.rs", "installer/src/bootstrap.rs:146"],
+      "evidence": "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command <fixed string>; worker spawns komorebic/glazewm/pwsh/git with literal args; CI=1, telemetry optout",
+      "analysis": "No format!-interpolated command strings found in the spawn paths; taint limited to PATH augmentation ordering.",
+      "remediation": "None required; preserve the fixed-string invariant as a code-review rule."
+    },
+    {
+      "id": "CONTAINER-RUSTUP-EVAL",
+      "severity": "LOW",
+      "scan": "iac",
+      "title": "rustup bootstrap via curl|sh inside conformance container",
+      "files": ["docker/Conformance.Containerfile:29"],
+      "evidence": "RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --component rustfmt --no-modify-path",
+      "analysis": "Vendor-standard rustup bootstrap, executed entirely inside the disposable Linux container; host isolation intact (0 host exec verified)",
+      "remediation": "None; optionally pin RUSTUP_INIT_VERSION in a hardening pass."
+    },
+    {
+      "id": "TERMLAUNCH-NAME-SPAWN",
+      "severity": "LOW",
+      "scan": "sast",
+      "title": "term-launch spawns binary by CLI-name lookup (PATH/scoop ordering)",
+      "files": ["tools/term-launch/src/main.rs:49", "tools/term-launch/src/main.rs:132", "tools/term-launch/src/main.rs:163"],
+      "evidence": "format!(\"{}.exe\", want) → command greens via Command::new(&exe).spawn(); fixed-arg spawn",
+      "analysis": "Trust boundary is the same user who invoked it (T1574.007 residual only, launcher semantics by design).",
+      "remediation": "None for a convenience launcher; keep binary lookup deterministic (scope own scoop dir first)."
+    },
+    {
+      "id": "BIN-TRACKED-EXES",
+      "severity": "LOW",
+      "scan": "iac",
+      "title": "Tracked binaries in repo (bin/rice-installer.exe, bin/term-launch.exe) can drift from source",
+      "files": ["bin/rice-installer.exe", "bin/term-launch.exe"],
+      "evidence": "both files are binary entries in the 45fd6f9..HEAD diff",
+      "analysis": "Release artifacts (the things users run) are CI-built + SHA256SUMS.txt-hashed independently; the tracked copies are convenience/conformance artifacts. Side effect observed: their diff memory blew up the security-mcp gate (exit 134 heap OOM).",
+      "remediation": "Housekeeping: untrack or git-LFS the binaries, keep them in CI artifacts only."
+    }
+  ],
+  "falsePositivesRecorded": [
+    "install.ps1 irm|iex classified HIGH not CRITICAL: origin is the project's own first-party endpoint; CRITICAL reserved for attacker-controlled input paths (none found)",
+    "PSFzf module IEX matches are vendored upstream module code, NOT in the recent-changes scope (no diff entries)",
+    "shells/nushell/config-additions.nu winutil functions unchanged this cycle (out of scope, awareness only)"
+  ]
+}

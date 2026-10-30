@@ -1,0 +1,18 @@
+{
+  "runId": "b3fff0fe-4d89-471e-a1ba-b3c67a57776a",
+  "agentRunId": "manual-solo-b3fff0fe",
+  "verifiedAt": "2026-10-30T08:25:36.6453577Z",
+  "valid": true,
+  "links": 4,
+  "artifactIntegrity": {
+    "findings_json_current": "b3da3ed919eac8bd3a680d6171549bad79d784dc1230556bc4b65595116225fa",
+    "findings_json_link": "b3da3ed919eac8bd3a680d6171549bad79d784dc1230556bc4b65595116225fa",
+    "coverage_manifest_link": "7f96a2deed548a7d9adbb7b0d453f2852810be4b0bc0e8e904c116b5ba9fc56a",
+    "taint_map_link": "054b6aa14402a37963a5ea4db82806a853204d6910c1ad27b768b9fb0e5ebb74",
+    "threat_model_link": "5d88358941d73a29053a7702b0c6cb145e6e54345e34c60f13f493a7288d940d",
+    "gate_result_link": "f913762653a61ce43041d091a79513fe07226963d26a56611f9b5e3aa521519f",
+    "policy_link": "77b8e6f0afd27c115d5c4649a1bd9a4948f336e8e4768d77ef003a5c7bba1311",
+    "review_record_link": "d6df9bda2c4b1d26f68f2807ea9bea30003faf64e70f7748e813101dcd100733"
+  },
+  "note": "all four links recomputed from payload+prevHash; artifact hashes embedded in links match on-disk bytes at verification time"
+}

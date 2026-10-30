@@ -1,0 +1,37 @@
+{
+  "chainVersion": 1,
+  "agentRunId": "manual-solo-b3fff0fe",
+  "runId": "b3fff0fe-4d89-471e-a1ba-b3c67a57776a",
+  "algorithm": "sha256",
+  "createdAt": "2026-10-30T08:25:36.4813523Z",
+  "links": [
+    {
+      "index": 0,
+      "type": "genesis",
+      "payload": "genesis|agentRunId=manual-solo-b3fff0fe|createdAt=2026-10-30T08:25:36.4813523Z",
+      "prevHash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "hash": "744e819d7fe45bf2a8a044e39aee2ae90f9923a7c730ecb1e609d15bcf7f101b"
+    },
+    {
+      "index": 1,
+      "type": "agent_attestation",
+      "payload": "agent|name=opencode-agent-glm|findings=b3da3ed919eac8bd3a680d6171549bad79d784dc1230556bc4b65595116225fa|coverage=7f96a2deed548a7d9adbb7b0d453f2852810be4b0bc0e8e904c116b5ba9fc56a|taint=054b6aa14402a37963a5ea4db82806a853204d6910c1ad27b768b9fb0e5ebb74|threatmodel=5d88358941d73a29053a7702b0c6cb145e6e54345e34c60f13f493a7288d940d|sections=1..7+EDGE-CASE-MATRIX+TEMPORAL-THREATS+DETECTION-GAP+ZERO-MISS-MANDATE|summary=v1.0.3 installer ecosystem review: bootstrap/CI/fs-safety sweeps, FAIL on iac HIGH",
+      "prevHash": "744e819d7fe45bf2a8a044e39aee2ae90f9923a7c730ecb1e609d15bcf7f101b",
+      "hash": "e124ab66002ab2b5d69f4fe3a0a62ff6e25197ed7829d6f56a1d3b9510e8d460"
+    },
+    {
+      "index": 2,
+      "type": "gate_attestation",
+      "payload": "gate|verdict=FAIL|drivers=CI-ACTIONS-NOT-SHA-PINNED|critical=0|high=3|medium=2|low=8|gateResult=f913762653a61ce43041d091a79513fe07226963d26a56611f9b5e3aa521519f|remediationTemplates=cc0c9adc615e2b49181be609904835be5658c14e57d4a060b394f53e92168683|policy=77b8e6f0afd27c115d5c4649a1bd9a4948f336e8e4768d77ef003a5c7bba1311",
+      "prevHash": "e124ab66002ab2b5d69f4fe3a0a62ff6e25197ed7829d6f56a1d3b9510e8d460",
+      "hash": "77a7807d61a0f42d49a2bb3ce852ae2a060db9d92a485edc5881aa6852b200c5"
+    },
+    {
+      "index": 3,
+      "type": "review_attestation",
+      "payload": "review|runId=b3fff0fe-4d89-471e-a1ba-b3c67a57776a|reviewRecord=d6df9bda2c4b1d26f68f2807ea9bea30003faf64e70f7748e813101dcd100733|attestedAt=2026-10-30T08:25:36.4813523Z",
+      "prevHash": "77a7807d61a0f42d49a2bb3ce852ae2a060db9d92a485edc5881aa6852b200c5",
+      "hash": "2639b948de00690cc6ac21e41043a13d3bac053c49bbbb441c5c07894e0385c5"
+    }
+  ]
+}

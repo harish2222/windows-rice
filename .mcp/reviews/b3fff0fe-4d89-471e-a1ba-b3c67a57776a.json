@@ -1,0 +1,82 @@
+{
+  "id": "b3fff0fe-4d89-471e-a1ba-b3c67a57776a",
+  "createdAt": "2026-10-29T08:22:56.613Z",
+  "updatedAt": "2026-10-30T06:12:12.830Z",
+  "mode": "recent_changes",
+  "remediationMode": "detection_only",
+  "targets": [],
+  "baseRef": "45fd6f9",
+  "headRef": "HEAD",
+  "requiredSteps": [
+    "scan_strategy",
+    "threat_model",
+    "checklist",
+    "run_pr_gate"
+  ],
+  "steps": {
+    "start_review": {
+      "status": "completed",
+      "updatedAt": "2026-10-29T08:22:56.613Z",
+      "details": {
+        "mode": "recent_changes",
+        "remediationMode": "detection_only",
+        "targets": [],
+        "baseRef": "45fd6f9",
+        "headRef": "HEAD"
+      }
+    },
+    "scan_strategy": {
+      "status": "completed",
+      "updatedAt": "2026-10-29T08:22:56.621Z",
+      "details": {
+        "mode": "recent_changes",
+        "targets": [],
+        "baseRef": "45fd6f9",
+        "headRef": "HEAD"
+      }
+    },
+    "threat_model": {
+      "status": "completed",
+      "updatedAt": "2026-10-30T06:12:12.814Z",
+      "details": {
+        "feature": "windows-rice (WINDOW-RICE installer ecosystem v1.0.3): a PowerShell bootstrap (irm|iex) plus a Rust TUI installer that renders dotfiles, creates symlinks/junctions, spawns komorebi/glazewm/pwsh subprocesses, and can fully revoke (uninstall) by removing files and restoring user backups; CI builds and publishes release binaries via GitHub Actions",
+        "surfaces": [
+          "infra",
+          "web"
+        ]
+      }
+    },
+    "checklist": {
+      "status": "completed",
+      "updatedAt": "2026-10-30T06:12:12.830Z",
+      "details": {
+        "surface": "infra"
+      }
+    },
+    "run_pr_gate": {
+      "status": "completed",
+      "updatedAt": "2026-10-30T07:10:00.000Z",
+      "details": {
+        "executedBy": "manual-fallback (operator-directed)",
+        "reason": "security_run_pr_gate crashed server: security-mcp exit 134 heap OOM on recent_changes diff containing tracked binaries bin/*.exe (two attempts: missing-policy error, then OOM); server de-registered after crash",
+        "scope": "file_by_file over 31 code/config/test/workflow targets; bin/*.exe excluded (binary, CI-built + SHA256SUMS-hashed at release)",
+        "policyPath": ".mcp/policies/security-policy.json",
+        "verdict": "FAIL",
+        "verdictDriver": "iac HIGH threshold tripped by CI-ACTIONS-NOT-SHA-PINNED",
+        "counts": { "critical": 0, "high": 3, "medium": 2, "low": 8 },
+        "scans": { "sast": "0 critical", "iac": "1 high (FAIL driver)", "secrets": "clean", "dependency": "clean (OSV-verified)", "artifactsRequired": "satisfied" },
+        "artifacts": [
+          ".mcp/reviews/b3fff0fe-4d89-471e-a1ba-b3c67a57776a/coverage-manifest.json",
+          ".mcp/reviews/b3fff0fe-4d89-471e-a1ba-b3c67a57776a/taint-map.json",
+          ".mcp/reviews/b3fff0fe-4d89-471e-a1ba-b3c67a57776a/threat-model.md",
+          ".mcp/reviews/b3fff0fe-4d89-471e-a1ba-b3c67a57776a/findings.json",
+          ".mcp/reviews/b3fff0fe-4d89-471e-a1ba-b3c67a57776a/gate-result.md",
+          ".mcp/reviews/b3fff0fe-4d89-471e-a1ba-b3c67a57776a/remediation-templates.md",
+          ".mcp/reviews/b3fff0fe-4d89-471e-a1ba-b3c67a57776a/chain.json",
+          ".mcp/reviews/b3fff0fe-4d89-471e-a1ba-b3c67a57776a/chain-verify.json"
+        ],
+        "note": "no files modified by this run (detection_only); fixes await operator approval; tamper-evident attestation chain for this run: .mcp/reviews/b3fff0fe-4d89-471e-a1ba-b3c67a57776a/chain.json (head hash recorded in chain-verify.json, valid=true)"
+      }
+    }
+  }
+}
