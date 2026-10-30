@@ -25,10 +25,10 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable branch snapshot
 
       - name: Run installer unit tests (release gate)
         run: cargo test --manifest-path installer/Cargo.toml --verbose
@@ -48,6 +48,10 @@ jobs:
           Compress-Archive -Path "$releaseDir\*" -DestinationPath "rice-installer-windows-x64.zip" -Force
           $sha = (Get-FileHash -Path "rice-installer-windows-x64.zip" -Algorithm SHA256).Hash
           "$sha  rice-installer-windows-x64.zip" | Out-File -FilePath "SHA256SUMS.txt" -Encoding ascii
+          $shaExe = (Get-FileHash -Path "installer\target\release\rice-installer.exe" -Algorithm SHA256).Hash
+          "$shaExe  rice-installer.exe" | Out-File -FilePath "SHA256SUMS.txt" -Encoding ascii -Append
+          $shaScript = (Get-FileHash -Path "$releaseDir\install.ps1" -Algorithm SHA256).Hash
+          "$shaScript  install.ps1" | Out-File -FilePath "SHA256SUMS.txt" -Encoding ascii -Append
 
           Write-Host "Archive created: rice-installer-windows-x64.zip"
           Write-Host "SHA256: $sha"
@@ -62,10 +66,15 @@ jobs:
             "${{ github.event.inputs.tag_name }}"
           }
           if ([string]::IsNullOrWhiteSpace($tag)) { $tag = "v1.0.0" }
+          # validate release tag shape before it reaches the release step
+          if ($tag -notmatch '^v\d+\.\d+\.\d+$') {
+            Write-Host "::error::tag_name '$tag' does not match expected pattern vX.Y.Z"
+            exit 1
+          }
           "tag=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
           tag_name: ${{ steps.get_tag.outputs.tag }}
           name: "Windows Rice Release ${{ steps.get_tag.outputs.tag }}"
@@ -75,4 +84,5 @@ jobs:
           files: |
             rice-installer-windows-x64.zip
             installer/target/release/rice-installer.exe
+            install.ps1
             SHA256SUMS.txt
