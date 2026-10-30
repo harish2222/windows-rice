@@ -396,10 +396,18 @@ def _restart(time=None):
     _reboot(time)
 
 def winutil():
-    subprocess.run(["powershell", "-NoProfile", "-Command", "irm https://christitus.com/win | iex"])
+    answer = input("Run WinUtil now ( irm https://christitus.com/win | iex )? [y/N] ")
+    if answer.strip().lower() == "y":
+        subprocess.run(["powershell", "-NoProfile", "-Command", "irm https://christitus.com/win | iex"])
+    else:
+        print("WinUtil skipped (confirmation not given).")
 
 def winutildev():
-    subprocess.run(["powershell", "-NoProfile", "-Command", "irm https://christitus.com/windev | iex"])
+    answer = input("Run WinUtilDEV now ( irm https://christitus.com/windev | iex )? [y/N] ")
+    if answer.strip().lower() == "y":
+        subprocess.run(["powershell", "-NoProfile", "-Command", "irm https://christitus.com/windev | iex"])
+    else:
+        print("WinUtilDEV skipped (confirmation not given).")
 
 def trash(path):
     target = Path(path).resolve()

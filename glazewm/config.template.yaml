@@ -1,0 +1,236 @@
+# ============================================================================
+# Author -: HKDEVS
+# Project -: Window-Rice
+# Title -: GlazeWM Tiling Window Manager Configuration
+# ============================================================================
+# ============================================================================
+#  GlazeWM configuration ΓÇö Optimized for Performance & Stability
+#  Config path: %userprofile%\.glzr\glazewm\config.yaml
+# ============================================================================
+
+general:
+  # PERFORMANCE FIX: Ensure GlazeWM is NOT fighting Komorebi for focus.
+  focus_follows_cursor: false
+  workspace_behavior: "workspace_driven"
+  cursor_jump:
+    enabled: false
+    trigger: "window_focus"
+
+gaps:
+  inner_gap: "0px"
+  outer_gap:
+    top: "0px"
+    right: "0px"
+    bottom: "0px"
+    left: "0px"
+
+window_behavior:
+  default_orientation: "horizontal"
+  border:
+    enabled: false
+    width: "4px"
+    color: "#313244"
+    focused_color: "#cba6f7"
+    unfocused_color: "#313244"
+
+bar:
+  height: "0"
+  opacity: 0.0
+  background: "#00000000"
+  foreground: "#00000000"
+  font_family: ""
+  font_size: "1"
+  padding: "0 0 0 0"
+  components_left: []
+  components_right: []
+
+ignore:
+  class_names:
+    - "SnippingToolWindowClass"
+    - "ScreenSketch"
+    - "MS_SnipSketch"
+    - "Windows.UI.Core.CoreWindow"
+    - "zen"
+    - "Zen"
+    - "MozillaWindowClass"
+    - "CASCADIA_HOSTING_WINDOW_CLASS"
+    - "otty"
+    - "Alacritty"
+    - "PowerToys"
+    - "Microsoft.CmdPal.UI"
+    - "PowerToys.PowerLauncher"
+    - "PowerToys.ColorPickerUI"
+    - "PowerToys.Peek.UI"
+    - "PowerToys.CropAndLock"
+    - "PowerToys.AdvancedPaste"
+
+workspaces:
+  - name: "1"
+  - name: "2"
+  - name: "3"
+  - name: "4"
+  - name: "5"
+  - name: "6"
+  - name: "7"
+  - name: "8"
+  - name: "9"
+
+window_rules:
+  # Komorebi owns all tiling. We ignore all to prevent lag and conflicts.
+  - commands: ["ignore"]
+    match: [{}]
+    on: ["manage"]
+    run_once: true
+
+binding_modes:
+  - name: "resize"
+    keybindings:
+      - commands: ["shell-exec silent-run komorebic resize-edge left decrease"]
+        bindings: ["h", "left"]
+      - commands: ["shell-exec silent-run komorebic resize-edge right increase"]
+        bindings: ["l", "right"]
+      - commands: ["shell-exec silent-run komorebic resize-edge up increase"]
+        bindings: ["k", "up"]
+      - commands: ["shell-exec silent-run komorebic resize-edge down decrease"]
+        bindings: ["j", "down"]
+      - commands: ["wm-disable-binding-mode --name resize"]
+        bindings: ["escape", "enter", "alt+r"]
+
+keybindings:
+  # ΓöÇΓöÇ Focus (alt + hjkl) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  - commands: ["shell-exec silent-run komorebic focus left"]
+    bindings: ["alt+h", "alt+left"]
+  - commands: ["shell-exec silent-run komorebic focus right"]
+    bindings: ["alt+l", "alt+right"]
+  - commands: ["shell-exec silent-run komorebic focus up"]
+    bindings: ["alt+k", "alt+up"]
+  - commands: ["shell-exec silent-run komorebic focus down"]
+    bindings: ["alt+j", "alt+down"]
+
+  # ΓöÇΓöÇ Move (alt + shift + hjkl) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  - commands: ["shell-exec silent-run komorebic move left"]
+    bindings: ["alt+shift+h", "alt+shift+left"]
+  - commands: ["shell-exec silent-run komorebic move right"]
+    bindings: ["alt+shift+l", "alt+shift+right"]
+  - commands: ["shell-exec silent-run komorebic move up"]
+    bindings: ["alt+shift+k", "alt+shift+up"]
+  - commands: ["shell-exec silent-run komorebic move down"]
+    bindings: ["alt+shift+j", "alt+shift+down"]
+
+  # ΓöÇΓöÇ Multi-Monitor (alt + comma / period, alt + shift + comma / period) ΓöÇΓöÇ
+  - commands: ["shell-exec silent-run komorebic cycle-monitor previous"]
+    bindings: ["alt+comma"]
+  - commands: ["shell-exec silent-run komorebic cycle-monitor next"]
+    bindings: ["alt+period"]
+  - commands: ["shell-exec silent-run komorebic cycle-move-to-monitor previous"]
+    bindings: ["alt+shift+comma"]
+  - commands: ["shell-exec silent-run komorebic cycle-move-to-monitor next"]
+    bindings: ["alt+shift+period"]
+
+  # ΓöÇΓöÇ Window state ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  - commands: ["shell-exec silent-run komorebic toggle-maximize"]
+    bindings: ["alt+f"]
+  - commands: ["shell-exec silent-run komorebic toggle-monocle"]
+    bindings: ["alt+shift+f"]
+  - commands: ["shell-exec silent-run komorebic toggle-tiling"]
+    bindings: ["alt+t"]
+  - commands: ["shell-exec silent-run komorebic close"]
+    bindings: ["alt+q"]
+
+  # ΓöÇΓöÇ Workspaces (alt + 1-9) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  - commands: ["shell-exec silent-run komorebic focus-workspace 0"]
+    bindings: ["alt+1"]
+  - commands: ["shell-exec silent-run komorebic focus-workspace 1"]
+    bindings: ["alt+2"]
+  - commands: ["shell-exec silent-run komorebic focus-workspace 2"]
+    bindings: ["alt+3"]
+  - commands: ["shell-exec silent-run komorebic focus-workspace 3"]
+    bindings: ["alt+4"]
+  - commands: ["shell-exec silent-run komorebic focus-workspace 4"]
+    bindings: ["alt+5"]
+  - commands: ["shell-exec silent-run komorebic focus-workspace 5"]
+    bindings: ["alt+6"]
+  - commands: ["shell-exec silent-run komorebic focus-workspace 6"]
+    bindings: ["alt+7"]
+  - commands: ["shell-exec silent-run komorebic focus-workspace 7"]
+    bindings: ["alt+8"]
+  - commands: ["shell-exec silent-run komorebic focus-workspace 8"]
+    bindings: ["alt+9"]
+
+  # Move window to workspace + follow.
+  - commands: ["shell-exec silent-run komorebic move-to-workspace 0", "shell-exec silent-run komorebic focus-workspace 0"]
+    bindings: ["alt+shift+1"]
+  - commands: ["shell-exec silent-run komorebic move-to-workspace 1", "shell-exec silent-run komorebic focus-workspace 1"]
+    bindings: ["alt+shift+2"]
+  - commands: ["shell-exec silent-run komorebic move-to-workspace 2", "shell-exec silent-run komorebic focus-workspace 2"]
+    bindings: ["alt+shift+3"]
+  - commands: ["shell-exec silent-run komorebic move-to-workspace 3", "shell-exec silent-run komorebic focus-workspace 3"]
+    bindings: ["alt+shift+4"]
+  - commands: ["shell-exec silent-run komorebic move-to-workspace 4", "shell-exec silent-run komorebic focus-workspace 4"]
+    bindings: ["alt+shift+5"]
+  - commands: ["shell-exec silent-run komorebic move-to-workspace 5", "shell-exec silent-run komorebic focus-workspace 5"]
+    bindings: ["alt+shift+6"]
+  - commands: ["shell-exec silent-run komorebic move-to-workspace 6", "shell-exec silent-run komorebic focus-workspace 6"]
+    bindings: ["alt+shift+7"]
+  - commands: ["shell-exec silent-run komorebic move-to-workspace 7", "shell-exec silent-run komorebic focus-workspace 7"]
+    bindings: ["alt+shift+8"]
+  - commands: ["shell-exec silent-run komorebic move-to-workspace 8", "shell-exec silent-run komorebic focus-workspace 8"]
+    bindings: ["alt+shift+9"]
+
+  # ΓöÇΓöÇ Launchers (PERFORMANCE FIXED) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  # Launching Zen Browser using 'cmd /c start' to ensure it's handed off to the
+  # Windows Shell and NOT tracked as a child process by GlazeWM.
+  - commands: ["shell-exec cmd /c start zen"]
+    bindings: ["alt+z", "alt+shift+b"]
+
+  # Music players in Windows Terminal (24 px Kew / 25 px CLIamp)
+  - commands: ["shell-exec cmd /c start wt.exe -p KewMusic"]
+    bindings: ["alt+m"]
+  - commands: ["shell-exec cmd /c start wt.exe -p CLIampMusic"]
+    bindings: ["alt+shift+m"]
+
+  # Terminal Launchers
+  # term-launch (.config/tools/term-launch): native, zero-flash GUI launcher.
+  # Komorebi owns all tiling, so a maximized terminal start needs an external
+  # SW_MAXIMIZE + SetForegroundWindow once the real window is realized. otty
+  # has no on-launch window keys at all (1.6.0-beta); a pwsh wrapper both
+  # flashed an empty console host and cost ~460 ms of spawn. term-launch
+  # ignores the 16x16 pre-realization window and is single-instance aware
+  # (raises an existing terminal instead of duplicating it). Verified: otty
+  # born windowed 1471x807 -> 1936x1064 maximized+focused ~0.5 s later,
+  # stable >= 5 s under komorebi.
+  - commands: ["shell-exec C:\\Users\\haris\\.config\\bin\\term-launch.exe otty"]
+    bindings: ["alt+return"]
+  - commands: ["shell-exec cmd /c start wt.exe"]
+    bindings: ["win+return", "win+enter", "alt+shift+return"]
+  # Alacritty needs NO post-launch treatment: startup_mode="Maximized"
+  # survives komorebi (earlier "komorebi un-maximizes it" was a 16x16
+  # pre-realization window mis-sampled). Plain direct launch - zero flash.
+  - commands: ["shell-exec alacritty"]
+    bindings: ["win+shift+return"]
+
+  # Other launchers
+  - commands: ["shell-exec explorer.exe"]
+    bindings: ["alt+shift+e"]
+  - commands: ["shell-exec code"]
+    bindings: ["alt+o"]
+  - commands: ["shell-exec C:\\PROGRA~1\\Emacs\\emacs-31.1\\bin\\runemacs.exe"]
+    bindings: ["alt+shift+c"]
+  - commands: ["shell-exec SnippingTool.exe"]
+    bindings: ["alt+print_screen"]
+
+  # Keybindings cheatsheet (Omarchy style)
+  - commands: ["shell-exec silent-run C:\\Users\\haris\\.config\\yasb\\tools\\keybind\\keybind.exe"]
+    bindings: ["win+k"]
+
+  # ΓöÇΓöÇ Resize mode ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  - commands: ["wm-enable-binding-mode --name resize"]
+    bindings: ["alt+r"]
+
+  # WM control
+  - commands: ["shell-exec silent-run komorebic replace-configuration C:\\Users\\haris\\.config\\komorebi\\komorebi.json", "wm-reload-config"]
+    bindings: ["alt+shift+r"]
+  - commands: ["shell-exec silent-run komorebic retile"]
+    bindings: ["alt+shift+w"]
+  - commands: ["shell-exec silent-run komorebic toggle-pause"]
+    bindings: ["alt+shift+p"]

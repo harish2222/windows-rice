@@ -528,8 +528,22 @@ def "restart cancel" [] {
 }
 
 # These mirror the opt-in PowerShell commands.  They do no work until called.
-def winutil [] { ^powershell -NoProfile -Command "irm https://christitus.com/win | iex" }
-def winutildev [] { ^powershell -NoProfile -Command "irm https://christitus.com/windev | iex" }
+def winutil [] {
+    let answer = (input "Run WinUtil now ( irm https://christitus.com/win | iex )? [y/N] ")
+    if ($answer | str lowercase | str trim) == "y" {
+        ^powershell -NoProfile -Command "irm https://christitus.com/win | iex"
+    } else {
+        print "WinUtil skipped (confirmation not given)."
+    }
+}
+def winutildev [] {
+    let answer = (input "Run WinUtilDEV now ( irm https://christitus.com/windev | iex )? [y/N] ")
+    if ($answer | str lowercase | str trim) == "y" {
+        ^powershell -NoProfile -Command "irm https://christitus.com/windev | iex"
+    } else {
+        print "WinUtilDEV skipped (confirmation not given)."
+    }
+}
 
 # ── Elevated shells ──
 def admin [...args: string] {

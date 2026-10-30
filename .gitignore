@@ -4,6 +4,12 @@
 # Title -: Git Ignore Rules
 # ============================================================================
 # ===== Never commit: secrets & personal data =====
+# Live desktop master files (HKDEVS): scoop/config.json contains a real API
+# key slot (security review ed156b73: APS-001) and glazewm/config.yaml is the
+# user's live master. Shipped rice continuity: glazewm/config.template.yaml
+# (tracked canonical) + install.ps1 post-TUI deploy step to .glzr\glazewm.
+scoop/config.json
+glazewm/config.yaml
 forgum/
 nvim/
 neovim/

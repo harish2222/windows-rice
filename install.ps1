@@ -347,6 +347,15 @@ if ($isRemote) {
 
         Write-Host "[Windows Rice] Launching WINDOW-RICE Ratatui TUI installer..." -ForegroundColor Green
         & $binaryToLaunch $extraArgs
+
+        # Post-TUI: deploy shipped glazewm config template for fresh .glzr targets (product continuity after config-untracking)
+        $glzTarget = Join-Path $env:USERPROFILE ".glzr\glazewm"
+        $glzTemplate = Join-Path $targetRepoDir "glazewm\config.template.yaml"
+        if ((Test-Path $glzTemplate) -and (-not (Test-Path (Join-Path $glzTarget "config.yaml")))) {
+            New-Item -ItemType Directory -Force -Path $glzTarget | Out-Null
+            Copy-Item $glzTemplate (Join-Path $glzTarget "config.yaml") -Force
+            Write-Host "[Windows Rice] Deployed shipped glazewm config template to $glzTarget\config.yaml" -ForegroundColor Green
+        }
         exit $LASTEXITCODE
     }
 
@@ -427,6 +436,14 @@ if (-not (Test-Path $tempInstaller)) {
 if (-not (Test-Path $tempInstaller)) {
     Write-Host "[Windows Rice] Preparing build environment (Scoop & Rust)..." -ForegroundColor Cyan
 
+    # capture prior policy so it is restorable later (EXEC-POLICY-WIDEN fix - GAP-002)
+    try {
+        $priorPolicy = Get-ExecutionPolicy -Scope CurrentUser
+        $riceStateDir = Join-Path $env:USERPROFILE ".config\.rice"
+        New-Item -ItemType Directory -Force -Path $riceStateDir | Out-Null
+        Set-Content -Path (Join-Path $riceStateDir "execution-policy-previous.txt") -Value $priorPolicy -Encoding ascii
+        Write-Host "[Windows Rice] Previous ExecutionPolicy (CurrentUser): $priorPolicy recorded at .config\.rice\execution-policy-previous.txt (tools\restore-exec-policy.ps1 restores it)" -ForegroundColor DarkGray
+    } catch {}
     Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
     $userProfile = $env:USERPROFILE
     $scoopShim = Join-Path $userProfile "scoop\shims"
@@ -490,6 +507,15 @@ $binaryToLaunch = if (Test-Path $repoBin) { $repoBin } elseif (Test-Path $tempIn
 if ($binaryToLaunch) {
     Write-Host "[Windows Rice] Launching WINDOW-RICE Ratatui TUI installer..." -ForegroundColor Green
     & $binaryToLaunch $extraArgs
+
+    # Post-TUI: deploy shipped glazewm config template for fresh .glzr targets (product continuity after config-untracking)
+    $glzTarget = Join-Path $env:USERPROFILE ".glzr\glazewm"
+    $glzTemplate = Join-Path $ScriptRoot "glazewm\config.template.yaml"
+    if ((Test-Path $glzTemplate) -and (-not (Test-Path (Join-Path $glzTarget "config.yaml")))) {
+        New-Item -ItemType Directory -Force -Path $glzTarget | Out-Null
+        Copy-Item $glzTemplate (Join-Path $glzTarget "config.yaml") -Force
+        Write-Host "[Windows Rice] Deployed shipped glazewm config template to $glzTarget\config.yaml" -ForegroundColor Green
+    }
     exit $LASTEXITCODE
 } else {
     Write-Host "[Windows Rice] Error: Failed to acquire or build rice-installer.exe binary." -ForegroundColor Red
