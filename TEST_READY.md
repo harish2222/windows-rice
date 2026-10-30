@@ -313,25 +313,63 @@ commit the suite evidence. Applied set (pre-force-push state):
    merged-findings.json copy, attestation-chain.json copy, byte-verbatim per
    `.gitattributes .mcp/** -text`) + `.mcp/reports/` SOC2 report + this section.
 
-### §5.3a History purge + force-push (carried out after the evidence commit)
+### §5.3a History purge + force-push (executed 2026-10-30 — full record)
 
-- `git filter-branch --index-filter "git rm --cached --ignore-unmatch scoop/config.json
-  glazewm/config.yaml"` executed in a temp mirror clone (`git clone --mirror`), not on the live
-  working tree (filter-branch/reset hygiene vs. operator's live desktop).
+- `git filter-branch --force --index-filter "git rm --cached --ignore-unmatch scoop/config.json
+  glazewm/config.yaml" --prune-empty --tag-name-filter cat -- --all` executed in a temp mirror
+  clone (`git clone --mirror`, `Temp\opencode\rice-purge.git`), not on the live working tree
+  (filter-branch/reset hygiene vs. operator's live desktop).
   NOTE: git-filter-repo was available via scoop but rejected as a Python-script tool per the
   operator's tooling rules; git's built-in filter-branch (POSIX shell) was used instead.
-- Mirror force-pushed: `git push --force origin` (rewritten main + rewritten tags v1.0.3/v1.0.4).
-- Local reconciliation: stashed the two live-master files (their uncommitted edits preserved),
-  fetched the rewritten refs, `git reset --hard` to the rewritten head, stash-applied back;
-  both files remain on disk, untracked + ignored.
-- Post-condition verified: `git log -p --all -- scoop/config.json` returns nothing (linear),
-  the only remaining VT-key bytes live in the local untracked working file and in remote reflog
-  reflogs pre-gc (documented; GitHub-side history no longer contains the file).
+  Rewrote every ref: main, all five local tags, the remote-tracking refs
+  (`origin/yasb-theme-rangalipi` included) and `refs/stash`; commits that touched ONLY the two
+  purged paths were pruned entirely (e.g. sole `chore(scoop): sync last_update` commits).
+  `refs/original/*` backup (10 refs) deleted inside the mirror after rewrite.
+- **Manual guarded push — Release workflow step**: `release.yml` triggers on `push: tags: v*`;
+  force-pushing rewritten tags would have fired four stale release workflows and rebuilt/unchecked
+  the release assets bound in the evidence. Sequence: `gh workflow disable` Release Rice Installer
+  → single force-push → `gh workflow enable` (verified both workflows active afterward).
+- Force-push set from the mirror (single push, all forced): `refs/heads/main`,
+  `refs/tags/v1.0.0`, `refs/tags/v1.0.1`, `refs/tags/v1.0.3`, `refs/tags/v1.0.4`, and
+  `refs/remotes/origin/yasb-theme-rangalipi:refs/heads/yasb-theme-rangalipi`.
+  `v1.0.2` was NOT pushed — it never existed on origin (local-only tag; rewritten locally for
+  consistency). Post-push `git ls-remote` contains zero pre-purge SHAs.
+- Rewritten-vs-pre-purge tip map (history content identical minus the two paths):
+  pre `6ed5052..`→ post `50e647d..`; pre `08861df`→ `6d1ef53`; pre `c8dac2f`→ `cb8f48a`;
+  pre `e782570`→ `46fac31`; pre `a998c55`→ `6a995c0`; tag `v1.0.3` object `80cd334→5d43270`
+  (peeled commit `118abc51→6babaa2c`); `v1.0.4` lightweight tag re-pointed `e782570→46fac31`;
+  rewritten tags: `v1.0.0 bfe579e`, `v1.0.1 5b58270`, `v1.0.2 fad0251` (local), `v1.0.3 5d43270`,
+  `v1.0.4 46fac31`; `yasb-theme-rangalipi` `28160a5→139adb3`.
+- Local reconciliation (NO stash dance needed): trees of pre- and post-purge HEADs are identical
+  (the configs were already untracked in 08861df), so `git reset --hard 50e647d` touched zero
+  files; rewritten tracking refs + tags fetched with force-overwrite (`fetch 'refs/tags/*…'
+  --force`, plus v1.0.2 backfilled from the mirror). Both live-master files remained on disk,
+  untracked + ignored (`git check-ignore -v` matches .gitignore:11/12); operator's uncommitted
+  local edits to both files untouched (scoop key still a nonempty 64-char value, masked probe).
+- Local object hygiene: reflogs for HEAD/main/origin-tracking refs expired to empty and
+  `git gc --prune=now` — pre-purge tips `a998c55/e782570/c8dac2f/6ed5052/08861df/d25f93c` no
+  longer resolve locally. **Deliberate residual**: `refs/stash` reflog is spared to preserve the
+  operator's two stash entries (old bases predate the purge), so pre-purge history stays locally
+  reachable ONLY through stash ancestry (`git log --source --all -- scoop/config.json
+  glazewm/config.yaml` shows hits solely under `refs/stash`; scoped check
+  `git log --oneline ^refs/stash --all -- scoop/config.json glazewm/config.yaml` = 0). Local-only
+  cosmetics; the live key file itself sits on disk by design. Drop the stashes to finish that
+  cleanup whenever convenient.
+- Tracked files at rewritten HEAD: **495** (measurement; includes the new
+  `glazewm/config.template.yaml`, the two untracked live configs excluded).
+- Post-conditions verified: fresh full clone of origin → `git log --all -- <both paths>` = 0 hits,
+  HEAD = `50e647d`, template present; rewritten-main CI run `41105309388` on GitHub
+  (force-push-triggered; separately monitored); release v1.0.4 untouched (Release workflow was
+  disabled during the push window, so no asset rebuild).
 - Commit IDs referenced throughout TEST_READY (a998c55, e782570, c8dac2f, ef6d417..d25f93c)
   refer to PRE-PURGE history; the rewritten lineage carries the same content (minus the two
-  purged paths) — hashes shifted by design; the last rewritten code commit pre-purge was
-  `d25f93c` family. Numeric/byte-attestation chains bind FILE BYTES, not commit IDs — intact.
+  purged paths) — hashes shifted by design (see tip map above). Numeric/byte-attestation chains
+  bind FILE BYTES, not commit IDs — intact.
+- Residual reality (no action pending): GitHub keeps unreachable commit objects server-side until
+  its internal GC and may serve cached commit pages briefly; public refs no longer contain the
+  paths. The lease on the leaked key remains: **rotate/revoke the VirusTotal API key** (operator
+  action, flagged in §5.2a) — history cleanup does not substitute rotation.
+- External clones made before the purge keep pre-purge history; re-clone or re-fetch with
+  invalidated pull. Fresh flows (README `git clone --branch vX` etc.) unaffected.
 - Release assets: unchanged (v1.0.3/v1.0.4 assets were built from installer sources; no configs
-  ever shipped in release bundles).
-- CHANGE OF HASHES may break external clones; fresh `git clone --branch v1.0.4 --depth 1 …`
-  remains valid (README flow), while older clones should re-clone.
+  ever shipped in release bundles). Release workflow re-enabled and active.
