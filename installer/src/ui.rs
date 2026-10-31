@@ -11,7 +11,8 @@ use ratatui::{
     Frame,
 };
 use crate::app::App;
-use crate::detect::{BinaryStatus, LinkStatus};
+use crate::catalog::resolve_target_path;
+use crate::detect::{classify_config, BinaryStatus, ConfigState, LinkStatus};
 
 pub fn render(f: &mut Frame, app: &App) {
     let size = f.area();
@@ -189,13 +190,14 @@ fn render_item_list(f: &mut Frame, app: &App, area: Rect) {
 
             let bin_badge = match &item.inspection.binary_status {
                 BinaryStatus::Installed(_) => Span::styled("BIN", Style::default().fg(Color::Rgb(166, 227, 161))),
-                BinaryStatus::Missing => Span::styled("NO-BIN", Style::default().fg(Color::Rgb(243, 139, 168))),
+                BinaryStatus::Missing => Span::styled("NO-BIN", Style::default().fg(Color::Rgb(243, 139, 168)).add_modifier(Modifier::BOLD)),
             };
 
             let link_badge = match &item.inspection.link_status {
                 LinkStatus::LinkedSymlink(_) => Span::styled("LINK", Style::default().fg(Color::Rgb(148, 226, 213))),
                 LinkStatus::LinkedCopy(_) => Span::styled("COPY", Style::default().fg(Color::Rgb(137, 180, 250))),
-                LinkStatus::NotLinked => Span::styled("UNLINK", Style::default().fg(Color::Rgb(249, 226, 175))),
+                LinkStatus::InPlace(_) => Span::styled("IN-REPO", Style::default().fg(Color::Rgb(166, 227, 161)).add_modifier(Modifier::BOLD)),
+                LinkStatus::NotLinked => Span::styled("UNLINK", Style::default().fg(Color::Rgb(249, 226, 175)).add_modifier(Modifier::BOLD)),
                 LinkStatus::NotApplicable => Span::styled("---", Style::default().fg(Color::Rgb(108, 112, 134))),
             };
 
@@ -272,17 +274,57 @@ fn render_details(f: &mut Frame, app: &App, area: Rect) {
             bin_info,
         ]));
 
+        // Live verification verdict for the selected package: mirrors the
+        // [TEST: PASS]/[TEST: WARN] result the install pipeline would log.
+        let (status_text, status_color) = if item.inspection.is_missing_any {
+            ("[NEEDS SETUP]", Color::Rgb(249, 226, 175))
+        } else {
+            ("[READY]", Color::Rgb(166, 227, 161))
+        };
+        text.push(Line::from(vec![
+            Span::styled("Status:      ", Style::default().fg(Color::Rgb(137, 180, 250))),
+            Span::styled(status_text, Style::default().fg(status_color).add_modifier(Modifier::BOLD)),
+            Span::styled(
+                match &item.inspection.link_status {
+                    LinkStatus::NotApplicable => " (binary-only)".to_string(),
+                    LinkStatus::NotLinked => " (config target missing)".to_string(),
+                    LinkStatus::InPlace(_) => " (repo-native config in place)".to_string(),
+                    LinkStatus::LinkedSymlink(_) => " (configs symlinked)".to_string(),
+                    LinkStatus::LinkedCopy(_) => " (configs copied)".to_string(),
+                },
+                Style::default().fg(Color::Rgb(186, 194, 222)),
+            ),
+        ]));
+
         text.push(Line::from(vec![
             Span::styled("Configs:     ", Style::default().fg(Color::Rgb(137, 180, 250))),
             Span::styled(if pkg.configs.is_empty() { "No config files mapped (standalone tool)" } else { "Source -> Target" }, Style::default().fg(Color::Rgb(148, 226, 213))),
         ]));
 
+        // Per-config live state so verification is visible at a glance:
+        //   [~] repo-native in place  [>] symlinked  [+] present  [x] missing
         for cfg in &pkg.configs {
+            let source = app.repo_root.join(&cfg.source_rel);
+            let target = resolve_target_path(cfg.target_pattern);
+            let state = classify_config(&source, &target);
+            let (marker, color) = match state {
+                ConfigState::InPlace => ("[~]", Color::Rgb(166, 227, 161)),
+                ConfigState::Symlinked => ("[>]", Color::Rgb(148, 226, 213)),
+                ConfigState::Present => ("[+]", Color::Rgb(137, 180, 250)),
+                ConfigState::Missing => ("[x]", Color::Rgb(243, 139, 168)),
+            };
+            let target_color = if state == ConfigState::Missing {
+                Color::Rgb(243, 139, 168)
+            } else {
+                Color::Rgb(205, 214, 244)
+            };
             text.push(Line::from(vec![
-                Span::raw("  • "),
+                Span::raw("  "),
+                Span::styled(marker, Style::default().fg(color).add_modifier(Modifier::BOLD)),
+                Span::raw(" "),
                 Span::styled(cfg.source_rel, Style::default().fg(Color::Rgb(249, 226, 175))),
                 Span::raw(" -> "),
-                Span::styled(cfg.target_pattern, Style::default().fg(Color::Rgb(205, 214, 244))),
+                Span::styled(cfg.target_pattern, Style::default().fg(target_color)),
             ]));
         }
 
@@ -312,6 +354,44 @@ fn render_details(f: &mut Frame, app: &App, area: Rect) {
     }
 }
 
+/// Console palette. Ordered so compound tags ([TEST: PASS], [RESULT: READY],
+/// ...) match their own color first - the old chain checked the bare `[PASS]`
+/// /`[WARN]` substrings, which compound tags never contain ("[TEST: PASS]"
+/// has no `[` before `PASS]`), so every verification line rendered flat gray.
+fn log_line_style(line: &str) -> Style {
+    let color = if line.contains("[FAIL]")
+        || line.contains("[ERROR]")
+        || line.contains("[ERR]")
+        || line.contains("[CANCEL")
+        || line.contains("[ENDED]")
+    {
+        Color::Rgb(243, 139, 168)
+    } else if line.contains("[TEST: WARN]")
+        || line.contains("[RESULT: PENDING]")
+        || line.contains("[WARN]")
+        || line.contains("[NOTE]")
+    {
+        Color::Rgb(249, 226, 175)
+    } else if line.contains("[TEST: PASS]")
+        || line.contains("[RESULT: READY]")
+        || line.contains("[PASS]")
+        || line.contains("[SYMLINK]")
+        || line.contains("[ALREADY]")
+        || line.contains("[COMPLETED")
+    {
+        Color::Rgb(166, 227, 161)
+    } else if line.contains("[BACKUP]") {
+        Color::Rgb(203, 166, 247)
+    } else if line.contains("[COPIED]") || line.contains("[INFO]") || line.contains("[STEP") || line.contains("[START") {
+        Color::Rgb(137, 180, 250)
+    } else if line.contains("[OUT]") {
+        Color::Rgb(180, 190, 254)
+    } else {
+        Color::Rgb(186, 194, 222)
+    };
+    Style::default().fg(color)
+}
+
 fn render_logs(f: &mut Frame, app: &App, area: Rect) {
     let height = area.height.saturating_sub(2) as usize;
     let total_logs = app.logs.len();
@@ -328,27 +408,7 @@ fn render_logs(f: &mut Frame, app: &App, area: Rect) {
         &[]
     };
 
-    let log_lines: Vec<Line> = visible_logs
-        .iter()
-        .map(|l| {
-            let color = if l.contains("[PASS]") || l.contains("[SYMLINK]") || l.contains("[COMPLETED") {
-                Color::Rgb(166, 227, 161)
-            } else if l.contains("[FAIL]") || l.contains("[ERROR]") || l.contains("[ERR]") {
-                Color::Rgb(243, 139, 168)
-            } else if l.contains("[COPIED]") || l.contains("[INFO]") || l.contains("[STEP") || l.contains("[START") {
-                Color::Rgb(137, 180, 250)
-            } else if l.contains("[WARN]") {
-                Color::Rgb(249, 226, 175)
-            } else if l.contains("[OUT]") {
-                Color::Rgb(180, 190, 254)
-            } else if l.contains("[CANCEL") {
-                Color::Rgb(235, 160, 172)
-            } else {
-                Color::Rgb(186, 194, 222)
-            };
-            Line::from(Span::styled(l, Style::default().fg(color)))
-        })
-        .collect();
+    let log_lines: Vec<Line> = visible_logs.iter().map(|l| Line::from(Span::styled(l, log_line_style(l)))).collect();
 
     let scroll_indicator = if app.log_scroll_offset > 0 {
         format!(" (scroll: -{}) ", app.log_scroll_offset)

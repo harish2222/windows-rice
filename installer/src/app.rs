@@ -223,14 +223,26 @@ impl App {
                 KeyCode::Char(' ') | KeyCode::Enter => {
                     self.toggle_selected();
                 }
+                KeyCode::Char('a') | KeyCode::Char('A') => {
+                    self.select_all();
+                }
+                KeyCode::Char('n') | KeyCode::Char('N') => {
+                    self.select_none();
+                }
+                KeyCode::Char('m') | KeyCode::Char('M') => {
+                    self.select_missing_only();
+                }
                 KeyCode::Char('[') => self.scroll_log_up(),
                 KeyCode::Char(']') => self.scroll_log_down(),
                 KeyCode::Char('q') | KeyCode::Char('Q') => {
                     self.cancel_current_task();
                     self.should_quit = true;
                 }
-                // Action hotkeys (i/l/u/b/r/c/v/w, a/m/n/g...) are ignored while busy.
-                _ => {}
+                // Action hotkeys (i/l/u/b/r/c/v/w...) provide clear user feedback while busy.
+                _ => {
+                    let task_name = self.active_task_name.as_deref().unwrap_or("Task");
+                    self.status_message = format!("{} in progress ({}%). Press [Esc] to cancel before starting a new action.", task_name, self.progress_percentage);
+                }
             }
             return self.should_quit;
         }
@@ -1421,9 +1433,13 @@ mod tests {
         assert!(app.cancel_flag.load(std::sync::atomic::Ordering::SeqCst), "cancel flag must be set");
         assert!(app.status_message.contains("Cancelling"), "status must reflect cancellation request");
 
-        // Poll until the worker finishes (bounded, ~5s max) and returns to idle.
+        // Poll until the worker finishes (bounded, ~15s max) and returns to idle.
+        // The worker runs an EXTERNAL `git status` against the checkout, which
+        // alone takes ~3s on slow/network filesystems and longer under full
+        // suite parallelism - the bound only guards against a true hang, the
+        // assertions below still verify completion and summary correctness.
         let mut attempts = 0;
-        while app.is_busy && attempts < 250 {
+        while app.is_busy && attempts < 1500 {
             app.poll_worker_events();
             std::thread::sleep(std::time::Duration::from_millis(10));
             attempts += 1;

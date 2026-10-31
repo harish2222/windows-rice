@@ -194,10 +194,31 @@ pub fn link_config_mapping(repo_root: &Path, mapping: &ConfigMapping, package_id
         return LinkOutcome::AlreadyValid(target);
     }
 
+    // 1b. Repo protection: NEVER write, replace, back up or delete anything
+    //     inside the repository tree (.config). This project's configs ARE
+    //     the repo, so a target resolving into it (but != the source above)
+    //     would destroy tracked files. Refuse loudly instead.
+    if is_repo_internal(&target, repo_root) {
+        return LinkOutcome::Failed(format!(
+            "Refusing to modify repo-internal path (repository files are read-only to the installer): {}",
+            target.display()
+        ));
+    }
+
     // 2. Ensure parent directory exists
     if let Some(parent) = target.parent() {
         if let Err(e) = fs::create_dir_all(parent) {
             return LinkOutcome::Failed(format!("Failed to create parent dir {}: {}", parent.display(), e));
+        }
+        // Re-check AFTER materializing the parent: a previously dangling (or
+        // otherwise uncanonicalizable) parent symlink into the repo only
+        // resolves once the directory exists - re-evaluate so the guard can
+        // never be evaded through an unresolved parent.
+        if is_repo_internal(&target, repo_root) {
+            return LinkOutcome::Failed(format!(
+                "Refusing to modify repo-internal path (repository files are read-only to the installer): {}",
+                target.display()
+            ));
         }
     }
 
@@ -421,6 +442,14 @@ pub fn unlink_config_mapping(repo_root: &Path, mapping: &ConfigMapping, package_
         return UnlinkOutcome::RepoNativeNotTouched(target);
     }
 
+    // Repo protection: never remove, restore over, or archive anything that
+    // lives inside the repository tree itself (normalized WITHOUT following
+    // the final component, so an outside symlink pointing INTO the repo is
+    // still handled by the symlink branch below).
+    if is_repo_internal(&target, repo_root) {
+        return UnlinkOutcome::RepoNativeNotTouched(target);
+    }
+
     let had_target = target.exists() || symlink_meta.is_some();
 
     if had_target && !is_symlink {
@@ -517,6 +546,76 @@ fn archive_preserved_copy(package_id: &str, target: &Path, is_dir: bool) -> Resu
     let archive_dest = archive_dir.join(file_name);
     copy_recursive(target, &archive_dest, is_dir)?;
     Ok(archive_dest)
+}
+
+/// True when `path` resolves to a location inside `repo_root`.
+/// Normalization canonicalizes the DEEPEST EXISTING ancestor (following any
+/// symlinks/junctions along the way) and re-appends the remaining
+/// non-existent components, so an unresolved parent path can never smuggle a
+/// write into the repo. Comparison is case-insensitive (Windows filesystems)
+/// and tolerates the `\?\` verbatim prefix `Path::canonicalize` adds.
+pub(crate) fn is_repo_internal(path: &Path, repo_root: &Path) -> bool {
+    fn normalize(p: &Path) -> PathBuf {
+        // The FINAL component is never followed (it may be the symlink
+        // itself: a link living outside the repo whose destination is inside
+        // it must still be handled by the caller's symlink branch, not by
+        // this guard). Only the parent chain is resolved.
+        let (parent, name) = match (p.parent(), p.file_name()) {
+            (Some(parent), Some(name)) => (parent, name),
+            _ => {
+                let whole = p.canonicalize().unwrap_or_else(|_| p.to_path_buf());
+                return strip_verbatim(whole);
+            }
+        };
+
+        // Deepest-existing-ancestor resolution of the parent: walk up until
+        // canonicalize succeeds (following parent symlinks/junctions), then
+        // re-append the components that did not exist yet.
+        let mut unresolved: Vec<std::ffi::OsString> = Vec::new();
+        let mut cursor = parent.to_path_buf();
+        let resolved = loop {
+            if let Ok(c) = cursor.canonicalize() {
+                break Some(c);
+            }
+            match (cursor.file_name(), cursor.parent()) {
+                (Some(part), Some(up)) => {
+                    unresolved.push(part.to_os_string());
+                    cursor = up.to_path_buf();
+                }
+                _ => break None,
+            }
+        };
+        let mut norm = match resolved {
+            Some(c) => c,
+            None => parent.to_path_buf(),
+        };
+        for comp in unresolved.iter().rev() {
+            norm.push(comp);
+        }
+        norm.push(name);
+        strip_verbatim(norm)
+    }
+
+    fn strip_verbatim(p: PathBuf) -> PathBuf {
+        if let Some(s) = p.to_str() {
+            if let Some(stripped) = s.strip_prefix(r"\\?\") {
+                return PathBuf::from(stripped);
+            }
+        }
+        p
+    }
+
+    fn components(p: &Path) -> Vec<String> {
+        p.components()
+            .map(|c| c.as_os_str().to_string_lossy().to_lowercase())
+            .collect()
+    }
+
+    let path_c = components(&normalize(path));
+    let root_c = components(&normalize(repo_root));
+    !root_c.is_empty()
+        && path_c.len() >= root_c.len()
+        && path_c[..root_c.len()] == root_c[..]
 }
 
 pub fn copy_recursive(src: &Path, dst: &Path, is_dir: bool) -> Result<()> {
@@ -1006,6 +1105,148 @@ pub(crate) mod tests {
 
         // Cleanup
         unsafe { std::env::remove_var("RICE_BACKUP_DIR"); }
+        let _ = fs::remove_dir_all(&temp_dir);
+    }
+
+    #[test]
+    fn test_link_refuses_repo_internal_target() {
+        let _guard = TEST_MUTEX.lock().unwrap_or_else(|p| p.into_inner());
+        let temp_dir = std::env::temp_dir().join("rice_test_repo_guard_link");
+        let _ = fs::remove_dir_all(&temp_dir);
+        let repo = temp_dir.join("repo");
+        fs::create_dir_all(repo.join("nested")).unwrap();
+        fs::write(repo.join("src.yaml"), "rice source").unwrap();
+        // A live repo file that is NOT the mapping's source: linking must
+        // refuse instead of backing it up and replacing it with a symlink.
+        let repo_file = repo.join("nested").join("live.yaml");
+        fs::write(&repo_file, "tracked repo content").unwrap();
+
+        let backup_root = temp_dir.join(".rice-backups");
+        fs::create_dir_all(&backup_root).unwrap();
+        unsafe { std::env::set_var("RICE_BACKUP_DIR", &backup_root) }
+
+        let mapping = crate::catalog::ConfigMapping {
+            source_rel: leak_path(&repo.join("src.yaml")),
+            target_pattern: leak_path(&repo_file),
+            is_dir: false,
+        };
+        let outcome = super::link_config_mapping(&repo, &mapping, "guardpkg");
+        assert!(
+            matches!(&outcome, super::LinkOutcome::Failed(msg) if msg.contains("repo-internal")),
+            "link into the repo tree must be refused, got {:?}",
+            outcome
+        );
+        // The tracked file is byte-for-byte untouched, and no ledger/backup
+        // record was created for it.
+        assert_eq!(
+            fs::read_to_string(&repo_file).unwrap(),
+            "tracked repo content",
+            "repo file must never be modified by the linker"
+        );
+        // No backup was staged for the refused target either.
+        let staged: Vec<_> = fs::read_dir(&backup_root)
+            .map(|it| it.flatten().collect::<Vec<_>>())
+            .unwrap_or_default();
+        assert!(staged.is_empty(), "refused link must not stage backups, found {:?}", staged);
+        let ledger = crate::ledger::load_ledger();
+        assert!(!ledger.records.iter().any(|r| r.pkg_id == "guardpkg"));
+        let manifest = load_manifest();
+        assert!(!manifest.records.iter().any(|r| r.package_id == "guardpkg"));
+
+        unsafe { std::env::remove_var("RICE_BACKUP_DIR") };
+        let _ = fs::remove_dir_all(&temp_dir);
+    }
+
+    #[test]
+    fn test_link_guard_closes_dangling_parent_symlink_evasion() {
+        let _guard = TEST_MUTEX.lock().unwrap_or_else(|p| p.into_inner());
+        let temp_dir = std::env::temp_dir().join("rice_test_repo_guard_dangling");
+        let _ = fs::remove_dir_all(&temp_dir);
+        let repo = temp_dir.join("repo");
+        fs::create_dir_all(&repo).unwrap();
+        fs::write(repo.join("src.yaml"), "rice source").unwrap();
+
+        // Parent path component is a DANGLING symlink pointing INTO the repo:
+        // canonicalize() fails while the link is dangling, which used to let a
+        // write slip through the repo-write guard. The guard must refuse
+        // either during the pre-check or (after the parent materializes) on
+        // the post-create_dir_all re-check.
+        let ghost = repo.join("ghost");
+        let parent_link = temp_dir.join("parent-link");
+        #[cfg(windows)]
+        let link_res = std::os::windows::fs::symlink_dir(&ghost, &parent_link);
+        #[cfg(not(windows))]
+        let link_res = std::os::unix::fs::symlink(&ghost, &parent_link);
+        if link_res.is_err() {
+            println!("symlink creation unavailable on this host; skipping");
+            let _ = fs::remove_dir_all(&temp_dir);
+            return;
+        }
+
+        let backup_root = temp_dir.join(".rice-backups");
+        fs::create_dir_all(&backup_root).unwrap();
+        unsafe { std::env::set_var("RICE_BACKUP_DIR", &backup_root) }
+
+        let target = parent_link.join("config.yaml");
+        let mapping = crate::catalog::ConfigMapping {
+            source_rel: leak_path(&repo.join("src.yaml")),
+            target_pattern: leak_path(&target),
+            is_dir: false,
+        };
+        let outcome = super::link_config_mapping(&repo, &mapping, "guard-dangling");
+
+        assert!(
+            matches!(&outcome, super::LinkOutcome::Failed(_)),
+            "write through a dangling parent link into the repo must be refused, got {:?}",
+            outcome
+        );
+        assert!(
+            !target.exists(),
+            "no file may be written through the dangling link"
+        );
+        assert_eq!(
+            fs::read_to_string(repo.join("src.yaml")).unwrap(),
+            "rice source",
+            "repo source must be untouched"
+        );
+
+        unsafe { std::env::remove_var("RICE_BACKUP_DIR") };
+        let _ = fs::remove_dir_all(&temp_dir);
+    }
+
+    #[test]
+    fn test_unlink_refuses_repo_internal_target() {
+        let _guard = TEST_MUTEX.lock().unwrap_or_else(|p| p.into_inner());
+        let temp_dir = std::env::temp_dir().join("rice_test_repo_guard_unlink");
+        let _ = fs::remove_dir_all(&temp_dir);
+        let repo = temp_dir.join("repo");
+        fs::create_dir_all(&repo).unwrap();
+        fs::write(repo.join("src.yaml"), "rice source").unwrap();
+        let repo_file = repo.join("live.yaml");
+        fs::write(&repo_file, "tracked repo content").unwrap();
+
+        let backup_root = temp_dir.join(".rice-backups");
+        fs::create_dir_all(&backup_root).unwrap();
+        unsafe { std::env::set_var("RICE_BACKUP_DIR", &backup_root) }
+
+        let mapping = crate::catalog::ConfigMapping {
+            source_rel: leak_path(&repo.join("src.yaml")),
+            target_pattern: leak_path(&repo_file),
+            is_dir: false,
+        };
+        let outcome = super::unlink_config_mapping(&repo, &mapping, "guardpkg");
+        assert!(
+            matches!(outcome, super::UnlinkOutcome::RepoNativeNotTouched(_)),
+            "unlink inside the repo tree must be refused, got {:?}",
+            outcome
+        );
+        assert_eq!(
+            fs::read_to_string(&repo_file).unwrap(),
+            "tracked repo content",
+            "repo file must never be deleted by the unlinker"
+        );
+
+        unsafe { std::env::remove_var("RICE_BACKUP_DIR") };
         let _ = fs::remove_dir_all(&temp_dir);
     }
 }

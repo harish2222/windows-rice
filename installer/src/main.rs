@@ -179,7 +179,7 @@ fn main() -> Result<()> {
         }
         let summary = format!(
             "Health check complete: {}/{} binaries, {}/{} configs.",
-            report.installed_binaries, report.total_packages, report.linked_configs, report.total_packages
+            report.installed_binaries, report.total_packages, report.linked_configs, report.total_configs
         );
         app::log_to_file(&summary);
         return Ok(());

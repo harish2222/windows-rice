@@ -9,6 +9,10 @@ use crate::detect::{detect_package_managers, inspect_package, BinaryStatus, Link
 
 pub struct VerificationReport {
     pub total_packages: usize,
+    /// Packages that actually map configuration targets (README contract:
+    /// 20 config targets). The config denominator uses this - NOT the full
+    /// catalog - so the summary can legitimately reach 20/20.
+    pub total_configs: usize,
     pub installed_binaries: usize,
     pub linked_configs: usize,
     pub lines: Vec<String>,
@@ -35,6 +39,7 @@ pub fn run_verification(repo_root: &Path) -> VerificationReport {
     // 2. Packages inspection
     let catalog = get_catalog();
     let total_packages = catalog.len();
+    let total_configs = catalog.iter().filter(|i| !i.configs.is_empty()).count();
     let mut installed_binaries = 0;
     let mut linked_configs = 0;
 
@@ -62,6 +67,10 @@ pub fn run_verification(repo_root: &Path) -> VerificationReport {
                 linked_configs += 1;
                 "[PASS] Copied"
             }
+            LinkStatus::InPlace(_) => {
+                linked_configs += 1;
+                "[PASS] In-Place"
+            }
             LinkStatus::NotLinked => "[WARN] Not Linked",
             LinkStatus::NotApplicable => "[INFO] N/A",
         };
@@ -84,13 +93,60 @@ pub fn run_verification(repo_root: &Path) -> VerificationReport {
 
     lines.push("-".repeat(80));
     lines.push(format!("Summary: {}/{} binaries detected, {}/{} configs linked.",
-        installed_binaries, total_packages, linked_configs, total_packages));
+        installed_binaries, total_packages, linked_configs, total_configs));
     lines.push("================================================================================".to_string());
 
     VerificationReport {
         total_packages,
+        total_configs,
         installed_binaries,
         linked_configs,
         lines,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_verification_summary_denominators() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .parent()
+            .expect("repo root")
+            .to_path_buf();
+        let report = run_verification(&root);
+
+        // README contract: 23 catalog packages, 20 configuration targets.
+        assert_eq!(report.total_packages, 23, "catalog must expose 23 packages");
+        assert_eq!(
+            report.total_configs, 20,
+            "config denominator must count only config-bearing packages (20), matching README"
+        );
+
+        // The rendered summary must use the config-bearing denominator so a
+        // fully-linked host can actually reach 20/20.
+        let summary = report
+            .lines
+            .iter()
+            .find(|l| l.starts_with("Summary:"))
+            .expect("summary line must exist");
+        assert!(
+            summary.contains(&format!("{}/{} configs linked", report.linked_configs, 20)),
+            "summary must be `X/20 configs linked`, got: {}",
+            summary
+        );
+        assert!(
+            summary.contains(&format!("{}/{} binaries detected", report.installed_binaries, 23)),
+            "summary must keep the `X/23 binaries detected` contract, got: {}",
+            summary
+        );
+
+        // Report structure required by e2e (T1-R5-03).
+        let all = report.lines.join("\n");
+        assert!(all.contains("WINDOWS RICE SYSTEM HEALTH CHECK REPORT"));
+        assert!(all.contains("[Package Managers]"));
+        assert!(all.contains("[Components & Configs]"));
+        assert!(all.contains("[Carapace Autocompletions]"));
     }
 }

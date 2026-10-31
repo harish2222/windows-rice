@@ -98,6 +98,39 @@ jobs:
           }
           if (-not $allPassed) { exit 1 }
 
+      - name: Guard Against Command-Mode Operator Parameters
+        shell: pwsh
+        run: |
+          # Regression gate for the v1.0.4 sandbox bootstrap abort:
+          #   elseif (Test-Path $x -and (...))
+          # parses cleanly but binds `-and` as a PARAMETER of Test-Path
+          # (NamedParameterNotFound), which $ErrorActionPreference='Stop'
+          # turns into a hard abort of `irm ... | iex`. AST parse-error checks
+          # cannot see it - only an operator-named CommandParameterAst scan.
+          $targets = @("install.ps1")
+          $targets += (Get-ChildItem -Path "tools","tests","docker","yasb\tools","yasb\configs","komorebi" -Recurse -Filter "*.ps1" -File -ErrorAction SilentlyContinue | ForEach-Object FullName)
+          $targets += (Get-ChildItem -Path "shells\powershell","windows-powershell" -Filter "*.ps1" -File -ErrorAction SilentlyContinue | ForEach-Object FullName)
+          $failed = $false
+          foreach ($t in $targets) {
+            if (-not (Test-Path $t)) { continue }
+            $tokens = $null; $errors = $null
+            $ast = [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $t), [ref]$tokens, [ref]$errors)
+            if ($errors.Count -gt 0) { continue }  # parse errors reported by the AST step
+            $bad = @($ast.FindAll({
+              param($node)
+              $node -is [System.Management.Automation.Language.CommandParameterAst] -and
+              $node.ParameterName -match '^(and|or|not|xor)$'
+            }, $true))
+            if ($bad.Count -gt 0) {
+              $failed = $true
+              foreach ($b in $bad) {
+                Write-Host "::error file=$t::line $($b.Extent.StartLineNumber): logical operator '$($b.ParameterName)' bound as a command parameter (NamedParameterNotFound abort)"
+              }
+            }
+          }
+          if ($failed) { exit 1 }
+          Write-Host "[PASS] $($targets.Count) first-party scripts: no operator-named command parameters" -ForegroundColor Green
+
       - name: Validate Carapace Completion Specs
         shell: pwsh
         run: |

@@ -196,7 +196,7 @@ Describe "Tier 4 - Real-World End-to-End User Workflows" {
                 Should-Exist $ledgerFile "installed.json ownership ledger must exist after linking"
                 $ledger = Get-Content $ledgerFile -Raw | ConvertFrom-Json
                 Should-BeGreaterThan $ledger.records.Count 10 "Ledger must record the linked catalog targets"
-                $wezRecord = $ledger.records | Where-Object { $_.pkg_id -eq "wezterm" -and $_.target -like "*.wezterm.lua" }
+                $wezRecord = @($ledger.records | Where-Object { $_.pkg_id -eq "wezterm" -and $_.target -like "*.wezterm.lua" })
                 Should-Be $wezRecord.Count 1 "Ledger must contain exactly one wezterm .wezterm.lua record"
 
                 # 4. FULL REVOKE: restore the user original, clear the ledger

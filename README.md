@@ -133,7 +133,7 @@ iwr -useb https://raw.githubusercontent.com/harish2222/windows-rice/main/install
 2. **Git Installation:** Automatically installs Git via Scoop (`scoop install git`) to ensure git commands and tools are immediately available in `$env:PATH`.
 3. **Repository Clone via Tag:** Clones the repository using the repository URL:
    ```bash
-   git clone --branch v1.0.4 --depth 1 https://github.com/harish2222/windows-rice.git ~/.config
+   git clone --branch v1.0.5 --depth 1 https://github.com/harish2222/windows-rice.git ~/.config
    ```
    > [!IMPORTANT]
    > Always clone the repository URL `https://github.com/harish2222/windows-rice.git`, NOT a release asset download URL (e.g. `.../releases/download/.../rice-installer.exe`). Git requires a repository endpoint; passing a binary download URL causes Git to fail with `fatal: unable to access ... Could not connect to server`.

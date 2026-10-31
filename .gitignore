@@ -57,6 +57,8 @@ ORIGINAL_REQUEST.md
 # ===== Local security-mcp state (review artifacts are committed explicitly) =====
 .mcp/audit/
 .mcp/agent-clis/
+.mcp/agent-runs/
+.mcp/memory/
 
 # ===== Dependencies =====
 node_modules/
@@ -112,3 +114,6 @@ yasb/alarms.json
 # contents rather than the dir itself, so our own theme can be whitelisted.
 otty/themes/*
 !otty/themes/clear.ottytheme
+# Local staging dir for the Rangalipi theme submission (zip + screenshots).
+# Never belongs in the dotfiles repo.
+rangalipi/

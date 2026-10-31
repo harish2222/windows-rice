@@ -150,6 +150,7 @@ pub fn clear_all() {
 }
 
 /// Record one wallpaper entry the installer just created below `dest`.
+#[allow(dead_code)]
 pub fn record_wallpaper_entry(dest: &PathBuf, entry_name: &str, is_symlink: bool) {
     let _guard = LEDGER_MUTEX.lock().unwrap_or_else(|p| p.into_inner());
     let mut ledger = load_ledger();

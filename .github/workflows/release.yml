@@ -36,6 +36,19 @@ jobs:
       - name: Build release binary
         run: cargo build --release --manifest-path installer/Cargo.toml
 
+      - name: Smoke-gate installer binary (--help must work)
+        shell: pwsh
+        run: |
+          # The release artifact must actually start and print its banner before
+          # we publish it as the bootstrap's integrity-verified payload.
+          $out = & "installer\target\release\rice-installer.exe" --help 2>&1 | Out-String
+          if ($LASTEXITCODE -ne 0 -or $out -notmatch "WINDOW-RICE INSTALLER") {
+            Write-Host "::error::rice-installer.exe --help smoke gate failed (exit $LASTEXITCODE)"
+            Write-Host $out
+            exit 1
+          }
+          Write-Host "[PASS] rice-installer.exe --help smoke gate" -ForegroundColor Green
+
       - name: Package installer archive
         shell: pwsh
         run: |
@@ -46,15 +59,41 @@ jobs:
           Copy-Item "README.md" "$releaseDir\README.md" -ErrorAction SilentlyContinue
 
           Compress-Archive -Path "$releaseDir\*" -DestinationPath "rice-installer-windows-x64.zip" -Force
-          $sha = (Get-FileHash -Path "rice-installer-windows-x64.zip" -Algorithm SHA256).Hash
-          "$sha  rice-installer-windows-x64.zip" | Out-File -FilePath "SHA256SUMS.txt" -Encoding ascii
-          $shaExe = (Get-FileHash -Path "installer\target\release\rice-installer.exe" -Algorithm SHA256).Hash
-          "$shaExe  rice-installer.exe" | Out-File -FilePath "SHA256SUMS.txt" -Encoding ascii -Append
-          $shaScript = (Get-FileHash -Path "$releaseDir\install.ps1" -Algorithm SHA256).Hash
-          "$shaScript  install.ps1" | Out-File -FilePath "SHA256SUMS.txt" -Encoding ascii -Append
+
+          # Deterministic checksum manifest: write the bytes directly instead of
+          # piping through Out-File (formatting/width rules have mangled hash
+          # lines before), then FAIL the release if any expected line is absent -
+          # install.ps1's integrity gate parses the rice-installer.exe line and
+          # silently skips verification when it cannot find it.
+          $entries = @(
+            @("rice-installer-windows-x64.zip", "rice-installer-windows-x64.zip"),
+            @("installer\target\release\rice-installer.exe", "rice-installer.exe"),
+            @("$releaseDir\install.ps1", "install.ps1")
+          )
+          $lines = foreach ($e in $entries) {
+            $hash = (Get-FileHash -Path $e[0] -Algorithm SHA256).Hash
+            "$hash  $($e[1])"
+          }
+          [System.IO.File]::WriteAllLines((Join-Path (Get-Location) "SHA256SUMS.txt"), $lines, [System.Text.UTF8Encoding]::new($false))
+
+          $manifest = Get-Content "SHA256SUMS.txt" -Raw
+          foreach ($name in "rice-installer-windows-x64.zip", "rice-installer.exe", "install.ps1") {
+            if ($manifest -notmatch ("[0-9a-fA-F]{64}\s+" + [regex]::Escape($name))) {
+              Write-Host "::error::SHA256SUMS.txt is missing the $name line - bootstrap integrity check would silently skip"
+              exit 1
+            }
+          }
+
+          # The shipped bootstrap entry point must parse before it is published.
+          $tokens = $null; $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path "install.ps1"), [ref]$tokens, [ref]$errors) | Out-Null
+          if ($errors.Count -gt 0) {
+            $errors | ForEach-Object { Write-Host "::error file=install.ps1::line $($_.Extent.StartLineNumber): $($_.Message)" }
+            exit 1
+          }
 
           Write-Host "Archive created: rice-installer-windows-x64.zip"
-          Write-Host "SHA256: $sha"
+          Write-Host "SHA256SUMS.txt verified (3 asset lines); install.ps1 parses cleanly"
 
       - name: Determine tag name
         id: get_tag

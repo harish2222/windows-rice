@@ -344,6 +344,48 @@ Describe "R5 - Persistent Diagnostic Logging & System Verification" {
         Should-Contain $output "test result: ok." "YASB test suites must report ok"
         Should-NotContain $output "FAILED" "YASB test suites must have no failures"
     }
+
+    It "T1-R5-07: install.ps1 has no command-mode logical-operator parameters (iex -and abort regression)" {
+        # v1.0.4 sandbox bug: `elseif (Test-Path $x -and (...))` PARSES fine but
+        # binds `-and` as a PARAMETER of Test-Path (NamedParameterNotFound);
+        # with $ErrorActionPreference='Stop' that aborted the whole remote iex
+        # bootstrap right before the TUI launch. Plain AST parse errors do NOT
+        # catch this - only an operator-named CommandParameterAst scan does.
+        $installPs1 = Join-Path $RepoRoot "install.ps1"
+        Should-Exist $installPs1 "install.ps1 must exist"
+        $tokens = $null
+        $errors = $null
+        $ast = [System.Management.Automation.Language.Parser]::ParseFile($installPs1, [ref]$tokens, [ref]$errors)
+        Should-Be $errors.Count 0 "install.ps1 must parse cleanly"
+        $bad = @($ast.FindAll({
+            param($node)
+            $node -is [System.Management.Automation.Language.CommandParameterAst] -and
+            $node.ParameterName -match '^(and|or|not|xor)$'
+        }, $true))
+        foreach ($b in $bad) {
+            Write-Host "    offending: line $($b.Extent.StartLineNumber): $($b.Extent.Text)" -ForegroundColor Red
+        }
+        Should-Be $bad.Count 0 "logical operators must never appear in command-parameter position (aborts the iex bootstrap)"
+    }
+
+    It "T1-R5-08: --verify summary uses README denominators (23 binaries / 20 config targets)" {
+        $out = & $InstallerExe --verify | Out-String
+        Should-Match $out "(?m)^Summary: \d+/23 binaries detected, \d+/20 configs linked\.\r?$" "Summary must read `X/23 binaries detected, Y/20 configs linked` (README denominators, exact shape)"
+    }
+
+    It "T1-R5-09: install.ps1 Step 4b checksum verification regex matches SHA256SUMS format across platforms" {
+        $sampleManifest = @"
+0c8cb1902d68042e5e3190ffcdfc3de3c7aa73707bbe8751cc991eff2109e664  rice-installer-windows-x64.zip
+D01D5FA8DF752413C8C61088D5F83A09830913B5518093318048DB36B1E5664E  rice-installer.exe
+fbdfb9908ee5283dd7e3446d7f9cf3486edd7352158ab122d3e3b04c0c8efdd8  install.ps1
+"@
+        $regex = '^\s*[0-9a-fA-F]{64}\s+\*?rice-installer\.exe\s*$'
+        $lines = $sampleManifest -split "\r?\n"
+        $matched = @($lines | Where-Object { $_ -match $regex })
+        Should-Be $matched.Count 1 "Regex must match the rice-installer.exe line"
+        $extractedHash = ($matched[0] -split '\s+')[0].ToLowerInvariant()
+        Should-Be $extractedHash "d01d5fa8df752413c8c61088d5f83a09830913b5518093318048db36b1e5664e" "Hash must be lowercased sha256 hex string"
+    }
 }
 
 # ============================================================================

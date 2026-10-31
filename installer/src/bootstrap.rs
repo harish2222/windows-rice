@@ -42,6 +42,18 @@ pub fn prepare_install_command(cmd: &str) -> String {
         } else {
             trimmed.to_string()
         }
+    } else if trimmed.starts_with("choco install ") {
+        if !trimmed.contains("-y") {
+            format!("{} -y --no-progress", trimmed)
+        } else {
+            trimmed.to_string()
+        }
+    } else if trimmed.contains("pip install ") {
+        if !trimmed.contains("--no-input") {
+            trimmed.replace("pip install ", "pip install --no-input ")
+        } else {
+            trimmed.to_string()
+        }
     } else {
         trimmed.to_string()
     }
@@ -51,16 +63,17 @@ pub fn prepare_install_command(cmd: &str) -> String {
 pub fn ensure_scoop_buckets(cancel_token: &Arc<AtomicBool>, on_line: &mut dyn FnMut(String)) {
     let has_scoop = find_binary_in_path("scoop.cmd").is_some() || user_profile_file_exists("scoop/shims/scoop.cmd");
     if has_scoop {
-        on_line("Checking Scoop buckets (extras, nerd-fonts)...".to_string());
+        // Fast-path: if the extras bucket directory already exists on disk, skip checking completely.
+        if user_profile_file_exists("scoop/buckets/extras") {
+            return;
+        }
+        on_line("Checking Scoop buckets (extras)...".to_string());
         let script = r#"
-            $buckets = scoop bucket list 2>$null
+            $ErrorActionPreference = 'SilentlyContinue'
+            $buckets = @(scoop bucket list 2>&1) | Out-String
             if ($buckets -notmatch 'extras') {
                 Write-Host 'Adding extras bucket...'
                 scoop bucket add extras
-            }
-            if ($buckets -notmatch 'nerd-fonts') {
-                Write-Host 'Adding nerd-fonts bucket...'
-                scoop bucket add nerd-fonts
             }
         "#;
         let _ = run_streaming_command(script, cancel_token, |l| {
@@ -194,6 +207,8 @@ where
 
         // Cooperative cancellation check
         if cancel_token.load(Ordering::SeqCst) {
+            let pid = child.id();
+            let _ = Command::new("taskkill").args(["/PID", &pid.to_string(), "/T", "/F"]).output();
             let _ = child.kill();
             on_line("[CANCELLED] Subprocess killed by user.".to_string());
             anyhow::bail!("Operation cancelled by user.");

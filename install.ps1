@@ -24,7 +24,7 @@
 
 [CmdletBinding()]
 param(
-    [string]$Tag = "v1.0.4",
+    [string]$Tag = "v1.0.5",
     [switch]$Verify,
     [switch]$LinkAll,
     [switch]$Unlink,
@@ -220,10 +220,10 @@ if ($isRemote) {
                 Write-Host "[Windows Rice] Running: git clone --branch $Tag --depth 1 $repoUrl $tempClone" -ForegroundColor DarkGray
                 git clone --branch $Tag --depth 1 $repoUrl $tempClone
                 if ($LASTEXITCODE -eq 0 -and (Test-Path $tempClone)) {
-                    Copy-Item -Path "$tempClone\*" -Destination $targetRepoDir -Recurse -Force
-                    if (Test-Path (Join-Path $tempClone ".git")) {
-                        Copy-Item -Path (Join-Path $tempClone ".git") -Destination (Join-Path $targetRepoDir ".git") -Recurse -Force
-                    }
+                    # -Force enumeration copies hidden items too (.git carries the
+                    # hidden attribute on Windows and a plain "$src\*" skips it).
+                    Get-ChildItem -Force -LiteralPath $tempClone |
+                        Copy-Item -Destination $targetRepoDir -Recurse -Force
                     Remove-Item $tempClone -Recurse -Force -ErrorAction SilentlyContinue
                     $cloned = $true
                 }
@@ -260,7 +260,10 @@ if ($isRemote) {
                 New-Item -ItemType Directory -Force -Path $targetRepoDir | Out-Null
             }
             if ($extractedFolder) {
-                Copy-Item -Path "$($extractedFolder.FullName)\*" -Destination $targetRepoDir -Recurse -Force
+                # Same hidden-item rule as the git-clone merge above: enumerate
+                # with -Force so dot-dirs (.github, .cargo, ...) are not dropped.
+                Get-ChildItem -Force -LiteralPath $extractedFolder.FullName |
+                    Copy-Item -Destination $targetRepoDir -Recurse -Force
             }
             Remove-Item $tempZip -Force -ErrorAction SilentlyContinue
             Remove-Item $tempExtract -Recurse -Force -ErrorAction SilentlyContinue
@@ -296,19 +299,40 @@ if ($isRemote) {
     # Step 4b: Hash-verify release-downloaded binary against SHA256SUMS.txt (fail closed on mismatch)
     if ((Test-Path $tempInstaller) -and (-not (Test-Path $repoBin))) {
         $expectedExeHash = $null
+        $sumsFile = Join-Path $env:TEMP "rice-SHA256SUMS.txt"
         $sumsUrls = @(
             "https://github.com/harish2222/windows-rice/releases/download/$Tag/SHA256SUMS.txt",
             "https://github.com/harish2222/windows-rice/releases/latest/download/SHA256SUMS.txt"
         )
         foreach ($sumsUrl in $sumsUrls) {
+            if (Test-Path $sumsFile) { Remove-Item $sumsFile -Force -ErrorAction SilentlyContinue }
             try {
-                $sumsContent = Invoke-WebRequest -Uri $sumsUrl -UseBasicParsing -ErrorAction Stop
-                $sumsLine = ($sumsContent.Content -split "`r?`n") | Where-Object { $_ -match 'rice-installer\.exe\s*$' } | Select-Object -First 1
+                # Release assets are served as application/octet-stream. In
+                # Windows PowerShell 5.1 (Invoke-WebRequest).Content is a byte[]
+                # for that content type, so `-split` over it silently matches
+                # nothing and the integrity check reports "no line" (v1.0.4
+                # sandbox bug). Download to disk and read as text instead -
+                # byte[]-safe on both PS 5.1 and PS 7.
+                Invoke-WebRequest -Uri $sumsUrl -OutFile $sumsFile -UseBasicParsing -ErrorAction Stop | Out-Null
+            } catch {
+                try {
+                    $webClient = New-Object System.Net.WebClient
+                    $webClient.DownloadFile($sumsUrl, $sumsFile)
+                } catch {
+                    if (Get-Command curl.exe -ErrorAction SilentlyContinue) {
+                        try { & curl.exe -sSL $sumsUrl -o $sumsFile } catch {}
+                    }
+                }
+            }
+            if (Test-Path $sumsFile) {
+                $sumsLine = (Get-Content -LiteralPath $sumsFile -ErrorAction SilentlyContinue) |
+                    Where-Object { $_ -match '^\s*[0-9a-fA-F]{64}\s+\*?rice-installer\.exe\s*$' } |
+                    Select-Object -First 1
                 if ($sumsLine) {
                     $expectedExeHash = ($sumsLine -split '\s+')[0].ToLowerInvariant()
                     break
                 }
-            } catch {}
+            }
         }
         if ($expectedExeHash) {
             $actualExeHash = (Get-FileHash -Path $tempInstaller -Algorithm SHA256).Hash.ToLowerInvariant()
@@ -324,8 +348,12 @@ if ($isRemote) {
     }
 
     # Step 5: Launch TUI installer immediately
+    # NOTE: parenthesize every sub-expression here. In command position a bare
+    # `-and` binds as a PARAMETER (NamedParameterNotFound) and - because this
+    # script sets `$ErrorActionPreference = "Stop"` - it aborted the whole
+    # iex run right before the TUI launch (sandbox report, v1.0.4).
     $binaryToLaunch = if (Test-Path $repoBin) { $repoBin }
-                      elseif (Test-Path $tempInstaller -and ((Get-Item $tempInstaller).Length -ge 500000)) { $tempInstaller }
+                      elseif ((Test-Path $tempInstaller) -and ((Get-Item $tempInstaller).Length -ge 500000)) { $tempInstaller }
                       else { $null }
 
     if ($binaryToLaunch) {
@@ -487,7 +515,10 @@ if (-not (Test-Path $tempInstaller)) {
     }
 
     # Step C: Build the release binary using Rust
-    if (Get-Command cargo -ErrorAction SilentlyContinue -and (Test-Path $manifestPath)) {
+    # Parenthesized: a bare `Get-Command ... -and ...` binds `-and` as a
+    # parameter of Get-Command (silently swallowed by -ErrorAction), which
+    # made this build branch unreachable.
+    if ((Get-Command cargo -ErrorAction SilentlyContinue) -and (Test-Path $manifestPath)) {
         Write-Host "[Windows Rice] Building WINDOW-RICE installer binary (release mode)..." -ForegroundColor Cyan
         Push-Location $installerDir
         try {
@@ -521,12 +552,11 @@ if ($binaryToLaunch) {
     Write-Host "[Windows Rice] Error: Failed to acquire or build rice-installer.exe binary." -ForegroundColor Red
     exit 1
 }
-
 # SIG # Begin signature block
 # MIIGKwYJKoZIhvcNAQcCoIIGHDCCBhgCAQExDzANBglghkgBZQMEAgEFADB5Bgor
 # BgEEAYI3AgEEoGswaTA0BgorBgEEAYI3AgEeMCYCAwEAAAQQH8w7YFlLCE63JNLG
-# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCBXxOUZ9AZofzgt
-# hTbepIwyZLwHJkcQT2zHeObnDm7yfKCCA24wggNqMIICUqADAgECAhARUGl3tg6h
+# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCAKy0xM8WF/u2+4
+# fVC+AuUVLIXcoQvdBxjHQRBFQkTA66CCA24wggNqMIICUqADAgECAhARUGl3tg6h
 # n0/ys9hv8thvMA0GCSqGSIb3DQEBCwUAME0xHTAbBgNVBAsMFFdpbmRvdy1SaWNl
 # IFNlY3VyaXR5MQ8wDQYDVQQKDAZIS0RFVlMxGzAZBgNVBAMMEkhLREVWUyBXaW5k
 # b3ctUmljZTAeFw0yNjEwMjUxOTQ0MTBaFw0zMTEwMjUxOTU0MDlaME0xHTAbBgNV
@@ -549,11 +579,11 @@ if ($binaryToLaunch) {
 # BkhLREVWUzEbMBkGA1UEAwwSSEtERVZTIFdpbmRvdy1SaWNlAhARUGl3tg6hn0/y
 # s9hv8thvMA0GCWCGSAFlAwQCAQUAoIGEMBgGCisGAQQBgjcCAQwxCjAIoAKAAKEC
 # gAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwG
-# CisGAQQBgjcCARUwLwYJKoZIhvcNAQkEMSIEIGclWggw3O9bxeaOUKwbhKsYK+4I
-# vee8yN3XABBDJ9JxMA0GCSqGSIb3DQEBAQUABIIBAE5lcmEt5Yi+3Jq8DS2i9xgx
-# Vd0O0dksrKr1+djmswCddR4pTK7Y4XfkAMRGfLvrfiTf0wB7M5eB+MZb1b1z4XU2
-# +SqrYXYcLB6b5EfgTsRATIIEQE8Vty2Wloz013QhCzJZlitYTXwfHXc8BAhWW38V
-# 9YHH4HHkiV61PJzBWtdTAZM5y32X06KoSPGva9A+dAx0BZWv8kOR/pezbbSGh3X8
-# Ar9vBW6YnDk9FhWd0GgggaZbeZ5F07fLc9q1B3KKyJQOO2aImic4O3oi5yESsKpV
-# GrNG59nHC/sHqtWJsitRVCSuN68owETCIFAEfmo3mR+mTiYOr0s5Kb1tSzcaFKc=
+# CisGAQQBgjcCARUwLwYJKoZIhvcNAQkEMSIEIJZoXDVXoyYkisL6vkKwO3Xxb8BG
+# tcjh2AaLRJ99Wel+MA0GCSqGSIb3DQEBAQUABIIBAJnJ5rJfkEAMTZasCVbf/mCW
+# jImxSvM4F/Wz2HNEuSoNnRzOVH92nqQL7PHeGNJndpP5q2jCPdv5q5QdsEGQb9AR
+# 13aJoyyS6hWA7xj7QfXN3YBd1M/Ww17NjBUCIPMURePYPAqrN2LxWMjOJ3t2v9L1
+# LGir4cZdnkByD6tPFqwYPqKW5kq0ytSqRPFFInOIL7qeYYoAkHzv0s4atHKbloYk
+# MkoK4raIQfbQ+11lpumyL4gq8F5mAqjrj8fgQ53iZF0bGHJD9eiS0oKK1u0xpO0k
+# 2BK6lLRsIt1wYkFt/o5NjiHBrb+n1RpFgb7sUc+5c4wmJKgjZJAO9XzspoNrYpY=
 # SIG # End signature block

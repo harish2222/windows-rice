@@ -17,7 +17,9 @@ use crate::detect::{
     detect_package_managers, find_binary_in_path, inspect_package, BinaryStatus, LinkStatus,
     PackageManagerStatus,
 };
-use crate::linker::{link_config_mapping, unlink_config_mapping, copy_recursive, LinkOutcome, UnlinkOutcome};
+#[cfg(windows)]
+use crate::linker::copy_recursive;
+use crate::linker::{link_config_mapping, unlink_config_mapping, LinkOutcome, UnlinkOutcome};
 use crate::bootstrap::{
     bootstrap_scoop, bootstrap_choco, bootstrap_uv, bootstrap_vcpkg,
     ensure_package_manager_ready, prepare_install_command,
@@ -205,11 +207,16 @@ pub fn flow_install(ctx: &TaskContext, notify: Notify) -> TaskResult {
             return cancelled_result(notify);
         }
 
+        let _base_pct = (idx * 100) / total.max(1);
+        let step1_pct = ((idx * 100 + 10) / total.max(1)) as u16;
+        let step2_pct = ((idx * 100 + 50) / total.max(1)) as u16;
+        let step3_pct = ((idx * 100 + 85) / total.max(1)) as u16;
+
         emit_progress(
             notify,
-            ((idx * 100) / total) as u16,
+            step1_pct,
             format!("[{}/{}] {}", idx + 1, total, pkg.name),
-            "Step 1: Install".to_string(),
+            "Step 1/3: Installing binary".to_string(),
         );
         send_log(notify, format!("=== [{}/{}] Processing: {} ({}) ===", idx + 1, total, pkg.name, pkg.id));
 
@@ -235,9 +242,9 @@ pub fn flow_install(ctx: &TaskContext, notify: Notify) -> TaskResult {
                         let sanitized = prepare_install_command(&cmd);
                         emit_progress(
                             notify,
-                            ((idx * 100) / total) as u16,
+                            step1_pct,
                             format!("[{}/{}] {}", idx + 1, total, pkg.name),
-                            format!("Installing via {}", cmd),
+                            format!("Running {}", cmd),
                         );
                         run_streaming_command(&sanitized, &ctx.cancel_flag, |line: String| {
                             send_log(notify, format!("    [OUT] {}", line));
@@ -276,9 +283,9 @@ pub fn flow_install(ctx: &TaskContext, notify: Notify) -> TaskResult {
         } else if !pkg.configs.is_empty() {
             emit_progress(
                 notify,
-                ((idx * 100) / total) as u16,
+                step2_pct,
                 format!("[{}/{}] {}", idx + 1, total, pkg.name),
-                "Step 2: Link configs".to_string(),
+                "Step 2/3: Linking configs".to_string(),
             );
             send_log(notify, format!("  [STEP 2: CONFIG] Connecting & linking configurations for {}:", pkg.name));
             for mapping in &pkg.configs {
@@ -314,9 +321,9 @@ pub fn flow_install(ctx: &TaskContext, notify: Notify) -> TaskResult {
         // Step 3: Test and Verify Package Setup
         emit_progress(
             notify,
-            ((idx * 100) / total.max(1)) as u16,
+            step3_pct,
             format!("[{}/{}] {}", idx + 1, total, pkg.name),
-            "Step 3: Verify".to_string(),
+            "Step 3/3: Verifying setup".to_string(),
         );
         send_log(notify, format!("  [STEP 3: VERIFY] Testing installation & configuration for {}:", pkg.name));
         let inspection_after = inspect_package(pkg, &ctx.repo_root);
@@ -337,6 +344,9 @@ pub fn flow_install(ctx: &TaskContext, notify: Notify) -> TaskResult {
             LinkStatus::LinkedCopy(p) => {
                 send_log(notify, format!("    [TEST: PASS] Config copy verified: {}", p.display()));
             }
+            LinkStatus::InPlace(p) => {
+                send_log(notify, format!("    [TEST: PASS] Config in place (repo-native): {}", p.display()));
+            }
             LinkStatus::NotApplicable => {
                 send_log(notify, "    [TEST: PASS] Config check: N/A");
             }
@@ -351,6 +361,13 @@ pub fn flow_install(ctx: &TaskContext, notify: Notify) -> TaskResult {
             send_log(notify, format!("  [RESULT: PENDING] {} partially configured (see warnings above).", pkg.name));
         }
 
+        let item_done_pct = (((idx + 1) * 100) / total.max(1)).min(95) as u16;
+        emit_progress(
+            notify,
+            item_done_pct,
+            format!("[{}/{}] {}", idx + 1, total, pkg.name),
+            "Package complete".to_string(),
+        );
         send_log(notify, format!("Finished setup for {}. Advancing to next selected option...\n", pkg.name));
     }
 
@@ -711,7 +728,7 @@ pub fn flow_verify(ctx: &TaskContext, notify: Notify) -> TaskResult {
     }
     let summary = format!(
         "Health check complete: {}/{} binaries, {}/{} configs.",
-        report.installed_binaries, report.total_packages, report.linked_configs, report.total_packages
+        report.installed_binaries, report.total_packages, report.linked_configs, report.total_configs
     );
     send_log(notify, summary.clone());
     emit_progress(notify, 100, "Done", summary.clone());
@@ -879,29 +896,30 @@ fn flow_install_wallpapers(ctx: &TaskContext, notify: Notify) -> TaskResult {
         let _ = std::fs::create_dir_all(&dest);
 
         if let Ok(entries) = std::fs::read_dir(&local_organized) {
+            #[allow(unused_mut)]
             let mut linked_count = 0;
             for entry in entries.flatten() {
                 if is_cancelled(&ctx.cancel_flag) {
                     return cancelled_result(notify);
                 }
                 let name = entry.file_name();
-                let target = dest.join(&name);
-                let src = entry.path();
-                let name_str = name.to_string_lossy().to_string();
+                let _target = dest.join(&name);
+                let _src = entry.path();
+                let _name_str = name.to_string_lossy().to_string();
                 #[cfg(windows)]
                 {
-                    if src.is_dir() {
-                        match std::os::windows::fs::symlink_dir(&src, &target) {
+                    if _src.is_dir() {
+                        match std::os::windows::fs::symlink_dir(&_src, &_target) {
                             Ok(_) => {
                                 linked_count += 1;
-                                crate::ledger::record_wallpaper_entry(&dest, &name_str, true);
-                                send_log(notify, format!("  [SYMLINK] -> {}", target.display()));
+                                crate::ledger::record_wallpaper_entry(&dest, &_name_str, true);
+                                send_log(notify, format!("  [SYMLINK] -> {}", _target.display()));
                             }
                             Err(_) => {
-                                send_log(notify, format!("  [COPY] Copying {}...", name_str));
-                                let _ = copy_recursive(&src, &target, true);
+                                send_log(notify, format!("  [COPY] Copying {}...", _name_str));
+                                let _ = copy_recursive(&_src, &_target, true);
                                 linked_count += 1;
-                                crate::ledger::record_wallpaper_entry(&dest, &name_str, false);
+                                crate::ledger::record_wallpaper_entry(&dest, &_name_str, false);
                             }
                         }
                     }
