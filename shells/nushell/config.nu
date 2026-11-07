@@ -139,28 +139,13 @@ $env.config = {
         external: {
             enable: true
             max_results: 20
-            # Canonical Carapace completer (https://carapace.sh/docs/integrations/nushell/).
-            # Heavy `help commands` enumeration only fires when completing the `nu`
-            # binary itself; alias expansion and ergonomics preserved.
-            completer: {|token, place, buffer|
-                #  Record-input contract (nushell deprecated positional `spans`):
-                #  `$place.command` = token list of the command being completed.
-                let spans = ($place.command? | default [])
-                if ($spans | is-empty) { return [] }
-                if ($spans.0 == 'nu') {
-                    load-env {
-                        CARAPACE_SHELL_BUILTINS: (help commands | where category != "" | get name | each { split row " " | first } | uniq | str join "\n"),
-                        CARAPACE_SHELL_FUNCTIONS: (help commands | where category == "" | get name | each { split row " " | first } | uniq | str join "\n"),
-                    }
-                }
-                let expanded = (scope aliases | where name == $spans.0 | $in.0?.expansion?)
-                let spans = if $expanded != null {
-                    $spans | skip 1 | prepend ($expanded | split row " " | take 1 | str replace --regex '\.exe$' '')
-                } else {
-                    $spans | skip 1 | prepend ($spans.0 | str replace --regex '\.exe$' '')
-                }
-                carapace $spans.0 nushell ...$spans | from json | where {|item| $item.value? != 'ERR' and $item.value? != '_'}
-            }
+            # Carapace's external completer spawns an external process per Tab
+            # (plus a heavy `help commands` enumeration for `nu`), which made
+            # prompt autocompletion lag badly. Completion registration is disabled
+            # by default; nushell falls back to fast built-in path completion.
+            # Carapace stays available as a command. Re-enable by restoring the
+            # completer block above.
+            completer: {|token, place, buffer| [] }
         }
     }
 

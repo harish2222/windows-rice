@@ -840,7 +840,7 @@ if _which("carapace"):
 
             cmd = ["carapace", clean_cmd, "xonsh", *extra_prefix_args, *words, current_prefix]
             try:
-                proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
+                proc = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=2.0)
                 if proc.returncode != 0 or not proc.stdout.strip():
                     return None
                 data = json.loads(proc.stdout)
@@ -858,7 +858,11 @@ if _which("carapace"):
             except Exception:
                 return None
 
-        add_one_completer('carapace', _carapace_completer, 'start')
+        # Carapace's per-completion external process (~220-560 ms) made prompt
+        # autocompletion lag badly, so it is NOT registered by default. Carapace
+        # stays available as a command and via explicit fuzzy completion (Ctrl+Space).
+        # Re-enable with: add_one_completer('carapace', _carapace_completer, 'start')
+        pass
     except Exception:
         pass
 

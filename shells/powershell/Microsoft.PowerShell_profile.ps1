@@ -1055,40 +1055,22 @@ if (Test-Path $carapacePath) {
     function Enable-Carapace {
         if ($script:CarapaceLoaded) { return }
         $script:CarapaceLoaded = $true
-        $cacheItem = Get-Item -LiteralPath $script:CarapaceCache -ErrorAction SilentlyContinue
-        $exeTime = (Get-Item -LiteralPath $carapacePath).LastWriteTimeUtc
-        # Regenerate when the binary is newer, or when specs were added/changed
-        # (keeps future commands composable without any per-keystroke overhead).
-        $script:CarapaceSpecs = Join-Path $env:USERPROFILE '.config\carapace\specs'
-        $specLatest = $null
-        if (Test-Path -LiteralPath $script:CarapaceSpecs) {
-            $specLatest = (Get-ChildItem -LiteralPath $script:CarapaceSpecs -File | Measure-Object LastWriteTimeUtc -Maximum).Maximum
-        }
-        if (-not $cacheItem -or $cacheItem.LastWriteTimeUtc -lt $exeTime -or ($specLatest -and $cacheItem.LastWriteTimeUtc -lt $specLatest)) {
-            $null = New-Item -ItemType Directory -Path (Split-Path -Parent $script:CarapaceCache) -Force
-            # Carapace surfaces upstream action failures (npm registry rejects 1-char
-            # search prefixes with E400, package.json missing for run-scripts, unknown
-            # flags) as red 'ERR'/'_' menu items in every shell. The generated init
-            # parses every completer through ONE shared pipeline, so drop those two
-            # sentinel entries right there - valid completions survive untouched.
-            # Capture with -join, not Out-String: Out-String wraps long lines at the
-            # console width and corrupts the generated script mid-token. Use
-            # String.Replace, not -replace: literal match, no regex $-substitution.
-            $carapaceInit = ((& $carapacePath _carapace powershell) -join "`n").Replace(
-                '| ConvertFrom-Json | ForEach-Object ',
-                "| ConvertFrom-Json | Where-Object { `$_.CompletionText -ne 'ERR' -and `$_.CompletionText -ne '_' } | ForEach-Object "
-            )
-            $carapaceInit | Set-Content -LiteralPath $script:CarapaceCache -Encoding UTF8
-        }
-        Invoke-Expression (Get-Content -LiteralPath $script:CarapaceCache -Raw)
+        # Carapace's generated init registers ~600 native-argument completers that
+        # each spawn carapace.exe on every Tab press (~0.2-0.8s per completion),
+        # which made prompt autocompletion lag badly. Completion registration is
+        # therefore disabled by default; carapace stays available as a command and
+        # via explicit fuzzy completion (Ctrl+Space). Set $script:CarapaceLoaded
+        # back to $false and call Enable-Carapace to opt in.
+        return
     }
 
-    if ($isInteractiveShell) {
-        Set-PSReadLineKeyHandler -Key Tab -ScriptBlock {
-            Enable-Carapace
-            [Microsoft.PowerShell.PSConsoleReadLine]::MenuComplete()
-        }
-    }
+    # Tab completion uses PSReadLine's built-in MenuComplete (fast). Carapace's
+    # heavy per-command completers are no longer auto-registered (see Enable-Carapace).
+}
+
+# Re-bind Tab to the fast built-in MenuComplete explicitly (defensive).
+if ($isInteractiveShell) {
+    Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
 }
 
 # ============================================================================
